@@ -1,0 +1,16 @@
+{{ define "main" }}
+<section class="qa-section">
+  <div class="section-head">
+    <span class="section-label">Q&amp;A</span>
+    <div class="section-rule"></div>
+  </div>
+  <div class="qa-list">
+    {{ range .Pages }}
+    <a href="{{ .RelPermalink }}" class="qa-item" style="display:block;text-decoration:none;color:inherit;">
+      <div class="qa-q">{{ .Title }}</div>
+      <div class="qa-a">{{ .Params.answer }}</div>
+    </a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}

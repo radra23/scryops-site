@@ -1,0 +1,8 @@
+<nav>
+  <a href="{{ "/" | relURL }}" class="logo">scry<span class="accent">ops</span></a>
+  <ul class="nav-links">
+    {{ range .Site.Menus.main }}
+    <li><a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} class="active"{{ end }}>{{ .Name }}</a></li>
+    {{ end }}
+  </ul>
+</nav>

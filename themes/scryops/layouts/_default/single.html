@@ -1,0 +1,23 @@
+{{ define "main" }}
+<article>
+  <div class="single-header">
+    <div class="art-meta">
+      {{ $type := .Type }}
+      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
+      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
+      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
+      {{ else if eq $type "qa" }}<span class="tag qa">Q&amp;A</span>
+      {{ end }}
+      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
+      {{ range .Params.tags }}
+      <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
+      {{ end }}
+    </div>
+    <h1>{{ .Title }}</h1>
+    {{ with .Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
+  </div>
+  <div class="prose">
+    {{ .Content }}
+  </div>
+</article>
+{{ end }}

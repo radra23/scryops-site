@@ -1,0 +1,9 @@
+name = "scryops"
+license = "MIT"
+licenselink = ""
+description = "Custom theme for scryops observability publication"
+tags = ["observability", "dark", "terminal", "monospace"]
+min_version = "0.120.0"
+
+[author]
+  name = "scryops"

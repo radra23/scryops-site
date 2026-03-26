@@ -1,0 +1,56 @@
+{{ define "main" }}
+
+{{ partial "terminal.html" . }}
+
+<!-- Latest articles across all sections -->
+<section class="feed">
+  <div class="section-head">
+    <span class="section-label">Latest</span>
+    <div class="section-rule"></div>
+  </div>
+  {{ $allContent := slice }}
+  {{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
+  {{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
+  {{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
+  {{ $sorted := sort $allContent "Date" "desc" }}
+  {{ range $i, $page := first 10 $sorted }}
+  {{ partial "article-card.html" (dict "num" (add $i 1) "page" $page) }}
+  {{ end }}
+</section>
+
+<!-- Q&A Section -->
+{{ $qaPages := where .Site.RegularPages "Type" "qa" }}
+{{ if $qaPages }}
+<section class="qa-section">
+  <div class="section-head">
+    <span class="section-label">Q&amp;A</span>
+    <div class="section-rule"></div>
+  </div>
+  <div class="qa-list">
+    {{ range first 5 $qaPages }}
+    <div class="qa-item">
+      <div class="qa-q">{{ .Title }}</div>
+      <div class="qa-a">{{ .Params.answer }}</div>
+    </div>
+    {{ end }}
+  </div>
+  <a href="{{ "qa/" | relURL }}" class="ask-cta">&rarr; All questions</a>
+</section>
+{{ end }}
+
+<!-- Tags cloud -->
+{{ with .Site.Taxonomies.tags }}
+<section class="tags-section">
+  <div class="section-head">
+    <span class="section-label">Tags</span>
+    <div class="section-rule"></div>
+  </div>
+  <div class="tag-cloud">
+    {{ range $name, $pages := . }}
+    <a href="{{ "tags/" | relURL }}{{ $name | urlize }}/" class="tag-pill">{{ $name }}</a>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
+
+{{ end }}
