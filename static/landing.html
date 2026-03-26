@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scryops — observability decoded</title>
+  <meta name="description" content="scryops is an independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Courier+Prime:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:         #0D0D0D;
+      --surface:    #161616;
+      --border:     #2A2A2A;
+      --text:       #F0EEE8;
+      --muted:      #A8A8A0;
+      --amber:      #F5A623;
+      --amber-deep: #D4820A;
+      --gold:       #FFD700;
+      --klein:      #002FA7;
+      --klein-mid:  #1A52D4;
+      --klein-glow: #4D7FFF;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier Prime', 'Courier New', monospace;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .wrapper {
+      max-width: 640px;
+      width: 100%;
+      padding: 2rem;
+    }
+
+    /* ── TERMINAL ── */
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--amber);
+      padding: 1.6rem 2rem 2rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .term-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 1.6rem;
+    }
+    .dot {
+      width: 11px; height: 11px;
+      border-radius: 50%;
+    }
+    .dot-r { background: #FF5F57; }
+    .dot-y { background: #FFBD2E; }
+    .dot-g { background: #28CA41; }
+
+    .tline {
+      display: flex;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+    .prompt { color: var(--amber); flex-shrink: 0; user-select: none; }
+    .cmd    { color: var(--text); }
+
+    .tout {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding-left: 1.4rem;
+      margin-bottom: 0.2rem;
+    }
+    .tout.hi { color: var(--gold); }
+
+    .spacer { margin: 0.8rem 0; }
+
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 1em;
+      background: var(--amber);
+      vertical-align: text-bottom;
+      animation: blink 1.1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    /* ── LOGO ── */
+    .logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.4rem;
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .logo .accent { color: var(--amber); }
+
+    .tagline {
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 2.5rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* ── DOMAINS ── */
+    .domains {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.6rem;
+      margin-bottom: 2.5rem;
+    }
+    .domain {
+      font-size: 0.75rem;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.3rem 0.7rem;
+      text-transform: none;
+      letter-spacing: 0.04em;
+      transition: border-color 0.15s, color 0.15s;
+    }
+    .domain:hover {
+      color: var(--amber);
+      border-color: var(--amber-deep);
+    }
+
+    /* ── TOPICS ── */
+    .topics {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 2.5rem;
+    }
+    .topic {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.09em;
+      padding: 0.15rem 0.5rem;
+    }
+    .topic.t1 { color: var(--klein-mid); border: 1px solid var(--klein); background: rgba(0,47,167,0.07); }
+    .topic.t2 { color: #4D9FFF; border: 1px solid #1A6AFF; background: rgba(26,82,212,0.08); }
+    .topic.t3 { color: #7EB8FF; border: 1px solid #4D7FFF; background: rgba(77,127,255,0.07); }
+    .topic.t4 { color: #A89FFF; border: 1px solid #6B5FD4; background: rgba(107,95,212,0.09); }
+
+    /* ── STATUS ── */
+    .status {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    .status-badge {
+      display: inline-block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: var(--amber);
+      border: 1px solid var(--amber-deep);
+      padding: 0.4rem 0.8rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+
+    /* ── FOOTER ── */
+    .foot {
+      text-align: center;
+      font-size: 0.78rem;
+      color: var(--muted);
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+    .foot a {
+      color: var(--amber);
+    }
+    .foot a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .wrapper { padding: 1.5rem 1rem; }
+      .terminal { padding: 1.2rem 1.2rem 1.6rem; }
+      .logo { font-size: 1.1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+
+  <div class="logo">scry<span class="accent">ops</span></div>
+  <div class="tagline">observability decoded</div>
+
+  <div class="terminal">
+    <div class="term-dots">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+    </div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">whois scryops</span>
+    </div>
+    <div class="tout">A publication on modern observability.</div>
+    <div class="tout">Trends, deep dives, how-tos, and open questions.</div>
+    <div class="tout">Covering OpenTelemetry &middot; eBPF &middot; Tracing &middot; Metrics &middot; Logs &middot; and what comes next.</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">cat mission.txt</span>
+    </div>
+    <div class="tout hi">"The stack is always changing. We help you see through it."</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">cat status.txt</span>
+    </div>
+    <div class="tout">Site is being assembled. Full launch incoming.</div>
+    <div class="tout">No fluff. No vendor capture. Just signal.</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd"><span class="cursor"></span></span>
+    </div>
+  </div>
+
+  <div class="topics">
+    <span class="topic t1">Trends</span>
+    <span class="topic t2">Guides</span>
+    <span class="topic t3">How-tos</span>
+    <span class="topic t4">Q&amp;A</span>
+  </div>
+
+  <div class="domains">
+    <span class="domain">scryops.io</span>
+    <span class="domain">scryops.dev</span>
+    <span class="domain">scryops.observer</span>
+  </div>
+
+  <div class="status">
+    <span class="status-badge">Launching Soon</span>
+  </div>
+
+  <div class="foot">
+    <p>observability decoded</p>
+  </div>
+
+</div>
+
+</body>
+</html>
