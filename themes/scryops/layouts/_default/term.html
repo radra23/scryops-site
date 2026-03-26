@@ -1,0 +1,11 @@
+{{ define "main" }}
+<section class="feed">
+  <div class="section-head">
+    <span class="section-label">Tagged: {{ .Title }}</span>
+    <div class="section-rule"></div>
+  </div>
+  {{ range $i, $page := .Pages }}
+  {{ partial "article-card.html" (dict "num" (add $i 1) "page" $page) }}
+  {{ end }}
+</section>
+{{ end }}
