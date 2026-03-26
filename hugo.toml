@@ -1,0 +1,56 @@
+baseURL = "https://scryops.io/"
+languageCode = "en-us"
+title = "scryops — observability decoded"
+theme = "scryops"
+
+[params]
+  description = "An independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions."
+  tagline = "observability decoded"
+  mission = "The stack is always changing. We help you see through it."
+
+[taxonomies]
+  tag = "tags"
+  category = "categories"
+
+[markup]
+  [markup.goldmark]
+    [markup.goldmark.renderer]
+      unsafe = true
+  [markup.highlight]
+    style = "monokai"
+    lineNos = false
+
+[menu]
+  [[menu.main]]
+    name = "Articles"
+    url = "/articles/"
+    weight = 1
+  [[menu.main]]
+    name = "Guides"
+    url = "/guides/"
+    weight = 2
+  [[menu.main]]
+    name = "How-tos"
+    url = "/howtos/"
+    weight = 3
+  [[menu.main]]
+    name = "Q&A"
+    url = "/qa/"
+    weight = 4
+  [[menu.main]]
+    name = "Tags"
+    url = "/tags/"
+    weight = 5
+  [[menu.main]]
+    name = "About"
+    url = "/about/"
+    weight = 6
+
+[outputs]
+  home = ["HTML"]
+  section = ["HTML"]
+  taxonomy = ["HTML"]
+  term = ["HTML"]
+
+[pagination]
+  pagerSize = 10
