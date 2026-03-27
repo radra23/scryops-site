@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>scryops — observability decoded</title>
+  <meta name="description" content="scryops is an independent publication on modern observability engineering. Launching soon." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
+  <style>
+    @font-face {
+      font-family: 'Commit Mono';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 400;
+      src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-400-normal.woff2) format('woff2');
+    }
+    @font-face {
+      font-family: 'Commit Mono';
+      font-style: normal;
+      font-display: swap;
+      font-weight: 700;
+      src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-700-normal.woff2) format('woff2');
+    }
+  </style>
+  <style>
+    :root {
+      --bg:         #0D0D0D;
+      --surface:    #161616;
+      --border:     #2A2A2A;
+      --text:       #F0EEE8;
+      --muted:      #A8A8A0;
+      --amber:      #F5A623;
+      --amber-deep: #D4820A;
+      --gold:       #FFD700;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Commit Mono', 'Courier New', monospace;
+      font-size: 16px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .wrapper {
+      max-width: 580px;
+      width: 100%;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .logo {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.6rem;
+    }
+    .logo .accent { color: var(--amber); }
+
+    .tagline {
+      font-size: 0.85rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 2.5rem;
+    }
+
+    .terminal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-top: 3px solid var(--amber);
+      padding: 1.6rem 2rem 2rem;
+      margin-bottom: 2.5rem;
+      text-align: left;
+    }
+
+    .tline {
+      display: flex;
+      gap: 0.6rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.3rem;
+    }
+    .prompt { color: var(--amber); flex-shrink: 0; user-select: none; }
+    .cmd    { color: var(--text); }
+
+    .tout {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding-left: 1.4rem;
+      margin-bottom: 0.2rem;
+    }
+    .tout.hi { color: var(--gold); }
+
+    .spacer { margin: 0.8rem 0; }
+
+    .cursor {
+      display: inline-block;
+      width: 9px;
+      height: 1em;
+      background: var(--amber);
+      vertical-align: text-bottom;
+      animation: blink 1.1s step-end infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .status {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.4rem;
+      color: var(--amber);
+      border: 1px solid var(--amber-deep);
+      padding: 0.5rem 1rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+
+    .foot {
+      font-size: 0.78rem;
+      color: var(--muted);
+    }
+    .gh-link {
+      color: var(--amber);
+      text-decoration: none;
+      border-bottom: 1px solid var(--amber-deep);
+      transition: color 0.2s, border-color 0.2s;
+    }
+    .gh-link:hover,
+    .gh-link:focus {
+      color: var(--gold);
+      border-color: var(--gold);
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+
+    @media (max-width: 600px) {
+      .wrapper { padding: 1.5rem 1rem; }
+      .terminal { padding: 1.2rem 1.2rem 1.6rem; }
+      .logo { font-size: 1.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="wrapper">
+  <div class="logo">scry<span class="accent">ops</span></div>
+  <div class="tagline">tomorrows observability decoded</div>
+
+  <div class="terminal">
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">whois scryops</span>
+    </div>
+    <div class="tout">An independent publication on modern observability.</div>
+    <div class="tout">Covering OpenTelemetry &middot; eBPF &middot; Tracing &middot; Metrics &middot; Logs.</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">cat status.txt</span>
+    </div>
+    <div class="tout hi">"Under construction. Signal incoming."</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd"><span class="cursor"></span></span>
+    </div>
+  </div>
+
+  <div class="status">Under Construction</div>
+
+  <div class="foot">
+    <p>made with <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:inline-block;vertical-align:middle;margin-bottom:2px;opacity:0.75;" aria-label="intent"><rect x="1" y="0" width="22" height="1"/><rect x="1" y="0" width="1" height="21"/><rect x="22" y="0" width="1" height="17"/><rect x="6" y="16" width="17" height="1"/><rect x="4" y="17" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="2" y="19" width="1" height="1"/><rect x="11" y="5" width="3" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="9" y="7" width="1" height="3"/><rect x="15" y="7" width="1" height="3"/><rect x="10" y="10" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="11" y="11" width="3" height="1"/><rect x="12" y="2" width="1" height="3"/><rect x="12" y="12" width="1" height="3"/><rect x="5" y="8" width="4" height="1"/><rect x="16" y="8" width="4" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="11" y="8" width="3" height="1"/><rect x="12" y="9" width="1" height="1"/></svg> intent by <a href="https://github.com/radra23" class="gh-link">@radra23</a></p>
+  </div>
+</div>
+
+</body>
+</html>
