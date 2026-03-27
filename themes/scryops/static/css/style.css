@@ -1,3 +1,37 @@
+/* ── COMMIT MONO ── */
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-400-normal.woff2) format('woff2'),
+       url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-400-normal.woff) format('woff');
+}
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-400-italic.woff2) format('woff2'),
+       url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-400-italic.woff) format('woff');
+}
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-700-normal.woff2) format('woff2'),
+       url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-700-normal.woff) format('woff');
+}
+@font-face {
+  font-family: 'Commit Mono';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 700;
+  src: url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-700-italic.woff2) format('woff2'),
+       url(https://cdn.jsdelivr.net/fontsource/fonts/commit-mono@latest/commit-mono-latin-700-italic.woff) format('woff');
+}
+
 :root {
   --bg:         #0D0D0D;
   --surface:    #161616;
@@ -8,7 +42,7 @@
   --amber-deep: #D4820A;
   --gold:       #FFD700;
   --klein:      #002FA7;
-  --klein-mid:  #1A52D4;
+  --klein-mid:  #5B8DEF;
   --klein-glow: #4D7FFF;
 }
 
@@ -18,7 +52,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Courier Prime', 'Courier New', monospace;
+  font-family: 'Commit Mono', 'Courier New', monospace;
   font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -131,7 +165,7 @@ main {
 }
 .section-label {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
+  font-size: 0.63rem;
   color: var(--amber-deep);
   text-transform: uppercase;
   letter-spacing: 0.18em;
@@ -160,7 +194,7 @@ main {
 
 .art-num {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.63rem;
   color: var(--border);
   padding-top: 0.4rem;
   line-height: 1.8;
@@ -197,7 +231,7 @@ main {
 }
 
 .art-title {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.35;
   margin-bottom: 0.4rem;
@@ -238,7 +272,7 @@ main {
   content: 'Q:';
   color: var(--amber);
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.63rem;
   padding-top: 0.45rem;
   flex-shrink: 0;
 }
@@ -302,7 +336,7 @@ main {
   border-bottom: 1px solid var(--border);
 }
 .single-header h1 {
-  font-family: 'Courier Prime', monospace;
+  font-family: 'Commit Mono', 'Courier New', monospace;
   font-size: 1.6rem;
   font-weight: 700;
   line-height: 1.3;
@@ -326,9 +360,11 @@ main {
   color: var(--gold);
 }
 .prose h3 {
-  font-size: 1.05rem;
+  font-size: 1.1rem;
+  font-weight: 700;
   margin: 1.5rem 0 0.6rem;
   color: var(--amber);
+  letter-spacing: 0.02em;
 }
 .prose p {
   margin-bottom: 1rem;
@@ -426,6 +462,6 @@ footer a:hover { text-decoration: underline; }
   .nav-links a { font-size: 0.7rem; }
   main { padding: 2rem 1rem 4rem; }
   .terminal { padding: 1.2rem 1.2rem 1.6rem; }
-  .art-title { font-size: 0.95rem; }
+  .art-title { font-size: 1.05rem; }
   .single-header h1 { font-size: 1.3rem; }
 }
