@@ -8,6 +8,10 @@ theme = "scryops"
   tagline = "observability decoded"
   mission = "The stack is always changing. We help you see through it."
 
+[params.analytics]
+  umami_script = "https://cloud.umami.is/script.js"
+  umami_website_id = "9b6c5846-f8af-408a-99ef-c03ada9b386d"
+
 [taxonomies]
   tag = "tags"
   category = "categories"
