@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>scryops — observability decoded</title>
-  <meta name="description" content="scryops is an independent publication on modern observability engineering. Launching soon." />
+  <meta name="description" content="scryops — exploring Observability 2.0 through AI-driven anomaly detection, predictive issue resolution, and proactive remediation for distributed systems." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
   <style>
@@ -42,8 +42,8 @@
       background: var(--bg);
       color: var(--text);
       font-family: 'Commit Mono', 'Courier New', monospace;
-      font-size: 16px;
-      line-height: 1.65;
+      font-size: 15px;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
       min-height: 100vh;
       display: flex;
@@ -52,55 +52,55 @@
     }
 
     .wrapper {
-      max-width: 580px;
+      max-width: 720px;
       width: 100%;
-      padding: 2rem;
+      padding: 1.2rem 2rem;
       text-align: center;
     }
 
     .logo {
       font-family: 'Press Start 2P', monospace;
-      font-size: 1.6rem;
+      font-size: 1.4rem;
       letter-spacing: 0.04em;
-      margin-bottom: 0.6rem;
+      margin-bottom: 0.4rem;
     }
     .logo .accent { color: var(--amber); }
 
     .tagline {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--muted);
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      margin-bottom: 2.5rem;
+      margin-bottom: 1.4rem;
     }
 
     .terminal {
       background: var(--surface);
       border: 1px solid var(--border);
       border-top: 3px solid var(--amber);
-      padding: 1.6rem 2rem 2rem;
-      margin-bottom: 2.5rem;
+      padding: 1.2rem 1.6rem 1.4rem;
+      margin-bottom: 1.4rem;
       text-align: left;
     }
 
     .tline {
       display: flex;
       gap: 0.6rem;
-      font-size: 0.9rem;
-      margin-bottom: 0.3rem;
+      font-size: 0.85rem;
+      margin-bottom: 0.15rem;
     }
     .prompt { color: var(--amber); flex-shrink: 0; user-select: none; }
     .cmd    { color: var(--text); }
 
     .tout {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--muted);
       padding-left: 1.4rem;
-      margin-bottom: 0.2rem;
+      margin-bottom: 0.1rem;
     }
     .tout.hi { color: var(--gold); }
 
-    .spacer { margin: 0.8rem 0; }
+    .spacer { margin: 0.5rem 0; }
 
     .cursor {
       display: inline-block;
@@ -117,11 +117,11 @@
       font-size: 0.4rem;
       color: var(--amber);
       border: 1px solid var(--amber-deep);
-      padding: 0.5rem 1rem;
+      padding: 0.4rem 0.8rem;
       letter-spacing: 0.14em;
       text-transform: uppercase;
       display: inline-block;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1rem;
     }
 
     .foot {
@@ -143,9 +143,10 @@
     }
 
     @media (max-width: 600px) {
-      .wrapper { padding: 1.5rem 1rem; }
-      .terminal { padding: 1.2rem 1.2rem 1.6rem; }
-      .logo { font-size: 1.2rem; }
+      .wrapper { padding: 1rem 0.8rem; }
+      .terminal { padding: 1rem 1rem 1.2rem; }
+      .logo { font-size: 1.1rem; }
+      .tagline { margin-bottom: 1rem; }
     }
   </style>
 </head>
@@ -153,21 +154,36 @@
 
 <div class="wrapper">
   <div class="logo">scry<span class="accent">ops</span></div>
-  <div class="tagline">tomorrows observability decoded</div>
+  <div class="tagline">observability 2.0 — decoded</div>
 
   <div class="terminal">
     <div class="tline">
       <span class="prompt">$</span>
       <span class="cmd">whois scryops</span>
     </div>
-    <div class="tout">An independent publication on modern observability.</div>
-    <div class="tout">Covering OpenTelemetry &middot; eBPF &middot; Tracing &middot; Metrics &middot; Logs.</div>
+    <div class="tout">Observability 2.0 — decoded.</div>
+    <div class="tout">Predictive &middot; interpretive &middot; AI-driven insight for complex distributed systems.</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">cat mission.txt</span>
+    </div>
+    <div class="tout">Moving beyond static dashboards and predefined alerts.</div>
+    <div class="tout">Surfacing unknown unknowns with LLMs, ML-driven anomaly detection,</div>
+    <div class="tout">automated root cause analysis, and proactive remediation.</div>
     <div class="spacer"></div>
     <div class="tline">
       <span class="prompt">$</span>
       <span class="cmd">cat status.txt</span>
     </div>
-    <div class="tout hi">"Under construction. Signal incoming."</div>
+    <div class="tout hi">"Calibrating the lens. Signal incoming."</div>
+    <div class="spacer"></div>
+    <div class="tline">
+      <span class="prompt">$</span>
+      <span class="cmd">cat next.txt</span>
+    </div>
+    <div class="tout">Practical guidance on the AI &times; observability intersection.</div>
+    <div class="tout">Built on years of OpenTelemetry &middot; APM &middot; distributed tracing.</div>
     <div class="spacer"></div>
     <div class="tline">
       <span class="prompt">$</span>
@@ -175,7 +191,7 @@
     </div>
   </div>
 
-  <div class="status">Under Construction</div>
+  <div class="status">Launching Soon</div>
 
   <div class="foot">
     <p>made with <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:inline-block;vertical-align:middle;margin-bottom:2px;opacity:0.75;" aria-label="intent"><rect x="1" y="0" width="22" height="1"/><rect x="1" y="0" width="1" height="21"/><rect x="22" y="0" width="1" height="17"/><rect x="6" y="16" width="17" height="1"/><rect x="4" y="17" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="2" y="19" width="1" height="1"/><rect x="11" y="5" width="3" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="9" y="7" width="1" height="3"/><rect x="15" y="7" width="1" height="3"/><rect x="10" y="10" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="11" y="11" width="3" height="1"/><rect x="12" y="2" width="1" height="3"/><rect x="12" y="12" width="1" height="3"/><rect x="5" y="8" width="4" height="1"/><rect x="16" y="8" width="4" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="11" y="8" width="3" height="1"/><rect x="12" y="9" width="1" height="1"/></svg> intent by <a href="https://github.com/radra23" class="gh-link">@radra23</a></p>
