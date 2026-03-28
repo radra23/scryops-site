@@ -148,6 +148,38 @@
       .logo { font-size: 1.1rem; }
       .tagline { margin-bottom: 1rem; }
     }
+
+    /* ---- pixel chicken easter egg ---- */
+    .pixel-chicken-link {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      display: block;
+      text-decoration: none;
+      z-index: 50;
+      animation: chk-idle 0.7s steps(1, end) alternate infinite;
+    }
+    @keyframes chk-idle {
+      from { transform: translateY(0px); }
+      to   { transform: translateY(-4px); }
+    }
+    .pixel-chicken-link:hover { animation-duration: 0.25s; }
+    .pixel-chicken-link:focus-visible {
+      outline: 2px solid var(--amber);
+      outline-offset: 4px;
+    }
+    .chk-bubble {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.28rem;
+      color: var(--amber);
+      text-align: center;
+      opacity: 0;
+      transition: opacity 0.15s;
+      margin-bottom: 3px;
+      white-space: nowrap;
+      letter-spacing: 0.04em;
+    }
+    .pixel-chicken-link:hover .chk-bubble { opacity: 1; }
   </style>
   {{ partial "analytics.html" . }}
 </head>
@@ -198,6 +230,60 @@
     <p>made with <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="14" height="14" style="display:inline-block;vertical-align:middle;margin-bottom:2px;opacity:0.75;" aria-label="intent"><rect x="1" y="0" width="22" height="1"/><rect x="1" y="0" width="1" height="21"/><rect x="22" y="0" width="1" height="17"/><rect x="6" y="16" width="17" height="1"/><rect x="4" y="17" width="1" height="1"/><rect x="3" y="18" width="1" height="1"/><rect x="2" y="19" width="1" height="1"/><rect x="11" y="5" width="3" height="1"/><rect x="10" y="6" width="1" height="1"/><rect x="14" y="6" width="1" height="1"/><rect x="9" y="7" width="1" height="3"/><rect x="15" y="7" width="1" height="3"/><rect x="10" y="10" width="1" height="1"/><rect x="14" y="10" width="1" height="1"/><rect x="11" y="11" width="3" height="1"/><rect x="12" y="2" width="1" height="3"/><rect x="12" y="12" width="1" height="3"/><rect x="5" y="8" width="4" height="1"/><rect x="16" y="8" width="4" height="1"/><rect x="12" y="7" width="1" height="1"/><rect x="11" y="8" width="3" height="1"/><rect x="12" y="9" width="1" height="1"/></svg> intent by <a href="https://github.com/radra23" class="gh-link">@radra23</a></p>
   </div>
 </div>
+
+<!-- pixel chicken easter egg — links to first article -->
+<a href="/articles/what-is-observability-2-and-why-scryops/" class="pixel-chicken-link" aria-label="First article">
+  <div class="chk-bubble">cluck?</div>
+  <!--
+    13×14 pixel grid, scale 4 (52×56px).
+    Chicken faces left: beak at x=0, tail feathers at right.
+    Colors: R=#FF4444  W=#F2EDD7  Y=#F5A623  B=#0D0D0D  T=#C8903A
+  -->
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 52 56" width="52" height="56"
+       style="image-rendering:pixelated;image-rendering:crisp-edges;display:block;">
+    <!-- comb -->
+    <rect x="12" y="0"  width="12" height="4" fill="#FF4444"/>
+    <rect x="12" y="4"  width="12" height="4" fill="#FF4444"/>
+    <!-- head (cream) row 1 tail -->
+    <rect x="24" y="4"  width="8"  height="4" fill="#F2EDD7"/>
+    <!-- row 2: full head -->
+    <rect x="8"  y="8"  width="28" height="4" fill="#F2EDD7"/>
+    <!-- row 3: head + beak -->
+    <rect x="0"  y="12" width="8"  height="4" fill="#F5A623"/><!-- beak -->
+    <rect x="8"  y="12" width="28" height="4" fill="#F2EDD7"/>
+    <!-- row 4: head + eye + beak -->
+    <rect x="0"  y="16" width="8"  height="4" fill="#F5A623"/><!-- beak -->
+    <rect x="8"  y="16" width="8"  height="4" fill="#F2EDD7"/>
+    <rect x="16" y="16" width="4"  height="4" fill="#0D0D0D"/><!-- eye -->
+    <rect x="20" y="16" width="16" height="4" fill="#F2EDD7"/>
+    <!-- row 5: wattle + neck -->
+    <rect x="8"  y="20" width="8"  height="4" fill="#FF4444"/><!-- wattle -->
+    <rect x="16" y="20" width="20" height="4" fill="#F2EDD7"/>
+    <!-- row 6: body wide -->
+    <rect x="8"  y="24" width="36" height="4" fill="#F2EDD7"/>
+    <!-- row 7: body + tail start -->
+    <rect x="4"  y="28" width="40" height="4" fill="#F2EDD7"/>
+    <rect x="44" y="28" width="4"  height="4" fill="#C8903A"/><!-- tail -->
+    <!-- row 8: wing + body + tail -->
+    <rect x="4"  y="32" width="4"  height="4" fill="#F2EDD7"/>
+    <rect x="8"  y="32" width="20" height="4" fill="#C8903A"/><!-- wing -->
+    <rect x="28" y="32" width="12" height="4" fill="#F2EDD7"/>
+    <rect x="40" y="32" width="8"  height="4" fill="#C8903A"/><!-- tail -->
+    <!-- row 9: body + tail -->
+    <rect x="4"  y="36" width="36" height="4" fill="#F2EDD7"/>
+    <rect x="40" y="36" width="8"  height="4" fill="#C8903A"/><!-- tail -->
+    <!-- row 10: body -->
+    <rect x="8"  y="40" width="36" height="4" fill="#F2EDD7"/>
+    <!-- row 11: lower body -->
+    <rect x="12" y="44" width="28" height="4" fill="#F2EDD7"/>
+    <!-- row 12: legs -->
+    <rect x="16" y="48" width="8"  height="4" fill="#F5A623"/>
+    <rect x="28" y="48" width="8"  height="4" fill="#F5A623"/>
+    <!-- row 13: feet -->
+    <rect x="12" y="52" width="12" height="4" fill="#F5A623"/>
+    <rect x="28" y="52" width="12" height="4" fill="#F5A623"/>
+  </svg>
+</a>
 
 </body>
 </html>
