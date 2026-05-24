@@ -455,6 +455,63 @@ footer a {
 }
 footer a:hover { text-decoration: underline; }
 
+/* ── PIXEL CHICKEN EASTER EGG ── */
+.pixel-chicken-link {
+  position: fixed;
+  bottom: 18px;
+  right: 18px;
+  display: block;
+  text-decoration: none;
+  z-index: 50;
+  animation: chk-idle 0.7s steps(1, end) alternate infinite;
+  transform-origin: bottom center;
+}
+@keyframes chk-idle {
+  from { transform: translateY(0px) scaleX(1); }
+  to   { transform: translateY(-4px) scaleX(1); }
+}
+@keyframes chk-attack {
+  0%   { transform: translateX(4px)  translateY(0px)  rotate(0deg); }
+  20%  { transform: translateX(-5px) translateY(-3px) rotate(-4deg); }
+  40%  { transform: translateX(5px)  translateY(0px)  rotate(3deg); }
+  60%  { transform: translateX(-4px) translateY(-4px) rotate(-3deg); }
+  80%  { transform: translateX(6px)  translateY(-1px) rotate(4deg); }
+  100% { transform: translateX(-5px) translateY(0px)  rotate(0deg); }
+}
+.pixel-chicken-link:hover {
+  animation: chk-attack 0.12s steps(1, end) infinite;
+}
+.pixel-chicken-link:focus-visible { outline: 2px solid var(--amber); outline-offset: 4px; }
+
+.chk-alert {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.7rem;
+  color: #FF4444;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.05s, transform 0.05s;
+  margin-bottom: 2px;
+  line-height: 1;
+}
+.pixel-chicken-link:hover .chk-alert {
+  opacity: 1;
+  transform: translateY(0px);
+}
+
+.chk-bubble {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.28rem;
+  color: #FF4444;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.05s;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  letter-spacing: 0.04em;
+}
+.pixel-chicken-link:hover .chk-bubble { opacity: 1; }
+
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
   nav { padding: 0.8rem 1rem; }
