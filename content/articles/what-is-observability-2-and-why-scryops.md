@@ -23,21 +23,33 @@ The first observability stack was built out of necessity. Prometheus made metric
 
 The model that those tools enforce is fundamentally retrospective. Metric crosses threshold → alert fires → human investigates → human fixes. Every step is reactive. The human is always last in line.
 
+{{< obs-reactive-loop >}}
+
 Fast forward to 2026. You're running hundreds of microservices across clouds, pumping out millions of spans every second. The old reactive model can't keep up. It's slow and inefficient. Picture a memory leak nudging one service's latency higher, hour by hour. No alert fires until the threshold breaks. By then, the API will be timing out, and customers will already be feeling it. Engineers scramble across dashboards, always chasing the problem, never catching up. By the time you find the real root cause, the damage is done. That's the price of staying reactive.
+
+{{< obs-memory-leak >}}
 
 ## Observability 2.0: a different question
 
-Observability 2.0 isn't about prettier dashboards. It isn't about shaving 30% off your MTTD. It's a different question entirely.
+Observability 2.0 isn’t about prettier dashboards. It isn’t about shaving 30% off your MTTD. It’s a different question entirely.
 
-Instead of asking *“what happened?”* it asks *“what’s about to happen, and how do we stop it?”*
+Instead of asking *”what happened?”* it asks *”what’s about to happen, and how do we stop it?”*
 
-Making that shift means building what the old model can't deliver: a way to see connections, predict trouble, and act before users notice.
+{{< obs-comparison-table >}}
 
-**Signal correlation at scale.** Not logs, metrics, and traces in their own corners, but one model that sees the connections. A spike in error rate alone is just a blip. But if it happens alongside a fresh deployment, a database pool that's nearly full, and a downstream service with p95 latency creeping up for hours, that's not noise. That's a warning.
+Making that shift means building what the old model can’t deliver: a way to see connections, predict trouble, and act before users notice.
 
-**Predictive inference.** ML models and LLMs that spot patterns *before* they turn into incidents. Not "this crossed a threshold." More like: "This pattern has come before an outage eight out of the last ten times, and we're three hours into it now." Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting in production. For everyone else, it's still experimental or just leaving the pilot phase. The promise is real. The tooling and practices are still catching up.
+**Signal correlation at scale.** Not logs, metrics, and traces in their own corners, but one model that sees the connections. A spike in error rate alone is just a blip. But if it happens alongside a fresh deployment, a database pool that’s nearly full, and a downstream service with p95 latency creeping up for hours, that’s not noise. That’s a warning.
+
+{{< obs-signal-correlation >}}
+
+**Predictive inference.** ML models and LLMs that spot patterns *before* they turn into incidents. Not “this crossed a threshold.” More like: “This pattern has come before an outage eight out of the last ten times, and we’re three hours into it now.” Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting in production. For everyone else, it’s still experimental or just leaving the pilot phase. The promise is real. The tooling and practices are still catching up.
 
 **Proactive remediation.** No more paging a human and waiting. The system rolls back a deployment, scales a service, or throttles traffic based on predicted risk, not confirmed failure. It acts on what it sees coming, not what has already happened.
+
+The industry data makes the case for the shift plainly.
+
+{{< obs-stats-chart >}}
 
 This is what I mean by Observability 2.0. The work of actually building it—the tools, the patterns, the architecture—is what I call **scryops**.
 
