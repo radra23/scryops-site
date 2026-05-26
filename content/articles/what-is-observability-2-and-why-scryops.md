@@ -29,6 +29,8 @@ Fast forward to 2026. Hundreds of microservices, millions of spans every second,
 
 {{< obs-memory-leak >}}
 
+{{< obs-memory-leak >}}
+
 ## Observability 2.0: a different question
 
 Observability 2.0 isn’t about prettier dashboards. It isn’t about shaving seconds off incident response. It’s about asking a new question.
