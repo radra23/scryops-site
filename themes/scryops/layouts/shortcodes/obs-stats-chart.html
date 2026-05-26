@@ -1,0 +1,121 @@
+<style>
+.obs-chart-wrap{background:#161616;border:1px solid #2A2A2A;border-top:3px solid #F5A623;padding:1.4rem 1.4rem 1.2rem;font-family:'Commit Mono','Courier New',monospace;}
+/* Headers — bumped from 0.5rem to 0.65rem for legibility */
+.obs-chart-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#A8A8A0;letter-spacing:.1em;text-align:center;margin-bottom:1.2rem;}
+.obs-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.6rem;}
+@media(max-width:640px){.obs-stat-grid{grid-template-columns:repeat(2,1fr);}}
+.obs-stat-card{background:#0D0D0D;border:1px solid #2A2A2A;border-top:3px solid;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.3rem;padding:1rem .8rem .8rem;}
+.obs-stat-num{font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:-.02em;}
+.obs-stat-desc{font-size:.78rem;color:#B0B0A8;line-height:1.5;flex:1;} /* lightened for 4.6:1 contrast */
+/* Source label — bumped from 0.38rem to 0.6rem; still small but legible */
+.obs-stat-src{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#808080;letter-spacing:.04em;margin-top:.4rem;}
+.obs-mttd-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#808080;letter-spacing:.1em;margin-bottom:.5rem;}
+.obs-mttd-div{height:1px;background:#2A2A2A;margin-bottom:1rem;}
+.obs-mttd-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:.8rem;margin-bottom:.7rem;}
+@media(max-width:640px){.obs-mttd-row{grid-template-columns:90px 1fr auto;}}
+.obs-mttd-lbl{font-size:.8rem;color:#A8A8A0;text-align:right;word-break:break-word;line-height:1.4;}
+@media(max-width:640px){.obs-mttd-lbl{font-size:.68rem;}}
+.obs-mttd-track{background:#111;border:1px solid #2A2A2A;height:28px;position:relative;overflow:hidden;}
+.obs-mttd-bar{height:100%;width:0;transition:width .9s cubic-bezier(.25,.46,.45,.94);position:relative;display:flex;align-items:center;}
+/* Respect reduced motion preference */
+@media(prefers-reduced-motion:reduce){.obs-mttd-bar{transition:none;}}
+.obs-mttd-bar-fill{position:absolute;inset:0;opacity:.22;}
+.obs-mttd-bar-border{position:absolute;inset:0;border:1.5px solid;}
+.obs-mttd-val{font-size:.8rem;font-weight:700;white-space:nowrap;padding-left:.4rem;}
+.obs-mttd-badge{font-size:.8rem;font-weight:700;white-space:nowrap;text-align:right;min-width:80px;}
+.obs-mttd-badge small{display:block;font-size:.65rem;font-weight:400;color:#A8A8A0;}
+/* Axis — lightened from #333 to #888880 for 3.8:1 contrast on #161616 */
+.obs-mttd-axis{display:flex;justify-content:space-between;padding:.3rem 0 0;margin-left:calc(160px + .8rem);font-size:.75rem;color:#888880;}
+@media(max-width:640px){.obs-mttd-axis{margin-left:calc(90px + .8rem);font-size:.65rem;}}
+/* Source line — bumped from 0.38rem to 0.6rem */
+.obs-src{margin-top:1.2rem;font-family:'Press Start 2P',monospace;font-size:.65rem;color:#808080;letter-spacing:.04em;}
+figure.obs-fig{margin:2.5rem 0 2rem;}
+figure.obs-fig figcaption{font-size:.7rem;color:#A8A8A0;font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+</style>
+
+<figure class="obs-fig"
+  aria-label="Industry observability statistics 2023–2024. Four key metrics: 58% of incidents are reported by customers before internal teams know, 74% of alerts are noise or false positives, 37% of engineering capacity is lost to unplanned reactive work, and only 26% of teams can detect issues before users do. Mean time to detect: 45 minutes with threshold-only alerting versus 8 minutes with ML-assisted detection — a 5.6× improvement.">
+  <div class="obs-chart-wrap">
+    <div class="obs-chart-hdr">INDUSTRY DATA &nbsp;·&nbsp; 2023–2024</div>
+    <div class="obs-stat-grid" id="obs-stat-cards"></div>
+    <div>
+      <div class="obs-mttd-hdr">MEAN TIME TO DETECT (MTTD)</div>
+      <div class="obs-mttd-div"></div>
+      <div id="obs-mttd-bars"></div>
+      <div class="obs-mttd-axis" id="obs-mttd-axis" aria-hidden="true"></div>
+    </div>
+    <div class="obs-src">
+      Sources: xMatters 2024 &nbsp;·&nbsp; PagerDuty 2023 &nbsp;·&nbsp; DORA 2023 &nbsp;·&nbsp; Dynatrace 2024
+    </div>
+  </div>
+  <figcaption>Fig. 5 — Most teams are flying blind. Only 26% detect issues before customers do — and when they do react, it takes 45 minutes. ML-assisted systems close that gap to 8.</figcaption>
+</figure>
+
+<script>
+(function () {
+  var STATS = [
+    { pct: 58, lines: ['of incidents reported', 'by customers first'],  color: '#FF4444', source: 'xMatters 2024'   },
+    { pct: 74, lines: ['of alerts are noise',   'or false positives'],   color: '#F5A623', source: 'PagerDuty 2023' },
+    { pct: 37, lines: ['of eng capacity',       'lost to firefighting'], color: '#FFE033', source: 'DORA 2023'      }, /* #FFE033 instead of #FFD700 for slightly better contrast */
+    { pct: 26, lines: ['of teams detect',       'before users do'],      color: '#28CA41', source: 'Dynatrace 2024' },
+  ];
+  var MTTD = [
+    { label: 'threshold-only alerting', min: 45, color: '#FF4444' },
+    { label: 'ML-assisted detection',   min:  8, color: '#28CA41' },
+  ];
+  var MAX_MIN = 45, STEP = 5;
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* Stat cards */
+  var cardsEl = document.getElementById('obs-stat-cards');
+  STATS.forEach(function(s) {
+    var card = document.createElement('div');
+    card.className = 'obs-stat-card';
+    card.style.borderTopColor = s.color;
+    card.innerHTML =
+      '<div class="obs-stat-num" style="color:' + s.color + '">' + s.pct + '%</div>' +
+      '<div class="obs-stat-desc">' + s.lines.join('<br>') + '</div>' +
+      '<div class="obs-stat-src">'  + s.source + '</div>';
+    cardsEl.appendChild(card);
+  });
+
+  /* MTTD bars */
+  var barsEl = document.getElementById('obs-mttd-bars');
+  var barEls = [];
+  MTTD.forEach(function(d, i) {
+    var pct = (d.min / MAX_MIN * 100).toFixed(2) + '%';
+    var badge = i === 0
+      ? '<div class="obs-mttd-badge" style="color:#FF4444" aria-label="Threshold-only alerting: 45 minutes">45&nbsp;min<small>threshold only</small></div>'
+      : '<div class="obs-mttd-badge" style="color:#28CA41" aria-label="ML-assisted detection: 8 minutes, 5.6 times faster than threshold alerting">8&nbsp;min<small>5.6× faster</small></div>';
+    var row = document.createElement('div');
+    row.className = 'obs-mttd-row';
+    row.innerHTML =
+      '<div class="obs-mttd-lbl">' + d.label + '</div>' +
+      '<div class="obs-mttd-track">' +
+        '<div class="obs-mttd-bar" data-w="' + pct + '" style="width:' + (prefersReducedMotion ? pct : '0') + '"' +
+            ' role="progressbar" aria-valuenow="' + d.min + '" aria-valuemin="0" aria-valuemax="' + MAX_MIN + '"' +
+            ' aria-label="' + d.label + ': ' + d.min + ' minutes">' +
+          '<div class="obs-mttd-bar-fill"   style="background:' + d.color + '"></div>' +
+          '<div class="obs-mttd-bar-border" style="border-color:' + d.color + '"></div>' +
+        '</div>' +
+      '</div>' + badge;
+    barsEl.appendChild(row);
+    if (!prefersReducedMotion) barEls.push(row.querySelector('.obs-mttd-bar'));
+  });
+
+  /* Axis ticks */
+  var axisEl = document.getElementById('obs-mttd-axis');
+  for (var m = 0; m <= MAX_MIN; m += STEP) {
+    var sp = document.createElement('span');
+    sp.textContent = m === MAX_MIN ? m + ' min' : m;
+    axisEl.appendChild(sp);
+  }
+
+  /* Animate bars — skipped if prefers-reduced-motion */
+  if (barEls.length) {
+    setTimeout(function() {
+      barEls.forEach(function(b) { b.style.width = b.dataset.w; });
+    }, 120);
+  }
+})();
+</script>
