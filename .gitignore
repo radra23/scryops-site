@@ -3,3 +3,7 @@ resources/_gen/
 .hugo_build.lock
 .DS_Store
 .claude/
+chicken-preview.html
+preview-index.html
+article-diagrams.html
+.gitignore
