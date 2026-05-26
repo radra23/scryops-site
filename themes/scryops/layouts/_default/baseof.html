@@ -10,7 +10,8 @@
   </main>
   {{ partial "footer.html" . }}
 
-  <!-- pixel chicken easter egg — Zelda cucco v4 -->
+  <!-- pixel chicken easter egg — wrapped in nav landmark so it's not orphaned outside a region -->
+  <nav aria-label="Home shortcut">
   <a href="{{ "/" | relURL }}" class="pixel-chicken-link" aria-label="Back to home">
     <div class="chk-alert">!</div>
     <div class="chk-bubble">BWOCK!!</div>
@@ -129,5 +130,6 @@
       <rect x="40" y="56" width="4"  height="4" fill="#111111"/>
     </svg>
   </a>
+  </nav>
 </body>
 </html>
