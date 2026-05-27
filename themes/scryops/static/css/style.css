@@ -240,10 +240,10 @@ main {
 .article:hover .art-title { color: var(--gold); }
 
 .art-excerpt {
-  font-size: 0.85rem;
-  color: var(--muted);
-  font-style: italic;
-  line-height: 1.55;
+  font-size: 0.95rem;
+  color: #C8C6C0;
+  line-height: 1.7;
+  margin-top: 0.5rem;
 }
 
 /* ── Q&A SECTION ── */
@@ -350,14 +350,16 @@ main {
 }
 
 .prose {
-  font-size: 0.95rem;
-  line-height: 1.8;
+  font-size: 1rem;
+  line-height: 1.85;
   color: var(--text);
 }
 .prose h2 {
-  font-size: 1.2rem;
-  margin: 2rem 0 0.8rem;
-  color: var(--gold);
+  font-size: 1.1rem;
+  margin: 2.2rem 0 0.8rem;
+  color: var(--amber);
+  padding-left: 0.75rem;
+  border-left: 2px solid var(--amber-deep);
 }
 .prose h3 {
   font-size: 1.1rem;
