@@ -1,0 +1,19 @@
+#!/bin/sh
+# .githooks/pre-commit
+#
+# Blocks commits that introduce unknown or incorrectly-cased tags.
+# Activate once with:
+#   git config core.hooksPath .githooks
+#
+# To auto-fix before committing:
+#   python3 scripts/normalize-tags.py --fix && git add -u && git commit
+
+python3 scripts/normalize-tags.py
+status=$?
+
+if [ $status -ne 0 ]; then
+  echo ""
+  echo "  Auto-fix:  python3 scripts/normalize-tags.py --fix"
+  echo "  Then:      git add -u && git commit"
+  exit 1
+fi
