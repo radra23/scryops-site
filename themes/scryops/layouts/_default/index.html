@@ -45,20 +45,34 @@
 </section>
 {{ end }}
 
-<!-- Tags cloud -->
-{{ with .Site.Taxonomies.tags }}
-<section class="tags-section">
+<!-- Domain topics -->
+<section class="domains-section">
   <div class="section-head">
-    <span class="section-label">Tags</span>
+    <span class="section-label">Topics</span>
     <div class="section-rule"></div>
   </div>
-  <div class="tag-cloud">
-    {{ range $name, $pages := . }}
-    <a href="{{ "tags/" | relURL }}{{ $name | urlize }}/" class="tag-pill">{{ $name }}</a>
+  <div class="domain-grid">
+    {{ $tags := .Site.Taxonomies.tags }}
+    {{ $domains := slice
+      (dict "slug" "opentelemetry" "name" "OpenTelemetry" "desc" "Instrumentation, collectors, and the OTel ecosystem")
+      (dict "slug" "tracing"       "name" "Tracing"       "desc" "Distributed traces, sampling, and profiling")
+      (dict "slug" "alerting"      "name" "Alerting"      "desc" "Alert design, fatigue, and on-call practices")
+      (dict "slug" "slos"          "name" "SLOs"          "desc" "Error budgets, burn rates, and reliability targets")
+      (dict "slug" "observability" "name" "Observability" "desc" "Foundations, philosophy, and what comes next")
+    }}
+    {{ range $domains }}
+      {{ $pages := index $tags .slug }}
+      {{ if $pages }}
+      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="domain-card">
+        <div class="domain-name">{{ .name }}</div>
+        <div class="domain-desc">{{ .desc }}</div>
+        <div class="domain-count">{{ len $pages }}&thinsp;pieces</div>
+      </a>
+      {{ end }}
     {{ end }}
   </div>
+  <a href="{{ "tags/" | relURL }}" class="all-tags-link">&rarr; all tags</a>
 </section>
-{{ end }}
 
 <!-- Subscribe section -->
 <section class="subscribe-section">
