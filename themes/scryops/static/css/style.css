@@ -89,11 +89,17 @@ nav {
   flex-wrap: wrap;
 }
 .nav-links a {
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--muted);
   transition: color 0.15s;
+  padding: 0.4rem 0.15rem;
+  display: inline-block;
+  min-height: 44px;
+  line-height: 44px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 .nav-links a:hover,
 .nav-links a.active { color: var(--amber); }
@@ -195,7 +201,7 @@ main {
 .art-num {
   font-family: 'Press Start 2P', monospace;
   font-size: 0.63rem;
-  color: var(--border);
+  color: var(--muted);
   padding-top: 0.4rem;
   line-height: 1.8;
   transition: color 0.15s;
@@ -220,7 +226,7 @@ main {
   background: rgba(0,47,167,0.07);
 }
 .tag.guide   { color: #4D9FFF; border-color: #1A6AFF; background: rgba(26,82,212,0.08); }
-.tag.howto   { color: #7EB8FF; border-color: #4D7FFF; background: rgba(77,127,255,0.07); }
+.tag.howto   { color: #F5A623; border-color: #D4820A; background: rgba(212,130,10,0.08); }
 .tag.trends  { color: var(--klein-mid); border-color: var(--klein); }
 .tag.qa      { color: #A89FFF; border-color: #6B5FD4; background: rgba(107,95,212,0.09); }
 .tag.article { color: var(--klein-mid); border-color: var(--klein); }
@@ -247,7 +253,13 @@ main {
 }
 
 /* ── Q&A SECTION ── */
-.qa-section { margin-bottom: 4rem; }
+.qa-section {
+  margin-bottom: 4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid #6B5FD4;
+  padding: 1.6rem 2rem 1.8rem;
+}
 
 .qa-list {
   display: flex;
@@ -318,11 +330,16 @@ main {
   font-size: 0.75rem;
   color: var(--muted);
   border: 1px solid var(--border);
-  padding: 0.25rem 0.65rem;
+  padding: 0.5rem 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
+  display: inline-block;
+  min-height: 36px;
+  line-height: 36px;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 .tag-pill:hover {
   color: var(--amber);
