@@ -346,6 +346,72 @@ main {
   border-color: var(--amber-deep);
 }
 
+/* ── DOMAIN TOPICS ── */
+.domains-section { margin-bottom: 4rem; }
+
+.domain-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+.domain-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 1.2rem 1.1rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--border);
+  transition: border-top-color 0.15s, background 0.12s;
+}
+.domain-card:hover {
+  border-top-color: var(--amber);
+  background: rgba(245,166,35,0.04);
+}
+
+.domain-name {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  transition: color 0.15s;
+}
+.domain-card:hover .domain-name { color: var(--amber); }
+
+.domain-desc {
+  font-size: 0.78rem;
+  color: var(--muted);
+  line-height: 1.5;
+  flex: 1;
+}
+
+.domain-count {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.55rem;
+  color: var(--amber-deep);
+  letter-spacing: 0.06em;
+  margin-top: 0.5rem;
+}
+
+.all-tags-link {
+  display: inline-block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+  transition: color 0.15s;
+}
+.all-tags-link:hover { color: var(--amber); }
+
+@media (max-width: 640px) {
+  .domain-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 380px) {
+  .domain-grid { grid-template-columns: 1fr; }
+}
+
 /* ── FEED FILTER ── */
 .feed-filter {
   display: flex;
