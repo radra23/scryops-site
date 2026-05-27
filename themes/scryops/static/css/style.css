@@ -661,3 +661,113 @@ figure.diagram figcaption {
   .mttd-label { font-size: 0.68rem; }
   .mttd-axis { margin-left: calc(100px + 0.8rem); }
 }
+
+/* ═══════════════════════════════════════════════
+   SHORTCODES
+   {{< mermaid >}}  {{< insight >}}  {{< quote_with_author >}}
+═══════════════════════════════════════════════ */
+
+/* ── Mermaid diagrams ── */
+.mermaid svg {
+  max-width: 100%;
+  display: block;
+  margin: 0 auto;
+}
+
+/* ── Insight callout ── */
+.insight {
+  display: flex;
+  gap: 0.85rem;
+  align-items: flex-start;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1rem 1.2rem;
+  margin: 1.8rem 0;
+}
+.insight.lightbulb { border-left: 3px solid var(--amber); }
+.insight.bookmark  { border-left: 3px solid var(--klein-mid); }
+
+.insight-icon {
+  flex-shrink: 0;
+  margin-top: 0.2rem;
+  width: 16px;
+  height: 16px;
+}
+.insight.lightbulb .insight-icon { color: var(--amber); }
+.insight.bookmark  .insight-icon { color: var(--klein-mid); }
+
+.insight-body {
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
+.insight-body strong {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+.insight.lightbulb .insight-body strong { color: var(--amber); }
+.insight.bookmark  .insight-body strong { color: var(--klein-mid); }
+.insight-body p {
+  margin: 0;
+  color: var(--muted);
+}
+
+/* ── Quote with author ── */
+.quote-with-author {
+  margin: 1.8rem 0;
+  border-left: 3px solid var(--amber-deep);
+  padding: 0.3rem 0 0.3rem 1.2rem;
+}
+.quote-with-author blockquote {
+  border: none;
+  padding: 0;
+  margin: 0 0 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+.quote-with-author blockquote p {
+  margin: 0;
+}
+.quote-with-author blockquote p::before { content: '\201C'; color: var(--amber-deep); font-style: normal; }
+.quote-with-author blockquote p::after  { content: '\201D'; color: var(--amber-deep); font-style: normal; }
+
+.quote-attribution {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.quote-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.quote-avatar-initials {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  color: var(--amber);
+  flex-shrink: 0;
+}
+.quote-name {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--amber);
+}
+.quote-role {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
