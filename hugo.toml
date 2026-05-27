@@ -42,7 +42,7 @@ theme = "scryops"
     url = "/qa/"
     weight = 4
   [[menu.main]]
-    name = "Tags"
+    name = "Topics"
     url = "/tags/"
     weight = 5
   [[menu.main]]
