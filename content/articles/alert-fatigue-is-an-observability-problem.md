@@ -1,0 +1,104 @@
+---
+title: "Alert Fatigue Is an Observability Problem"
+date: 2026-05-26
+draft: false
+excerpt: "Every alert that fires is doing its job. That is the problem. The model is wrong, not the thresholds."
+readtime: 5
+tags: ["Alerting", "SLOs", "On-Call", "Observability"]
+---
+
+{{< quote_with_author author="Charity Majors" title="On Call Shouldn’t Suck · charity.wtf" image="/images/charity-majors-pixel.png" pixel="true" >}}
+Night time pages are heart attacks, not diabetes.
+{{< /quote_with_author >}}
+
+Alert fatigue is the expected result of traditional monitoring when it’s working correctly.
+
+Every alert fired as configured. Threshold crossed, notification sent, system did its job. The alerts are not broken. The model is. You built a machine that watches numbers and shouts when one crosses a line. In a complex system, that machine shouts all the time. The on-call team tunes it out. The alerts that matter get lost in the noise.
+
+The fix is not fewer alerts — it’s alerting on the right signal.
+
+## The Machine That Always Cries Wolf
+
+A static threshold assumes anything above X is wrong. In real systems, that is almost never true. Daily traffic, weekend shifts, deployments, or seasonal spikes all break that rule. What matters at 2pm on Tuesday does not matter at 3am on Sunday.
+
+{{< obs-threshold-reality >}}
+
+It’s a feedback loop. The noisier the alerts, the more you ignore them. The more you ignore, the more real issues slip by. So you add more alerts to catch what you missed, and the noise just gets louder.
+
+{{< mermaid >}}
+graph LR
+    A[High Alert Volume] --> B[Desensitization]
+    B --> C[Missed Issues]
+    C --> D[More Alerts Added]
+    D --> A
+{{< /mermaid >}}
+
+To fix alert fatigue, you need to rethink what you measure—not just tweak the numbers.
+
+## A Better Question
+
+If static thresholds ask “did this number cross a line?”, SLO-based alerting asks “is the user experience degrading, and how fast?” That’s a fundamentally different question — and it’s the one that actually matters.
+
+Burn rate alerts fire when your error budget drains faster than the baseline depletion rate allows. They do not care about 2pm or 3am. They do not care if p99 crossed some random threshold. They ask: at this rate, when do you run out of budget? And they give you a head start.
+
+If you’re burning through your budget 14 times faster than the rate that would exhaust it over the full 30-day window, someone gets paged right away. If it’s 6 times faster — measured over a six-hour window — it’s urgent but not a fire drill. A burn rate below 2× means you have weeks of budget left; that earns a ticket for investigation during business hours, not a 3am page. The response matches how quickly you’re heading for trouble, not just whether a number jumped.
+
+{{< mermaid >}}
+flowchart TD
+    A([Incident Detected]) --> B{"Is SLO Error\nBudget Burning?"}
+
+    B -->|No| C[Monitor & Track]
+    C --> D([Log for Future Review])
+
+    B -->|Yes| E{"Burn Rate\nAnalysis"}
+
+    E -->|"Slow Burn\n<2× rate · weeks of budget left"| F["Ticket / Slack\nInvestigate This Week"]
+    F --> G["Schedule Investigation\nDuring Business Hours"]
+
+    E -->|"Moderate Burn\n~6× rate · 6hr window"| H["Team Notification\nBegin Investigation"]
+    H --> I{"Resolvable by\nOn-Call Team?"}
+    I -->|Yes| J[Resolve & Document]
+    I -->|No| K["Escalate to\nCross-Functional Team"]
+
+    E -->|"Fast Burn\n≥14× rate · 1hr window"| L["Page On-Call\nImmediate Response"]
+    L --> M{"User Experience\nSeverely Impacted?"}
+    M -->|Yes| N["Declare Major Incident\nExecutive Notification"]
+    M -->|No| P["Focused Technical\nResponse"]
+
+    style A fill:#0071C3,stroke:#0071C3,stroke-width:2px,color:#fff
+    style L fill:#EF6700,stroke:#EF6700,stroke-width:2px,color:#fff
+    style N fill:#CD384B,stroke:#CD384B,stroke-width:2px,color:#fff
+{{< /mermaid >}}
+
+Teams who move past static thresholds use multi-window, multi-burn-rate alerts. These catch the slow burns and creeping trends that old alerts miss.
+
+## The Alert Audit
+
+Even if you’ve switched to SLO-based alerts, you probably still have threshold alerts that were never retired. Start by reviewing them.
+
+For each active alert, ask one question: when this fires, what does the on-call person actually do? If the honest answer is check a few things and close it, the alert is not actionable. Fix it or remove it. An alert that does not drive action is just noise.
+
+As you clean up, track three things: how many alerts fire, how many lead to real action, and how fast people respond. You want fewer alerts, more action, and faster response. If all three improve, the cleanup is working. If only the volume drops, you might be missing something important.
+
+{{< obs-alert-fatigue-stats >}}
+
+## Route Alerts by Severity
+
+Not every alert needs the same channel. P0 issues that burn your error budget fast go to PagerDuty and wake someone up. P1 issues go to an incident channel with a clear 30-minute response goal. Everything else goes somewhere passive: a Slack channel, a ticket queue, or a weekly review. The person asleep at 3am should only be woken for alerts where delayed response directly accelerates budget burn.
+
+Suppress alerts during planned maintenance windows. An alert that fires during an intentional deployment is not signal — it's confirmation that you deployed.
+
+{{< obs-alert-routing >}}
+
+## What Trustworthy Looks Like
+
+The goal is not zero alerts. A system that never alerts lacks visibility into failures.
+
+The goal is alerts you trust. A small set that fires rarely, means something every time, and tells the person what to look at. That is what makes on-call tenable and alerts worth trusting.
+
+Maintain and protect your trusted alert set. Require that new alerts prove their value before adding them.
+
+{{< insight bookmark >}}
+**How to get started.**
+Audit alerts over 30 days. For each alert, mark it as actionable if it led to a real change or investigation, or as noise if it was only acknowledged and closed. If fewer than 70 percent are actionable — a reasonable starting bar — address it by starting with the noisiest alerts.
+{{< /insight >}}
