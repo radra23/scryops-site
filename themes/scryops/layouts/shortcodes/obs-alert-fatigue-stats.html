@@ -1,0 +1,69 @@
+<style>
+.af-wrap{background:#161616;border:1px solid #2A2A2A;border-top:3px solid #F5A623;padding:1.4rem 1.4rem 1.2rem;font-family:'Commit Mono','Courier New',monospace;}
+.af-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#A8A8A0;letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+.af-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.6rem;}
+@media(max-width:640px){.af-grid{grid-template-columns:repeat(2,1fr);}}
+.af-card{background:#0D0D0D;border:1px solid #2A2A2A;border-top:3px solid;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.35rem;padding:1rem .8rem .85rem;}
+.af-num{font-size:2.3rem;font-weight:700;line-height:1;letter-spacing:-.02em;}
+.af-desc{font-size:.78rem;color:#B0B0A8;line-height:1.5;flex:1;}
+.af-bars-hdr{font-family:'Press Start 2P',monospace;font-size:.6rem;color:#808080;letter-spacing:.08em;margin-bottom:.5rem;}
+.af-div{height:1px;background:#2A2A2A;margin-bottom:1rem;}
+.af-row{display:grid;grid-template-columns:190px 1fr;align-items:center;gap:.8rem;margin-bottom:.7rem;}
+@media(max-width:640px){.af-row{grid-template-columns:110px 1fr;}}
+.af-lbl{font-size:.8rem;color:#A8A8A0;text-align:right;line-height:1.35;}
+@media(max-width:640px){.af-lbl{font-size:.68rem;}}
+.af-track{background:#111;border:1px solid #2A2A2A;height:30px;position:relative;overflow:hidden;}
+.af-bar{height:100%;display:flex;align-items:center;justify-content:flex-end;}
+.af-bar span{font-size:.8rem;font-weight:700;padding-right:.5rem;}
+.af-axis{display:flex;justify-content:space-between;margin-left:calc(190px + .8rem);font-size:.72rem;color:#888880;padding-top:.2rem;}
+@media(max-width:640px){.af-axis{margin-left:calc(110px + .8rem);font-size:.64rem;}}
+.af-src{margin-top:1.1rem;font-family:'Press Start 2P',monospace;font-size:.55rem;line-height:1.7;color:#808080;letter-spacing:.03em;}
+figure.af-fig{margin:2.5rem 0 2rem;}
+figure.af-fig figcaption{font-size:.7rem;color:#A8A8A0;font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+</style>
+
+<figure class="af-fig"
+  aria-label="Alert fatigue by the numbers. A typical enterprise sees roughly 2,000 alerts per week, of which only about 3 percent warrant immediate action. 67 percent of engineers admit ignoring or dismissing alerts without investigating. 44 percent of organizations had an outage caused by a suppressed or ignored alert. Actionable-alert rate: most teams sit below 30 percent today, a healthy range is 30 to 50 percent, and the bar this guide sets for trustworthy alerting is 70 percent or higher.">
+  <div class="af-wrap">
+    <div class="af-hdr">ALERT FATIGUE &nbsp;&middot;&nbsp; BY THE NUMBERS &nbsp;&middot;&nbsp; INDUSTRY DATA 2024&ndash;2026</div>
+
+    <div class="af-grid">
+      <div class="af-card" style="border-top-color:#5B8DEF;">
+        <div class="af-num" style="color:#5B8DEF;">~2,000</div>
+        <div class="af-desc">alerts per week at a typical enterprise</div>
+      </div>
+      <div class="af-card" style="border-top-color:#FF6060;">
+        <div class="af-num" style="color:#FF6060;">3%</div>
+        <div class="af-desc">of them genuinely need immediate action</div>
+      </div>
+      <div class="af-card" style="border-top-color:#F5A623;">
+        <div class="af-num" style="color:#F5A623;">67%</div>
+        <div class="af-desc">of engineers ignore or dismiss alerts without investigating</div>
+      </div>
+      <div class="af-card" style="border-top-color:#EF6700;">
+        <div class="af-num" style="color:#EF6700;">44%</div>
+        <div class="af-desc">had an outage caused by a suppressed or ignored alert</div>
+      </div>
+    </div>
+
+    <div class="af-bars-hdr">ACTIONABLE-ALERT RATE &mdash; WHERE TEAMS ACTUALLY LAND</div>
+    <div class="af-div"></div>
+
+    <div class="af-row">
+      <div class="af-lbl">Most teams today</div>
+      <div class="af-track"><div class="af-bar" style="width:28%;background:rgba(255,96,96,0.22);border-right:2px solid #FF6060;"><span style="color:#FF6060;">&lt;30%</span></div></div>
+    </div>
+    <div class="af-row">
+      <div class="af-lbl">Healthy range</div>
+      <div class="af-track"><div class="af-bar" style="width:40%;background:rgba(245,166,35,0.20);border-right:2px solid #F5A623;"><span style="color:#F5A623;">30&ndash;50%</span></div></div>
+    </div>
+    <div class="af-row">
+      <div class="af-lbl">Trustworthy &mdash; this guide&rsquo;s bar</div>
+      <div class="af-track"><div class="af-bar" style="width:70%;background:rgba(40,202,65,0.18);border-right:2px solid #28CA41;"><span style="color:#28CA41;">70%+</span></div></div>
+    </div>
+    <div class="af-axis"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
+
+    <div class="af-src">SOURCES: CATCHPOINT SRE REPORT &middot; INCIDENT.IO 2025 &middot; NEUBIRD STATE OF PRODUCTION RELIABILITY 2026<br>FIGURES ARE INDUSTRY-SURVEY MEDIANS &mdash; DIRECTIONAL, NOT ABSOLUTE</div>
+  </div>
+  <figcaption>Fig. &#8212; The gap between alert volume and alert value is the whole problem. When 97% of what fires is ignorable, people learn to ignore all of it &mdash; including the 3% that matters.</figcaption>
+</figure>
