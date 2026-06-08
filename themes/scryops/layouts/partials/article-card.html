@@ -12,7 +12,7 @@
       {{ end }}
       {{ with $page.Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
     </div>
-    <div class="art-title">{{ $page.Title }}</div>
+    <h2 class="art-title">{{ $page.Title }}</h2>
     {{ with $page.Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
   </div>
 </a>
