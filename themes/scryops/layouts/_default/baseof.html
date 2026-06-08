@@ -11,7 +11,8 @@
   </main>
   {{ partial "footer.html" . }}
 
-  <!-- pixel chicken easter egg — wrapped in nav landmark so it's not orphaned outside a region -->
+  {{/* pixel chicken easter egg temporarily disabled for now — restore by deleting this line and the matching close tag below */}}
+  {{/*
   <nav aria-label="Home shortcut">
   <a href="{{ "/" | relURL }}" class="pixel-chicken-link" aria-label="Back to home">
     <div class="chk-alert">!</div>
@@ -132,6 +133,7 @@
     </svg>
   </a>
   </nav>
+  */}}
 
   <script>
     /* ── Terminal collapse (persists via localStorage) ── */
