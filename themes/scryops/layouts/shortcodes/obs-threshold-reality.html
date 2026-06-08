@@ -7,10 +7,9 @@
       <desc id="thr-desc">A service metric over 24 hours follows a diurnal curve: low overnight, a large midday and afternoon peak. A single flat alert threshold is drawn across it. During the normal afternoon peak the metric rises above the line and fires false alarms. At 3am a real incident spikes the metric well above its overnight baseline, but it stays just under the daytime-tuned threshold, so no alert fires and the incident is missed.</desc>
 
       <rect x="0" y="0" width="760" height="376" fill="#161616"/>
-      <rect x="0" y="0" width="760" height="3" fill="#F5A623"/>
 
-      <text x="24" y="30" fill="#F0EEE8" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">STATIC THRESHOLD vs. REALITY</text>
-      <text x="24" y="47" fill="#A8A8A0" font-size="11">// one fixed line, 24 hours of real traffic</text>
+      <text x="82" y="30" fill="#F0EEE8" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">STATIC THRESHOLD vs. REALITY</text>
+      <text x="82" y="47" fill="#A8A8A0" font-size="11">// one fixed line, 24 hours of real traffic</text>
 
       <!-- grid -->
       <line x1="78" y1="239" x2="730" y2="239" stroke="#1A1A1A" stroke-width="1"/>
@@ -24,7 +23,7 @@
       <!-- axes -->
       <line x1="78" y1="56" x2="78" y2="300" stroke="#2A2A2A" stroke-width="1"/>
       <line x1="78" y1="300" x2="730" y2="300" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="20" y="182" fill="#A8A8A0" font-size="9" transform="rotate(-90 20 182)">service latency / error rate</text>
+      <text x="20" y="178" fill="#A8A8A0" font-size="10" transform="rotate(-90 20 178)">service latency / error rate</text>
 
       <!-- false-alarm fill (curve above threshold, midday) -->
       <path d="M382,129.2 L383.6,128.6 387.0,124.9 390.4,121.4 393.8,117.9 397.2,114.5 400.6,111.3 404.0,108.4 407.4,105.6 410.8,103.1 414.2,100.8 417.6,98.9 421.0,97.2 424.4,95.9 427.8,94.8 431.2,94.1 434.6,93.7 438.0,93.5 441.4,93.7 444.8,94.1 448.1,94.7 451.5,95.6 454.9,96.6 458.3,97.9 461.7,99.2 465.1,100.7 468.5,102.2 471.9,103.8 475.3,105.5 478.7,107.2 482.1,108.9 485.5,110.7 488.9,112.4 492.3,114.2 495.7,116.1 499.1,118.0 502.5,119.9 505.9,121.9 509.3,124.1 512.7,126.4 516.1,128.8 517,129.2 Z" fill="#FF6060" fill-opacity="0.15"/>
