@@ -41,7 +41,7 @@ If static thresholds ask “did this number cross a line?”, SLO-based alerting
 
 Burn rate alerts fire when your error budget drains faster than the baseline depletion rate allows. They do not care about 2pm or 3am. They do not care if p99 crossed some random threshold. They ask: at this rate, when do you run out of budget? And they give you a head start.
 
-If you’re burning through your budget 14 times faster than the rate that would exhaust it over the full 30-day window, someone gets paged right away. If it’s 6 times faster — measured over a six-hour window — it’s urgent but not a fire drill. A burn rate below 2× means you have weeks of budget left; that earns a ticket for investigation during business hours, not a 3am page. The response matches how quickly you’re heading for trouble, not just whether a number jumped.
+If you’re burning through your budget 14 times faster than the rate that would exhaust it over the full 30-day window, someone gets paged right away. If it’s 6 times faster — sustained across both a one-hour and a six-hour window — it’s urgent but not a fire drill. A burn rate below 2× means you have roughly two weeks of budget remaining at that rate; that earns a ticket for investigation during business hours, not a 3am page. The response matches how quickly you’re heading for trouble, not just whether a number jumped.
 
 {{< mermaid >}}
 flowchart TD
@@ -55,7 +55,7 @@ flowchart TD
     E -->|"Slow Burn\n<2× rate · weeks of budget left"| F["Ticket / Slack\nInvestigate This Week"]
     F --> G["Schedule Investigation\nDuring Business Hours"]
 
-    E -->|"Moderate Burn\n~6× rate · 6hr window"| H["Team Notification\nBegin Investigation"]
+    E -->|"Moderate Burn\n~6× rate · 1hr+6hr windows"| H["Team Notification\nBegin Investigation"]
     H --> I{"Resolvable by\nOn-Call Team?"}
     I -->|Yes| J[Resolve & Document]
     I -->|No| K["Escalate to\nCross-Functional Team"]
@@ -100,5 +100,5 @@ Maintain and protect your trusted alert set. Require that new alerts prove their
 
 {{< insight bookmark >}}
 **How to get started.**
-Audit alerts over 30 days. For each alert, mark it as actionable if it led to a real change or investigation, or as noise if it was only acknowledged and closed. If fewer than 70 percent are actionable — a reasonable starting bar — address it by starting with the noisiest alerts.
+Audit alerts over 30 days. For each alert, mark it as actionable if it led to a real change or investigation, or as noise if it was only acknowledged and closed. If fewer than 70 percent are actionable — and most noisy alert sets aren't close to that — start with the loudest offenders.
 {{< /insight >}}
