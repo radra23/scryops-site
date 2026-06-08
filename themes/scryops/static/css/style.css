@@ -749,7 +749,7 @@ footer a:hover { text-decoration: underline; }
 
 /* ── Shared diagram wrapper ── */
 figure.diagram {
-  margin: 4rem 0 3.5rem;
+  margin: 2.5rem 0 2rem;
 }
 figure.diagram figcaption {
   font-size: 0.7rem;
@@ -967,7 +967,9 @@ figure.diagram figcaption {
 }
 /* Pixel-art avatars: square badge, no smoothing. Opt-in via pixel="true". */
 .quote-avatar--pixel {
-  border-radius: 6px;
+  width: 64px;
+  height: 64px;
+  border-radius: 7px;
   object-fit: contain;
   background: var(--surface);
   padding: 1px;
