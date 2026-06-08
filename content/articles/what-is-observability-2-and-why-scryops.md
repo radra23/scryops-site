@@ -61,19 +61,19 @@ I picked the name on purpose. Not because I believe in magic. Because I believe 
 
 Software operations has always looked backward. Log files. Post-mortems. Let’s check what the metrics were doing before the outage. Scrying flips that. You look forward. You act on what you see before it arrives.
 
-Scryops means bringing together every signal: telemetry, events, topology, deployment state, history, and predicting what your system will do before users notice. Usually, you start with one service and one recurring incident. Pull the signals together, find the pattern that comes before the problem, and build even a simple rule that catches it early. That first experiment is where the model stops being abstract.
+Scryops means bringing together every signal — telemetry, events, topology, deployment state, history — and using that picture to predict what your system will do before users notice. Usually, you start with one service and one recurring incident. Pull the signals together, find the pattern that comes before the problem, and build even a simple rule that catches it early. That first experiment is where the model stops being abstract.
 
 That’s the goal. Not zero downtime as a lucky streak. Zero downtime as a practice.
 
 ## What this publication covers
 
-I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. There are widely reported examples from large-scale operators: teams at Netflix have run ML pilots for early anomaly prediction, and Shopify’s SREs have described linking deployment, telemetry, and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
+I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. There are widely reported examples from large-scale operators: Netflix engineering has published work on ML-based anomaly detection in their time-series infrastructure, and Shopify’s SREs have described linking deployment, telemetry, and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
 
 Expect articles on designing OTel pipelines for predictive models, what eBPF-based instrumentation unlocks at runtime, where LLMs help with anomaly detection and where they fall short, and the real trade-offs of acting before you have confirmed a fault.
 
 If you’re trying to close the gap between “we have good observability” and “we knew about the problem before users did,” that gap is what this publication is for.
 
-The crystal ball is just a metaphor. Signal correlation is real. Start with one service and one recurring incident.
+The crystal ball is just a metaphor. Signal correlation is real.
 
 {{< insight bookmark >}}
 **Where to start.**
