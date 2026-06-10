@@ -3,14 +3,14 @@ title: "Should I use OTel collector or ship directly from SDKs?"
 date: 2026-03-24
 draft: false
 answer: "Almost always use the collector. It gives you a central place to batch, retry, filter, and route telemetry without touching your application code again."
+excerpt: "Almost always use the collector. It gives you a central place to batch, retry, filter, and route telemetry without touching your application code again."
+readtime: 2
 tags: ["OpenTelemetry", "OTLP"]
 ---
 
-## The short answer
-
 Use the collector. Almost always.
 
-## Why the collector wins
+## The collector removes the app from the telemetry pipeline
 
 The OTel Collector sits between your application and your backend. This gives you:
 
@@ -19,13 +19,13 @@ The OTel Collector sits between your application and your backend. This gives yo
 - **Routing** — send traces to Tempo, metrics to Mimir, logs to Loki — all from one pipeline.
 - **Decoupling** — change your backend without redeploying your applications.
 
-## When direct export makes sense
+## Three cases where direct export is justified
 
 - **Serverless functions** where a sidecar collector adds cold start latency.
 - **Simple single-service setups** where the collector is more infrastructure than the app itself.
 - **Development environments** where you just want to see spans in the console.
 
-## Recommended architecture
+## Two-tier topology: agent per node, gateway per cluster
 
 ```
 App (OTel SDK) → OTel Collector (agent mode, per-node)
@@ -33,4 +33,4 @@ App (OTel SDK) → OTel Collector (agent mode, per-node)
                         → Backend (Tempo, Mimir, Loki, etc.)
 ```
 
-The two-tier collector setup (agent + gateway) gives you the best balance of reliability, flexibility, and operational simplicity.
+The agent handles local buffering and failure isolation; the gateway handles routing, sampling, and auth. You change either layer without touching application code.
