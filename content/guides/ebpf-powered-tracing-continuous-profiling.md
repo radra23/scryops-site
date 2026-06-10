@@ -75,3 +75,5 @@ Look for:
 - Set a reasonable **sampling rate** (19Hz or 49Hz are common defaults).
 - Use **labels** to filter profiles by service, pod, or node.
 - **Storage costs** add up — configure retention policies early.
+
+{{< obs-mascot class="ranger" quip="I tracked the latency across fourteen services and three time zones. It was DNS. It is always DNS." >}}
