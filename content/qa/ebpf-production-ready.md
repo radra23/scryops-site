@@ -8,24 +8,22 @@ readtime: 3
 tags: ["eBPF", "Kubernetes", "Profiling"]
 ---
 
-## The short answer
-
 Yes — with caveats.
 
-## What's production-ready
+## Four tools running at scale today
 
 - **Cilium** for networking and network observability — used by major cloud providers.
 - **Parca / Pyroscope** for continuous profiling — low overhead, proven at scale.
 - **Pixie** for auto-instrumented Kubernetes observability — traces, metrics, and profiles without code changes.
 - **Tetragon** for security observability — runtime enforcement and audit logging.
 
-## The caveats
+## Three things to check before you deploy
 
-### Kernel version matters
+### BTF requires kernel 5.8+ — audit your fleet first
 
 Most eBPF observability tools require Linux kernel 5.8+ for BTF (BPF Type Format) support. Older kernels may work but with reduced functionality and more manual setup.
 
-### Container runtimes
+### Your container runtime needs explicit capability grants
 
 eBPF programs run in the kernel, not in the container. This means:
 
@@ -33,7 +31,7 @@ eBPF programs run in the kernel, not in the container. This means:
 - On managed Kubernetes (EKS, GKE, AKS), check if the node kernel supports BTF.
 - Some security policies (AppArmor, SELinux) may need adjustments.
 
-### Not all use cases are equal
+### Application-level tracing lags behind CPU profiling and networking
 
 - **CPU profiling**: very mature, low overhead.
 - **Network observability**: mature (Cilium is proof).
@@ -41,4 +39,4 @@ eBPF programs run in the kernel, not in the container. This means:
 
 ## Bottom line
 
-If you're on modern Linux with kernel 5.8+, eBPF-based observability tools are ready for production. Start with profiling — it's the lowest-risk, highest-value entry point.
+Start with profiling — it delivers the highest signal with the least kernel-capability exposure.

@@ -9,7 +9,7 @@ tags: ["Logs", "Structured Logging", "Best Practices"]
 
 **Q: I'm using a structured logging framework but my log entries still look like plain text blobs. What's going wrong?**
 
-Three patterns cause this, and they all appear in code that is ostensibly using `ILogger` or Serilog correctly.
+Three patterns cause this. All appear in code that looks correct using `ILogger` or Serilog from the outside.
 
 ---
 
@@ -88,6 +88,6 @@ With structured properties, you can write:
 event_type = "payment.failed" AND order.id = "ord-9f2a" AND order.amount > 500
 ```
 
-The second query is O(log n) on an index. The first is O(n) full-text scan. At any serious log volume, the difference between the two is the difference between a sub-second query and one that times out.
+The second query is O(log n) on an index. The first is O(n) full-text scan. At production log volumes, the difference between the two is the difference between a sub-second query and one that times out.
 
 <!-- TODO: Add Go and Python equivalents for the same anti-patterns -->
