@@ -79,3 +79,5 @@ The crystal ball is just a metaphor. Signal correlation is real.
 **Where to start.**
 Pick one service with a known recurring incident. Pull its telemetry for the 30 minutes before each occurrence — spans, error rates, upstream and downstream latency. Look for the signal that precedes the problem. Build even a simple rule that fires on it early. That first experiment is where the model stops being abstract.
 {{< /insight >}}
+
+{{< obs-mascot class="oracle" quip="I gazed into the orb and beheld it: checkout falls at 14:02. It is 14:01. I have known for six weeks — the signal was right there in the spans, plain as day. I filed the ticket. No one read the ticket. The orb foresaw that too." caption="The Oracle is Observability 2.0 given a body: the outage was always visible in the signals — someone just had to look before it happened." >}}
