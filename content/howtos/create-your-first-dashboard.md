@@ -9,6 +9,8 @@ tags: ["Grafana", "Observability", "How-to", "Prometheus"]
 
 A blank Grafana instance and a working Prometheus scrape target are all you need. By the end of this how-to you will have a service health dashboard with request rate, error rate, and latency panels that respond dynamically to a service selector — plus deployment annotations that add context when things go wrong.
 
+{{< obs-dashboard-mockup >}}
+
 ## Prerequisites
 
 - Grafana 10+ running locally or in your environment
@@ -87,6 +89,7 @@ sum(rate(http_requests_total{job=~"$service", environment="$environment"}[5m]))
 In **Field → Unit**, set to `Percent (0-100)`.
 
 In **Field → Thresholds**, set:
+
 - Base: green
 - 1% → yellow
 - 5% → red
