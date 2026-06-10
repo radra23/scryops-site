@@ -3,6 +3,8 @@ title: "Should I use OTel collector or ship directly from SDKs?"
 date: 2026-03-24
 draft: false
 answer: "Almost always use the collector. It gives you a central place to batch, retry, filter, and route telemetry without touching your application code again."
+excerpt: "Almost always use the collector. It gives you a central place to batch, retry, filter, and route telemetry without touching your application code again."
+readtime: 2
 tags: ["OpenTelemetry", "OTLP"]
 ---
 
