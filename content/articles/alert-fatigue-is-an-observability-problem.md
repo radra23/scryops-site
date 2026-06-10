@@ -71,3 +71,5 @@ Maintain and protect your trusted alert set. Require that new alerts prove their
 **How to get started.**
 Audit alerts over 30 days. For each alert, mark it as actionable if it led to a real change or investigation, or as noise if it was only acknowledged and closed. If fewer than 70 percent are actionable — and most noisy alert sets aren't close to that — start with the loudest offenders.
 {{< /insight >}}
+
+{{< obs-mascot tag="your noisiest alert" quip="BWOCK!! WOLF!! ...ok, the wind. WOLF!! ...the nightly cron. WOLF!! ...a deploy, probably fine. One of these is the real outage, I swear it. You will have to check every single one to find out which. That is my whole gift. I am level 1. I will never stop." caption="The Cucco is every untuned alert given a body: never lying, never useful, impossible to ignore." >}}
