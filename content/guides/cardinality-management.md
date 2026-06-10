@@ -1,99 +1,162 @@
 ---
 title: "Cardinality Management"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "High cardinality is the silent budget killer of metrics systems. How to identify, manage, and prevent cardinality explosions before they take down your Prometheus."
-readtime: 6
-tags: ["Metrics", "Prometheus", "Observability"]
+readtime: 7
+tags: ["Metrics", "Prometheus", "Observability", "Best Practices"]
 ---
 
-Cardinality is the number of unique time series a metric generates. Each unique combination of label values produces a separate series. A `http_requests_total` metric with labels `{method, status, route}` generates one series per distinct (method, status, route) triple observed. With 4 HTTP methods, 10 status codes, and 500 routes that is 20,000 series — before you add a second service, a second environment, or a per-user label.
+Prometheus stores every unique combination of label values as a separate time series. A metric with three labels — each taking ten possible values — produces 1,000 time series. If one of those labels is a user ID, and you have 100,000 users, a single metric creates 100,000 time series. Multiply by the number of metrics, and you have a Prometheus instance that runs out of memory before it runs out of useful data.
 
-That number matters because Prometheus (and equivalent backends) stores, indexes, and evaluates every active series. Cardinality does not just affect storage; it degrades query performance, increases scrape overhead, and can OOM a Prometheus instance entirely at high enough volumes.
+Cardinality is not a Prometheus implementation detail. It is the fundamental constraint that shapes how you design metrics, which labels you choose, and how you defend a working system against the instrumentation choices of twenty developers working independently.
 
-## Cardinality Thresholds
+## What High Cardinality Actually Costs
 
-The thresholds below are practical starting points for a label-value combination count per metric:
+Prometheus keeps its time series index in memory. Each unique label set — called a fingerprint — occupies memory for as long as the series is active, plus two hours after its last sample (the "lookback window"). A cardinality explosion means memory grows until Prometheus either OOMs or degrades to the point where scrapes start timing out.
 
-| Count | Severity | Action |
-|---|---|---|
-| < 100 | Healthy | No action |
-| 100 – 1,000 | Warning | Review label design; is every dimension necessary? |
-| 1,000 – 10,000 | High | Actively remediate; set recording rules to pre-aggregate |
-| > 10,000 | Critical | Block new series; incident-level response |
+The cost compounds. A high-cardinality metric does not just use memory proportional to its series count. It also slows every query that touches it — `rate()`, `sum()`, `histogram_quantile()` — because each evaluation has to iterate more series. A dashboard panel that takes 2 seconds with 10,000 series takes 200 seconds with 1,000,000.
 
-These are calibrated for a mid-sized Prometheus deployment. Very large installations (federated, Thanos, Cortex) can tolerate higher absolute counts, but the growth rate matters more than the absolute value at scale: a metric that doubles its series count week-over-week is a problem regardless of where it starts.
+The ceiling is not abstract. In a real Prometheus deployment, cardinality above ~2,000,000 active series on a single instance starts to cause operational problems. Below that, you have headroom. Above that, you are managing symptoms.
 
-## What Drives High Cardinality
+## Labels That Will Kill You
 
-The most common sources of cardinality explosion, in rough order of frequency:
+The labels most likely to cause cardinality explosions are the ones that encode per-entity identifiers. The pattern is the same in every case: the label seems reasonable at the time, it encodes genuinely useful information, and it scales with the entity count rather than with a small, bounded set of values.
 
-**Unbounded label values.** Any label whose value set is not finite and small is a cardinality risk. Classic offenders: user IDs, email addresses, request URLs with path parameters (e.g. `/users/12345/orders` as a raw path label), trace IDs, session tokens, IP addresses.
+**User IDs, session tokens, and device IDs** are the canonical examples. They are always unbounded — every new user, session, or device creates a new series. They should never appear as metric labels. If you need per-user visibility, use logs or traces, which are designed for high-cardinality attributes.
 
+**Raw request IDs and correlation IDs** have the same problem. A correlation ID that traces one request through ten services creates ten new time series for every request.
+
+**Free-form error messages and exception types** can explode in ways that are harder to predict. A `message` label that contains `"failed to connect to 10.0.1.42:5432"` creates a different series for every IP address that ever appears in a connection error. Normalise to bounded error codes before using them as labels.
+
+**Dynamic path segments** in URL labels: `/api/users/usr-9f2a8b` as a label value creates a series per user per endpoint. The OTel AspNetCore instrumentation handles this correctly with route templates (`/api/users/{id}`), but custom instrumentation often captures the raw path.
+
+## The Bounded Label Pattern
+
+The safe design principle is that every label value must come from a bounded set — a set small enough that you could enumerate all its members today and be confident the set will not grow unboundedly.
+
+For labels where the real-world value is unbounded, enforce a bounded set explicitly with an allowlist and a fallback:
+
+```csharp
+public static class MetricLabels
+{
+    private static readonly HashSet<string> AllowedTiers =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "free", "starter", "professional", "enterprise"
+        };
+
+    private static readonly HashSet<string> AllowedChannels =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            "web", "mobile", "api", "partner"
+        };
+
+    public static string NormalizeTier(string? tier) =>
+        tier != null && AllowedTiers.Contains(tier) ? tier.ToLowerInvariant() : "unknown";
+
+    public static string NormalizeChannel(string? channel) =>
+        channel != null && AllowedChannels.Contains(channel) ? channel.ToLowerInvariant() : "unknown";
+}
 ```
-# ❌ Unbounded — one series per distinct user
-http_requests_total{method="GET", user_id="usr_a8f3b2"}
 
-# ✅ Bounded — limited set of known tiers
-http_requests_total{method="GET", customer_tier="enterprise"}
+The "unknown" fallback is essential. It ensures that new values — a new tier introduced by product, a new channel from a third-party integration — collapse to a single series rather than creating an unbounded one. You will see a spike in the "unknown" bucket and know to update the allowlist, but Prometheus stays healthy.
+
+Apply this at the call site before recording metrics:
+
+```csharp
+OrdersTotal.Add(1,
+    new KeyValuePair<string, object?>("tier", MetricLabels.NormalizeTier(request.CustomerTier)),
+    new KeyValuePair<string, object?>("channel", MetricLabels.NormalizeChannel(request.Channel)),
+    new KeyValuePair<string, object?>("status", status));
 ```
 
-**High-arity enumerations.** Labels with many possible values but a finite set — e.g. a label for each microservice in a large fleet, or each country code — can push cardinality into the thousands for a single metric.
+## Auditing Cardinality in PromQL
 
-**Label combinations that multiply.** Each additional label multiplies total cardinality. A metric with three labels each taking 10 values generates up to 1,000 series. Adding a fourth label with 10 values takes it to 10,000.
+Prometheus exposes its own cardinality data through the `/api/v1/label` endpoint and via `prometheus_tsdb_*` metrics. For day-to-day auditing in PromQL:
 
-## Cardinality Tracking
-
-To detect cardinality issues before they become incidents, track unique label combinations per metric over time:
-
-```
-# Prometheus: count active time series per metric name
-count by (__name__) ({__name__=~".+"})
-
-# Count series for a specific metric
-count(http_requests_total)
-
-# Series count over time (use recording rule for efficiency)
-record: job:http_requests_total:series_count
-expr: count(http_requests_total) by (job)
+**Total active series count:**
+```promql
+prometheus_tsdb_head_series
 ```
 
-Alert on growth rate, not just absolute count. A metric that grew from 500 to 5,000 series in a week warrants investigation even if 5,000 is within your current headroom.
+**Top 10 metrics by series count:**
+```promql
+topk(10,
+  count by (__name__) ({__name__=~".+"})
+)
+```
+
+**Series count for a specific metric broken down by its labels:**
+```promql
+count by (tier, channel, status) (orders_total)
+```
+
+Run the middle query on a cadence — weekly, or after each deployment that adds new instrumentation. It will surface cardinality problems before they become operational incidents. A metric that jumps from 50 series to 5,000 between two audits is a signal that a new label value escaped its bounds.
+
+**Series added by a specific job:**
+```promql
+count by (job) ({__name__=~".+"})
+```
+
+This tells you which scraped service is contributing the most series. Useful when diagnosing an OOM or slow scrape.
+
+## Design Rules That Prevent Cardinality Problems
+
+Rather than reacting to cardinality explosions after they occur, enforce these rules in code review:
+
+Label values must be enumerable at design time. If you cannot write down all possible values of a label, it should not be a label.
+
+Labels encode grouping dimensions, not entity identities. `customer_tier` is a label (four values). `customer_id` is not a label (100,000+ values). The test: would you filter or group by this label in a dashboard or alert? If yes, it is a label. If you would only ever use it to look up one specific entity, it belongs in logs or traces.
+
+Add labels conservatively. Adding a label to an existing metric is a breaking change — it changes the fingerprint, invalidates existing recording rules and alerts, and multiplies the series count. Labels are easier to add initially than to remove later; removing a label is a breaking change for any consumer that depends on it.
+
+{{< insight >}}
+**The cardinality budget.** A useful heuristic: budget for a maximum total of 1,000,000 active series across your Prometheus instance. Divide that budget by the number of metrics you plan to instrument. A 100-metric system has ~10,000 series per metric on average. If any one metric needs more, others need less — or you need to redesign the high-cardinality one.
+{{< /insight >}}
+
+## When You Already Have a Cardinality Problem
+
+If cardinality has already grown out of control, the tools are limited:
+
+**Drop high-cardinality labels in the Collector** using OTTL before the data reaches Prometheus. This is the right place to normalise or remove labels — it preserves the raw data in traces while keeping metrics clean:
 
 ```yaml
-# Alert on rapid series growth
-- alert: HighCardinalityMetric
-  expr: count(http_requests_total) > 1000
-  for: 5m
-  labels:
-    severity: warning
-  annotations:
-    summary: "http_requests_total has {{ $value }} active series"
+processors:
+  transform/drop_user_label:
+    metric_statements:
+      - context: datapoint
+        statements:
+          - delete_key(attributes, "user_id")
 ```
 
-## Cardinality Impact Assessment
+**Use metric relabeling in Prometheus** to drop or rewrite label values before storage:
 
-Before adding a new label or metric, estimate its cardinality impact:
+```yaml
+scrape_configs:
+  - job_name: myservice
+    metric_relabel_configs:
+      # Drop the raw path label, keep the route template
+      - source_labels: [http_route]
+        target_label: http_route
+        regex: '/api/users/[^/]+'
+        replacement: '/api/users/{id}'
+```
 
-**Storage**: Prometheus stores approximately 1–2 bytes per sample per second per series. At a 15s scrape interval, 10,000 series adds roughly 50–100 MB/day before compression. For a 30-day retention window, that is 1.5–3 GB from a single high-cardinality metric.
+**Delete the problematic series** via the Prometheus admin API if they are already stored:
 
-**Query performance**: Queries that aggregate across many series are proportionally slower. A `sum(rate(http_requests_total[5m]))` over 50,000 series will be measurably slower than the same query over 500 series. Record frequently-queried high-cardinality expressions as recording rules to pre-aggregate at scrape time.
+```bash
+curl -X POST \
+  'http://prometheus:9090/api/v1/admin/tsdb/delete_series' \
+  --data 'match[]=bad_metric{user_id=~".+"}'
+```
 
-**Scrape overhead**: The Prometheus scraper parses every active series on every scrape. Very high cardinality metrics increase the duration and memory cost of the scrape target endpoint.
+The admin API requires `--web.enable-admin-api` at startup.
 
-## Remediation
+---
 
-When a metric's cardinality is already too high:
+- [How to Configure Prometheus for Your Service](/howtos/configure-prometheus/) — foundational Prometheus setup before applying these patterns
+- [How to Detect Metric Anomalies with Prometheus and Grafana](/howtos/detect-anomalies-with-prometheus/) — anomaly detection becomes much more tractable with controlled cardinality
 
-1. **Drop high-cardinality labels via relabeling** — use `metric_relabel_configs` to drop or replace the offending label at the Collector or scrape level.
-2. **Aggregate at the source** — replace the raw metric with a pre-aggregated one that drops the high-cardinality dimension.
-3. **Use recording rules** — keep the raw high-cardinality metric for debugging but satisfy dashboards and alerts from a recorded, aggregated series.
-4. **Move unbounded dimensions to spans** — trace attributes can carry user IDs, request URLs, and other high-cardinality context that has no place in metrics.
-
-<!-- TODO: Add Prometheus metric_relabel_configs examples for dropping labels -->
-<!-- TODO: Cover cardinality limits in managed platforms (Datadog custom metrics, Grafana Cloud series limits) -->
-<!-- TODO: Cover OTel Collector cardinality-limiting transform processor patterns -->
-
-- [Metrics Validation](/guides/metrics-validation/) — full validation checklist for metric quality
-- [OTel Metrics Instrumentation](/guides/otel-metrics-instrumentation/) — choosing the right instrument type
-- [OTel Semantic Conventions](/guides/otel-semantic-conventions/) — standard attribute names that help keep label sets bounded
+<!-- TODO: Add section on Prometheus remote write and how cardinality costs scale with storage backends -->
+<!-- TODO: Add section on adaptive metrics in Grafana Cloud -->
