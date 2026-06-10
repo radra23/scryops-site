@@ -1,0 +1,53 @@
+<figure class="diagram">
+  <div class="diag-card" style="padding:1.2rem 1rem;">
+    <svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg"
+         role="img" aria-labelledby="fwd-title fwd-desc"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="fwd-title">Looking back vs looking forward: the temporal shift in observability</title>
+      <desc id="fwd-desc">Two-panel diagram separated by an amber NOW line. Left panel — Observability 1.0 looking backward: alert fires, investigate logs and dashboards, post-mortem. Labelled "what happened?" Right panel — Observability 2.0 looking forward: signals correlate across services, pattern recognised early, act before users notice. Labelled "what's coming?"</desc>
+
+      <rect width="760" height="200" fill="#161616"/>
+
+      <!-- Left panel: past / reactive -->
+      <rect x="8" y="8" width="340" height="184" fill="#111111" rx="1"/>
+      <rect x="8" y="8" width="340" height="2" fill="#3A3A3A"/>
+      <text x="178" y="26" fill="#C8C6C0" font-size="10" text-anchor="middle"
+            font-family="'Press Start 2P',monospace" letter-spacing="0.06em">OBS 1.0 — LOOKING BACK</text>
+
+      <rect x="44" y="38" width="268" height="26" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="178" y="55" fill="#C8C6C0" font-size="11" text-anchor="middle">alert fires → on-call paged</text>
+
+      <rect x="44" y="74" width="268" height="26" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="178" y="91" fill="#C8C6C0" font-size="11" text-anchor="middle">investigate logs &amp; dashboards</text>
+
+      <rect x="44" y="110" width="268" height="26" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="178" y="127" fill="#C8C6C0" font-size="11" text-anchor="middle">post-mortem — damage done</text>
+
+      <text x="178" y="166" fill="#C8C6C0" font-size="12" text-anchor="middle" font-style="italic">"what happened?"</text>
+
+      <!-- NOW divider -->
+      <line x1="380" y1="0" x2="380" y2="200" stroke="#F5A623" stroke-width="2.5" opacity="0.85"/>
+      <rect x="361" y="90" width="38" height="18" fill="#161616"/>
+      <text x="380" y="104" fill="#F5A623" font-size="10" text-anchor="middle"
+            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">NOW</text>
+
+      <!-- Right panel: future / predictive -->
+      <rect x="412" y="8" width="340" height="184" fill="#111111" rx="1"/>
+      <rect x="412" y="8" width="340" height="2" fill="#5B8DEF" opacity="0.7"/>
+      <text x="582" y="26" fill="#5B8DEF" font-size="10" text-anchor="middle"
+            font-family="'Press Start 2P',monospace" letter-spacing="0.06em">OBS 2.0 — LOOKING FORWARD</text>
+
+      <rect x="448" y="38" width="268" height="26" fill="#0D0D0D" stroke="#3A6FAF" stroke-width="1"/>
+      <text x="582" y="55" fill="#5B8DEF" font-size="11" text-anchor="middle">signals correlate across services</text>
+
+      <rect x="448" y="74" width="268" height="26" fill="#0D0D0D" stroke="#3A6FAF" stroke-width="1"/>
+      <text x="582" y="91" fill="#5B8DEF" font-size="11" text-anchor="middle">pattern recognised early</text>
+
+      <rect x="448" y="110" width="268" height="26" fill="#0D0D0D" stroke="#1C7A2E" stroke-width="1"/>
+      <text x="582" y="127" fill="#28CA41" font-size="11" text-anchor="middle">act before users notice</text>
+
+      <text x="582" y="166" fill="#5B8DEF" font-size="12" text-anchor="middle" font-style="italic">"what's coming?"</text>
+    </svg>
+  </div>
+  <figcaption>Fig. — Traditional ops lives left of the line: reacting after the fact. Scryops lives right of it: acting on what it sees coming.</figcaption>
+</figure>
