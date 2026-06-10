@@ -3,6 +3,8 @@ title: "What's the real difference between profiling and tracing?"
 date: 2026-03-23
 draft: false
 answer: "Tracing tells you which path a request took and how long each hop took. Profiling tells you what your CPU was actually doing during those hops. They're complementary — use both."
+excerpt: "Tracing tells you which path a request took and how long each hop took. Profiling tells you what your CPU was actually doing during those hops. They're complementary — use both."
+readtime: 2
 tags: ["Profiling", "Tracing"]
 ---
 
