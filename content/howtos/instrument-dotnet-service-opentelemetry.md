@@ -248,7 +248,156 @@ service:
 
 Send a request to your service and check the Collector output for spans with your `service.name`, `deployment.environment`, and custom attributes.
 
+## Background Services and Workers
+
+`BackgroundService` implementations run outside the HTTP pipeline — there is no incoming request to seed `Activity.Current`. Each iteration of the worker loop should create its own root span:
+
+```csharp
+public class OrderProcessingWorker : BackgroundService
+{
+    private static readonly ActivitySource ActivitySource = new("Commerce.OrderWorker");
+    private readonly ILogger<OrderProcessingWorker> _logger;
+    private readonly IOrderRepository _orders;
+
+    public OrderProcessingWorker(ILogger<OrderProcessingWorker> logger, IOrderRepository orders)
+    {
+        _logger = logger;
+        _orders = orders;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            using var activity = ActivitySource.StartActivity("worker.process_pending_orders");
+            try
+            {
+                var pending = await _orders.GetPendingAsync();
+                activity?.SetTag("orders.pending_count", pending.Count);
+
+                foreach (var order in pending)
+                {
+                    using var orderActivity = ActivitySource.StartActivity("worker.process_single_order");
+                    orderActivity?.SetTag("order.id", order.Id);
+                    orderActivity?.SetTag("order.tier", order.CustomerTier);
+                    await _orders.ProcessAsync(order);
+                }
+
+                activity?.SetStatus(ActivityStatusCode.Ok);
+            }
+            catch (Exception ex)
+            {
+                activity?.RecordException(ex);
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                _logger.LogError(ex, "Worker cycle failed");
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
+    }
+}
+```
+
+Register the worker's `ActivitySource` in the tracing setup alongside your other sources:
+
+```csharp
+.WithTracing(tracing => tracing
+    // ... existing config ...
+    .AddSource("Commerce.OrderWorker"))
+```
+
+### Context in fire-and-forget tasks
+
+When you dispatch `Task.Run` inside an existing traced context, `Activity.Current` will be `null` on the thread-pool thread unless you capture it before dispatching:
+
+```csharp
+public async Task<IActionResult> CreateOrderAsync(CreateOrderRequest request)
+{
+    var order = await _orders.CreateAsync(request);
+
+    // Capture BEFORE Task.Run — Activity.Current is null inside the lambda
+    var parentContext = Activity.Current?.Context ?? default;
+
+    _ = Task.Run(async () =>
+    {
+        using var activity = ActivitySource.StartActivity(
+            "notifications.send_confirmation",
+            ActivityKind.Internal,
+            parentContext);
+
+        activity?.SetTag("order.id", order.Id);
+        await _notifications.SendConfirmationAsync(order);
+    });
+
+    return Ok(order);
+}
+```
+
+Without `parentContext`, the notification span has no parent and appears as a disconnected root trace — you cannot find it from the originating HTTP request.
+
+## Message Queue Instrumentation
+
+HTTP instrumentation propagates trace context automatically via the `traceparent` header. Message queues do not — you must inject context into message attributes on the producer side and extract it on the consumer side.
+
+**Producer** — inject before publishing:
+
+```csharp
+public async Task PublishOrderCreatedAsync(Order order)
+{
+    using var activity = ActivitySource.StartActivity("orders.publish", ActivityKind.Producer);
+    activity?.SetTag("order.id", order.Id);
+    activity?.SetTag("messaging.system", "rabbitmq");
+    activity?.SetTag("messaging.destination", "order-events");
+
+    var message = new OrderCreatedMessage { OrderId = order.Id };
+    message.Headers = new Dictionary<string, string>();
+
+    // Inject current trace context into message headers
+    Propagators.DefaultTextMapPropagator.Inject(
+        new PropagationContext(Activity.Current?.Context ?? default, Baggage.Current),
+        message.Headers,
+        (headers, key, value) => headers[key] = value);
+
+    await _bus.PublishAsync("order-events", message);
+}
+```
+
+**Consumer** — extract before processing:
+
+```csharp
+public async Task HandleOrderCreatedAsync(OrderCreatedMessage message)
+{
+    // Extract the propagated trace context from message headers
+    var propagationContext = Propagators.DefaultTextMapPropagator.Extract(
+        default,
+        message.Headers,
+        (headers, key) =>
+            headers.TryGetValue(key, out var value)
+                ? new[] { value }
+                : Array.Empty<string>());
+
+    using var activity = ActivitySource.StartActivity(
+        "orders.handle_created",
+        ActivityKind.Consumer,
+        propagationContext.ActivityContext);
+
+    activity?.SetTag("order.id", message.OrderId);
+    activity?.SetTag("messaging.system", "rabbitmq");
+    activity?.SetTag("messaging.destination", "order-events");
+
+    await _orders.HandleCreatedAsync(message.OrderId);
+}
+```
+
+`ActivityKind.Producer` and `ActivityKind.Consumer` follow the OpenTelemetry messaging semantic conventions. Trace backends use these kinds to link publisher and subscriber spans across the queue boundary.
+
+`Propagators.DefaultTextMapPropagator` uses W3C `traceparent` by default — the same format propagated in HTTP headers — so no additional configuration is required on either side. The consumer span appears as a child of the producer span in the same trace.
+
+---
+
+- [OTel Context Propagation](/guides/otel-context-propagation/) — W3C traceparent, B3, and where propagation breaks across async boundaries
+- [How to Configure Prometheus for Your Service](/howtos/configure-prometheus/) — adding the metrics pipeline to the setup above
+
 <!-- TODO: Add section on the .NET zero-code instrumentation agent (for legacy services you cannot modify) -->
 <!-- TODO: Add section on ASP.NET Core Minimal API vs Controller instrumentation differences -->
-<!-- TODO: Add section on background services and Worker instrumentation -->
 <!-- TODO: Add section on connecting trace context to Serilog structured logs (if not using ILogger bridge) -->
