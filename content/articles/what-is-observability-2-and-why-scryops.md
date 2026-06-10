@@ -25,7 +25,7 @@ The model those tools push always looks backward. A metric crosses a line, an al
 
 {{< obs-reactive-loop >}}
 
-Fast forward to 2026. Hundreds of microservices, millions of spans every second, spread across clouds. The old reactive model can’t keep up. It’s slow. It wastes time and attention. Picture a memory leak quietly pushing one service’s latency higher, hour after hour. No alert fires until the threshold finally snaps. By then, the API is timing out and customers are already feeling it. Engineers scramble through dashboards, always chasing, never catching up. By the time you find the real cause, the damage is done. That’s the price of staying reactive.
+Fast forward to 2026. Hundreds of microservices, millions of spans every second, spread across clouds. The old reactive model can’t keep up. It’s slow. It wastes time and attention. A memory leak pushes one service’s latency higher, hour by hour. No alert fires until the threshold finally snaps. By then, the API is timing out and customers are already feeling it. Engineers scramble through dashboards, always chasing, never catching up. By the time you find the real cause, the damage is done. That’s the price of staying reactive.
 
 {{< obs-memory-leak >}}
 
@@ -67,7 +67,7 @@ That’s the goal. Not zero downtime as a lucky streak. Zero downtime as a pract
 
 ## What this publication covers
 
-I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. There are widely reported examples from large-scale operators: Netflix engineering has published work on ML-based anomaly detection in their time-series infrastructure, and Shopify’s SREs have described linking deployment, telemetry, and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
+I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. Teams at Netflix and Shopify have published engineering work on this: ML-based anomaly detection in time-series infrastructure, linking deployment state and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
 
 Expect articles on designing OTel pipelines for predictive models, what eBPF-based instrumentation unlocks at runtime, where LLMs help with anomaly detection and where they fall short, and the real trade-offs of acting before you have confirmed a fault.
 
