@@ -61,7 +61,7 @@ I picked the name on purpose. Not because I believe in magic. Because I believe 
 
 Software operations has always looked backward. Log files. Post-mortems. Let’s check what the metrics were doing before the outage. Scrying flips that. You look forward. You act on what you see before it arrives.
 
-Scryops means bringing together every signal — telemetry, events, topology, deployment state, history — and using that picture to predict what your system will do before users notice. Usually, you start with one service and one recurring incident. Pull the signals together, find the pattern that comes before the problem, and build even a simple rule that catches it early. That first experiment is where the model stops being abstract.
+Scryops means bringing together every signal — telemetry, events, topology, deployment state, history — and using that picture to predict what your system will do before users notice.
 
 That’s the goal. Not zero downtime as a lucky streak. Zero downtime as a practice.
 
