@@ -61,13 +61,73 @@
 </div>
 
 <!-- Subscribe -->
+{{ with .Site.Params.brevo_form_url }}
 <section class="subscribe-section">
   <div class="subscribe-label">Stay in the loop</div>
   <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
-  <form class="subscribe-form" action="#" method="post">
-    <input class="subscribe-input" type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
-    <button class="subscribe-btn" type="submit">Subscribe</button>
+  <form class="subscribe-form" id="subscribe-form" novalidate>
+    <input type="hidden" name="email_address_check" value="">
+    <input type="hidden" name="locale" value="en">
+    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
+    <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
+  <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
 </section>
+
+<script>
+(function () {
+  var FORM_URL = {{ . | jsonify }};
+  var form  = document.getElementById('subscribe-form');
+  var input = document.getElementById('subscribe-email');
+  var btn   = document.getElementById('subscribe-btn');
+  var msg   = document.getElementById('subscribe-msg');
+
+  function setState(state, text) {
+    msg.textContent = text;
+    msg.hidden = false;
+    msg.className = 'subscribe-msg subscribe-msg--' + state;
+    if (state === 'loading') {
+      btn.disabled = true;
+      btn.textContent = 'Subscribing…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+    }
+    if (state === 'success') {
+      form.hidden = true;
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = input.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setState('error', 'Please enter a valid email address.');
+      input.focus();
+      return;
+    }
+    setState('loading', '');
+    var params = new URLSearchParams();
+    params.append('EMAIL', email);
+    params.append('email_address_check', '');
+    params.append('locale', 'en');
+    // no-cors: sibforms.com doesn't return CORS headers we can read,
+    // so we post fire-and-forget and show success optimistically.
+    fetch(FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+    .then(function () {
+      setState('success', "You're in. New pieces land in your inbox as they ship.");
+    })
+    .catch(function () {
+      setState('error', 'Something went wrong. Check your connection and try again.');
+    });
+  });
+}());
+</script>
+{{ end }}
 
 {{ end }}
