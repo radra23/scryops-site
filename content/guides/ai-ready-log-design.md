@@ -9,12 +9,25 @@ tags: ["Logs", "Structured Logging", "AI", "Observability"]
 
 <!-- TODO: Draft this guide -->
 <!--
-Source material: "AI-Friendly Logging Examples: Intelligence in Action" — provides the
-conceptual direction (rich context, business correlation, ML feature vectors) but all
-C# code examples are fictional (invented utility methods, not OTel .NET SDK patterns).
-Do NOT use the code from this source. Source code must come from OTel .NET SDK patterns
-consistent with existing guides (Meter.CreateCounter<T>(), ActivitySource.StartActivity(),
-ILogger with structured templates).
+Sources reviewed and rejected (same course, same defects):
+- "AI-Friendly Logging Examples: Intelligence in Action"
+- "AI-Friendly Logging Best Practices: Teaching Machines to Read Your Story"
+- "Structured Formatting: The Architecture of Intelligence"
+
+All three provide conceptual direction (rich context, business correlation, ML feature
+vectors) but their C# code is almost entirely fictional — invented utility methods that
+are not OTel .NET SDK patterns. Specific banned patterns found across all three:
+CalculateChurnRisk(), PredictRetentionImpact(), AssessBusinessSignificance(),
+GetCompetitorActivityAsync(), AIOptimizedStructuredSink(), AIOptimizedSink(),
+PatternDetectionEnricher, AnomalyDetectionEnricher, GetCompetitiveBenchmark(),
+CalculateMarketShareImpact(). All three also contain marketing copy (Slack channel
+invites, workshop schedules) that must be stripped. The field naming constants
+(user.id, business.order.id) in the second source diverge from OTel semantic
+conventions — use the OTel spec directly instead.
+
+Source code must come from OTel .NET SDK patterns consistent with existing guides
+(Meter.CreateCounter<T>(), ActivitySource.StartActivity(), ILogger with structured
+templates).
 
 Sections to cover:
 1. What makes a log AI-ready vs human-readable — the difference between a text search
