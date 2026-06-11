@@ -156,27 +156,25 @@ flowchart TD
     retype["Change field type"]
     patch["Patch bump · 1.0.x<br/>BackwardCompatible"]
     fwd["Minor bump · 1.x.0<br/>ForwardCompatible"]
-    minor_b["Minor bump · 1.x.0<br/>Breaking — dual-emit"]
     major["Major bump · x.0.0<br/>Breaking — dual-emit"]
     change --> type
     type --> add_opt --> patch
     type --> remove --> fwd
-    type --> add_req --> minor_b
+    type --> add_req --> major
     type --> rename --> major
     type --> retype --> major
     style patch fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
     style fwd fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
-    style minor_b fill:#2A1A0A,stroke:#D4820A,color:#F5A623
     style major fill:#2A0A0A,stroke:#CC4444,color:#FF6060
 {{< /mermaid >}}
 
 | Change type | Version bump | Compatibility |
 |-------------|-------------|---------------|
 | Add optional field | Patch (1.0.x) | BackwardCompatible |
-| Add required field | Minor (1.x.0) | Breaking (until consumers updated) |
+| Add required field | Major (x.0.0) | Breaking |
 | Rename a field | Major (x.0.0) | Breaking |
 | Change a field type | Major (x.0.0) | Breaking |
-| Remove a field | Minor (1.x.0) | ForwardCompatible |
+| Remove a field | Minor (1.x.0) | ForwardCompatible for readers that don't use the field; Breaking for those that do |
 
 For breaking changes, run both schema versions in parallel during the migration window. This means your event class emits both the old and new field name simultaneously:
 

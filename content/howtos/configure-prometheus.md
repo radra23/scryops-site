@@ -3,14 +3,12 @@ title: "How to Configure Prometheus for Your Service"
 date: 2026-06-07
 draft: false
 excerpt: "From zero to a working Prometheus setup — scraping your .NET service, writing your first PromQL queries, and setting up recording rules for expensive calculations."
-readtime: 8
+readtime: 10
 tags: ["Prometheus", "Metrics", "How-to", "OpenTelemetry"]
 ---
 
 > "A metric that nobody queries is just noise with a retention policy."
 > — Anonymous
-
-This how-to takes you from a blank `prometheus.yml` to a Prometheus instance scraping your .NET service, collecting business-aware metrics, and serving PromQL queries. It assumes Prometheus is running and you have a .NET service you control.
 
 {{< mermaid >}}
 flowchart LR

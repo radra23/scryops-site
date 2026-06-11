@@ -96,7 +96,7 @@ flowchart LR
 
 If you're instrumenting a new service, use the OTel logging SDK from the start and emit JSON with trace context attached. That's the baseline, and it's not much extra work when you're building from scratch.
 
-If you're retrofitting structured logging onto existing services, the highest-leverage move is adding `trace_id` and `event_type` to your existing log lines before reworking the entire schema. Correlation comes first. Schema completeness can follow iteratively, service by service.
+If you're retrofitting structured logging onto existing services, the most impactful first step is adding `trace_id` and `event_type` to your existing log lines before reworking the entire schema. Correlation comes first. Schema completeness can follow iteratively, service by service.
 
 And remember: consistency across services matters more than completeness within a single service. A shared logging schema that five teams follow is more valuable than one team's perfectly detailed schema that nobody else matches.
 
