@@ -25,13 +25,7 @@ A static threshold assumes anything above X is wrong. In real systems, that is a
 
 It’s a feedback loop. The noisier the alerts, the more you ignore them. The more you ignore, the more real issues slip by. So you add more alerts to catch what you missed, and the noise just gets louder.
 
-{{< mermaid >}}
-graph LR
-    A[High Alert Volume] --> B[Desensitization]
-    B --> C[Missed Issues]
-    C --> D[More Alerts Added]
-    D --> A
-{{< /mermaid >}}
+{{< obs-fatigue-loop >}}
 
 To fix alert fatigue, you need to rethink what you measure—not just tweak the numbers.
 
@@ -43,32 +37,7 @@ Burn rate alerts fire when your error budget drains faster than the baseline dep
 
 If you’re burning through your budget 14 times faster than the rate that would exhaust it over the full 30-day window, someone gets paged right away. If it’s 6 times faster — sustained across both a one-hour and a six-hour window — it’s urgent but not a fire drill. A burn rate below 2× means you have roughly two weeks of budget remaining at that rate; that earns a ticket for investigation during business hours, not a 3am page. The response matches how quickly you’re heading for trouble, not just whether a number jumped.
 
-{{< mermaid >}}
-flowchart TD
-    A([Incident Detected]) --> B{"Is SLO Error\nBudget Burning?"}
-
-    B -->|No| C[Monitor & Track]
-    C --> D([Log for Future Review])
-
-    B -->|Yes| E{"Burn Rate\nAnalysis"}
-
-    E -->|"Slow Burn\n<2× rate · weeks of budget left"| F["Ticket / Slack\nInvestigate This Week"]
-    F --> G["Schedule Investigation\nDuring Business Hours"]
-
-    E -->|"Moderate Burn\n~6× rate · 1hr+6hr windows"| H["Team Notification\nBegin Investigation"]
-    H --> I{"Resolvable by\nOn-Call Team?"}
-    I -->|Yes| J[Resolve & Document]
-    I -->|No| K["Escalate to\nCross-Functional Team"]
-
-    E -->|"Fast Burn\n≥14× rate · 1hr window"| L["Page On-Call\nImmediate Response"]
-    L --> M{"User Experience\nSeverely Impacted?"}
-    M -->|Yes| N["Declare Major Incident\nExecutive Notification"]
-    M -->|No| P["Focused Technical\nResponse"]
-
-    style A fill:#0071C3,stroke:#0071C3,stroke-width:2px,color:#fff
-    style L fill:#EF6700,stroke:#EF6700,stroke-width:2px,color:#fff
-    style N fill:#CD384B,stroke:#CD384B,stroke-width:2px,color:#fff
-{{< /mermaid >}}
+{{< obs-burn-rate-triage >}}
 
 Teams who move past static thresholds use multi-window, multi-burn-rate alerts. These catch the slow burns and creeping trends that old alerts miss.
 
@@ -102,3 +71,5 @@ Maintain and protect your trusted alert set. Require that new alerts prove their
 **How to get started.**
 Audit alerts over 30 days. For each alert, mark it as actionable if it led to a real change or investigation, or as noise if it was only acknowledged and closed. If fewer than 70 percent are actionable — and most noisy alert sets aren't close to that — start with the loudest offenders.
 {{< /insight >}}
+
+{{< obs-mascot tag="your noisiest alert" quip="BWOCK!! WOLF!! ...ok, the wind. WOLF!! ...the nightly cron. WOLF!! ...a deploy, probably fine. One of these is the real outage, I swear it. You will have to check every single one to find out which. That is my whole gift. I am level 1. I will never stop." caption="The Cucco is every untuned alert given a body: never lying, never useful, impossible to ignore." >}}

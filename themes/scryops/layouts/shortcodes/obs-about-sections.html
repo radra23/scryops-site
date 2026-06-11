@@ -1,0 +1,99 @@
+<div class="about-sections">
+
+  <a href="/articles/" class="about-sec-card about-sec-article">
+    <span class="about-sec-tag">Article</span>
+    <div class="about-sec-title">Articles</div>
+    <p class="about-sec-desc">Editorial takes on where the observability ecosystem is heading. Opinionated. Argued from first principles, not vendor whitepapers.</p>
+    <span class="about-sec-cta">Browse &rarr;</span>
+  </a>
+
+  <a href="/guides/" class="about-sec-card about-sec-guide">
+    <span class="about-sec-tag">Guide</span>
+    <div class="about-sec-title">Guides</div>
+    <p class="about-sec-desc">Technical deep-dives: architecture patterns, tool comparisons, and the decisions you'll have to make in production.</p>
+    <span class="about-sec-cta">Browse &rarr;</span>
+  </a>
+
+  <a href="/howtos/" class="about-sec-card about-sec-howto">
+    <span class="about-sec-tag">How-to</span>
+    <div class="about-sec-title">How-tos</div>
+    <p class="about-sec-desc">Step-by-step walkthroughs. The kind of thing you want open in a second window at 2am when a deploy went sideways.</p>
+    <span class="about-sec-cta">Browse &rarr;</span>
+  </a>
+
+  <a href="/qa/" class="about-sec-card about-sec-qa">
+    <span class="about-sec-tag">Q&amp;A</span>
+    <div class="about-sec-title">Q&amp;A</div>
+    <p class="about-sec-desc">Honest answers to the questions engineers actually ask — not the questions vendor marketing wants them to ask.</p>
+    <span class="about-sec-cta">Browse &rarr;</span>
+  </a>
+
+</div>
+
+<style>
+.about-sections {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin: 1.4rem 0 0.4rem;
+}
+.about-sec-card {
+  display: flex;
+  flex-direction: column;
+  background: #161616;
+  border: 1px solid #2A2A2A;
+  padding: 1.2rem 1.2rem 1rem;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.15s, background 0.15s;
+}
+.about-sec-article { border-top: 3px solid #5B8DEF; }
+.about-sec-guide   { border-top: 3px solid #4D9FFF; }
+.about-sec-howto   { border-top: 3px solid #F5A623; }
+.about-sec-qa      { border-top: 3px solid #A89FFF; }
+.about-sec-card:hover { background: rgba(245,166,35,0.03); }
+.about-sec-article:hover { border-color: #5B8DEF; }
+.about-sec-guide:hover   { border-color: #4D9FFF; }
+.about-sec-howto:hover   { border-color: #F5A623; }
+.about-sec-qa:hover      { border-color: #A89FFF; }
+.about-sec-tag {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.7rem;
+  display: block;
+}
+.about-sec-article .about-sec-tag { color: #5B8DEF; }
+.about-sec-guide   .about-sec-tag { color: #4D9FFF; }
+.about-sec-howto   .about-sec-tag { color: #F5A623; }
+.about-sec-qa      .about-sec-tag { color: #A89FFF; }
+.about-sec-title {
+  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #F0EEE8;
+  margin-bottom: 0.5rem;
+}
+.about-sec-desc {
+  font-size: 0.82rem;
+  line-height: 1.65;
+  color: #A8A8A0;
+  flex: 1;
+  margin-bottom: 1rem;
+}
+.about-sec-cta {
+  font-size: 0.75rem;
+  color: #F5A623;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: auto;
+}
+.about-sec-card:hover .about-sec-cta { color: #FFD700; }
+@media (max-width: 700px) {
+  .about-sections { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 420px) {
+  .about-sections { grid-template-columns: 1fr; }
+}
+</style>
