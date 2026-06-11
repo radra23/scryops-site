@@ -616,6 +616,15 @@ nav.topic-list {
   color: var(--muted);
   margin-top: 0.6rem;
 }
+.subscribe-msg {
+  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-size: 0.82rem;
+  margin-top: 0.75rem;
+  line-height: 1.5;
+}
+.subscribe-msg--success { color: var(--amber); }
+.subscribe-msg--error   { color: #e05c5c; }
+.subscribe-msg--loading { color: var(--muted); }
 
 /* ── SKIP TO CONTENT ── */
 .skip-link {
