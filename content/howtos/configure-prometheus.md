@@ -30,11 +30,11 @@ flowchart LR
 
 {{< mermaid >}}
 flowchart LR
-    svc[".NET Service\n/metrics endpoint"]
-    prom["Prometheus\nscrape_configs"]
-    rules["Recording Rules\npre-computed series"]
-    graf["Grafana\npanels + alerts"]
-    am["Alertmanager\nrouting"]
+    svc[".NET Service<br/>/metrics endpoint"]
+    prom["Prometheus<br/>scrape_configs"]
+    rules["Recording Rules<br/>pre-computed series"]
+    graf["Grafana<br/>panels + alerts"]
+    am["Alertmanager<br/>routing"]
 
     svc -->|"15s scrape"| prom
     prom --> rules

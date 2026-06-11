@@ -42,15 +42,15 @@ flowchart LR
 {{< mermaid >}}
 flowchart LR
     subgraph sut["Code Under Test"]
-        svc["PaymentService\nOrderService\nUserLookupService"]
+        svc["PaymentService<br/>OrderService<br/>UserLookupService"]
     end
     subgraph pipe["Serilog Pipeline"]
         enr["Enrichers"]
         flt["Level Filter"]
-        snk["ListSink\n(in-memory)"]
+        snk["ListSink<br/>(in-memory)"]
     end
     subgraph chk["Test Assertions"]
-        prp["Property values\nand types"]
+        prp["Property values<br/>and types"]
         pii["PII absence"]
         lvl["Log levels"]
     end
