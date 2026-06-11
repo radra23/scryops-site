@@ -239,11 +239,11 @@ nav.topic-list {
 .topic-row:hover .topic-name { color: var(--amber); }
 .topic-badge {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.62rem;
   color: var(--muted);
   border: 1px solid var(--border);
-  padding: 0.18rem 0.38rem;
-  line-height: 1.6;
+  padding: 0.22rem 0.42rem;
+  line-height: 1.4;
   background: var(--bg);
   flex-shrink: 0;
   transition: border-color 0.12s, color 0.12s;
@@ -254,6 +254,7 @@ nav.topic-list {
 }
 .topic-all {
   display: block;
+  flex-basis: 100%;
   margin-top: 1rem;
   font-size: 0.75rem;
   color: var(--muted);
@@ -448,16 +449,14 @@ nav.topic-list {
   font-size: 0.75rem;
   color: var(--muted);
   border: 1px solid var(--border);
-  padding: 0.5rem 0.9rem;
+  padding: 0 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
-  display: inline-block;
-  min-height: 36px;
-  line-height: 36px;
-  padding-top: 0;
-  padding-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .tag-pill:hover {
   color: var(--amber);
@@ -507,7 +506,7 @@ nav.topic-list {
 
 .domain-count {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   color: var(--amber-deep);
   letter-spacing: 0.06em;
   margin-top: 0.5rem;
@@ -545,10 +544,12 @@ nav.topic-list {
   color: var(--muted);
   border: 1px solid var(--border);
   background: transparent;
-  padding: 0.3rem 0.8rem;
+  padding: 0 0.9rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
-  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .filter-btn:hover { color: var(--text); border-color: var(--muted); }
 .filter-btn.active { color: var(--amber); border-color: var(--amber-deep); }
@@ -1012,7 +1013,7 @@ figure.diagram figcaption {
 }
 .stat-num  { font-size: 2.4rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
 .stat-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; flex: 1; }
-.stat-src  { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.04em; margin-top: 0.4rem; }
+.stat-src  { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; margin-top: 0.4rem; }
 .mttd-section  { margin-top: 0.4rem; }
 .mttd-header   { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
 .mttd-divider  { height: 1px; background: var(--border); margin-bottom: 1rem; }
@@ -1026,7 +1027,7 @@ figure.diagram figcaption {
 .mttd-badge    { font-size: 0.78rem; font-weight: 700; white-space: nowrap; text-align: right; }
 .mttd-badge small { display: block; font-size: 0.72rem; font-weight: 400; color: var(--muted); }
 .mttd-axis     { display: flex; justify-content: space-between; padding: 0.3rem 0 0; margin-left: calc(160px + 0.8rem); font-size: 0.72rem; color: #888880; }
-.stats-source  { margin-top: 1.2rem; font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.04em; }
+.stats-source  { margin-top: 1.2rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; }
 @media (max-width: 640px) {
   .mttd-row { grid-template-columns: 100px 1fr auto; }
   .mttd-label { font-size: 0.68rem; }
@@ -1139,7 +1140,7 @@ figure.diagram figcaption {
   align-items: center;
   justify-content: center;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   color: var(--amber);
   flex-shrink: 0;
 }
