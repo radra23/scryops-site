@@ -61,7 +61,35 @@ Enterprise certificate management platforms handle the full certificate lifecycl
 
 The open-source ecosystem has solid certificate management tools:
 
-- **cert-manager**: A Kubernetes-native certificate manager that integrates with Prometheus metrics for monitoring
+- **cert-manager**: A Kubernetes-native certificate manager that integrates with Prometheus metrics for monitoring. A minimal `Certificate` resource for Let's Encrypt:
+
+```yaml
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: example-com
+  namespace: default
+spec:
+  secretName: example-com-tls
+  duration: 2160h       # 90 days
+  renewBefore: 360h     # renew 15 days before expiry
+  isCA: false
+  privateKey:
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  usages:
+    - server auth
+    - client auth
+  dnsNames:
+    - example.com
+    - www.example.com
+  issuerRef:
+    name: letsencrypt-prod
+    kind: ClusterIssuer
+```
+
+cert-manager exposes Prometheus metrics at `:9402/metrics` — wire `certificate_expiration_timestamp_seconds` into your alerting stack for the same 30/14/7 day thresholds without any custom scripting.
 - **Certbot**: The reference Let's Encrypt client with extensible hooks for automated monitoring and renewal
 - **CFSSL**: CloudFlare's PKI toolkit providing certificate validation and bundle management capabilities
 
@@ -221,6 +249,25 @@ Even in these cases, daily or hourly checks are usually sufficient.
 
 A certificate manager running daily checks uses roughly 0.03% of the resources that minute-by-minute synthetic monitoring does, and adds renewal automation. That frees up synthetic monitoring capacity for user journey validation — where the real signal lives.
 
+## Implementation Roadmap
+
+Moving from synthetic certificate polling to lifecycle management takes 2–6 months depending on environment complexity:
+
+{{< mermaid >}}
+graph TD
+    A[Assessment] --> B[Tool Selection]
+    B --> C[Implementation]
+    C --> D[Observability Integration]
+    D --> E[Dashboards and Alerts]
+    E --> F[Optimization]
+
+    A -->|1-2 weeks| B
+    B -->|2-4 weeks| C
+    C -->|4-8 weeks| D
+    D -->|1-2 weeks| E
+    E -->|Ongoing| F
+{{< /mermaid >}}
+
 ## Migration Steps
 
 To move from synthetic certificate checking to lifecycle management:
@@ -233,3 +280,28 @@ To move from synthetic certificate checking to lifecycle management:
 6. **Optimization**: Continuously refine your certificate lifecycle management
 
 Start with the certificates that are closest to expiry or have no automation in place. Retire synthetic monitors only after the replacement tooling has been running cleanly for at least one renewal cycle.
+
+## Dashboard Structure
+
+Regardless of your observability backend, a certificate monitoring dashboard typically organizes into four sections:
+
+{{< mermaid >}}
+graph TD
+    subgraph "Certificate Status Overview"
+    A[Status Summary] --> B[Expiration Timeline]
+    end
+
+    subgraph "Certificate Details"
+    C[Critical Certificates Table] --> D[Certificate Type Distribution]
+    end
+
+    subgraph "Trends and Changes"
+    E[Expiration Heatmap] --> F[Certificate Changes]
+    end
+
+    subgraph "Management Metrics"
+    G[Auto-renewal Success Rate] --> H[Certificate Source Distribution]
+    end
+{{< /mermaid >}}
+
+The Status Overview section is the top-level health signal — certificates grouped by status (ok, warning, critical, expired) and sorted by days to expiry. Certificate Details drills into what's expiring and what's issuing it. Trends and Changes surfaces renewal cluster timing (useful for capacity planning) and unexpected certificate changes (a security signal). Management Metrics tracks automation health — an auto-renewal success rate below 100% is itself an alert condition.
