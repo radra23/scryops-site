@@ -1,7 +1,7 @@
 ---
 title: "How to Configure Prometheus for Your Service"
 date: 2026-06-07
-draft: false
+draft: true
 excerpt: "From zero to a working Prometheus setup — scraping your .NET service, writing your first PromQL queries, and setting up recording rules for expensive calculations."
 readtime: 10
 tags: ["Prometheus", "Metrics", "How-to", "OpenTelemetry"]

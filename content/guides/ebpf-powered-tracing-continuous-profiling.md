@@ -1,7 +1,7 @@
 ---
 title: "eBPF-Powered Tracing: A Practical Guide to Continuous Profiling"
 date: 2026-03-22
-draft: false
+draft: true
 excerpt: "From kernel hooks to flame graphs — instrument your infrastructure without touching application code, and why that matters for high-throughput systems."
 readtime: 12
 tags: ["eBPF", "Profiling", "Tracing", "Kubernetes"]

@@ -1,7 +1,7 @@
 ---
 title: "How to Instrument a Python Service with OpenTelemetry"
 date: 2026-05-26
-draft: false
+draft: true
 excerpt: "From zero to traces, metrics, and correlated logs in a Python service — using the stable OTel SDK and a local Collector."
 readtime: 8
 tags: ["OpenTelemetry", "Python", "Tracing", "How-to"]
