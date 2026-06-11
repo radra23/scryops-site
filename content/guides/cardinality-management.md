@@ -9,6 +9,8 @@ tags: ["Metrics", "Prometheus", "Observability", "Best Practices"]
 
 Prometheus stores every unique combination of label values as a separate time series. A metric with three labels — each taking ten possible values — produces 1,000 time series. If one of those labels is a user ID, and you have 100,000 users, a single metric creates 100,000 time series. Multiply by the number of metrics, and you have a Prometheus instance that runs out of memory before it runs out of useful data.
 
+{{< obs-cardinality-explosion >}}
+
 Cardinality is not a Prometheus implementation detail. It is the fundamental constraint that shapes how you design metrics, which labels you choose, and how you defend a working system against the instrumentation choices of twenty developers working independently.
 
 ## What High Cardinality Actually Costs
