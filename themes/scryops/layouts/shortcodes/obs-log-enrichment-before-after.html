@@ -1,0 +1,78 @@
+<figure class="diagram">
+  <div class="diag-card" style="padding:0.9rem;overflow:hidden;">
+    <svg viewBox="0 0 760 278" role="img" aria-labelledby="leb-title leb-desc"
+         style="width:100%;display:block;font-family:'Commit Mono',monospace;">
+      <title id="leb-title">Log event enrichment: before and after</title>
+      <desc id="leb-desc">Two panels: left shows a sparse log event with only four fields (timestamp, level, message, exception) and five empty placeholder rows. Right shows the same event with the same four fields plus five amber-highlighted enriched fields: customer.tier enterprise, customer.segment high, customer.id, experiment.id, and experiment.variant.</desc>
+      <rect width="760" height="278" fill="#161616"/>
+
+      <!-- LEFT PANEL -->
+      <rect x="8" y="10" width="350" height="225" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+      <rect x="8" y="10" width="350" height="3" fill="#CC3333" rx="1"/>
+      <text x="18" y="27" fill="#884444" font-family="'Press Start 2P',monospace" font-size="7" letter-spacing="0.5">WITHOUT ENRICHMENT</text>
+
+      <text x="18" y="50" fill="#5A5A52" font-size="9">{</text>
+      <text x="18" y="63" font-size="9"><tspan fill="#444">  "timestamp":</tspan><tspan fill="#5A5A52"> "2026-06-10T14:32:01Z"</tspan></text>
+      <text x="18" y="76" font-size="9"><tspan fill="#444">  "level":</tspan><tspan fill="#7A3A3A"> "Error"</tspan></text>
+      <text x="18" y="89" font-size="9"><tspan fill="#444">  "message":</tspan><tspan fill="#5A5A52"> "Payment processing failed"</tspan></text>
+      <text x="18" y="102" font-size="9"><tspan fill="#444">  "exception":</tspan><tspan fill="#5A5A52"> "GatewayTimeout"</tspan></text>
+      <text x="18" y="115" fill="#5A5A52" font-size="9">}</text>
+
+      <line x1="18" y1="122" x2="350" y2="122" stroke="#1E1E1E" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <rect x="18" y="127" width="240" height="11" fill="#141414" rx="1"/>
+      <rect x="18" y="142" width="260" height="11" fill="#141414" rx="1"/>
+      <rect x="18" y="157" width="210" height="11" fill="#141414" rx="1"/>
+      <rect x="18" y="172" width="250" height="11" fill="#141414" rx="1"/>
+      <rect x="18" y="187" width="230" height="11" fill="#141414" rx="1"/>
+
+      <line x1="8" y1="201" x2="358" y2="201" stroke="#3A1818" stroke-width="1"/>
+      <rect x="8" y="201" width="350" height="34" fill="#1A0808" rx="0"/>
+      <text x="183" y="215" fill="#884444" font-size="8.5" text-anchor="middle">tells you:</text>
+      <text x="183" y="229" fill="#CC4444" font-size="10" font-weight="bold" text-anchor="middle">IT broke</text>
+
+      <!-- RIGHT PANEL -->
+      <rect x="402" y="10" width="350" height="225" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1" rx="2"/>
+      <rect x="402" y="10" width="350" height="3" fill="#28CA41" rx="1"/>
+      <text x="412" y="27" fill="#1C7A2E" font-family="'Press Start 2P',monospace" font-size="7" letter-spacing="0.5">WITH ENRICHMENT</text>
+
+      <text x="412" y="50" fill="#A8A8A0" font-size="9">{</text>
+      <text x="412" y="63" font-size="9"><tspan fill="#444">  "timestamp":</tspan><tspan fill="#666"> "2026-06-10T14:32:01Z"</tspan></text>
+      <text x="412" y="76" font-size="9"><tspan fill="#444">  "level":</tspan><tspan fill="#884444"> "Error"</tspan></text>
+      <text x="412" y="89" font-size="9"><tspan fill="#444">  "message":</tspan><tspan fill="#888"> "Payment processing failed"</tspan></text>
+      <text x="412" y="102" font-size="9"><tspan fill="#444">  "exception":</tspan><tspan fill="#666"> "GatewayTimeout"</tspan></text>
+      <text x="412" y="115" fill="#A8A8A0" font-size="9">}</text>
+
+      <line x1="412" y1="122" x2="744" y2="122" stroke="#3A2A0A" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <rect x="412" y="127" width="330" height="11" fill="#1E1400" rx="1"/>
+      <rect x="412" y="142" width="330" height="11" fill="#1E1400" rx="1"/>
+      <rect x="412" y="157" width="330" height="11" fill="#1E1400" rx="1"/>
+      <rect x="412" y="172" width="330" height="11" fill="#1E1400" rx="1"/>
+      <rect x="412" y="187" width="330" height="11" fill="#1E1400" rx="1"/>
+
+      <text x="412" y="137" font-size="9"><tspan fill="#806030">  "customer.tier":</tspan><tspan fill="#F5A623"> "enterprise"</tspan></text>
+      <text x="412" y="152" font-size="9"><tspan fill="#806030">  "customer.segment":</tspan><tspan fill="#F5A623"> "high"</tspan></text>
+      <text x="412" y="167" font-size="9"><tspan fill="#806030">  "customer.id":</tspan><tspan fill="#F5A623"> "cus_8f2a9c3d"</tspan></text>
+      <text x="412" y="182" font-size="9"><tspan fill="#806030">  "experiment.id":</tspan><tspan fill="#F5A623"> "checkout-v2"</tspan></text>
+      <text x="412" y="197" font-size="9"><tspan fill="#806030">  "experiment.variant":</tspan><tspan fill="#F5A623"> "streamlined"</tspan></text>
+
+      <line x1="402" y1="201" x2="752" y2="201" stroke="#183A18" stroke-width="1"/>
+      <rect x="402" y="201" width="350" height="34" fill="#0A1808" rx="0"/>
+      <text x="577" y="215" fill="#1C7A2E" font-size="8.5" text-anchor="middle">tells you:</text>
+      <text x="577" y="229" fill="#28CA41" font-size="10" font-weight="bold" text-anchor="middle">WHO it matters to</text>
+
+      <!-- CENTER ARROW -->
+      <defs>
+        <marker id="leb-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#F5A623"/>
+        </marker>
+      </defs>
+      <line x1="362" y1="118" x2="396" y2="118" stroke="#F5A623" stroke-width="2" marker-end="url(#leb-arr)"/>
+      <text x="379" y="111" fill="#F5A623" font-size="7" text-anchor="middle">enrich</text>
+
+      <text x="380" y="261" fill="#5A5A52" font-size="8.5" text-anchor="middle">enricher runs once per request — context flows into every log event automatically</text>
+    </svg>
+  </div>
+  <figcaption>Fig. — The same error event before (left) and after (right) the enricher runs. Enterprise tier, revenue segment, and experiment variant appear automatically on every log line — no call site changes required.</figcaption>
+</figure>
