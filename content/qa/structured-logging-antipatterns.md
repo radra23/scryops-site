@@ -78,13 +78,13 @@ If you only need a few fields from a large object, the explicit form is preferab
 
 {{< mermaid >}}
 flowchart LR
-    event["log event\nhas orderId value"]
-    wrong["String concat\nor interpolation"]
-    right["Named template\n{OrderId}"]
-    blob["Value embedded\nin message string\nstructure lost"]
-    prop["Typed property\nOrderId = 'ord-9f2a'\nindexed separately"]
-    scan["Substring scan\nO(n) full-text"]
-    idx["Index lookup\nO(log n)"]
+    event["log event<br/>has orderId value"]
+    wrong["String concat<br/>or interpolation"]
+    right["Named template<br/>{OrderId}"]
+    blob["Value embedded<br/>in message string<br/>structure lost"]
+    prop["Typed property<br/>OrderId = 'ord-9f2a'<br/>indexed separately"]
+    scan["Substring scan<br/>O(n) full-text"]
+    idx["Index lookup<br/>O(log n)"]
     event --> wrong --> blob --> scan
     event --> right --> prop --> idx
     style blob fill:#2A0A0A,stroke:#CC4444,color:#FF6060
