@@ -25,22 +25,24 @@ The P0-P4 scale is still useful — not as a prescriptive checklist, but as a sh
 
 **P4 — Informational.** No service impact. Purely observational — capacity thresholds, trend signals, things worth knowing about but requiring no action right now.
 
+{{< obs-severity-tiers >}}
+
 {{< mermaid >}}
 flowchart LR
     subgraph assess["Assess impact"]
-        ui["User impact\n& scope"]
-        br["SLO burn rate\n& budget remaining"]
+        ui["User impact<br/>& scope"]
+        br["SLO burn rate<br/>& budget remaining"]
     end
     subgraph classify["Classify severity"]
-        p0["P0 — immediate\n14× burn / ~2 days"]
-        p1["P1 — urgent\n6× burn / ~5 days"]
-        p2["P2 — business hours\n2× burn / ~15 days"]
-        p34["P3/P4 — low\nno budget pressure"]
+        p0["P0 — immediate<br/>14× burn / ~2 days"]
+        p1["P1 — urgent<br/>6× burn / ~5 days"]
+        p2["P2 — business hours<br/>2× burn / ~15 days"]
+        p34["P3/P4 — low<br/>no budget pressure"]
     end
     subgraph route["Route response"]
-        wake["Wake on-call\n24/7"]
-        bh["Business hours\nresponse"]
-        ticket["Ticket /\ndocumentation"]
+        wake["Wake on-call<br/>24/7"]
+        bh["Business hours<br/>response"]
+        ticket["Ticket /<br/>documentation"]
     end
 
     assess --> classify
