@@ -5,8 +5,6 @@ draft: false
 answer: "For most Linux workloads on kernel 5.8+, yes. eBPF-based tools like Cilium, Pixie, and Parca are running in production at scale. The main caveat is kernel version requirements and container runtime compatibility."
 excerpt: "For most Linux workloads on kernel 5.8+, yes. eBPF-based tools like Cilium, Pixie, and Parca are running in production at scale. The main caveat is kernel version requirements and container runtime compatibility."
 readtime: 3
-excerpt: "For most Linux workloads on kernel 5.8+, yes. eBPF-based tools like Cilium, Pixie, and Parca are running in production at scale. The main caveat is kernel version requirements and container runtime compatibility."
-readtime: 3
 tags: ["eBPF", "Kubernetes", "Profiling"]
 ---
 
@@ -21,22 +19,45 @@ Yes — with caveats.
 
 ## Three things to check before you deploy
 
-### BTF requires kernel 5.8+ — audit your fleet first
+{{< mermaid >}}
+flowchart TD
+    start["Deploy eBPF for observability?"]
+    kernel{"Linux kernel ≥ 5.8<br/>BTF support?"}
+    caps{"Container runtime<br/>grants CAP_BPF?"}
+    usecase{"Use case?"}
+    upgrade["Upgrade kernel first<br/>or use reduced-feature mode"]
+    policy["Adjust AppArmor / SELinux<br/>or use managed node image"]
+    profiling["CPU profiling<br/>Mature — start here"]
+    network["Network observability<br/>Mature — Cilium proven at scale"]
+    tracing["App-level auto-tracing<br/>Evolving — SDK gives more context"]
+    start --> kernel
+    kernel -->|No| upgrade
+    kernel -->|Yes| caps
+    caps -->|No| policy
+    caps -->|Yes| usecase
+    usecase -->|profiling| profiling
+    usecase -->|network| network
+    usecase -->|app tracing| tracing
+    style profiling fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style network fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style tracing fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+    style upgrade fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style policy fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+{{< /mermaid >}}
 
-### Kernel version matters
+### BTF requires kernel 5.8+ — audit your fleet first
 
 Most eBPF observability tools require Linux kernel 5.8+ for BTF (BPF Type Format) support. Older kernels may work but with reduced functionality and more manual setup.
 
-### Container runtimes
+### Your container runtime needs explicit capability grants
 
 eBPF programs run in the kernel, not in the container. This means:
-
 
 - Your container runtime must allow the necessary capabilities (`CAP_BPF`, `CAP_PERFMON`).
 - On managed Kubernetes (EKS, GKE, AKS), check if the node kernel supports BTF.
 - Some security policies (AppArmor, SELinux) may need adjustments.
 
-### Not all use cases are equal
+### Application-level tracing lags behind CPU profiling and networking
 
 - **CPU profiling**: very mature, low overhead.
 - **Network observability**: mature (Cilium is proof).
