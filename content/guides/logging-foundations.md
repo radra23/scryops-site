@@ -309,6 +309,68 @@ The most common logging mistake is wrapping every function in entry/exit logs. T
    - Business context
    - Predictive analysis
 
+## HTTP Request Logging with Middleware
+
+ASP.NET Core middleware is the right place to add cross-cutting request telemetry: one implementation covers every controller and endpoint without touching application code. Log at completion, not arrival — the status code and duration are only available once the downstream handler has finished:
+
+```csharp
+public class RequestLoggingMiddleware
+{
+    private readonly RequestDelegate _next;
+    private readonly ILogger<RequestLoggingMiddleware> _logger;
+
+    public RequestLoggingMiddleware(RequestDelegate next, ILogger<RequestLoggingMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
+
+    public async Task InvokeAsync(HttpContext context)
+    {
+        var start = Stopwatch.GetTimestamp();
+
+        try
+        {
+            await _next(context);
+
+            _logger.LogInformation("{@RequestCompleted}", new
+            {
+                http_method         = context.Request.Method,
+                http_path           = context.Request.Path.Value,
+                http_status_code    = context.Response.StatusCode,
+                duration_ms         = Stopwatch.GetElapsedTime(start).TotalMilliseconds,
+                request_size_bytes  = context.Request.ContentLength ?? 0,
+                response_size_bytes = context.Response.ContentLength ?? 0,
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "{@RequestFailed}", new
+            {
+                http_method      = context.Request.Method,
+                http_path        = context.Request.Path.Value,
+                http_status_code = context.Response.StatusCode,
+                duration_ms      = Stopwatch.GetElapsedTime(start).TotalMilliseconds,
+                exception_type   = ex.GetType().Name,
+            });
+            throw;
+        }
+    }
+}
+```
+
+Register it early in the middleware pipeline so it wraps every downstream handler:
+
+```csharp
+app.UseMiddleware<RequestLoggingMiddleware>();
+```
+
+The exception path re-throws after logging so the response pipeline can set the correct status code before the process exits.
+
+{{< insight >}}
+**IP address is PII under GDPR.** Do not log `RemoteIpAddress` directly. If client IP is required for abuse detection or rate limiting, apply a consistent hash before logging — the same approach used for `customer.id` in span attributes (see [Data Masking in Telemetry](/guides/data-masking-in-telemetry/)).
+{{< /insight >}}
+
 Good logs are an investment in your own future incident response. The fields you skip today are the fields you'll wish existed at 2am next month. Start structured, keep context close to the event, and tie every log to the trace it belongs to.
 
 - [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — how to move from free-text to queryable, structured output
