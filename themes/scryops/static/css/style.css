@@ -226,6 +226,7 @@ nav.topic-list {
   font-size: 0.82rem;
   color: var(--text);
   transition: color 0.12s;
+  padding-right: 0.3rem;
 }
 .topic-row:hover .topic-name { color: var(--amber); }
 .topic-badge {
