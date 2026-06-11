@@ -111,6 +111,7 @@
     params.append('EMAIL', email);
     params.append('email_address_check', '');
     params.append('locale', 'en');
+    params.append('html_type', 'simple');
     // no-cors: sibforms.com doesn't return CORS headers we can read,
     // so we post fire-and-forget and show success optimistically.
     fetch(FORM_URL, {
