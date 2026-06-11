@@ -1,7 +1,7 @@
 ---
 title: "Is eBPF production-ready for observability use cases?"
 date: 2026-03-22
-draft: false
+draft: true
 answer: "For most Linux workloads on kernel 5.8+, yes. eBPF-based tools like Cilium, Pixie, and Parca are running in production at scale. The main caveat is kernel version requirements and container runtime compatibility."
 excerpt: "For most Linux workloads on kernel 5.8+, yes. eBPF-based tools like Cilium, Pixie, and Parca are running in production at scale. The main caveat is kernel version requirements and container runtime compatibility."
 readtime: 3

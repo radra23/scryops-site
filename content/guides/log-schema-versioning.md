@@ -1,7 +1,7 @@
 ---
 title: "Log Schema Versioning: Keeping Your Event Structure Honest Over Time"
 date: 2026-06-10
-draft: false
+draft: true
 excerpt: "Log schemas drift. A field gets renamed, a type changes from string to integer, a required property goes missing for three weeks before anyone notices. Schema versioning gives your log pipeline a contract it can enforce — and migrate."
 readtime: 8
 tags: ["Logs", "Structured Logging", "Observability", "Best Practices"]

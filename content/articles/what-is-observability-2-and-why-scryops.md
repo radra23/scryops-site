@@ -1,7 +1,7 @@
 ---
 title: "Observability 1.0 meant forensics. Observability 2.0 means prevention."
 date: 2026-03-15
-draft: false
+draft: true
 excerpt: "Observability 1.0 taught us to look backward. Observability 2.0 asks us to look forward. Most teams haven’t made that shift yet. That’s why I named this site after a medieval divination practice."
 readtime: 6
 tags: ["Observability", "OpenTelemetry", "AI", "Philosophy"]

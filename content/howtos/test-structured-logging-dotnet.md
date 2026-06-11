@@ -1,7 +1,7 @@
 ---
 title: "Test Structured Log Output in .NET"
 date: 2026-06-10
-draft: false
+draft: true
 excerpt: "If your logs are part of your observability contract, they deserve tests. Here is how to write assertions against structured log properties — verifying schema, severity, and that sensitive data is not leaking — using Serilog and xUnit."
 readtime: 6
 tags: ["Logs", "Structured Logging", "Best Practices"]
