@@ -1,0 +1,54 @@
+<figure class="diagram"
+  aria-label="False positive rate calibration zones. The bar runs from 0 to 100 percent. Zero to 20 percent is the target zone: on-call trusts the alert. 20 to 50 percent is the alert fatigue zone: on-call learns to ignore it. Above 50 percent is the broken zone: delete the alert and rebuild from scratch.">
+  <div class="diag-card" style="padding:0.9rem;">
+    <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="fpr-title fpr-desc"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="fpr-title">False Positive Rate — Calibration Zones</title>
+      <desc id="fpr-desc">A horizontal bar from 0 to 100 percent divided into three zones. Below 20 percent is healthy: on-call trusts the signal. Between 20 and 50 percent alert fatigue sets in. Above 50 percent the alert should be deleted and rebuilt.</desc>
+
+      <rect width="760" height="220" fill="#161616"/>
+
+      <!-- eyebrow -->
+      <text x="80" y="30" fill="#F0EEE8" font-family="'Press Start 2P',monospace"
+            font-size="11" letter-spacing="0.04em">FALSE POSITIVE RATE</text>
+      <text x="80" y="48" fill="#C8C6C0" font-size="12">// what your false-positive rate does to on-call trust</text>
+
+      <!-- ─── Zone backgrounds (0-20 / 20-50 / 50-100) ───
+           bar spans x=80–700 (620px), y=86–126 (40px tall) -->
+      <rect x="80"  y="86" width="124" height="40" fill="#28CA41" fill-opacity="0.18"/>
+      <rect x="80"  y="86" width="124" height="3"  fill="#28CA41"/>
+      <rect x="204" y="86" width="186" height="40" fill="#F5A623" fill-opacity="0.18"/>
+      <rect x="204" y="86" width="186" height="3"  fill="#F5A623"/>
+      <rect x="390" y="86" width="310" height="40" fill="#CD384B" fill-opacity="0.18"/>
+      <rect x="390" y="86" width="310" height="3"  fill="#CD384B"/>
+
+      <!-- bar outer border -->
+      <rect x="80" y="86" width="620" height="40" fill="none" stroke="#2A2A2A" stroke-width="1"/>
+
+      <!-- zone separator lines -->
+      <line x1="204" y1="83" x2="204" y2="130" stroke="#2A2A2A" stroke-width="1"/>
+      <line x1="390" y1="83" x2="390" y2="130" stroke="#2A2A2A" stroke-width="1"/>
+
+      <!-- zone labels (inside bar, vertically centred) -->
+      <text x="142" y="111" text-anchor="middle" fill="#28CA41" font-size="13" font-weight="700" letter-spacing="0.06em">TARGET</text>
+      <text x="297" y="111" text-anchor="middle" fill="#F5A623" font-size="13" font-weight="700" letter-spacing="0.06em">FATIGUE</text>
+      <text x="545" y="111" text-anchor="middle" fill="#CD384B" font-size="13" font-weight="700" letter-spacing="0.06em">BROKEN</text>
+
+      <!-- threshold tick labels above bar -->
+      <text x="204" y="76" text-anchor="middle" fill="#C8C6C0" font-size="11">20%</text>
+      <text x="390" y="76" text-anchor="middle" fill="#C8C6C0" font-size="11">50%</text>
+
+      <!-- axis labels below bar -->
+      <text x="80"  y="146" text-anchor="middle" fill="#C8C6C0" font-size="11">0%</text>
+      <text x="204" y="146" text-anchor="middle" fill="#C8C6C0" font-size="11">20%</text>
+      <text x="390" y="146" text-anchor="middle" fill="#C8C6C0" font-size="11">50%</text>
+      <text x="700" y="146" text-anchor="middle" fill="#C8C6C0" font-size="11">100%</text>
+
+      <!-- footer separator + note -->
+      <line x1="80" y1="170" x2="700" y2="170" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="390" y="192" text-anchor="middle" fill="#C8C6C0" font-size="12">above 20%: on-call learns to ignore &#183; above 50%: delete it and start over</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &#8212; A false positive rate above 20% trains the team to tune out real alerts. Above 50%, the rule itself is broken.</figcaption>
+</figure>
