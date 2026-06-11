@@ -87,6 +87,92 @@ If you have no standards today, start with three things:
 
 These three cover 80% of the common problems. Everything else can be added incrementally.
 
+## Metric Naming Conventions
+
+Without a naming scheme, every team invents its own. One team uses `http_request_duration`, another uses `request_latency_ms`, a third uses `latency.http`. None of these are queryable together.
+
+The convention that works: `{domain}.{component}.{measurement_type}_{unit}`.
+
+```
+http.server.request_duration_seconds
+database.connection.pool_size_total
+business.order.processing_duration_seconds
+```
+
+The four parts:
+
+**Domain** — the coarse category: `http`, `database`, `business`, `process`, `runtime`, `infrastructure`. Keeps metrics organised by concern and makes wildcard queries (`business.*`) useful.
+
+**Component** — the specific subsystem within the domain: `server`, `client`, `connection`, `order`, `payment`. Scopes the metric to where it originates.
+
+**Measurement type** — what is being counted or measured: `request_duration`, `pool_size`, `error_count`, `queue_depth`. Should read like a noun phrase.
+
+**Unit suffix** — always explicit, always consistent:
+
+| What you're measuring | Suffix | Notes |
+|---|---|---|
+| Time | `_seconds` | Always seconds, never ms or µs |
+| Memory / size | `_bytes` | |
+| Counts / totals | `_total` | Monotonically increasing counters only |
+| Ratios | `_ratio` | Values 0–1 |
+| Percentages | `_percentage` | Values 0–100 |
+| Dimensionless gauges | *(no suffix)* | e.g. `pool_size`, `queue_depth` |
+
+OTel's auto-instrumentation follows this scheme for framework metrics (`http.server.request.duration`, `db.client.operation.duration`). Aligning your custom metric names to the same pattern keeps them consistent with what's generated automatically — and what appears in dashboards and Collector transforms.
+
+## Required Service Metrics Contract
+
+Standards are easier to follow when they specify a minimum set. Every service must export these core metrics:
+
+**HTTP services:**
+
+```yaml
+http.server.request_duration_seconds:
+  type: Histogram
+  buckets: [0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+  labels: [method, path, status_code]
+
+http.server.requests_total:
+  type: Counter
+  labels: [method, path, status_code]
+
+http.server.active_requests:
+  type: UpDownCounter
+  labels: [method]
+```
+
+**Downstream dependencies (any outbound call):**
+
+```yaml
+dependency.request_duration_seconds:
+  type: Histogram
+  labels: [name, operation, status]
+
+dependency.requests_total:
+  type: Counter
+  labels: [name, operation, status]
+```
+
+**Process resources:**
+
+```yaml
+process.cpu_usage_percentage:
+  type: ObservableGauge
+
+process.memory_usage_bytes:
+  type: ObservableGauge
+
+process.open_connections:
+  type: UpDownCounter
+  labels: [type]
+```
+
+In practice, the HTTP and process metrics are emitted automatically by `AddAspNetCoreInstrumentation()`, `AddHttpClientInstrumentation()`, and `AddRuntimeInstrumentation()` — you do not write them by hand. The contract matters for two reasons: it documents what dashboards and alerts can rely on, and it identifies which services are non-compliant (missing required instrumentation packages). Run a periodic audit against this contract using the metrics endpoint of each service in your fleet.
+
+{{< insight >}}
+The dependency metrics are the most commonly missing. Auto-instrumentation covers HttpClient. It does not cover gRPC clients (requires `AddGrpcClientInstrumentation()`), database clients (requires `AddEntityFrameworkCoreInstrumentation()` or driver-specific packages), or custom TCP/queue clients — those require manual instrumentation.
+{{< /insight >}}
+
 <!-- TODO: Add section on the Collector as enforcement infrastructure (specific processor configs) -->
 <!-- TODO: Add section on standards for different org sizes: startup vs mid-size vs enterprise -->
 <!-- TODO: Add case study: what a standards migration looks like for an org with 50 services -->
