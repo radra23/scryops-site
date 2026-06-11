@@ -8,6 +8,9 @@ readtime: 2
 tags: ["Profiling", "Tracing"]
 ---
 
+{{< obs-profiling-vs-tracing >}}
+
+
 ## Tracing locates latency across services
 
 Distributed tracing follows a request through your system. Each span represents a unit of work — an HTTP call, a database query, a message consumed from a queue.
@@ -25,6 +28,24 @@ Profiling answers: **Where did time go within a service?**
 A trace might show that `service-B` took 800ms to respond. But it won't tell you *why*. Was it a slow database query? GC pressure? A hot loop in serialization code?
 
 Profiling fills that gap. When you can link a trace span to a CPU profile for the same time window, you get the complete picture: the request path *and* the code-level bottleneck.
+
+{{< mermaid >}}
+flowchart TD
+    req["Incoming request"]
+    sA["service-A span<br/>(10ms)"]
+    sB["service-B span<br/>(800ms)"]
+    sC["service-C span<br/>(5ms)"]
+    prof["CPU profile<br/>for service-B<br/>↳ hot loop in<br/>serialisation"]
+    rc["Root cause<br/>identified"]
+
+    req --> sA --> sB --> sC
+    sB -.->|"link via<br/>trace context"| prof
+    prof --> rc
+
+    style sB fill:#2A1A1A,stroke:#CC4444,color:#FF6060
+    style prof fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style rc fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+{{< /mermaid >}}
 
 ## Tools that link trace spans to CPU profiles
 
