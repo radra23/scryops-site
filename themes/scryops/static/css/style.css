@@ -190,42 +190,64 @@ main {
 .hero-topics {
   padding-top: 0;
 }
-.hero-topics .section-head {
-  margin-bottom: 0.8rem;
+.topics-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  color: var(--amber-deep);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.9rem;
 }
 .topic-list {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: 0.3rem;
 }
 .topic-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.45rem 0;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 2px solid var(--border);
   text-decoration: none;
-  gap: 0.5rem;
+  transition: border-color 0.12s, background 0.12s;
+}
+.topic-row:hover {
+  border-color: var(--amber);
+  border-left-color: var(--amber);
+  background: rgba(245,166,35,0.04);
 }
 .topic-name {
-  font-size: 0.84rem;
+  font-size: 0.82rem;
   color: var(--text);
-  transition: color 0.15s;
+  transition: color 0.12s;
 }
 .topic-row:hover .topic-name { color: var(--amber); }
-.topic-count {
-  font-size: 0.72rem;
+.topic-badge {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.5rem;
   color: var(--muted);
-  opacity: 0.45;
+  border: 1px solid var(--border);
+  padding: 0.18rem 0.38rem;
+  line-height: 1.6;
+  background: var(--bg);
   flex-shrink: 0;
+  transition: border-color 0.12s, color 0.12s;
+}
+.topic-row:hover .topic-badge {
+  border-color: var(--amber-deep);
+  color: var(--amber);
 }
 .topic-all {
   display: block;
-  margin-top: 1.2rem;
-  font-size: 0.76rem;
+  margin-top: 1rem;
+  font-size: 0.75rem;
   color: var(--muted);
   text-decoration: none;
-  transition: color 0.15s;
-  opacity: 0.7;
+  transition: color 0.12s;
+  opacity: 0.65;
 }
 .topic-all:hover { color: var(--amber); opacity: 1; }
 
