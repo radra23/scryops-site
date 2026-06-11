@@ -28,6 +28,24 @@ flowchart LR
     style rules fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
 {{< /mermaid >}}
 
+{{< mermaid >}}
+flowchart LR
+    svc[".NET Service\n/metrics endpoint"]
+    prom["Prometheus\nscrape_configs"]
+    rules["Recording Rules\npre-computed series"]
+    graf["Grafana\npanels + alerts"]
+    am["Alertmanager\nrouting"]
+
+    svc -->|"15s scrape"| prom
+    prom --> rules
+    prom --> graf
+    rules --> graf
+    graf --> am
+
+    style prom fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+    style rules fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+{{< /mermaid >}}
+
 ## Step 1: Wire Up the Prometheus Exporter in .NET
 
 Add the required packages:
