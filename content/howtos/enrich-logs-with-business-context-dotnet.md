@@ -18,6 +18,8 @@ Adding that context manually to every log call is the wrong approach. It is inco
 
 That is what Serilog enrichers are for.
 
+{{< obs-log-enrichment-before-after >}}
+
 ## What Enrichers Do
 
 Serilog's enricher pipeline runs before every log event is written to any sink. An enricher is a class that implements `ILogEventEnricher`, receives the `LogEvent` and a `LogEventPropertyFactory`, and can add, modify, or remove properties. The enricher runs once per log call. The properties it adds appear in every log event for the lifetime of the enrichment scope.
