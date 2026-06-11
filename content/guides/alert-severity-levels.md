@@ -26,35 +26,33 @@ The P0-P4 scale is still useful — not as a prescriptive checklist, but as a sh
 **P4 — Informational.** No service impact. Purely observational — capacity thresholds, trend signals, things worth knowing about but requiring no action right now.
 
 {{< mermaid >}}
-flowchart TD
- subgraph subGraph0["Business Impact Assessment"]
-        D["User Impact"]:::highlight
-        E["Revenue Impact"]:::highlight
-        F["SLO Burn Rate"]:::highlight
-        S["Error Budget Remaining"]:::highlight
-  end
- subgraph subGraph1["Severity Classification"]
-        G["P0 / P1"]:::critical
-        H["P2 / P3"]:::medium
-        I["P4"]:::info
-  end
- subgraph subGraph2["Response Protocol"]
-        J["Notification Channel"]:::highlight
-        K["Response Time SLA"]:::highlight
-        M["Escalation Path"]:::highlight
-  end
-    subGraph0 --> subGraph1
-    subGraph1 --> subGraph2
+flowchart LR
+    subgraph assess["Assess impact"]
+        ui["User impact\n& scope"]
+        br["SLO burn rate\n& budget remaining"]
+    end
+    subgraph classify["Classify severity"]
+        p0["P0 — immediate\n14× burn / ~2 days"]
+        p1["P1 — urgent\n6× burn / ~5 days"]
+        p2["P2 — business hours\n2× burn / ~15 days"]
+        p34["P3/P4 — low\nno budget pressure"]
+    end
+    subgraph route["Route response"]
+        wake["Wake on-call\n24/7"]
+        bh["Business hours\nresponse"]
+        ticket["Ticket /\ndocumentation"]
+    end
 
-subGraph0:::back
-subGraph1:::back
-subGraph2:::back
+    assess --> classify
+    p0 --> wake
+    p1 --> wake
+    p2 --> bh
+    p34 --> ticket
 
-classDef back fill:#F3F3F3,stroke:#D1D1D1,stroke-width:2px
-classDef highlight fill:#E0F7FA,stroke:#00ACC1,stroke-width:2px
-classDef critical fill:#FFEBEE,stroke:#F44336,stroke-width:2px
-classDef medium fill:#E8F5E9,stroke:#4CAF50,stroke-width:2px
-classDef info fill:#F3E5F5,stroke:#9C27B0,stroke-width:2px
+    style p0 fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style p1 fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+    style p2 fill:#1A1A0A,stroke:#808000,color:#A8A830
+    style wake fill:#2A0A0A,stroke:#CC4444,color:#FF6060
 {{< /mermaid >}}
 
 ## Let the Burn Rate Set the Level
