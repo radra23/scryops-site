@@ -31,17 +31,14 @@
 
   <!-- Topics sidebar (right) -->
   <aside class="hero-topics">
-    <div class="section-head">
-      <span class="section-label">Topics</span>
-      <div class="section-rule"></div>
-    </div>
+    <div class="topics-label">Topics</div>
     {{ $tags := .Site.Taxonomies.tags }}
     {{ $domains := slice
-      (dict "slug" "opentelemetry" "name" "OpenTelemetry" "desc" "OTel ecosystem")
-      (dict "slug" "tracing"       "name" "Tracing"       "desc" "Traces &amp; sampling")
-      (dict "slug" "alerting"      "name" "Alerting"      "desc" "Alerts &amp; on-call")
-      (dict "slug" "slos"          "name" "SLOs"          "desc" "Error budgets")
-      (dict "slug" "observability" "name" "Observability" "desc" "Foundations")
+      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
+      (dict "slug" "tracing"       "name" "Tracing")
+      (dict "slug" "alerting"      "name" "Alerting")
+      (dict "slug" "slos"          "name" "SLOs")
+      (dict "slug" "observability" "name" "Observability")
     }}
     <nav class="topic-list">
       {{ range $domains }}
@@ -49,7 +46,7 @@
         {{ if $pages }}
         <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
           <span class="topic-name">{{ .name }}</span>
-          <span class="topic-count">{{ len $pages }}</span>
+          <span class="topic-badge">{{ printf "%02d" (len $pages) }}</span>
         </a>
         {{ end }}
       {{ end }}
