@@ -753,7 +753,7 @@ nav.topic-list {
 .qa-a {
   font-family: var(--font-sans);
 }
-.prose p,
+/* .prose p,
 .prose ul,
 .prose ol,
 .prose h2,
@@ -762,7 +762,7 @@ nav.topic-list {
 .art-excerpt,
 .featured-excerpt {
   max-width: 70ch;
-}
+} */
 
 /* visible keyboard focus (previously only the skip link had one) */
 a:focus-visible,
