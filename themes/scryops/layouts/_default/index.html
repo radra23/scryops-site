@@ -22,41 +22,13 @@
       {{ end }}
       {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
       <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
-{{ $allContent := slice }}
-{{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ $sorted := sort $allContent "Date" "desc" }}
-
-<!-- Two-column hero: featured article + topics sidebar -->
-<div class="hero-grid">
-
-  <!-- Featured article (left) -->
-  {{ with index $sorted 0 }}
-  <a href="{{ .RelPermalink }}" class="featured-article">
-    <div class="featured-meta">
-      {{ $type := .Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ end }}
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
-      <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
     </div>
     <h1 class="featured-title">{{ .Title }}</h1>
     {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
     <span class="featured-cta">Read &rarr;</span>
   </a>
   {{ end }}
-    <h1 class="featured-title">{{ .Title }}</h1>
-    {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
-    <span class="featured-cta">Read &rarr;</span>
-  </a>
-  {{ end }}
 
-  <!-- Topics sidebar (right) -->
-  <aside class="hero-topics">
-    <div class="topics-label">Topics</div>
   <!-- Topics sidebar (right) -->
   <aside class="hero-topics">
     <div class="topics-label">Topics</div>
@@ -69,17 +41,9 @@
       (dict "slug" "observability" "name" "Observability")
     }}
     {{ $withCounts := slice }}
-      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
-      (dict "slug" "tracing"       "name" "Tracing")
-      (dict "slug" "alerting"      "name" "Alerting")
-      (dict "slug" "slos"          "name" "SLOs")
-      (dict "slug" "observability" "name" "Observability")
-    }}
-    {{ $withCounts := slice }}
     {{ range $domains }}
       {{ $pages := index $tags .slug }}
       {{ if $pages }}
-        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
         {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
       {{ end }}
     {{ end }}
