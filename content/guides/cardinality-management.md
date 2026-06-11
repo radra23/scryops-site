@@ -21,6 +21,8 @@ The cost compounds. A high-cardinality metric does not just use memory proportio
 
 The ceiling is not abstract. In a real Prometheus deployment, cardinality above ~2,000,000 active series on a single instance starts to cause operational problems. Below that, you have headroom. Above that, you are managing symptoms.
 
+{{< obs-cardinality-meter >}}
+
 ## Labels That Will Kill You
 
 The labels most likely to cause cardinality explosions are the ones that encode per-entity identifiers. The pattern is the same in every case: the label seems reasonable at the time, it encodes genuinely useful information, and it scales with the entity count rather than with a small, bounded set of values.
@@ -162,3 +164,5 @@ The admin API requires `--web.enable-admin-api` at startup.
 
 <!-- TODO: Add section on Prometheus remote write and how cardinality costs scale with storage backends -->
 <!-- TODO: Add section on adaptive metrics in Grafana Cloud -->
+
+{{< obs-mascot class="barbarian" quip="I added a label. user_id. Then request_id. The dashboard took 200 seconds to load and the bill arrived in a CART pulled by oxen. I cannot cleave a number this large. ...bound your labels to a known set. Spare the cluster." >}}
