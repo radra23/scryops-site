@@ -60,6 +60,21 @@
 
 </div>
 
+<!-- Latest: the remaining posts after the featured one (previously computed but dropped) -->
+{{ $rest := first 12 (after 1 $sorted) }}
+{{ with $rest }}
+<section class="feed">
+  <div class="section-head">
+    <span class="section-label">Latest</span>
+    <div class="section-rule"></div>
+  </div>
+  {{ range $i, $page := . }}
+  {{ partial "article-card.html" (dict "num" (add $i 1) "page" $page) }}
+  {{ end }}
+  <a href="{{ "articles/" | relURL }}" class="feed-cta">Browse all &rarr;</a>
+</section>
+{{ end }}
+
 <!-- Subscribe -->
 {{ with .Site.Params.brevo_form_url }}
 <section class="subscribe-section">
