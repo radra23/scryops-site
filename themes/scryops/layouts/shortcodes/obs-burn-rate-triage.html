@@ -1,0 +1,57 @@
+<figure class="diagram">
+  <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
+    <svg viewBox="0 0 760 244" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="brt-title brt-desc"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="brt-title">Burn-rate triage</title>
+      <desc id="brt-desc">Burn-rate triage as two questions. First: is the SLO error budget burning? If not, monitor and log it. If yes, ask how fast it is burning, which sets a proportional response. A slow burn (under 2 times the sustainable rate, weeks of budget left) becomes a ticket to investigate this week. A moderate burn (around 6 times, on the one-hour and six-hour windows) notifies the team and escalates cross-functionally if on-call cannot resolve it. A fast burn (14 times on the one-hour window) pages on-call and is declared a major incident if users are severely hit.</desc>
+
+      <rect x="0" y="0" width="760" height="244" fill="#161616"/>
+
+      <text x="24" y="24" fill="#F0EEE8" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">BURN-RATE TRIAGE</text>
+      <text x="24" y="40" fill="#C8C6C0" font-size="11">// two questions decide the response</text>
+
+      <!-- ───────── decision spine (left) ───────── -->
+      <rect x="20" y="56" width="160" height="30" fill="#0D0D0D" stroke="#3A3A3A" stroke-width="1"/>
+      <text x="100" y="75" fill="#D8D6CE" font-size="11" text-anchor="middle">Incident detected</text>
+      <line x1="100" y1="86" x2="100" y2="96" stroke="#5B8DEF" stroke-width="1.5"/>
+      <polygon points="95,96 105,96 100,102" fill="#5B8DEF"/>
+
+      <rect x="20" y="102" width="160" height="46" fill="rgba(245,166,35,0.10)" stroke="#F5A623" stroke-width="1.5"/>
+      <text x="100" y="122" fill="#F5A623" font-size="11" text-anchor="middle">SLO budget burning?</text>
+      <text x="100" y="138" fill="#C8C6C0" font-size="10" text-anchor="middle">no &#8594; monitor &amp; log</text>
+      <line x1="100" y1="148" x2="100" y2="158" stroke="#5B8DEF" stroke-width="1.5"/>
+      <polygon points="95,158 105,158 100,164" fill="#5B8DEF"/>
+      <text x="112" y="158" fill="#C8C6C0" font-size="10">yes</text>
+
+      <rect x="20" y="164" width="160" height="44" fill="rgba(245,166,35,0.10)" stroke="#F5A623" stroke-width="1.5"/>
+      <text x="100" y="184" fill="#F5A623" font-size="11" text-anchor="middle">How fast is it</text>
+      <text x="100" y="199" fill="#F5A623" font-size="11" text-anchor="middle">burning?</text>
+
+      <!-- ───────── fan to three proportional tiers ───────── -->
+      <line x1="182" y1="186" x2="294" y2="79"  stroke="#5B8DEF" stroke-width="1.5"/>
+      <polygon points="294,74 294,84 300,79" fill="#5B8DEF"/>
+      <line x1="182" y1="186" x2="294" y2="141" stroke="#F5A623" stroke-width="1.5"/>
+      <polygon points="294,136 294,146 300,141" fill="#F5A623"/>
+      <line x1="182" y1="186" x2="294" y2="203" stroke="#FF6060" stroke-width="1.5"/>
+      <polygon points="294,198 294,208 300,203" fill="#FF6060"/>
+
+      <!-- ───────── tiers (right) ───────── -->
+      <!-- SLOW -->
+      <rect x="300" y="56" width="444" height="46" fill="rgba(91,141,239,0.08)" stroke="#5B8DEF" stroke-width="1.5"/>
+      <text x="314" y="76" fill="#C8C6C0" font-size="10">SLOW &#183; under 2&#215; &#183; weeks of budget left</text>
+      <text x="314" y="94" fill="#5B8DEF" font-size="11">Ticket / Slack &#8212; investigate this week</text>
+
+      <!-- MODERATE -->
+      <rect x="300" y="118" width="444" height="46" fill="rgba(245,166,35,0.08)" stroke="#F5A623" stroke-width="1.5"/>
+      <text x="314" y="138" fill="#C8C6C0" font-size="10">MODERATE &#183; ~6&#215; &#183; 1h + 6h windows</text>
+      <text x="314" y="156" fill="#F5A623" font-size="11">Notify the team &#8212; escalate if on-call can&rsquo;t resolve</text>
+
+      <!-- FAST -->
+      <rect x="300" y="180" width="444" height="46" fill="rgba(255,96,96,0.08)" stroke="#FF6060" stroke-width="1.5"/>
+      <text x="314" y="200" fill="#C8C6C0" font-size="10">FAST &#183; 14&#215; &#183; 1h window</text>
+      <text x="314" y="218" fill="#FF6060" font-size="11">Page on-call &#8212; major incident if users hit hard</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &#8212; Two questions &#8212; is the budget burning, and how fast &#8212; and the response picks itself.</figcaption>
+</figure>

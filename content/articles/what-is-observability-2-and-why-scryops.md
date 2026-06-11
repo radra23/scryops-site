@@ -25,7 +25,7 @@ The model those tools push always looks backward. A metric crosses a line, an al
 
 {{< obs-reactive-loop >}}
 
-Fast forward to 2026. Hundreds of microservices, millions of spans every second, spread across clouds. The old reactive model can’t keep up. It’s slow. It wastes time and attention. Picture a memory leak quietly pushing one service’s latency higher, hour after hour. No alert fires until the threshold finally snaps. By then, the API is timing out and customers are already feeling it. Engineers scramble through dashboards, always chasing, never catching up. By the time you find the real cause, the damage is done. That’s the price of staying reactive.
+Fast forward to 2026. Hundreds of microservices, millions of spans every second, spread across clouds. The old reactive model can’t keep up. It’s slow. It wastes time and attention. A memory leak pushes one service’s latency higher, hour by hour. No alert fires until the threshold finally snaps. By then, the API is timing out and customers are already feeling it. Engineers scramble through dashboards, always chasing, never catching up. By the time you find the real cause, the damage is done. That’s the price of staying reactive.
 
 {{< obs-memory-leak >}}
 
@@ -43,7 +43,7 @@ Making that shift means building what the old model never could. You see the con
 
 {{< obs-signal-correlation >}}
 
-**Predictive inference.** ML models and LLMs that spot patterns before they become incidents. Not just a threshold crossed. More like: this pattern showed up before an outage eight out of the last ten times, and we’re three hours into it now. Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting running in production. For everyone else, it’s still experimental or just leaving the pilot phase. The promise is real. The tooling and practices are still catching up.
+**Predictive inference.** ML models and LLMs that spot patterns before they become incidents. Not just a threshold crossed. More like: this pattern showed up before an outage eight out of the last ten times, and we’re three hours into it now. Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting running in production. For everyone else, it’s still experimental or just leaving the pilot phase. The tooling hasn't caught up to the promise yet — which is exactly where practitioners should be paying attention.
 
 **Proactive remediation.** No more paging a human and waiting. The system rolls back a deployment, scales a service, or throttles traffic based on predicted risk, not confirmed failure. It acts on what it sees coming, not what has already happened.
 
@@ -65,9 +65,9 @@ Scryops means bringing together every signal — telemetry, events, topology, de
 
 That’s the goal. Not zero downtime as a lucky streak. Zero downtime as a practice.
 
-## What this publication covers
+## The gap this publication closes
 
-I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. There are widely reported examples from large-scale operators: Netflix engineering has published work on ML-based anomaly detection in their time-series infrastructure, and Shopify’s SREs have described linking deployment, telemetry, and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
+I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. Teams at Netflix and Shopify have published engineering work on this: ML-based anomaly detection in time-series infrastructure, linking deployment state and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
 
 Expect articles on designing OTel pipelines for predictive models, what eBPF-based instrumentation unlocks at runtime, where LLMs help with anomaly detection and where they fall short, and the real trade-offs of acting before you have confirmed a fault.
 
@@ -79,3 +79,5 @@ The crystal ball is just a metaphor. Signal correlation is real.
 **Where to start.**
 Pick one service with a known recurring incident. Pull its telemetry for the 30 minutes before each occurrence — spans, error rates, upstream and downstream latency. Look for the signal that precedes the problem. Build even a simple rule that fires on it early. That first experiment is where the model stops being abstract.
 {{< /insight >}}
+
+{{< obs-mascot class="oracle" quip="I gazed into the orb and beheld it: checkout falls at 14:02. It is 14:01. I have known for six weeks — the signal was right there in the spans, plain as day. I filed the ticket. No one read the ticket. The orb foresaw that too." caption="The Oracle is Observability 2.0 given a body: the outage was always visible in the signals — someone just had to look before it happened." >}}
