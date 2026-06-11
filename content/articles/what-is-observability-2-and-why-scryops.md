@@ -43,7 +43,7 @@ Making that shift means building what the old model never could. You see the con
 
 {{< obs-signal-correlation >}}
 
-**Predictive inference.** ML models and LLMs that spot patterns before they become incidents. Not just a threshold crossed. More like: this pattern showed up before an outage eight out of the last ten times, and we’re three hours into it now. Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting running in production. For everyone else, it’s still experimental or just leaving the pilot phase. The promise is real. The tooling and practices are still catching up.
+**Predictive inference.** ML models and LLMs that spot patterns before they become incidents. Not just a threshold crossed. More like: this pattern showed up before an outage eight out of the last ten times, and we’re three hours into it now. Most teams are just starting to try these predictive approaches. A few big tech companies have ML-driven forecasting running in production. For everyone else, it’s still experimental or just leaving the pilot phase. The tooling hasn't caught up to the promise yet — which is exactly where practitioners should be paying attention.
 
 **Proactive remediation.** No more paging a human and waiting. The system rolls back a deployment, scales a service, or throttles traffic based on predicted risk, not confirmed failure. It acts on what it sees coming, not what has already happened.
 
@@ -65,7 +65,7 @@ Scryops means bringing together every signal — telemetry, events, topology, de
 
 That’s the goal. Not zero downtime as a lucky streak. Zero downtime as a practice.
 
-## What this publication covers
+## The gap this publication closes
 
 I'm building scryops out in the open. No hype. No vendor whitepapers. I'll dig into original research, case studies, and pilot projects from teams actually trying predictive observability. Teams at Netflix and Shopify have published engineering work on this: ML-based anomaly detection in time-series infrastructure, linking deployment state and topology data to get ahead of incidents. Startups are building open-source tools to unify logs, metrics, and traces for predictive risk modeling. I’ll share what these teams learned, what tripped them up, and how you can adapt their approaches.
 
