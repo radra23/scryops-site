@@ -39,6 +39,29 @@ flowchart LR
     style chk fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
 {{< /mermaid >}}
 
+{{< mermaid >}}
+flowchart LR
+    subgraph sut["Code Under Test"]
+        svc["PaymentService\nOrderService\nUserLookupService"]
+    end
+    subgraph pipe["Serilog Pipeline"]
+        enr["Enrichers"]
+        flt["Level Filter"]
+        snk["ListSink\n(in-memory)"]
+    end
+    subgraph chk["Test Assertions"]
+        prp["Property values\nand types"]
+        pii["PII absence"]
+        lvl["Log levels"]
+    end
+    svc --> enr --> flt --> snk
+    snk --> prp
+    snk --> pii
+    snk --> lvl
+    style snk fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style chk fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+{{< /mermaid >}}
+
 ## The Test Sink
 
 The foundation is an in-memory sink that captures log events rather than writing them anywhere. Serilog exposes `ILogEventSink`, which is all you need:

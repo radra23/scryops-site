@@ -76,6 +76,23 @@ If you only need a few fields from a large object, the explicit form is preferab
 
 ### Why the distinction matters at query time
 
+{{< mermaid >}}
+flowchart LR
+    event["log event\nhas orderId value"]
+    wrong["String concat\nor interpolation"]
+    right["Named template\n{OrderId}"]
+    blob["Value embedded\nin message string\nstructure lost"]
+    prop["Typed property\nOrderId = 'ord-9f2a'\nindexed separately"]
+    scan["Substring scan\nO(n) full-text"]
+    idx["Index lookup\nO(log n)"]
+    event --> wrong --> blob --> scan
+    event --> right --> prop --> idx
+    style blob fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style scan fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style prop fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style idx fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+{{< /mermaid >}}
+
 The practical difference shows up when something breaks. With string concatenation or interpolation, your only query option is a substring match:
 
 ```
