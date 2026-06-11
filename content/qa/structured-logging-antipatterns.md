@@ -1,7 +1,7 @@
 ---
 title: "Why are my structured logs still unstructured strings?"
 date: 2026-06-10
-draft: false
+draft: true
 excerpt: "Three C# patterns that look like structured logging but aren't — and what to do instead."
 readtime: 3
 tags: ["Logs", "Structured Logging", "Best Practices"]

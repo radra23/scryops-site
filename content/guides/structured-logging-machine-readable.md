@@ -1,7 +1,7 @@
 ---
 title: "Structured Logging: Teaching Machines to Read"
 date: 2026-05-26
-draft: false
+draft: true
 excerpt: "Logs were designed for humans grepping text files at 2am. In 2026, they need to work for ML models and correlation engines too. Here's what that means for what you write."
 readtime: 8
 tags: ["Logs", "OpenTelemetry", "Structured Logging", "AI"]
