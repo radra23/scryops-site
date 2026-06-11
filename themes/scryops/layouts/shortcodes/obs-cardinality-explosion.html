@@ -1,0 +1,170 @@
+<figure class="diagram">
+  <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
+    <svg viewBox="0 0 760 260" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="ce-title ce-desc"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="ce-title">Bounded vs unbounded label cardinality</title>
+      <desc id="ce-desc">Two-panel comparison. Left panel shows bounded labels — tier, channel, status — producing 12 time series. Right panel shows unbounded labels — user_id — producing 100,000 time series for a single metric, with boxes overflowing the panel to illustrate the explosion.</desc>
+
+      <!-- background -->
+      <rect width="760" height="260" fill="#161616"/>
+
+      <!-- ─── Left panel: BOUNDED LABELS ─── -->
+      <rect x="8" y="8" width="344" height="244" fill="#111111" rx="1"/>
+      <!-- header stripe -->
+      <rect x="8" y="8" width="344" height="2" fill="#3A3A3A"/>
+      <!-- header text -->
+      <text x="180" y="26" text-anchor="middle" fill="#808080"
+            font-family="'Press Start 2P',monospace" font-size="9" letter-spacing="0.04em">BOUNDED LABELS</text>
+      <!-- sub-label -->
+      <text x="180" y="38" text-anchor="middle" fill="#555550" font-size="9">tier &#215; channel &#215; status</text>
+
+      <!-- 4 cols × 3 rows grid of 12 series boxes -->
+      <!-- Row 1 -->
+      <rect x="38"  y="50" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="64"  y="68" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="96"  y="50" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="122" y="68" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="154" y="50" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="180" y="68" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="212" y="50" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="238" y="68" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <!-- Row 2 -->
+      <rect x="38"  y="84" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="64"  y="102" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="96"  y="84" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="122" y="102" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="154" y="84" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="180" y="102" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="212" y="84" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="238" y="102" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <!-- Row 3 -->
+      <rect x="38"  y="118" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="64"  y="136" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="96"  y="118" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="122" y="136" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="154" y="118" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="180" y="136" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+      <rect x="212" y="118" width="52" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="238" y="136" text-anchor="middle" fill="#3A3A3A" font-size="8">ts</text>
+
+      <!-- series count -->
+      <text x="180" y="194" text-anchor="middle" fill="#28CA41" font-size="20" font-weight="700">12 series</text>
+      <text x="180" y="210" text-anchor="middle" fill="#1C7A2E" font-size="9">manageable, predictable</text>
+      <!-- bottom notes -->
+      <text x="180" y="230" text-anchor="middle" fill="#3A3A3A" font-size="8">tier &#8712; {free, starter, pro, enterprise}</text>
+      <text x="180" y="242" text-anchor="middle" fill="#3A3A3A" font-size="8">status &#8712; {ok, error, timeout}</text>
+
+      <!-- ─── Center arrow ─── -->
+      <text x="380" y="135" text-anchor="middle" fill="#F5A623" font-size="18">&#8594;</text>
+
+      <!-- ─── Right panel: UNBOUNDED LABELS ─── -->
+      <rect x="408" y="8" width="344" height="244" fill="#111111" rx="1"/>
+      <!-- header stripe -->
+      <rect x="408" y="8" width="344" height="2" fill="#CC4444" opacity="0.8"/>
+      <!-- header text -->
+      <text x="580" y="26" text-anchor="middle" fill="#CC4444"
+            font-family="'Press Start 2P',monospace" font-size="9" letter-spacing="0.04em">UNBOUNDED LABELS</text>
+      <!-- sub-label -->
+      <text x="580" y="38" text-anchor="middle" fill="#805555" font-size="9">user_id &#215; status</text>
+
+      <!-- 8 cols × 5 rows = 40 visible boxes -->
+      <!-- Row 1 -->
+      <rect x="418" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="435" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="454" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="471" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="490" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="507" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="526" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="543" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="562" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="579" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="598" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="615" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="634" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="651" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="670" y="50" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="687" y="63" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <!-- Row 2 -->
+      <rect x="418" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="435" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="454" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="471" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="490" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="507" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="526" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="543" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="562" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="579" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="598" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="615" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="634" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="651" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="670" y="70" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="687" y="83" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <!-- Row 3 -->
+      <rect x="418" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="435" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="454" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="471" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="490" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="507" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="526" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="543" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="562" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="579" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="598" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="615" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="634" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="651" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="670" y="90" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="687" y="103" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <!-- Row 4 -->
+      <rect x="418" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="435" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="454" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="471" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="490" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="507" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="526" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="543" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="562" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="579" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="598" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="615" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="634" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="651" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="670" y="110" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="687" y="123" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <!-- Row 5 -->
+      <rect x="418" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="435" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="454" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="471" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="490" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="507" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="526" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="543" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="562" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="579" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="598" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="615" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="634" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="651" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+      <rect x="670" y="130" width="34" height="18" fill="#0D0D0D" stroke="#553333" stroke-width="1"/>
+      <text x="687" y="143" text-anchor="middle" fill="#553333" font-size="7">ts</text>
+
+      <!-- overflow indicator -->
+      <text x="580" y="167" text-anchor="middle" fill="#FF6060" font-size="9">... &#215; 99,960 more</text>
+
+      <!-- series count -->
+      <text x="580" y="194" text-anchor="middle" fill="#FF6060" font-size="18" font-weight="700">100,000 series</text>
+      <text x="580" y="210" text-anchor="middle" fill="#CC4444" font-size="9">per metric, grows with users</text>
+      <!-- bottom notes -->
+      <text x="580" y="230" text-anchor="middle" fill="#553333" font-size="8">user_id &#8712; {usr-0000001, usr-0000002, ...}</text>
+      <text x="580" y="242" text-anchor="middle" fill="#553333" font-size="8">100,000+ unique values</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &#8212; One metric, two label strategies. Bounded labels produce a fixed, predictable number of series. An unbounded label like user_id creates one new series per entity &#8212; and grows forever.</figcaption>
+</figure>
