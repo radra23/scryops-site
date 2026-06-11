@@ -27,17 +27,17 @@ The practical consequence: an outage that synthetic detects but RUM doesn't mean
 {{< mermaid >}}
 flowchart LR
     subgraph syn["Synthetic monitoring"]
-        s1["Scripted journeys\nrun on schedule"]
-        s2["Known locations\n& network conditions"]
-        s3["Catches outages\nbefore users do"]
+        s1["Scripted journeys<br/>run on schedule"]
+        s2["Known locations<br/>& network conditions"]
+        s3["Catches outages<br/>before users do"]
     end
     subgraph rum["Real User Monitoring"]
-        r1["Real user sessions\ncaptured in browser"]
-        r2["Real devices\n& networks"]
-        r3["Catches degradation\nfor real conditions"]
+        r1["Real user sessions<br/>captured in browser"]
+        r2["Real devices<br/>& networks"]
+        r3["Catches degradation<br/>for real conditions"]
     end
-    sla["SLA / availability\nvalidation"] 
-    ux["User-perceived\nperformance"]
+    sla["SLA / availability<br/>validation"] 
+    ux["User-perceived<br/>performance"]
 
     syn --> sla
     rum --> ux
