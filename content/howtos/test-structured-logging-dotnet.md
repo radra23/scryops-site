@@ -14,7 +14,7 @@ Structured logging is not just formatting. When you make a deliberate choice to 
 
 Most teams test their log *volume* informally — they check that things were logged, perhaps by grepping output in integration tests. Almost no teams test the structured *content*: the specific properties, their types, their presence or absence based on code paths, and whether sensitive fields are being correctly masked.
 
-This how-to shows you how to do that in .NET, with Serilog and xUnit. The same patterns apply to NUnit or MSTest.
+The same patterns apply to NUnit or MSTest.
 
 {{< mermaid >}}
 flowchart LR
@@ -299,7 +299,7 @@ The second test is the one teams forget: enrichers that try to access `HttpConte
 
 The `StubPaymentGateway`, `StubCustomerContextService`, and friends in these examples are simple hand-rolled stubs. For this kind of test, stubs beat mocking frameworks — they are explicit about exactly the state they represent, they have no magic, and they compile cleanly. The test is about the logging behaviour, not about the stub machinery.
 
-If your existing test infrastructure already uses Moq or NSubstitute everywhere, there is no need to diverge — just ensure the stub returns the values that drive the code path you are testing.
+If your existing test infrastructure already uses Moq or NSubstitute everywhere, there is no need to diverge — just make the stub return the values that drive the code path you're testing.
 
 Logs that never get tested are logs that drift. Properties get renamed. Sensitive fields leak in. Error levels get quietly downgraded. These tests are the guardrails that keep your observability contract from silently degrading — which is exactly the kind of failure that is hardest to notice until it matters.
 
