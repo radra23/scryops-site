@@ -22,13 +22,41 @@
       {{ end }}
       {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
       <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
+{{ $allContent := slice }}
+{{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ $sorted := sort $allContent "Date" "desc" }}
+
+<!-- Two-column hero: featured article + topics sidebar -->
+<div class="hero-grid">
+
+  <!-- Featured article (left) -->
+  {{ with index $sorted 0 }}
+  <a href="{{ .RelPermalink }}" class="featured-article">
+    <div class="featured-meta">
+      {{ $type := .Type }}
+      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
+      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
+      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
+      {{ end }}
+      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
+      <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
     </div>
     <h1 class="featured-title">{{ .Title }}</h1>
     {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
     <span class="featured-cta">Read &rarr;</span>
   </a>
   {{ end }}
+    <h1 class="featured-title">{{ .Title }}</h1>
+    {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
+    <span class="featured-cta">Read &rarr;</span>
+  </a>
+  {{ end }}
 
+  <!-- Topics sidebar (right) -->
+  <aside class="hero-topics">
+    <div class="topics-label">Topics</div>
   <!-- Topics sidebar (right) -->
   <aside class="hero-topics">
     <div class="topics-label">Topics</div>
@@ -41,9 +69,17 @@
       (dict "slug" "observability" "name" "Observability")
     }}
     {{ $withCounts := slice }}
+      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
+      (dict "slug" "tracing"       "name" "Tracing")
+      (dict "slug" "alerting"      "name" "Alerting")
+      (dict "slug" "slos"          "name" "SLOs")
+      (dict "slug" "observability" "name" "Observability")
+    }}
+    {{ $withCounts := slice }}
     {{ range $domains }}
       {{ $pages := index $tags .slug }}
       {{ if $pages }}
+        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
         {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
       {{ end }}
     {{ end }}
@@ -60,21 +96,8 @@
 
 </div>
 
-<!-- Latest: the remaining posts after the featured one (previously computed but dropped) -->
-{{ $rest := first 12 (after 1 $sorted) }}
-{{ with $rest }}
-<section class="feed">
-  <div class="section-head">
-    <span class="section-label">Latest</span>
-    <div class="section-rule"></div>
-  </div>
-  {{ range $i, $page := . }}
-  {{ partial "article-card.html" (dict "num" (add $i 1) "page" $page) }}
-  {{ end }}
-  <a href="{{ "articles/" | relURL }}" class="feed-cta">Browse all &rarr;</a>
-</section>
-{{ end }}
-
+<!-- Subscribe -->
+{{ with .Site.Params.brevo_form_url }}
 <!-- Subscribe -->
 {{ with .Site.Params.brevo_form_url }}
 <section class="subscribe-section">
@@ -85,9 +108,72 @@
     <input type="hidden" name="locale" value="en">
     <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
     <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
+  <form class="subscribe-form" id="subscribe-form" novalidate>
+    <input type="hidden" name="email_address_check" value="">
+    <input type="hidden" name="locale" value="en">
+    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
+    <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
   <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
+  <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
 </section>
+
+<script>
+(function () {
+  var FORM_URL = {{ . | jsonify }};
+  var form  = document.getElementById('subscribe-form');
+  var input = document.getElementById('subscribe-email');
+  var btn   = document.getElementById('subscribe-btn');
+  var msg   = document.getElementById('subscribe-msg');
+
+  function setState(state, text) {
+    msg.textContent = text;
+    msg.hidden = false;
+    msg.className = 'subscribe-msg subscribe-msg--' + state;
+    if (state === 'loading') {
+      btn.disabled = true;
+      btn.textContent = 'Subscribing…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+    }
+    if (state === 'success') {
+      form.hidden = true;
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = input.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setState('error', 'Please enter a valid email address.');
+      input.focus();
+      return;
+    }
+    setState('loading', '');
+    var params = new URLSearchParams();
+    params.append('EMAIL', email);
+    params.append('email_address_check', '');
+    params.append('locale', 'en');
+    params.append('html_type', 'simple');
+    // no-cors: sibforms.com doesn't return CORS headers we can read,
+    // so we post fire-and-forget and show success optimistically.
+    fetch(FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+    .then(function () {
+      setState('success', "You're in. New pieces land in your inbox as they ship.");
+    })
+    .catch(function () {
+      setState('error', 'Something went wrong. Check your connection and try again.');
+    });
+  });
+}());
+</script>
+{{ end }}
 
 <script>
 (function () {
