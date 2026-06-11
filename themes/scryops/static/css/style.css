@@ -882,8 +882,8 @@ footer a:hover { text-decoration: underline; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  nav { padding: 0.8rem 1rem; }
-  .nav-links { gap: 0.8rem; }
+  nav.site-nav { padding: 0.8rem 1rem; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .nav-links { gap: 0.3rem 1rem; width: 100%; }
   .nav-links a { font-size: 0.75rem; }
   main { padding: 2rem 1rem 4rem; }
   .site-identity { font-size: 0.8rem; }
@@ -953,7 +953,7 @@ figure.diagram figcaption {
 .flow-box.pattern { border-color: var(--klein); color: var(--klein-mid); background: rgba(0,47,167,0.08); }
 .flow-box.predict { border-color: #1A5FCC; color: var(--klein-mid); background: rgba(91,141,239,0.10); }
 .flow-box.prevent { border-color: #1C7A2E; color: #28CA41; background: rgba(40,202,65,0.08); }
-.flow-arrow { font-size: 0.9rem; padding: 0 0.25rem; flex-shrink: 0; color: #6A6A6A; }
+.flow-arrow { font-size: 0.9rem; padding: 0 0.25rem; flex-shrink: 0; color: #909090; }
 .flow-arrow.bad  { color: #CC4444; }
 .flow-arrow.good { color: #28CA41; }
 .flow-outcome { flex: 1; text-align: right; font-size: 0.82rem; font-weight: 700; padding-left: 0.8rem; white-space: nowrap; }
