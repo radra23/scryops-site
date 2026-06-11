@@ -737,13 +737,23 @@ nav.topic-list {
   font-size: 0.9rem;
   line-height: 1.75;
   color: var(--muted);
-  max-width: 620px;
 }
 .about-content p {
   margin-bottom: 0.8rem;
 }
 .about-content strong {
   color: var(--text);
+}
+.about-content h3 {
+  color: var(--amber-deep);
+}
+.about-content a {
+  color: var(--amber);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.about-content a:hover {
+  color: var(--gold);
 }
 
 /* ── FOOTER ── */
