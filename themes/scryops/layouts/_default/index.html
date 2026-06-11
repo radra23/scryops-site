@@ -2,86 +2,133 @@
 
 {{ partial "terminal.html" . }}
 
-<!-- Latest articles across all sections -->
-<section class="feed">
-  <div class="section-head">
-    <span class="section-label">Latest</span>
-    <div class="section-rule"></div>
-  </div>
-  <div class="feed-filter">
-    <button class="filter-btn active" data-type="all">All</button>
-    <button class="filter-btn" data-type="trends">Article</button>
-    <button class="filter-btn" data-type="guide">Guide</button>
-    <button class="filter-btn" data-type="howto">How-to</button>
-  </div>
-  {{ $allContent := slice }}
-  {{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
-  {{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
-  {{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
-  {{ $sorted := sort $allContent "Date" "desc" }}
-  {{ range $i, $page := first 10 $sorted }}
-  {{ partial "article-card.html" (dict "num" (add $i 1) "page" $page) }}
-  {{ end }}
-  <a href="{{ "articles/" | relURL }}" class="feed-cta">&rarr; All articles</a>
-</section>
+{{ $allContent := slice }}
+{{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ $sorted := sort $allContent "Date" "desc" }}
 
-<!-- Q&A Section -->
-{{ $qaPages := where .Site.RegularPages "Type" "qa" }}
-{{ if $qaPages }}
-<section class="qa-section">
-  <div class="section-head">
-    <span class="section-label">Q&amp;A</span>
-    <div class="section-rule"></div>
-  </div>
-  <div class="qa-list">
-    {{ range first 5 $qaPages }}
-    <div class="qa-item">
-      <div class="qa-q">{{ .Title }}</div>
-      <div class="qa-a">{{ .Params.answer }}</div>
+<!-- Two-column hero: featured article + topics sidebar -->
+<div class="hero-grid">
+
+  <!-- Featured article (left) -->
+  {{ with index $sorted 0 }}
+  <a href="{{ .RelPermalink }}" class="featured-article">
+    <div class="featured-meta">
+      {{ $type := .Type }}
+      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
+      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
+      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
+      {{ end }}
+      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
+      <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
     </div>
-    {{ end }}
-  </div>
-  <a href="{{ "qa/" | relURL }}" class="ask-cta">&rarr; All questions</a>
-</section>
-{{ end }}
+    <h1 class="featured-title">{{ .Title }}</h1>
+    {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
+    <span class="featured-cta">Read &rarr;</span>
+  </a>
+  {{ end }}
 
-<!-- Domain topics -->
-<section class="domains-section">
-  <div class="section-head">
-    <span class="section-label">Topics</span>
-    <div class="section-rule"></div>
-  </div>
-  <div class="domain-grid">
+  <!-- Topics sidebar (right) -->
+  <aside class="hero-topics">
+    <div class="topics-label">Topics</div>
     {{ $tags := .Site.Taxonomies.tags }}
     {{ $domains := slice
-      (dict "slug" "opentelemetry" "name" "OpenTelemetry" "desc" "Instrumentation, collectors, and the OTel ecosystem")
-      (dict "slug" "tracing"       "name" "Tracing"       "desc" "Distributed traces, sampling, and profiling")
-      (dict "slug" "alerting"      "name" "Alerting"      "desc" "Alert design, fatigue, and on-call practices")
-      (dict "slug" "slos"          "name" "SLOs"          "desc" "Error budgets, burn rates, and reliability targets")
-      (dict "slug" "observability" "name" "Observability" "desc" "Foundations, philosophy, and what comes next")
+      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
+      (dict "slug" "tracing"       "name" "Tracing")
+      (dict "slug" "alerting"      "name" "Alerting")
+      (dict "slug" "slos"          "name" "SLOs")
+      (dict "slug" "observability" "name" "Observability")
     }}
+    {{ $withCounts := slice }}
     {{ range $domains }}
       {{ $pages := index $tags .slug }}
       {{ if $pages }}
-      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="domain-card">
-        <div class="domain-name">{{ .name }}</div>
-        <div class="domain-desc">{{ .desc }}</div>
-        <div class="domain-count">{{ len $pages }}&thinsp;pieces</div>
-      </a>
+        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
       {{ end }}
     {{ end }}
-  </div>
-  <a href="{{ "tags/" | relURL }}" class="all-tags-link">&rarr; all tags</a>
-</section>
+    <nav class="topic-list">
+      {{ range sort $withCounts "count" "desc" }}
+      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
+        <span class="topic-name">{{ .name }}</span>
+        <span class="topic-badge">{{ printf "%02d" .count }}</span>
+      </a>
+      {{ end }}
+      <a href="{{ "tags/" | relURL }}" class="topic-all">&rarr; all topics</a>
+    </nav>
+  </aside>
 
-<!-- Subscribe section -->
+</div>
+
+<!-- Subscribe -->
+{{ with .Site.Params.brevo_form_url }}
 <section class="subscribe-section">
   <div class="subscribe-label">Stay in the loop</div>
   <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
-  <form class="subscribe-form" action="#" method="post">
-    <input class="subscribe-input" type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
-    <button class="subscribe-btn" type="submit">Subscribe</button>
+  <form class="subscribe-form" id="subscribe-form" novalidate>
+    <input type="hidden" name="email_address_check" value="">
+    <input type="hidden" name="locale" value="en">
+    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
+    <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
+  <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
 </section>
+
+<script>
+(function () {
+  var FORM_URL = {{ . | jsonify }};
+  var form  = document.getElementById('subscribe-form');
+  var input = document.getElementById('subscribe-email');
+  var btn   = document.getElementById('subscribe-btn');
+  var msg   = document.getElementById('subscribe-msg');
+
+  function setState(state, text) {
+    msg.textContent = text;
+    msg.hidden = false;
+    msg.className = 'subscribe-msg subscribe-msg--' + state;
+    if (state === 'loading') {
+      btn.disabled = true;
+      btn.textContent = 'Subscribing…';
+    } else {
+      btn.disabled = false;
+      btn.textContent = 'Subscribe';
+    }
+    if (state === 'success') {
+      form.hidden = true;
+    }
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = input.value.trim();
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setState('error', 'Please enter a valid email address.');
+      input.focus();
+      return;
+    }
+    setState('loading', '');
+    var params = new URLSearchParams();
+    params.append('EMAIL', email);
+    params.append('email_address_check', '');
+    params.append('locale', 'en');
+    params.append('html_type', 'simple');
+    // no-cors: sibforms.com doesn't return CORS headers we can read,
+    // so we post fire-and-forget and show success optimistically.
+    fetch(FORM_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: params.toString()
+    })
+    .then(function () {
+      setState('success', "You're in. New pieces land in your inbox as they ship.");
+    })
+    .catch(function () {
+      setState('error', 'Something went wrong. Check your connection and try again.');
+    });
+  });
+}());
+</script>
+{{ end }}
 
 {{ end }}

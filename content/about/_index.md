@@ -4,19 +4,24 @@ type: "page"
 layout: "single"
 ---
 
-**scryops** is an independent publication focused on the evolving field of observability engineering.
+{{< obs-mascot class="bard" quip="Most teams drown in dashboards. I write about engineers who learned to read the signal before the page fires. Pull up a log. Let's begin." caption="Bawk Dylan — every log line is a lyric, every outage a verse." >}}
 
-We write for engineers who care about understanding what their systems are actually doing — beyond dashboards, beyond alerts, into the signal.
+**scryops** is an independent observability engineering publication. No VC. No vendor relationships. Just one engineer thinking in public about the craft of making software legible.
 
-No fluff. No vendor capture. Just rigorous thinking about the craft of making software legible.
+There's a gap most teams live in: the space between "we have good observability" and "we knew about the problem before users did." The dashboards work. The alerts work. The model is broken — it's reactive by design, and reactive means you always find out last.
 
-### What we cover
+This publication is for teams trying to close that gap. The move from forensics to foresight: the architecture decisions, instrumentation patterns, and hard-won lessons from teams actually doing it in production.
 
-- **Trends** — where the observability ecosystem is heading and why it matters.
-- **Guides** — deep dives into tools, techniques, and architecture patterns.
-- **How-tos** — step-by-step instructions for getting things done.
-- **Q&A** — honest answers to the questions engineers actually ask.
+### What you'll find here
+
+{{< obs-about-sections >}}
 
 ### The name
 
-*Scry* — to see, to perceive, to divine meaning from noise. That's what observability is: the practice of making systems legible. **scryops** is the operational side of that vision.
+*Scry* — to foretell the future by gazing into a reflective surface. Your telemetry data is that surface. Observability done right isn't recording what happened — it's reading what the signals are already telling you about what comes next.
+
+**scryops** is the operational side of that vision.
+
+{{< insight bookmark >}}
+**Where to start.** The founding piece lays out the shift from Observability 1.0 to Observability 2.0 — why the reactive model is broken, and what the alternative actually looks like in practice. Everything else on the site [builds from that frame](/articles/what-is-observability-2-and-why-scryops/).
+{{< /insight >}}

@@ -1,0 +1,115 @@
+{{ define "main" }}
+<style>
+  .page-404 {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    text-align: center;
+    padding: 2rem;
+  }
+
+  .page-404__graphic {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.25rem;
+    margin-bottom: 2rem;
+  }
+
+  .page-404__number {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(3rem, 10vw, 6rem);
+    color: var(--text);
+    line-height: 1;
+    text-shadow: 4px 4px 0 #000, 8px 8px 0 rgba(0,0,0,0.4);
+  }
+
+  .page-404__doc {
+    width: clamp(60px, 12vw, 110px);
+    height: auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    flex-shrink: 0;
+  }
+
+  .page-404__label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(0.55rem, 2vw, 0.85rem);
+    color: var(--text);
+    letter-spacing: 0.1em;
+    margin-bottom: 2.5rem;
+    text-transform: lowercase;
+  }
+
+  .page-404__home {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 0.65rem;
+    color: var(--amber);
+    text-decoration: none;
+    border: 2px solid var(--amber);
+    padding: 0.75rem 1.25rem;
+    letter-spacing: 0.05em;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .page-404__home:hover {
+    background: var(--amber);
+    color: var(--bg);
+  }
+</style>
+
+<div class="page-404">
+
+  <div class="page-404__graphic" aria-hidden="true">
+    <span class="page-404__number">4</span>
+
+    <!-- pixel sad document — 8px grid, viewBox 0 0 110 120
+         document body: (10,10) → (100,110), fold: top-right 30×30 -->
+    <svg class="page-404__doc"
+         viewBox="0 0 110 120"
+         xmlns="http://www.w3.org/2000/svg"
+         role="img"
+         aria-label="sad document">
+      <!-- document body -->
+      <rect x="10" y="10" width="90" height="100" fill="#F0EEE8"/>
+      <!-- fold: shadow behind, then fold face -->
+      <polygon points="70,10 100,10 100,40" fill="#B0AEA8"/>
+      <polygon points="70,10 100,40 70,40"  fill="#D0CEC8"/>
+      <!-- outline -->
+      <polygon points="10,10 70,10 100,40 100,110 10,110"
+               fill="none" stroke="#0D0D0D" stroke-width="4" stroke-linejoin="round"/>
+      <!-- fold crease -->
+      <line x1="70" y1="10" x2="100" y2="40" stroke="#0D0D0D" stroke-width="4"/>
+
+      <!-- left X eye  (3×3 at 8px/pixel, top-left corner at 18,42) -->
+      <rect x="18" y="42" width="8" height="8" fill="#0D0D0D"/><!-- TL -->
+      <rect x="34" y="42" width="8" height="8" fill="#0D0D0D"/><!-- TR -->
+      <rect x="26" y="50" width="8" height="8" fill="#0D0D0D"/><!-- centre -->
+      <rect x="18" y="58" width="8" height="8" fill="#0D0D0D"/><!-- BL -->
+      <rect x="34" y="58" width="8" height="8" fill="#0D0D0D"/><!-- BR -->
+
+      <!-- right X eye (same pattern, offset +40) -->
+      <rect x="58" y="42" width="8" height="8" fill="#0D0D0D"/>
+      <rect x="74" y="42" width="8" height="8" fill="#0D0D0D"/>
+      <rect x="66" y="50" width="8" height="8" fill="#0D0D0D"/>
+      <rect x="58" y="58" width="8" height="8" fill="#0D0D0D"/>
+      <rect x="74" y="58" width="8" height="8" fill="#0D0D0D"/>
+
+      <!-- frown: middle row ABOVE corners row = corners droop down = sad
+           middle: x=34–66 at y=74 | corner drops at y=82 -->
+      <rect x="34" y="74" width="32" height="8" fill="#0D0D0D"/><!-- middle (high) -->
+      <rect x="26" y="82" width="8"  height="8" fill="#0D0D0D"/><!-- left corner (low) -->
+      <rect x="66" y="82" width="8"  height="8" fill="#0D0D0D"/><!-- right corner (low) -->
+    </svg>
+
+    <span class="page-404__number">4</span>
+  </div>
+
+  <p class="page-404__label">page not found</p>
+
+  <a href="{{ "/" | relURL }}" class="page-404__home">← back to home</a>
+
+</div>
+{{ end }}
