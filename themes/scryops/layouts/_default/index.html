@@ -40,15 +40,19 @@
       (dict "slug" "slos"          "name" "SLOs")
       (dict "slug" "observability" "name" "Observability")
     }}
+    {{ $withCounts := slice }}
+    {{ range $domains }}
+      {{ $pages := index $tags .slug }}
+      {{ if $pages }}
+        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
+      {{ end }}
+    {{ end }}
     <nav class="topic-list">
-      {{ range $domains }}
-        {{ $pages := index $tags .slug }}
-        {{ if $pages }}
-        <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
-          <span class="topic-name">{{ .name }}</span>
-          <span class="topic-badge">{{ printf "%02d" (len $pages) }}</span>
-        </a>
-        {{ end }}
+      {{ range sort $withCounts "count" "desc" }}
+      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
+        <span class="topic-name">{{ .name }}</span>
+        <span class="topic-badge">{{ printf "%02d" .count }}</span>
+      </a>
       {{ end }}
       <a href="{{ "tags/" | relURL }}" class="topic-all">&rarr; all topics</a>
     </nav>
