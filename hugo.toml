@@ -7,6 +7,9 @@ theme = "scryops"
   description = "An independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions."
   tagline = "observability decoded"
   mission = "The stack is always changing. We help you see through it."
+  # Brevo subscription form — paste the action URL from Contacts → Forms → your form → Share
+  # e.g. "https://sibforms.com/serve/MUIEAK..."
+  brevo_form_url = "https://a687b92f.sibforms.com/serve/MUIFAJDqIgx84az-BuoP8gEdihFM0YeuIs35pNsnqDxUA7D0oy8kTjObl3h-LXe0CWtvfLGxXFz99znudbnkHdoR3vQxEXBzUN_DwHOqR35NRPWyI4uHfssMvHoECDDNhDSpQx7QR1zMPB0KNpYMNX3uqGP9U0V5nfrhFVlDFHug-PICu_qzzzzRKL3_MuG5p96OKMiI5jdWM7dbvA=="
 
 [params.analytics]
   umami_script = "https://cloud.umami.is/script.js"
