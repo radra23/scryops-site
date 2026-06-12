@@ -954,7 +954,7 @@ figure.diagram figcaption {
 .flow-box.predict { border-color: #1A5FCC; color: var(--klein-mid); background: rgba(91,141,239,0.10); }
 .flow-box.prevent { border-color: #1C7A2E; color: #28CA41; background: rgba(40,202,65,0.08); }
 .flow-arrow { font-size: 0.9rem; padding: 0 0.25rem; flex-shrink: 0; color: #909090; }
-.flow-arrow.bad  { color: #CC4444; }
+.flow-arrow.bad  { color: #FF5555; }
 .flow-arrow.good { color: #28CA41; }
 .flow-outcome { flex: 1; text-align: right; font-size: 0.82rem; font-weight: 700; padding-left: 0.8rem; white-space: nowrap; }
 .flow-outcome.bad  { color: #FF5555; }
@@ -1017,7 +1017,7 @@ figure.diagram figcaption {
 .stat-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; flex: 1; }
 .stat-src  { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; margin-top: 0.4rem; }
 .mttd-section  { margin-top: 0.4rem; }
-.mttd-header   { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+.mttd-header   { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #C8C6C0; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
 .mttd-divider  { height: 1px; background: var(--border); margin-bottom: 1rem; }
 .mttd-row      { display: grid; grid-template-columns: 160px 1fr auto; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; }
 .mttd-label    { font-size: 0.78rem; color: var(--muted); text-align: right; white-space: nowrap; }
@@ -1028,7 +1028,7 @@ figure.diagram figcaption {
 .mttd-val      { font-size: 0.78rem; font-weight: 700; white-space: nowrap; padding-left: 0.4rem; }
 .mttd-badge    { font-size: 0.78rem; font-weight: 700; white-space: nowrap; text-align: right; }
 .mttd-badge small { display: block; font-size: 0.72rem; font-weight: 400; color: var(--muted); }
-.mttd-axis     { display: flex; justify-content: space-between; padding: 0.3rem 0 0; margin-left: calc(160px + 0.8rem); font-size: 0.72rem; color: #888880; }
+.mttd-axis     { display: flex; justify-content: space-between; padding: 0.3rem 0 0; margin-left: calc(160px + 0.8rem); font-size: 0.72rem; color: #C8C6C0; }
 .stats-source  { margin-top: 1.2rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; }
 @media (max-width: 640px) {
   .mttd-row { grid-template-columns: 100px 1fr auto; }
