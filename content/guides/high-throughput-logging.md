@@ -344,6 +344,52 @@ public class BatchBuffer
 
 Flush on count handles sustained load. Flush on age handles bursty patterns where the count threshold might not be reached before the signal goes stale.
 
+### Adaptive Batching Strategies
+
+At extreme load, a single fixed batch size is a compromise: too small at peak, too coarse at idle. Load-aware strategy switching adjusts batch size and flush interval as queue depth climbs:
+
+```csharp
+public record BatchingStrategy(
+    int      BatchSize,
+    TimeSpan FlushInterval,
+    int      MaxConcurrentBatches,
+    int      BackpressureThreshold);
+
+public enum SystemLoadLevel { LowLoad, Normal, HighLoad, Critical }
+
+public class AdaptiveBatchingConfig
+{
+    public static readonly Dictionary<SystemLoadLevel, BatchingStrategy> Strategies = new()
+    {
+        [SystemLoadLevel.LowLoad] = new(
+            BatchSize:             50,
+            FlushInterval:         TimeSpan.FromMilliseconds(50),
+            MaxConcurrentBatches:  2,
+            BackpressureThreshold: 1_000),
+
+        [SystemLoadLevel.Normal] = new(
+            BatchSize:             100,
+            FlushInterval:         TimeSpan.FromMilliseconds(100),
+            MaxConcurrentBatches:  4,
+            BackpressureThreshold: 5_000),
+
+        [SystemLoadLevel.HighLoad] = new(
+            BatchSize:             500,
+            FlushInterval:         TimeSpan.FromMilliseconds(200),
+            MaxConcurrentBatches:  8,
+            BackpressureThreshold: 25_000),
+
+        [SystemLoadLevel.Critical] = new(
+            BatchSize:             2_000,
+            FlushInterval:         TimeSpan.FromMilliseconds(500),
+            MaxConcurrentBatches:  16,
+            BackpressureThreshold: 100_000),
+    };
+}
+```
+
+The active `BatchingStrategy` drives `SmartBatchProcessor.BatchingConfig`. Load level is measured by queue depth sampled on a short interval — a rising queue depth signals the need to grow batches before back-pressure reaches the application threads.
+
 ## Circuit Breakers
 
 When a downstream log sink becomes unavailable, write attempts queue up and exhaust threads. A circuit breaker stops calling a failing sink after a configurable failure threshold and retries after a recovery window:
@@ -488,6 +534,88 @@ public class HighThroughputProcessor : BaseProcessor<LogRecord>
     }
 }
 ```
+
+## Pipeline Observability
+
+The logging pipeline itself needs observability. A `Meter` backed by OTel metrics lets you see queue depth, drop rate, and end-to-end latency without adding I/O to the hot path:
+
+```csharp
+public class LoggingPipelineMetrics
+{
+    // Meter is instantiated directly; the OTel SDK collects from all Meter instances
+    // registered via builder.WithMetrics(b => b.AddMeter("logging.pipeline"))
+    private readonly Meter _meter = new("logging.pipeline", "1.0.0");
+
+    private readonly Counter<long>       _eventsProcessed;
+    private readonly Histogram<double>   _processingLatencyMs;
+    private readonly UpDownCounter<long> _queueDepth;
+    private readonly Counter<long>       _eventsDropped;
+    private readonly Counter<long>       _circuitBreakerTrips;
+
+    public LoggingPipelineMetrics()
+    {
+        _eventsProcessed    = _meter.CreateCounter<long>(
+            "logging.events.processed",
+            description: "Events successfully processed by the pipeline");
+
+        _processingLatencyMs = _meter.CreateHistogram<double>(
+            "logging.processing.latency",
+            unit: "ms",
+            description: "End-to-end latency from log call to export");
+
+        _queueDepth          = _meter.CreateUpDownCounter<long>(
+            "logging.queue.depth",
+            description: "Current entries in the logging queue");
+
+        _eventsDropped       = _meter.CreateCounter<long>(
+            "logging.events.dropped",
+            description: "Events dropped due to back-pressure or circuit breaker");
+
+        _circuitBreakerTrips = _meter.CreateCounter<long>(
+            "logging.circuit_breaker.trips",
+            description: "Circuit breaker open transitions");
+    }
+
+    public void RecordEventProcessed(string level, string destination, bool success, double latencyMs)
+    {
+        var tags = new TagList();
+        tags.Add("level",       level);
+        tags.Add("destination", destination);
+        tags.Add("status",      success ? "success" : "failure");
+
+        _eventsProcessed.Add(1, tags);
+        _processingLatencyMs.Record(latencyMs, tags);
+    }
+
+    public void RecordBatchProcessed(int count, string destination, double latencyMs)
+    {
+        var tags = new TagList();
+        tags.Add("destination", destination);
+        _eventsProcessed.Add(count, tags);
+        _processingLatencyMs.Record(latencyMs, tags);
+    }
+
+    public void RecordQueueChange(long delta) =>
+        _queueDepth.Add(delta);
+
+    public void RecordDropped(string reason) =>
+        _eventsDropped.Add(1, new TagList { { "reason", reason } });
+
+    public void RecordCircuitBreakerTrip(string sink) =>
+        _circuitBreakerTrips.Add(1, new TagList { { "sink", sink } });
+}
+```
+
+Register the meter name in your OTel setup alongside the logging exporter:
+
+```csharp
+services.AddOpenTelemetry()
+    .WithMetrics(b => b
+        .AddMeter("logging.pipeline")
+        .AddOtlpExporter());
+```
+
+`logging.queue.depth` is the most actionable signal: a sustained climb means the pipeline is not draining fast enough and back-pressure is imminent. Alert on queue depth before alerting on drop rate — depth leads, drops lag.
 
 ## Common Pitfalls
 
