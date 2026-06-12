@@ -31,9 +31,9 @@ Auto-instruments Kubernetes workloads using eBPF. Captures traces, metrics, and 
 ## Getting started: Parca DaemonSet, no code changes
 
 ### Prerequisites
-- Linux kernel 5.8+ (for BTF support)
+- Linux kernel **5.8+** for BTF (BPF Type Format) / CO-RE support; some tools (Parca Agent ≥ v0.30, Pixie) require **5.10+** for stable `perf_event_open` semantics — check the release notes for the specific version you're deploying
 - `CAP_BPF` and `CAP_PERFMON` capabilities
-- For Kubernetes: privileged containers or appropriate security contexts
+- For Kubernetes: `privileged: true` is the simplest setup; in security-conscious environments you can instead grant only `CAP_BPF`, `CAP_PERFMON`, and `CAP_SYS_PTRACE` without full privileged mode — check your tool's documentation for the minimal capability set
 
 ### Minimal Parca setup
 

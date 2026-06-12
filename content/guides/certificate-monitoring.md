@@ -14,33 +14,17 @@ tags: ["Security", "Observability", "Monitoring"]
 Effective certificate monitoring requires purpose-built tools for this specific observability domain.
 
 {{< mermaid >}}
-%%{init: {'theme': 'neutral'}}%%
-mindmap
-  root((Certificate Monitoring Solutions))
-    Enterprise Platforms
-      AppViewX
-      Venafi
-      Keyfactor
-    Open Source Tools
-      cert-manager
-      Certbot
-      CFSSL
-    Infrastructure-Based
-      Load Balancers
-      Proxies
-      CDNs
-    Cloud Provider Tools
-      AWS Certificate Manager
-      Azure Key Vault
-      Google Certificate Manager
-    Agent-Based Approaches
-      Infrastructure Agents
-      Custom Integrations
-      Event Forwarding
-    Automation Frameworks
-      ACME Protocol
-      Certificate Transparency
-      Infrastructure as Code
+graph TD
+    A[Certificate Monitoring Approaches] --> B[Dedicated Tools]
+    A --> C[Infrastructure-Based]
+    A --> D[Automation-First]
+    B --> B1[Enterprise: AppViewX / Venafi / Keyfactor]
+    B --> B2[Open Source: cert-manager / Certbot / CFSSL]
+    B --> B3[Cloud: AWS ACM / Azure KV / GCP CM]
+    C --> C1[Load balancers and proxies]
+    C --> C2[Agent-based inspection]
+    D --> D1[ACME protocol]
+    D --> D2[IaC certificate declarations]
 {{< /mermaid >}}
 
 ## Stop Checking Every Minute
@@ -54,11 +38,9 @@ graph TB
 
     subgraph "Certificate Management Tool Approach"
     C[Certificate Management Tool] -->|Daily check| D[Certificate Status]
-    D -->|Forward data| E[Custom Events]
+    D -->|Forward data| E[Observability backend]
     E -->|Alert on| F[Expiration thresholds]
     end
-    
-    classDef default fill:#FAFAFA,stroke:#1B1B1B,stroke-width:4px;
 {{< /mermaid >}}
 
 Minute-by-minute synthetic checks are the wrong tool for this job. Certificate expiry is a slow-moving signal — a daily check gives you days or weeks of lead time, which is all you need to act. Switching to dedicated lifecycle management tools means you get structured expiry metadata and renewal automation, not just a binary pass/fail every 60 seconds.
@@ -94,17 +76,6 @@ Modern proxies and load balancers already validate certificates as part of their
 - **F5 BIG-IP**: Certificate monitoring with SNMP and REST API access
 
 {{< mermaid >}}
-%%{init:{'theme': 'base',
-    'themeVariables': {
-      'primaryColor': '#FAFAFA',
-      'primaryTextColor': '#1B1B1B',
-      'primaryBorderColor': '#1B1B1B',
-      'lineColor': '#1B1B1B',
-      'activationBkgColor':'#2EB2B1',
-      'activationBorderColor':'#2EB2B1'
-    }
-  }
-}%%
 sequenceDiagram
     participant LB as Load Balancer
     participant Cert as Certificates
@@ -210,10 +181,10 @@ The goal is to make entire classes of failure structurally impossible rather tha
 |----------|----------------|------------------|--------------------|--------------------------|-----------------------|
 | **Synthetic (minute)** | 43,200 checks/month | ★☆☆☆☆ | None | Native | High |
 | **Synthetic (daily)** | 30 checks/month | ★☆☆☆☆ | None | Native | Medium |
-| **Enterprise Platform** | 30 checks/month | ★★★☆☆ | Full | Custom Events | Low |
-| **Cloud Provider** | Continuous | ★★☆☆☆ | Full | Custom Events | Very Low |
-| **Infrastructure Agent** | 30 checks/month | ★★☆☆☆ | Partial | Custom Events | Medium |
-| **Let's Encrypt + ACME** | 4 checks/month | ★★★☆☆ | Full | Custom Events | Very Low |
+| **Enterprise Platform** | 30 checks/month | ★★★☆☆ | Full | Structured events | Low |
+| **Cloud Provider** | Continuous | ★★☆☆☆ | Full | Native integration | Very Low |
+| **Infrastructure Agent** | 30 checks/month | ★★☆☆☆ | Partial | Structured events | Medium |
+| **Let's Encrypt + ACME** | 4 checks/month | ★★★☆☆ | Full | Structured events | Very Low |
 
 ## Match Monitoring Frequency to Response Capability
 

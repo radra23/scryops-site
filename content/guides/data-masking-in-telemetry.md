@@ -3,11 +3,9 @@ title: "Data Masking in Telemetry: The Art of Safe Transformation"
 date: 2026-06-07
 draft: true
 excerpt: "Telemetry data carries the same PII risks as any other data store. Here is how to transform sensitive fields while preserving analytical value — hashing, tokenising, coarsening, and knowing which to use when."
-readtime: 6
+readtime: 8
 tags: ["Privacy", "OpenTelemetry", "Security", "Observability", "Collector"]
 ---
-
-# Data Masking in Telemetry
 
 This guide covers transformation techniques. For PII risk, compliance obligations, and which fields to target, start with [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
 
@@ -29,9 +27,9 @@ graph TD
     C --> C3[Truncate]
     C --> C4[Aggregate]
     
-    style A fill:#44ED90
-    style F fill:#44ED90
-    style G fill:#E1998E
+    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF
+    style F fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style G fill:#2A0A0A,stroke:#CC4444,color:#FF6060
 {{< /mermaid >}}
 
 1. **Raw Telemetry**: The raw, sensitive data as it's initially collected. It contains PII that, if exported unchanged, lands in your trace backend indexed and searchable — a GDPR audit waiting to happen.
@@ -95,9 +93,9 @@ graph LR
     D --> D1[Round]
     E --> E1[Bucket]
     
-    style A fill:#00B866
-    classDef second fill:#44ED90
-    classDef third fill:#A4FBC2
+    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF
+    classDef second fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    classDef third fill:#1C1C1C,stroke:#2A2A2A,color:#A8A8A0
 
     class B,C,D,E second;
     class B1,C1,D1,E1 third;
@@ -112,8 +110,8 @@ Each gate validates a structural property of the transformed data before it reac
 stateDiagram-v2
     direction LR
 
-    classDef pass fill:#44ED90
-    classDef fail fill:#E1998E
+    classDef pass fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    classDef fail fill:#2A0A0A,stroke:#CC4444,color:#FF6060
    data_quality: Quality Gates
    State2: Format Check
    State3: Pattern Check
@@ -151,7 +149,7 @@ stateDiagram-v2
 
 | Data Type  | Example              | Transformation | Rationale         | Result Example       |
 | ---------- | -------------------- | -------------- | ----------------- | -------------------- |
-| Email      | <user@company.com>     | Hash + Domain  | Preserve source   | ****@company.com     |
+| Email      | <user@company.com>     | Remove         | PII — no safe hash | *(deleted)*         |
 | IP Address | 192.168.1.100        | Subnet Mask    | Network analysis  | 192.168.0.0/16       |
 | Location   | San Francisco, CA    | Region Code    | Geographic trends | US-WEST              |
 | Timestamp  | 2024-02-15T10:30:00Z | Time Bucket    | Pattern analysis  | 2024-02-15T10:00:00Z |

@@ -151,6 +151,64 @@ Alert on `prometheus_tsdb_head_series` growth rate, not just absolute count. A P
 
 <!-- TODO: Add OTel Collector pipeline health metrics (otelcol_receiver_accepted_metric_points, otelcol_exporter_sent_metric_points, drop rates) -->
 
+## Metric Testing Pipeline
+
+Before a metric ships, it should pass three distinct validation concerns:
+
+{{< mermaid >}}
+graph TD
+    A[Metric Testing] --> B[Accuracy]
+    A --> C[Reliability]
+    A --> D[Performance]
+    B --> B1[Value correctness]
+    B --> B2[Unit precision]
+    C --> C1[Consistency under concurrent load]
+    C --> C2[Edge case handling]
+    D --> D1[Recording overhead]
+    D --> D2[Series count at scale]
+{{< /mermaid >}}
+
+**Accuracy** — the value recorded must equal the value observed. For histograms this means bucket boundaries are hit correctly; for counters it means no drops or double-counts under concurrency; for gauges it means the most recent observation wins rather than being averaged or queued. Test each instrument type with known input values and assert the exported value matches exactly.
+
+**Reliability** — the instrument must behave correctly under burst load. A counter that loses increments when 1000 goroutines hit it simultaneously is wrong, not "eventually consistent." OTel SDK instruments are designed to be goroutine-safe and thread-safe, but any wrapper or aggregation layer you build on top needs the same guarantee. Test with concurrent writers before the metric ships.
+
+**Performance** — metric recording must not meaningfully affect the service's own latency or memory footprint. A useful rule of thumb: recording overhead should be undetectable at the service's normal request volume. Benchmark recording in isolation, not mixed with application logic, to isolate the metric's contribution.
+
+A metric that fails any of these three gates degrades the entire system — inaccurate metrics produce incorrect alerts, unreliable metrics produce silent gaps, expensive metrics produce a different class of incident.
+
+### Validation Rules
+
+Enforce these structural invariants as part of any metric registration or review:
+
+- **Percentage metrics must be in `[0, 100]`** — a CPU usage reading of 103% or -1% indicates a bug in the collection code, not the system under observation.
+- **Byte and size metrics must be non-negative** — negative bytes have no physical meaning; a negative value means subtraction happened where addition was intended.
+- **Timestamps must not be in the future** — a metric with a future timestamp will appear to Prometheus as stale until the clock catches up, silently breaking rate calculations.
+- **Counter values must be monotonically non-decreasing** — if a counter decreases between scrapes (outside of a process restart), it is using the wrong instrument type.
+
+### Automated Testing Stages
+
+Each stage assumes the previous one has passed. Failing any stage sends the metric back to the author before it reaches production:
+
+{{< mermaid >}}
+graph TD
+    A[New Metric] --> B[Unit Tests]
+    B --> C[Integration Tests]
+    C --> D[Load Tests]
+    D --> E[Validation]
+    B -.->|Fail| F[Fix and Retry]
+    C -.->|Fail| F
+    D -.->|Fail| F
+    E -.->|Fail| F
+{{< /mermaid >}}
+
+{{< insight >}}
+Metrics without tests are assumptions. A gauge that silently returns stale values, a counter that drops increments under load, or a histogram with a single `+Inf` bucket will look correct in dashboards until the moment it matters.
+{{< /insight >}}
+
+<!-- TODO: Add OTel .NET testing code using MetricCollector<T> from Microsoft.Extensions.Diagnostics.Testing -->
+<!-- TODO: Add OTel Go testing patterns using metrictest/exporter -->
+<!-- TODO: Add OTel Python testing patterns using in-memory MetricReader -->
+
 - [Cardinality Management](/guides/cardinality-management/) — depth on cardinality thresholds and remediation
 - [OTel Metrics Instrumentation](/guides/otel-metrics-instrumentation/) — choosing the right instrument type
 - [OTel Semantic Conventions](/guides/otel-semantic-conventions/) — standard attribute names for metrics labels
