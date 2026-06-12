@@ -205,6 +205,55 @@ For higher-throughput scenarios, route logs through the OTel Collector instead o
 
 **DEBUG in production.** Debug-level logs in production under non-trivial traffic can multiply storage costs by 10×. Set the minimum log level to `Information` in production and configure `appsettings.Production.json` explicitly rather than relying on a default you might have forgotten.
 
+## Validating Required Fields
+
+If you're onboarding multiple services to a shared logging standard, a validation pass at test time catches missing or mis-cased fields before they become production gaps. This validator checks the four required fields (timestamp, level, service, message) and warns on common quality issues:
+
+```csharp
+public class LogStandardValidator
+{
+    // Include both short and full .NET names — serializers vary
+    private static readonly string[] ValidLevels =
+        ["ERROR", "WARN", "WARNING", "INFO", "INFORMATION", "DEBUG", "TRACE"];
+
+    public ValidationResult Validate(LogEntry entry)
+    {
+        var errors   = new List<string>();
+        var warnings = new List<string>();
+
+        if (entry.Timestamp == default)
+            errors.Add("Missing timestamp");
+
+        if (string.IsNullOrEmpty(entry.Level))
+            errors.Add("Missing level");
+        else if (!ValidLevels.Contains(entry.Level.ToUpperInvariant()))
+            errors.Add($"Invalid level '{entry.Level}' — valid values: {string.Join(", ", ValidLevels)}");
+
+        if (string.IsNullOrEmpty(entry.ServiceName))
+            errors.Add("Missing service name — set via ResourceBuilder.AddService() or OTel resource");
+
+        if (string.IsNullOrEmpty(entry.Message))
+            errors.Add("Missing message");
+
+        // Quality warnings
+        if (entry.Message?.Length > 8_192)
+            warnings.Add("Message exceeds 8 KB — move payload to structured attributes");
+
+        if (entry.Attributes?.Count > 50)
+            warnings.Add($"High attribute count ({entry.Attributes.Count}) may impact query performance");
+
+        return new ValidationResult(errors.Count == 0, errors, warnings);
+    }
+}
+
+public record ValidationResult(
+    bool IsValid,
+    IReadOnlyList<string> Errors,
+    IReadOnlyList<string> Warnings);
+```
+
+Wire it into an integration test that captures output from a real request and runs the validator against a sample of records. In .NET 8+, `Microsoft.Extensions.Logging.Testing` ships `FakeLogger<T>` for capturing log calls in tests without a real sink.
+
 <!-- TODO: Add section on connecting trace context to Serilog structured logs when NOT using the ILogger bridge (fills TODO in instrument-dotnet-service-opentelemetry.md) -->
 <!-- TODO: Add BeginScope pattern for background services and IHostedService -->
 <!-- TODO: Cover log level filtering per-namespace (useful for reducing 3rd-party library noise) -->
