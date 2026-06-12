@@ -103,7 +103,7 @@
 
 <script>
 (function () {
-  var FORM_URL = {{ . | jsonify }};
+  var FORM_URL = {{ . | jsonify | safeJS }};
   var form  = document.getElementById('subscribe-form');
   var input = document.getElementById('subscribe-email');
   var btn   = document.getElementById('subscribe-btn');
