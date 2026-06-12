@@ -1,4 +1,4 @@
-baseURL = "https://scryops.io/"
+baseURL = "https://scryops.dev/"
 languageCode = "en-us"
 title = "scryops — observability decoded"
 theme = "scryops"

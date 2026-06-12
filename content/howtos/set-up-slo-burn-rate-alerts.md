@@ -177,7 +177,7 @@ You should see `CheckoutAPI_FastBurn` transition:
 If it stays in `pending` and never fires, check that both recording rules are returning values above the threshold. The `and` clause requires both conditions to be simultaneously true — if either window is below the threshold, the alert won't fire.
 
 {{< insight bookmark >}}
-**The error budget dashboard.** Once your recording rules are in place, add a Grafana panel showing consumed budget minutes: `43.2 * avg_over_time(slo:error_rate:checkout_api:5m[30d]) / 0.001`. This takes the average burn rate over the rolling 30-day window and scales it against the 43.2-minute budget, giving you the approximate minutes consumed. Seeing the budget expressed as a concrete number — "you've consumed 7 of your 43.2 minutes this month" — makes the SLO model feel real in a way that percentage graphs don't.
+**The error budget dashboard.** Once your recording rules are in place, add a Grafana panel showing budget consumption: `43.2 * avg_over_time(slo:error_rate:checkout_api:5m[30d]) / 0.001`. This divides the rolling 30-day average error rate by the 0.1% SLO budget rate to get the effective burn rate, then scales it to budget minutes — giving you "at the rate you've been burning, this is how much of your 43.2-minute budget has been consumed." Seeing the budget expressed as a concrete number — "you've consumed 7 of your 43.2 minutes this month" — makes the SLO model feel real in a way that percentage graphs don't.
 {{< /insight >}}
 
 ## Error Budget Burn Is Now Observable at Four Time Windows

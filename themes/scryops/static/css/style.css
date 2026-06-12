@@ -32,6 +32,12 @@
        url(https://cdn.jsdelivr.net/npm/@fontsource/commit-mono@5.2.5/files/commit-mono-latin-700-italic.woff) format('woff');
 }
 
+/* ── iA WRITER QUATTRO — reading face for long-form body (mono stays for chrome/headings/code/diagrams) ── */
+@font-face { font-family: 'iA Writer Quattro'; font-style: normal; font-weight: 400; font-display: swap; src: url(../fonts/iawriter/iAWriterQuattroS-Regular.woff2) format('woff2'); }
+@font-face { font-family: 'iA Writer Quattro'; font-style: italic; font-weight: 400; font-display: swap; src: url(../fonts/iawriter/iAWriterQuattroS-Italic.woff2) format('woff2'); }
+@font-face { font-family: 'iA Writer Quattro'; font-style: normal; font-weight: 700; font-display: swap; src: url(../fonts/iawriter/iAWriterQuattroS-Bold.woff2) format('woff2'); }
+@font-face { font-family: 'iA Writer Quattro'; font-style: italic; font-weight: 700; font-display: swap; src: url(../fonts/iawriter/iAWriterQuattroS-BoldItalic.woff2) format('woff2'); }
+
 :root {
   --bg:         #0D0D0D;
   --surface:    #161616;
@@ -44,6 +50,8 @@
   --klein:      #002FA7;
   --klein-mid:  #5B8DEF;
   --klein-glow: #4D7FFF;
+  --font-mono:  'Commit Mono', 'Courier New', monospace;
+  --font-sans:  'iA Writer Quattro', 'Commit Mono', 'Courier New', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,8 +68,8 @@ body {
 
 a { color: inherit; text-decoration: none; }
 
-/* ── NAV ── */
-nav {
+/* ── NAV (site header only; scoped so the .topic-list <nav> doesn't inherit sticky and overlap) ── */
+nav.site-nav {
   position: sticky;
   top: 0;
   z-index: 200;
@@ -231,11 +239,11 @@ nav.topic-list {
 .topic-row:hover .topic-name { color: var(--amber); }
 .topic-badge {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.62rem;
   color: var(--muted);
   border: 1px solid var(--border);
-  padding: 0.18rem 0.38rem;
-  line-height: 1.6;
+  padding: 0.22rem 0.42rem;
+  line-height: 1.4;
   background: var(--bg);
   flex-shrink: 0;
   transition: border-color 0.12s, color 0.12s;
@@ -246,6 +254,7 @@ nav.topic-list {
 }
 .topic-all {
   display: block;
+  flex-basis: 100%;
   margin-top: 1rem;
   font-size: 0.75rem;
   color: var(--muted);
@@ -440,16 +449,14 @@ nav.topic-list {
   font-size: 0.75rem;
   color: var(--muted);
   border: 1px solid var(--border);
-  padding: 0.5rem 0.9rem;
+  padding: 0 0.9rem;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
-  display: inline-block;
-  min-height: 36px;
-  line-height: 36px;
-  padding-top: 0;
-  padding-bottom: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .tag-pill:hover {
   color: var(--amber);
@@ -499,7 +506,7 @@ nav.topic-list {
 
 .domain-count {
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.55rem;
+  font-size: 0.62rem;
   color: var(--amber-deep);
   letter-spacing: 0.06em;
   margin-top: 0.5rem;
@@ -537,10 +544,12 @@ nav.topic-list {
   color: var(--muted);
   border: 1px solid var(--border);
   background: transparent;
-  padding: 0.3rem 0.8rem;
+  padding: 0 0.9rem;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
-  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
 }
 .filter-btn:hover { color: var(--text); border-color: var(--muted); }
 .filter-btn.active { color: var(--amber); border-color: var(--amber-deep); }
@@ -732,6 +741,40 @@ nav.topic-list {
   margin: 1rem 0;
 }
 
+/* ── READABILITY: reading face on body text + ~70ch measure ──
+   Figures, code blocks, tables, and all obs-* diagrams intentionally stay
+   full-width and Commit Mono — only running prose moves to the reading face. */
+.prose p,
+.prose li,
+.prose blockquote,
+.art-excerpt,
+.featured-excerpt,
+.about-content p,
+.qa-a {
+  font-family: var(--font-sans);
+}
+/* Reading column: the article title block and body text share one width so they
+   line up; figures, code, and tables still run full-width. ~48rem ≈ 80ch. */
+.single-header,
+.prose > p,
+.prose > ul,
+.prose > ol,
+.prose > h2,
+.prose > h3,
+.prose > blockquote,
+.art-excerpt {
+  max-width: 48rem;
+}
+
+/* visible keyboard focus (previously only the skip link had one) */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--amber);
+  outline-offset: 2px;
+}
+
 /* ── ABOUT PAGE ── */
 .about-content {
   font-size: 0.9rem;
@@ -839,8 +882,8 @@ footer a:hover { text-decoration: underline; }
 
 /* ── RESPONSIVE ── */
 @media (max-width: 600px) {
-  nav { padding: 0.8rem 1rem; }
-  .nav-links { gap: 0.8rem; }
+  nav.site-nav { padding: 0.8rem 1rem; flex-direction: column; align-items: flex-start; gap: 0.6rem; }
+  .nav-links { gap: 0.3rem 1rem; width: 100%; }
   .nav-links a { font-size: 0.75rem; }
   main { padding: 2rem 1rem 4rem; }
   .site-identity { font-size: 0.8rem; }
@@ -910,8 +953,8 @@ figure.diagram figcaption {
 .flow-box.pattern { border-color: var(--klein); color: var(--klein-mid); background: rgba(0,47,167,0.08); }
 .flow-box.predict { border-color: #1A5FCC; color: var(--klein-mid); background: rgba(91,141,239,0.10); }
 .flow-box.prevent { border-color: #1C7A2E; color: #28CA41; background: rgba(40,202,65,0.08); }
-.flow-arrow { font-size: 0.9rem; padding: 0 0.25rem; flex-shrink: 0; color: #6A6A6A; }
-.flow-arrow.bad  { color: #CC4444; }
+.flow-arrow { font-size: 0.9rem; padding: 0 0.25rem; flex-shrink: 0; color: #909090; }
+.flow-arrow.bad  { color: #FF5555; }
 .flow-arrow.good { color: #28CA41; }
 .flow-outcome { flex: 1; text-align: right; font-size: 0.82rem; font-weight: 700; padding-left: 0.8rem; white-space: nowrap; }
 .flow-outcome.bad  { color: #FF5555; }
@@ -972,9 +1015,9 @@ figure.diagram figcaption {
 }
 .stat-num  { font-size: 2.4rem; font-weight: 700; line-height: 1; letter-spacing: -0.02em; }
 .stat-desc { font-size: 0.75rem; color: var(--muted); line-height: 1.5; flex: 1; }
-.stat-src  { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.04em; margin-top: 0.4rem; }
+.stat-src  { font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; margin-top: 0.4rem; }
 .mttd-section  { margin-top: 0.4rem; }
-.mttd-header   { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
+.mttd-header   { font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #C8C6C0; letter-spacing: 0.12em; margin-bottom: 0.5rem; }
 .mttd-divider  { height: 1px; background: var(--border); margin-bottom: 1rem; }
 .mttd-row      { display: grid; grid-template-columns: 160px 1fr auto; align-items: center; gap: 0.8rem; margin-bottom: 0.7rem; }
 .mttd-label    { font-size: 0.78rem; color: var(--muted); text-align: right; white-space: nowrap; }
@@ -985,8 +1028,8 @@ figure.diagram figcaption {
 .mttd-val      { font-size: 0.78rem; font-weight: 700; white-space: nowrap; padding-left: 0.4rem; }
 .mttd-badge    { font-size: 0.78rem; font-weight: 700; white-space: nowrap; text-align: right; }
 .mttd-badge small { display: block; font-size: 0.72rem; font-weight: 400; color: var(--muted); }
-.mttd-axis     { display: flex; justify-content: space-between; padding: 0.3rem 0 0; margin-left: calc(160px + 0.8rem); font-size: 0.72rem; color: #888880; }
-.stats-source  { margin-top: 1.2rem; font-family: 'Press Start 2P', monospace; font-size: 0.65rem; color: #808080; letter-spacing: 0.04em; }
+.mttd-axis     { display: flex; justify-content: space-between; padding: 0.3rem 0 0; margin-left: calc(160px + 0.8rem); font-size: 0.72rem; color: #C8C6C0; }
+.stats-source  { margin-top: 1.2rem; font-family: var(--font-mono); font-size: 0.7rem; color: var(--muted); letter-spacing: 0.02em; }
 @media (max-width: 640px) {
   .mttd-row { grid-template-columns: 100px 1fr auto; }
   .mttd-label { font-size: 0.68rem; }
@@ -1099,7 +1142,7 @@ figure.diagram figcaption {
   align-items: center;
   justify-content: center;
   font-family: 'Press Start 2P', monospace;
-  font-size: 0.5rem;
+  font-size: 0.6rem;
   color: var(--amber);
   flex-shrink: 0;
 }
