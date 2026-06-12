@@ -41,12 +41,12 @@ graph TD
     F --> F2[User Actions]
     F --> F3[Business Metrics]
     
-    style A fill:#2EB2B1,stroke:#2EB2B1,stroke-width:4px
-    style B fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
-    style C fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
-    style D fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
-    style E fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
-    style F fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
+    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623
+    style B fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style C fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style D fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style E fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style F fill:#161616,stroke:#3A6FAF,color:#5B8DEF
 {{< /mermaid >}}
 
 Each signal type covers ground the others can't. Logs don't replace metrics or traces — they make them actionable.
@@ -162,7 +162,7 @@ Most teams start at Level 1 and stay there longer than they should. Moving up th
     "retry_count": 2
   },
   "observability": {
-    "trace_id": "00-0af7651916cd43dd8448eb211c80319c-b9c7c989f97918e1-01",
+    "trace_id": "0af7651916cd43dd8448eb211c80319c",
     "span_id": "b9c7c989f97918e1",
     "service": "payment-api",
     "environment": "production"
@@ -242,8 +242,8 @@ graph LR
     H --> J[Alerting]
     H --> K[Business Intelligence]
     
-    style A fill:#2EB2B1,stroke:#2EB2B1,stroke-width:4px
-    style H fill:#89EDEA,stroke:#89EDEA,stroke-width:4px
+    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623
+    style H fill:#161616,stroke:#3A6FAF,color:#5B8DEF
 {{< /mermaid >}}
 
 ### Key Integration Points

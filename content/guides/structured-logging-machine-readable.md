@@ -4,7 +4,7 @@ date: 2026-05-26
 draft: true
 excerpt: "Logs were designed for humans grepping text files at 2am. In 2026, they need to work for ML models and correlation engines too. Here's what that means for what you write."
 readtime: 8
-tags: ["Logs", "OpenTelemetry", "Structured Logging", "AI"]
+tags: ["Logs", "OpenTelemetry", "Structured Logging", "AI", "Observability"]
 ---
 
 > "A log line that only a human can read is a log line that only a human can use. In 2026, that's half the job."
@@ -50,7 +50,7 @@ Every field is queryable. Every field is consistent across services that follow 
 
 Not every field in a log entry carries equal weight. The ones that unlock machine-readable analysis fall into three categories — and if any of them are missing, your logs are working at a fraction of their potential.
 
-**Correlation fields.** `trace_id`, `span_id`, and `request_id` are what connect a log event to the trace it belongs to. Without these, logs and traces live in separate worlds, and correlation is a manual task. With them, your observability platform can jump from a metric spike to the relevant traces to the log lines that explain what happened — in a single click. The OpenTelemetry semantic conventions define these fields precisely. Use them, and use the same names across every service.
+**Correlation fields.** `trace_id` and `span_id` are what connect a log event to the trace it belongs to — these are standardised OTel semantic convention fields. Without them, logs and traces live in separate worlds, and correlation is a manual task. With them, your observability platform can jump from a metric spike to the relevant traces to the log lines that explain what happened — in a single click. Use the exact names the OpenTelemetry spec defines, and use them consistently across every service. A `request_id` can be a useful custom field, but it is not part of the OTel correlation model — use it for application-layer correlation, not as a substitute for `trace_id`.
 
 **Event classification.** `event_type` and `event_outcome` (success, failure, partial) give automated systems a consistent vocabulary for what happened. "payment_failed" means the same thing whether it comes from the checkout service, the retry worker, or the fraud detection pipeline. Without consistent classification, pattern detection has to learn each service's unique naming conventions — and that rarely happens.
 
@@ -80,10 +80,10 @@ flowchart LR
     C2 --> D2["📋 Maybe the right logs?<br/>(timestamp guess)"]
     D2 --> E2["❓ Root cause<br/>possibly identified"]
 
-    style A fill:#C4FCD8,stroke:#00884A,color:#00884A
-    style E fill:#C4FCD8,stroke:#00884A,color:#00884A
-    style A2 fill:#FFD27E,stroke:#FFB500
-    style E2 fill:#FFD27E,stroke:#FFB500
+    style A fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style A2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+    style E2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623
 {{< /mermaid >}}
 
 **Automated anomaly detection.** ML models can learn what "normal" log patterns look like for a service — which event types fire, at what rates, with what distribution of outcomes — and flag deviations before they manifest as metric changes. This requires consistent `event_type` classification. An AI-assisted triage tool can reason over well-structured context; it can do nothing useful with wall-of-text log lines.

@@ -57,9 +57,9 @@ pip install opentelemetry-instrumentation-logging
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 import logging
 
-# Call this after your TracerProvider is initialised
-LoggingInstrumentor().instrument(set_logging_format=True)
-
+# basicConfig must run first — it is a no-op if handlers already exist.
+# LoggingInstrumentor with set_logging_format=True attaches its own handler
+# when none are configured, which would make this basicConfig call silently ignored.
 logging.basicConfig(
     format=(
         "%(asctime)s %(levelname)s [%(name)s] "
@@ -68,6 +68,9 @@ logging.basicConfig(
     ),
     level=logging.INFO,
 )
+
+# Call this after your TracerProvider is initialised and after basicConfig
+LoggingInstrumentor().instrument(set_logging_format=True)
 ```
 
 Every `logger.info(...)`, `logger.error(...)`, or `logger.warning(...)` call made while a span is active will now include `otelTraceID` and `otelSpanID` in the log record. When no span is active, both fields emit as `0000000000000000` — a useful signal that the request wasn't traced.
