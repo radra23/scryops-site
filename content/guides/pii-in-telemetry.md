@@ -87,6 +87,8 @@ Not all attributes need the same treatment. Applying maximum protection to every
 
 The "hash" treatment for business identifiers deserves explanation: you replace the raw value with a deterministic hash, which means you can still correlate across spans (all spans for `ORD-12345` share the same hash) without the hash being reversible to the original value. The order ID is useful for correlation; the actual number doesn't need to be stored.
 
+One important caveat: this approach is safe for opaque business identifiers like order IDs or transaction IDs, where the value space is large and unpredictable. Do **not** apply unsalted SHA-256 to personal identifiers like email addresses — the value space of common email addresses is small enough to be exhausted by a pre-computed rainbow table in seconds. If you need a correlatable pseudonym for a user, use HMAC-SHA256 with a rotating secret key stored outside the telemetry system, or tokenise the value and discard the mapping from the pipeline entirely.
+
 {{< mermaid >}}
 flowchart TD
     A[Attribute in Span] --> B{Required for<br/>operational debugging?}
