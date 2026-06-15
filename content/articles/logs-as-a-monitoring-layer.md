@@ -1,7 +1,7 @@
 ---
 title: "Logs Are a Monitoring Layer. Most Teams Use Them as a Forensics Archive."
 date: 2026-06-10
-draft: true
+draft: false
 excerpt: "Your logs are already capturing what metrics miss. The error rate says something is wrong. The logs say exactly which user, which operation, and which line of code. That difference is the whole gap between knowing and understanding."
 readtime: 6
 tags: ["Logs", "Observability", "Alerting"]

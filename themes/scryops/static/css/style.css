@@ -102,12 +102,12 @@ nav.site-nav {
   letter-spacing: 0.12em;
   color: var(--muted);
   transition: color 0.15s;
-  padding: 0.4rem 0.15rem;
+  padding: 0 0.55rem;
   display: inline-block;
+  min-width: 44px;
+  text-align: center;
   min-height: 44px;
   line-height: 44px;
-  padding-top: 0;
-  padding-bottom: 0;
 }
 .nav-links a:hover,
 .nav-links a.active { color: var(--amber); }
@@ -855,6 +855,11 @@ footer p {
 footer a {
   color: var(--amber);
   text-decoration: none;
+  display: inline-block;
+  min-height: 24px;
+  line-height: 24px;
+  padding: 0 0.4rem;
+  vertical-align: middle;
 }
 footer a:hover { text-decoration: underline; }
 
@@ -1017,7 +1022,8 @@ figure.knt-fig figcaption {
 .obs-table th.v1 { color: var(--muted); border-bottom: 2px solid var(--amber-deep); }
 .obs-table th.v2 { color: var(--klein-mid); border-bottom: 2px solid var(--klein-mid); }
 .obs-table td { border: 1px solid var(--border); padding: 0.5rem 1rem; font-size: 0.75rem; vertical-align: middle; }
-.obs-table td:first-child { color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; background: var(--bg); }
+.obs-table td:first-child,
+.obs-table tbody th[scope="row"] { color: var(--muted); font-weight: 400; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; background: var(--bg); text-align: left; }
 .obs-table td.v1 { color: var(--text); }
 .obs-table td.v2 { color: var(--klein-mid); }
 .obs-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }
@@ -1194,3 +1200,31 @@ figure.knt-fig figcaption {
   font-size: 0.75rem;
   color: var(--muted);
 }
+
+/* ═══════════════════════════════════════════════
+   SYNTAX HIGHLIGHTING (Chroma, class-based)
+   AA-contrast palette on the #161616 code surface.
+   Set [markup.highlight] noClasses = false in hugo.toml.
+   Every token clears 4.5:1; anything unstyled inherits
+   the bright base color below, so it can never fail.
+═══════════════════════════════════════════════ */
+.chroma { color: var(--text); background: none; }
+.chroma .err { color: #FF6188; background: none; }                 /* error            */
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs,
+.chroma .cp, .chroma .cpf { color: #A6A28C; font-style: italic; }  /* comments  ~7:1   */
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn,
+.chroma .kp, .chroma .kr, .chroma .kt { color: #FF6188; }          /* keywords  ~6.3:1 */
+.chroma .o, .chroma .ow, .chroma .p { color: var(--text); }        /* operators/punct  */
+.chroma .n, .chroma .na, .chroma .nl, .chroma .nv,
+.chroma .vc, .chroma .vg, .chroma .vi { color: var(--text); }      /* names / vars     */
+.chroma .nb, .chroma .bp, .chroma .nc, .chroma .nn,
+.chroma .no, .chroma .nt { color: #66D9EF; }                       /* builtins/types ~11:1 */
+.chroma .nf, .chroma .fm { color: #A6E22E; }                       /* functions ~11.7:1 */
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl,
+.chroma .sd, .chroma .s2, .chroma .se, .chroma .sh, .chroma .si,
+.chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: #E6DB74; } /* strings ~12.7:1 */
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh,
+.chroma .mi, .chroma .il, .chroma .mo { color: #AE81FF; }          /* numbers ~6.4:1   */
+.chroma .gd { color: #FF6188; }
+.chroma .gi { color: #A6E22E; }
+.chroma .gh, .chroma .gu { color: #66D9EF; }
