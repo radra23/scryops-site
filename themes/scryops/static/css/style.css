@@ -938,10 +938,12 @@ footer a:hover { text-decoration: underline; }
 ═══════════════════════════════════════════════ */
 
 /* ── Shared diagram wrapper ── */
-figure.diagram {
+figure.diagram,
+figure.knt-fig {
   margin: 2.5rem 0 2rem;
 }
-figure.diagram figcaption {
+figure.diagram figcaption,
+figure.knt-fig figcaption {
   font-size: 0.7rem;
   color: var(--muted);
   font-style: italic;
