@@ -1,5 +1,10 @@
+{{- $caption := .Get "caption" | default "" -}}
+{{- $alt := .Get "alt" | default $caption -}}
 <figure class="diagram">
   <div class="diag-card">
-    <div class="mermaid">{{ .Inner }}</div>
+    <div class="mermaid"{{ with $alt }} role="img" aria-label="{{ . }}"{{ end }}>{{ .Inner }}</div>
   </div>
+  {{- with $caption }}
+  <figcaption>{{ . | safeHTML }}</figcaption>
+  {{- end }}
 </figure>

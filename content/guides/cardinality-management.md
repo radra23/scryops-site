@@ -27,13 +27,21 @@ The ceiling is not abstract. In a real Prometheus deployment, cardinality above 
 
 The labels most likely to cause cardinality explosions are the ones that encode per-entity identifiers. The pattern is the same in every case: the label seems reasonable at the time, it encodes genuinely useful information, and it scales with the entity count rather than with a small, bounded set of values.
 
-**User IDs, session tokens, and device IDs** are the canonical examples. They are always unbounded — every new user, session, or device creates a new series. They should never appear as metric labels. If you need per-user visibility, use logs or traces, which are designed for high-cardinality attributes.
+### User IDs, session tokens, and device IDs
 
-**Raw request IDs and correlation IDs** have the same problem. A correlation ID that traces one request through ten services creates ten new time series for every request.
+These are the canonical examples. They are always unbounded — every new user, session, or device creates a new series. They should never appear as metric labels. If you need per-user visibility, use logs or traces, which are designed for high-cardinality attributes.
 
-**Free-form error messages and exception types** can explode in ways that are harder to predict. A `message` label that contains `"failed to connect to 10.0.1.42:5432"` creates a different series for every IP address that ever appears in a connection error. Normalise to bounded error codes before using them as labels.
+### Raw request IDs and correlation IDs
 
-**Dynamic path segments** in URL labels: `/api/users/usr-9f2a8b` as a label value creates a series per user per endpoint. The OTel AspNetCore instrumentation handles this correctly with route templates (`/api/users/{id}`), but custom instrumentation often captures the raw path.
+These have the same problem. A correlation ID that traces one request through ten services creates ten new time series for every request.
+
+### Free-form error messages and exception types
+
+These can explode in ways that are harder to predict. A `message` label that contains `"failed to connect to 10.0.1.42:5432"` creates a different series for every IP address that ever appears in a connection error. Normalise to bounded error codes before using them as labels.
+
+### Dynamic path segments
+
+In URL labels, a value like `/api/users/usr-9f2a8b` creates a series per user per endpoint. The OTel AspNetCore instrumentation handles this correctly with route templates (`/api/users/{id}`), but custom instrumentation often captures the raw path.
 
 ## The Bounded Label Pattern
 

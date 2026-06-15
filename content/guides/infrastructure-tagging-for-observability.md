@@ -48,15 +48,15 @@ governance:
 
 {{< mermaid >}}
 flowchart LR
-    A["IaC Resource\n(Terraform / Helm)"]
-    B["Env Var Injection\nOTEL_RESOURCE_ATTRIBUTES\n=deployment.environment=prod"]
-    C["OTel ResourceBuilder\nattaches attributes\nto SDK on startup"]
-    D["Every Signal\ntrace · metric · log"]
-    E["Backend Index\ndashboard filter\nby environment, team, tier"]
+    A["IaC Resource<br/>(Terraform / Helm)"]
+    B["Env Var Injection<br/>OTEL_RESOURCE_ATTRIBUTES<br/>=deployment.environment=prod"]
+    C["OTel ResourceBuilder<br/>attaches attributes<br/>to SDK on startup"]
+    D["Every Signal<br/>trace · metric · log"]
+    E["Backend Index<br/>dashboard filter<br/>by environment, team, tier"]
 
-    A -->|"tag defined\nin code"| B
-    B -->|"ResourceDetector\nreads on startup"| C
-    C -->|"attribute on\nevery export"| D
+    A -->|"tag defined<br/>in code"| B
+    B -->|"ResourceDetector<br/>reads on startup"| C
+    C -->|"attribute on<br/>every export"| D
     D -->|"indexed field"| E
 {{< /mermaid >}}
 
