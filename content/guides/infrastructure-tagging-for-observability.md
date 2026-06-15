@@ -46,7 +46,19 @@ governance:
 
 `monitoring-tier` is the tag that drives alert routing decisions downstream. `alert-routing` connects a resource to the right team queue in your on-call tool without hard-coding team names in the alerting rules themselves.
 
-<!-- TODO: Add mermaid diagram showing tag propagation path: IaC resource definition → environment variable injection → OTel ResourceBuilder → trace/metric/log attributes → dashboard filter dropdowns -->
+{{< mermaid >}}
+flowchart LR
+    A["IaC Resource\n(Terraform / Helm)"]
+    B["Env Var Injection\nOTEL_RESOURCE_ATTRIBUTES\n=deployment.environment=prod"]
+    C["OTel ResourceBuilder\nattaches attributes\nto SDK on startup"]
+    D["Every Signal\ntrace · metric · log"]
+    E["Backend Index\ndashboard filter\nby environment, team, tier"]
+
+    A -->|"tag defined\nin code"| B
+    B -->|"ResourceDetector\nreads on startup"| C
+    C -->|"attribute on\nevery export"| D
+    D -->|"indexed field"| E
+{{< /mermaid >}}
 
 ## OPA Policy Implementation
 

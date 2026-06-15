@@ -671,8 +671,53 @@ public class HighThroughputConfig
 }
 ```
 
+## Offloading Batching to the Collector
+
+At very high throughput — sustained above roughly 5,000 log records per second — in-process batching starts fighting your application's GC. The buffers that smooth out bursts are large byte arrays sitting in the managed heap. They survive Gen 0 and Gen 1 collections, graduate to Gen 2, and contribute to the pause times you were trying to avoid in the first place.
+
+The fix is to stop batching inside the application and let the OTel Collector do it instead. The SDK sends small, frequent OTLP deliveries to a Collector running on localhost. The Collector accumulates those deliveries and emits large, efficient batches toward the backend. The application's buffer shrinks dramatically; the Collector — a separate process with its own memory — absorbs the burst.
+
+Configure the SDK to minimise in-process holding time:
+
+```csharp
+builder.Logging.AddOpenTelemetry(options =>
+{
+    options.AddOtlpExporter((otlpOptions, processorOptions) =>
+    {
+        otlpOptions.Endpoint = new Uri("http://localhost:4317");
+        otlpOptions.Protocol  = OtlpExportProtocol.Grpc;
+
+        // Small, frequent deliveries to the local Collector
+        processorOptions.MaxExportBatchSize       = 200;
+        processorOptions.ExportIntervalMilliseconds = 50;
+        processorOptions.MaxQueueSize             = 2_048;
+    });
+});
+```
+
+And let the Collector's `batch` processor do the heavy accumulation before forwarding:
+
+```yaml
+# OTel Collector config.yaml
+processors:
+  batch:
+    send_batch_size: 8_192       # Target batch size for the backend exporter
+    send_batch_max_size: 10_000  # Hard ceiling per batch
+    timeout: 200ms               # Maximum wait before sending an incomplete batch
+
+service:
+  pipelines:
+    logs:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [otlphttp/backend]
+```
+
+The net effect: the application holds at most ~2,000 records in its in-process queue at any moment; the Collector holds the rest. A Gen 2 collection in your application no longer contends with multi-megabyte log buffers. The Collector can also be shared across multiple services on the same host, which amortises its footprint further.
+
+This architecture shift is worth making when you can measure GC pause contributions from logging buffers in profiling output. If your Channel queue stays well below its bound and GC pressure is low, the in-process approach is simpler — the Collector adds an operational dependency that the SDK-only path avoids.
+
 <!-- TODO: Add BenchmarkDotNet baseline measurements comparing sync vs Channel-based logging under sustained load -->
-<!-- TODO: Cover OTel Collector batch processor as the preferred alternative to in-process batching at very high scale (reduces GC impact by moving buffering out of the application process) -->
 <!-- TODO: Add serialization optimization section (System.Text.Json options, GZip compression for OTLP payloads) -->
 
 The right sampling and pipeline design keeps your logs useful at 13TB/day — the wrong defaults make them either incomplete or cost-prohibitive.
