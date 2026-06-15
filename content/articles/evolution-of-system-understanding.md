@@ -31,6 +31,8 @@ This is where the classic three-category problem emerges:
 
 Traditional monitoring handles the first category. It is mostly blind to the third. Most interesting production incidents land in the third.
 
+{{< obs-knowledge-tiers >}}
+
 ## The Telemetry Gap
 
 The data engineers were collecting in the 2000s was sparse by necessity. Storage was expensive; networks were slow; the tooling for querying rich structured data at scale did not exist.
@@ -93,6 +95,8 @@ Three shifts characterise the move from monitored to observable:
 **Isolated to connected.** Traditional monitoring tracks each service independently. Observable systems correlate signals across service boundaries, so a slow database query in service A is visible as latency in service B's downstream call.
 
 **Static to dynamic.** Traditional monitoring requires pre-built dashboards for pre-anticipated questions. Observable systems support arbitrary queries — "show me all requests slower than 300ms, grouped by downstream dependency, for the last 15 minutes" — answered at investigation time, not dashboard-build time.
+
+{{< obs-monitoring-shifts >}}
 
 ## OpenTelemetry: A Shared Foundation
 
