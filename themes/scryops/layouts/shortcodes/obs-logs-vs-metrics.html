@@ -4,7 +4,7 @@
          role="img" aria-labelledby="lvm-title lvm-desc"
          style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
       <title id="lvm-title">Metrics vs logs: the same incident from two vantage points</title>
-      <desc id="lvm-desc">Left panel shows the metric view of an incident: error rate climbed from 0.8% to 4.2% between 14:20 and 14:35 UTC, but gateway, endpoint, customer segment, and root cause are all unknown. Right panel shows the log view of the same incident at 14:22 UTC: service payment-api, endpoint /checkout/confirm, gateway stripe, HTTP 402, error_type card_expired — a specific condition affecting only one customer segment, with no cascade.</desc>
+      <desc id="lvm-desc">Left panel shows the metric view of an incident: error rate climbed from 0.8% to 4.2% between 14:20 and 14:35 UTC, but gateway, endpoint, customer segment, and root cause are all unknown. Right panel shows the log view of the same incident at 14:22 UTC: service payment-api, endpoint /checkout/confirm, gateway stripe, HTTP 422, error_type card_expired — a specific condition affecting only one customer segment, with no cascade.</desc>
 
       <rect width="760" height="274" fill="#161616"/>
 
@@ -66,7 +66,7 @@
       <text x="564" y="94"  fill="#F5A623" font-size="10">"stripe"</text>
 
       <text x="556" y="113" fill="#808080" font-size="10" text-anchor="end">http_status:</text>
-      <text x="564" y="113" fill="#FF6060" font-size="10">402</text>
+      <text x="564" y="113" fill="#FF6060" font-size="10">422</text>
 
       <text x="556" y="132" fill="#808080" font-size="10" text-anchor="end">error_type:</text>
       <text x="564" y="132" fill="#FF6060" font-size="10">"card_expired"</text>
