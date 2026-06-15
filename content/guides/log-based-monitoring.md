@@ -278,3 +278,5 @@ Infrastructure metrics — CPU, memory, disk I/O, network throughput — have no
 Distributed traces are a better tool for latency attribution. A log with `duration_ms` tells you a request took 450ms. A trace tells you 380ms of that was in a downstream database call, 40ms was in deserialization, and 30ms was in a Redis cache miss. Deriving latency from logs is an approximation useful when you have no trace backend. Once you have traces, the log-derived latency number is redundant and less accurate.
 
 Use logs for application-layer monitoring: business event tracking, error specifics, dependency failure modes, request-level context. Use metrics for infrastructure aggregates and SLO burn rate computation. Use traces for latency attribution and cross-service request path analysis.
+
+{{< obs-mascot class="druid" quip="You &lsquo;open the logs&rsquo; only after the fire? I am one with the stream — every event a ripple, every error a tremor in the canopy. I felt the gateway timeouts at 2:03am, long before your dashboard so much as stirred. ...stop archiving a living thing. Query it where it flows." >}}

@@ -25,6 +25,8 @@ The OTel Collector sits between your application and your backend. This gives yo
 - **Simple single-service setups** where the collector is more infrastructure than the app itself.
 - **Development environments** where you just want to see spans in the console.
 
+{{< obs-otel-collector-vs-sdk >}}
+
 ## Two-tier topology: agent per node, gateway per cluster
 
 {{< mermaid >}}
