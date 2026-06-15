@@ -60,7 +60,7 @@ Synthetic monitoring is frequently applied to tasks better handled by purpose-bu
 <!-- TODO: Add section on multi-region checks: understanding geographic baseline differences vs real failures -->
 <!-- TODO: Add section on alert calibration: what failure counts justify paging vs recording, avoiding alert fatigue from transient network issues -->
 <!-- TODO: Add worked example of SLA verification: mapping a 99.9% uptime SLO to synthetic check frequency and failure threshold -->
-<!-- TODO: Verify attributed quotes before adding: source document included quotes attributed to Charity Majors (Honeycomb) and Baron Schwartz (VividCortex) — locate primary sources before using {{< quote_with_author >}} -->
+<!-- TODO: Verify attributed quotes before adding: source document included quotes attributed to Charity Majors (Honeycomb) and Baron Schwartz (VividCortex) — locate primary sources before using the quote_with_author shortcode -->
 
 ## See Also
 
