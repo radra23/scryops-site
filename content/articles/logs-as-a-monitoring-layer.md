@@ -17,7 +17,7 @@ Metrics aggregate. That is their strength — a single number summarises thousan
 
 Logs tell you all of those things. The individual event is the unit. Every field is queryable. The information is already there — most teams just aren't monitoring with it.
 
-Picture the same incident from two vantage points. The metrics dashboard shows an error rate climbing from 0.8% to 4.2% between 14:20 and 14:35 UTC. The on-call engineer sees the spike, opens a runbook, and starts checking services. Five minutes in, they still don't know where to look. The metric is an alarm, not a diagnosis.
+The metrics dashboard shows an error rate climbing from 0.8% to 4.2% between 14:20 and 14:35 UTC. The on-call engineer sees the spike, opens a runbook, and starts checking services. Five minutes in, they still don't know where to look. The metric is an alarm, not a diagnosis.
 
 The log stream at 14:22 UTC shows something different: `payment-api` returning HTTP 422 on `/checkout/confirm`, exclusively for requests where `gateway="stripe"` and `error_type="card_expired"`. The error is not spreading. It is not a cascade. It is one specific condition on one specific endpoint, affecting a specific customer segment. The log stream had that answer at 14:22. The metrics page never will.
 
@@ -27,7 +27,7 @@ The metric told you something was wrong. The log told you what.
 
 ## The Signal Hidden in Structured Logs
 
-Free-text logs are searchable. Structured logs are queryable. That gap determines what your monitoring layer can actually do.
+Free-text logs are searchable. Structured logs are queryable. That gap determines what your monitoring layer can do.
 
 When a log line reads `"error processing payment for user 4821"`, you can grep for it. You can count occurrences. That's the extent of it. The string is the data, and the data is opaque. Every analysis requires pattern matching against uncontrolled human-written text.
 
@@ -47,7 +47,7 @@ A specific payment gateway returns 422s on a subset of transactions. The volume 
 
 A high-traffic customer segment hits an undocumented rate limit on a third-party dependency. The overall error rate is normal — the segment is a small fraction of total traffic. But `customer_tier="enterprise" AND error_type="rate_limit"` is spiking in the log stream. The customers affected are the ones most likely to call your account team at 9am. The metric never sees it coming.
 
-A retry storm is underway. Individual request error rates look normal because the retries eventually succeed. But the same `request_id` or `user_id` appears fifteen times in sixty seconds. Nobody instrumented a metric for client-side retry frequency. It's not a counter anyone thought to expose. The log stream captures it as a natural consequence of logging each attempt — the pattern is there if you look for it.
+A retry storm is underway. Individual request error rates look normal because the retries eventually succeed. But the same `request_id` or `user_id` appears fifteen times in sixty seconds. Nobody instrumented a metric for client-side retry frequency. It's not a counter anyone thought to expose. The log stream captures it as a natural consequence of logging each attempt — the pattern is in the data.
 
 In all three cases, the log alert is not a fallback for absent metrics. It is a fundamentally different kind of check. Metrics summarize populations. Log-based alerts target specific conditions within those populations. The monitoring capability is not redundant — it's orthogonal.
 
@@ -82,7 +82,7 @@ Metrics answer "what changed?" — aggregate behavior over time. They're cheap t
 
 Resolution is the defining difference. A metric is a summary. A log is an individual event. That makes logs expensive to query at scale and precise for specific conditions. Querying a week of logs across all services for a field combination you didn't index is slow and costly. Querying a fifteen-minute window with a specific filter is fast and cheap. The query pattern matters.
 
-The common mistake is treating logs as a fallback — the thing you reach for when metrics aren't sufficient. That framing keeps logs in the forensics role. The correct model is that logs are the layer you use when metrics are not specific enough for the question you're asking. Metrics and logs coexist. They don't substitute for each other.
+The common mistake is treating logs as a fallback — the thing you reach for when metrics aren't sufficient. That framing keeps logs in the forensics role. Logs are the layer you use when metrics aren't specific enough for the question. Metrics and logs coexist. They don't substitute for each other.
 
 ## Three Prerequisites
 
