@@ -21,7 +21,7 @@ The limitation: it only works if you already know what can go wrong.
 
 When applications fragmented into microservices, the "anticipate the failure mode" model collapsed. A single user request might traverse thirty services. A slow downstream dependency cascades up the call chain, and the error surfaces three hops away from the actual cause. The dashboards look green. Users are already experiencing failures.
 
-This is where the classic three-category problem emerges:
+The classic three-category problem emerges directly from this:
 
 **Known-knowns** — the failure modes you have seen and instrumented for. Payment success/failure rates, transaction volumes, response time thresholds. You have alerts for these and they work.
 
@@ -85,7 +85,7 @@ flowchart LR
 
 Distributed tracing — the ability to follow a request's path across service boundaries — offered one of the first systematic responses to the microservices debugging problem. It gave engineers a cross-service view they had never had before.
 
-This was a step toward a broader concept: **observability**. The word comes from control theory. A system is observable if you can reconstruct its internal state from external measurements alone, without needing to insert probes at every possible failure point.
+Distributed tracing pointed toward a broader concept: **observability**. The word comes from control theory. A system is observable if you can reconstruct its internal state from external measurements alone, without needing to insert probes at every possible failure point.
 
 Applied to software: an observable system lets you ask any question about its behaviour and get an answer from the telemetry it emits — not just the questions you anticipated when you wrote the instrumentation.
 
@@ -115,6 +115,6 @@ The evolution has not stopped.
 
 **Threshold-free anomaly detection** reduces the alert-writing burden. Instead of requiring engineers to anticipate failure modes and codify them as thresholds, statistical models — from rolling baselines to time-series anomaly detection — learn normal behaviour from telemetry and surface deviations automatically. This is not a replacement for human judgment — it is a reduction in the minimum detectable signal, surfacing subtle degradations that would never cross a static threshold.
 
-**Business context integration** closes the gap between system health and user impact. A latency spike matters differently if it affects checkout versus a background sync job. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise not just by severity but by consequence.
+**Business context integration** closes the gap between system health and user impact. A latency spike on checkout costs revenue. On a background sync, it can wait. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise not just by severity but by consequence.
 
 The direction is clear: from predefined questions toward arbitrary queryability, from isolated service monitoring toward cross-system correlation, from reactive alerting toward proactive detection. The systems we operate have become more complex than anything the original monitoring model was designed for. The tools are evolving to match.
