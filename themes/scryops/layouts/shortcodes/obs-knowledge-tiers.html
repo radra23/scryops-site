@@ -1,0 +1,63 @@
+<style>
+.knt-wrap{background:#161616;border:1px solid #2A2A2A;border-top:3px solid #F5A623;padding:1.4rem 1.4rem 1.2rem;font-family:'Commit Mono','Courier New',monospace;}
+.knt-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#A8A8A0;letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+.knt-lane{background:#0D0D0D;border:1px solid #2A2A2A;border-left:4px solid;display:grid;grid-template-columns:180px 1fr 148px;gap:.8rem;align-items:center;padding:.95rem .8rem;margin-bottom:.7rem;}
+@media(max-width:640px){.knt-lane{grid-template-columns:1fr;gap:.55rem;}}
+.knt-lp{font-family:'Press Start 2P',monospace;font-size:.62rem;font-weight:700;line-height:1.5;}
+.knt-ls{font-family:'Press Start 2P',monospace;font-size:.48rem;color:#808080;letter-spacing:.06em;margin-top:.3rem;}
+.knt-desc{font-size:.82rem;color:#D8D6CE;line-height:1.5;}
+.knt-desc b{color:#F0EEE8;}
+.knt-desc small{display:block;color:#A8A8A0;font-size:.72rem;margin-top:.2rem;}
+.knt-tag{font-family:'Press Start 2P',monospace;font-size:.48rem;letter-spacing:.04em;padding:.45rem .55rem;border:1px solid;text-align:center;line-height:1.6;justify-self:end;}
+@media(max-width:640px){.knt-tag{justify-self:start;}}
+.knt-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid #2A2A2A;font-size:.8rem;color:#A8A8A0;line-height:1.5;}
+.knt-foot b{color:#FF6060;}
+figure.knt-fig{margin:2.5rem 0 2rem;}
+figure.knt-fig figcaption{font-size:.7rem;color:#A8A8A0;font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+</style>
+
+<figure class="knt-fig"
+  aria-label="Three tiers of system knowledge. Known-Knowns: failure modes you have seen before — monitored and alerted. Known-Unknowns: gaps you are aware of but have not instrumented — on the backlog. Unknown-Unknowns: novel cascades and emergent failure modes — invisible to traditional monitoring. Most interesting production incidents live in the bottom tier, which traditional monitoring cannot reach.">
+  <div class="knt-wrap">
+    <div class="knt-hdr">WHAT YOUR MONITORING SYSTEM CAN SEE</div>
+
+    <div class="knt-lane" style="border-left-color:#28CA41;">
+      <div>
+        <div class="knt-lp" style="color:#28CA41;">Known-Knowns</div>
+        <div class="knt-ls">INSTRUMENTED</div>
+      </div>
+      <div class="knt-desc">
+        <b>Payment success rate, p99 latency, transaction volume</b>
+        <small>Failure modes you&rsquo;ve seen before. Alerts written. Dashboards built.</small>
+      </div>
+      <div class="knt-tag" style="color:#28CA41;border-color:#28CA41;background:rgba(40,202,65,0.1);">MONITORED<br>&amp; ALERTED</div>
+    </div>
+
+    <div class="knt-lane" style="border-left-color:#F5A623;">
+      <div>
+        <div class="knt-lp" style="color:#F5A623;">Known-Unknowns</div>
+        <div class="knt-ls">GAPS KNOWN</div>
+      </div>
+      <div class="knt-desc">
+        <b>Regional latency variance, untested load spikes</b>
+        <small>You know the instrumentation is missing. It&rsquo;s on the backlog.</small>
+      </div>
+      <div class="knt-tag" style="color:#F5A623;border-color:#F5A623;background:rgba(245,166,35,0.1);">AWARE<br>BUT BLIND</div>
+    </div>
+
+    <div class="knt-lane" style="border-left-color:#FF6060;">
+      <div>
+        <div class="knt-lp" style="color:#FF6060;">Unknown-Unknowns</div>
+        <div class="knt-ls">INVISIBLE</div>
+      </div>
+      <div class="knt-desc">
+        <b>Novel cascades, edge-case third-party interactions, emergent failure modes</b>
+        <small>No alert could have been written. The failure mode didn&rsquo;t exist yet.</small>
+      </div>
+      <div class="knt-tag" style="color:#FF6060;border-color:#FF6060;background:rgba(255,96,96,0.1);">NO ALERT<br>POSSIBLE</div>
+    </div>
+
+    <div class="knt-foot">Most interesting production incidents live in the <b>bottom tier</b>. Traditional monitoring covers only the top.</div>
+  </div>
+  <figcaption>Fig. &mdash; Traditional monitoring saturates the known-knowns tier. The interesting failures live in the tier it cannot reach.</figcaption>
+</figure>
