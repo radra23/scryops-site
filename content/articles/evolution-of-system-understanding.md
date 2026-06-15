@@ -74,10 +74,10 @@ What you can ask: is this payment slow? Is it slow for a specific provider? Is i
 
 {{< mermaid >}}
 flowchart LR
-    A["2000s · Raw logs\n'Did it succeed?'"]
-    B["2010s · Metrics\n'Is error rate rising?'"]
-    C["2012+ · Traces\n'Which service is slow?'"]
-    D["Today · Rich events\n'Why, for whom, in which version?'"]
+    A["2000s · Raw logs<br/>'Did it succeed?'"]
+    B["2010s · Metrics<br/>'Is error rate rising?'"]
+    C["2012+ · Traces<br/>'Which service is slow?'"]
+    D["Today · Rich events<br/>'Why, for whom, in which version?'"]
     A --> B --> C --> D
 {{< /mermaid >}}
 
