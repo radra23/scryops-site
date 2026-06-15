@@ -1,7 +1,7 @@
 ---
 title: "The Evolution of System Understanding"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "From reading log files to predicting failures — how our ability to understand complex systems has evolved over 30 years of distributed computing."
 readtime: 6
 tags: ["Observability", "Philosophy"]
@@ -21,15 +21,25 @@ The limitation: it only works if you already know what can go wrong.
 
 When applications fragmented into microservices, the "anticipate the failure mode" model collapsed. A single user request might traverse thirty services. A slow downstream dependency cascades up the call chain, and the error surfaces three hops away from the actual cause. The dashboards look green. Users are already experiencing failures.
 
-The classic three-category problem emerges directly from this:
+The classic four-category problem emerges directly from this:
 
-**Known-knowns** — the failure modes you have seen and instrumented for. Payment success/failure rates, transaction volumes, response time thresholds. You have alerts for these and they work.
+### Charted
 
-**Known-unknowns** — gaps you are aware of but have not yet instrumented. You know that regional performance varies but have not yet split your latency metric by region. You know that traffic spikes are coming but have not yet load-tested the new checkout flow.
+The failure modes you have seen and instrumented for. Payment success/failure rates, transaction volumes, response time thresholds. You have alerts for these and they work.
 
-**Unknown-unknowns** — failure modes you could not have predicted. Novel interaction patterns between services. Complex failure cascades triggered by an edge case in a third-party integration. A new fraud pattern that emerged from a combination of signals nobody thought to watch.
+### Marked
 
-Traditional monitoring covers the first category. The third is invisible to it. Most interesting production incidents land in the third.
+Gaps you are aware of but have not yet instrumented. You know that regional performance varies but have not yet split your latency metric by region. You know that traffic spikes are coming but have not yet load-tested the new checkout flow. It is on the map. Nobody has explored it yet.
+
+### Rumored
+
+Signals already in your telemetry that nobody has queried. The `payment.provider` field has been in every log event for a year. You have never filtered on it. The data exists — the monitoring capability does not. This is where the fastest wins are.
+
+### Here Be Dragons
+
+Failure modes you could not have predicted. Novel interaction patterns between services. Complex failure cascades triggered by an edge case in a third-party integration. A new fraud pattern that emerged from a combination of signals nobody thought to watch.
+
+Traditional monitoring covers only the first tier. Most teams operate in the second. The fastest wins are in the third. The most interesting incidents live in the fourth.
 
 {{< obs-knowledge-tiers >}}
 
@@ -72,7 +82,7 @@ A contemporary equivalent:
 
 What you can ask: is this payment slow? Is it slow for a specific provider? Is it slow for a specific region? Is it slow for premium-tier users specifically? Is it correlated with a particular app version? These are the questions that turn a "latency spiked" alert into a "stripe auth latency spiked for EU premium users on v4.2.1" root cause.
 
-{{< mermaid >}}
+{{< mermaid alt="Timeline of four telemetry eras, each answering a question the last could not: 2000s raw logs ('did it succeed?'), 2010s metrics ('is the error rate rising?'), 2012-onward distributed traces ('which service is slow?'), and today's rich events ('why, for whom, and in which version?')." caption="Fig. — Four eras of telemetry: raw logs, metrics, traces, rich events." >}}
 flowchart LR
     A["2000s · Raw logs<br/>'Did it succeed?'"]
     B["2010s · Metrics<br/>'Is error rate rising?'"]
@@ -91,11 +101,17 @@ Applied to software: an observable system lets you ask any question about its be
 
 Three shifts characterise the move from monitored to observable:
 
-**Reactive to proactive.** Traditional monitoring waits for thresholds to fire. Observable systems can surface anomalies before they cross user-visible thresholds — because the telemetry is rich enough to detect degradation patterns early.
+### Reactive to proactive
 
-**Isolated to connected.** Traditional monitoring tracks each service independently. Observable systems correlate signals across service boundaries, so a slow database query in service A is visible as latency in service B's downstream call.
+Traditional monitoring waits for thresholds to fire. Observable systems can surface anomalies before they cross user-visible thresholds — because the telemetry is rich enough to detect degradation patterns early.
 
-**Static to dynamic.** Traditional monitoring requires pre-built dashboards for pre-anticipated questions. Observable systems support arbitrary queries — "show me all requests slower than 300ms, grouped by downstream dependency, for the last 15 minutes" — answered at investigation time, not dashboard-build time.
+### Isolated to connected
+
+Traditional monitoring tracks each service independently. Observable systems correlate signals across service boundaries, so a slow database query in service A is visible as latency in service B's downstream call.
+
+### Static to dynamic
+
+Traditional monitoring requires pre-built dashboards for pre-anticipated questions. Observable systems support arbitrary queries — "show me all requests slower than 300ms, grouped by downstream dependency, for the last 15 minutes" — answered at investigation time, not dashboard-build time.
 
 {{< obs-monitoring-shifts >}}
 
@@ -111,10 +127,16 @@ With a shared standard, the instrumentation an engineer writes is portable acros
 
 The evolution has not stopped.
 
-**Continuous profiling** adds a fourth signal: low-overhead execution profiles collected from production services in real time. Where traces show which request was slow, profiling shows why — which functions consumed CPU, which allocations caused GC pressure, which I/O patterns created contention.
+### Continuous profiling
 
-**Threshold-free anomaly detection** reduces the alert-writing burden. Instead of requiring engineers to anticipate failure modes and codify them as thresholds, statistical models — from rolling baselines to time-series anomaly detection — learn normal behaviour from telemetry and surface deviations automatically. This is not a replacement for human judgment — it is a reduction in the minimum detectable signal, surfacing subtle degradations that would never cross a static threshold.
+This adds a fourth signal: low-overhead execution profiles collected from production services in real time. Where traces show which request was slow, profiling shows why — which functions consumed CPU, which allocations caused GC pressure, which I/O patterns created contention.
 
-**Business context integration** closes the gap between system health and user impact. A latency spike on checkout costs revenue. On a background sync, it can wait. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise not just by severity but by consequence.
+### Threshold-free anomaly detection
+
+This reduces the alert-writing burden. Instead of requiring engineers to anticipate failure modes and codify them as thresholds, statistical models — from rolling baselines to time-series anomaly detection — learn normal behaviour from telemetry and surface deviations automatically. This is not a replacement for human judgment — it is a reduction in the minimum detectable signal, surfacing subtle degradations that would never cross a static threshold.
+
+### Business context integration
+
+This closes the gap between system health and user impact. A latency spike on checkout costs revenue. On a background sync, it can wait. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise not just by severity but by consequence.
 
 The direction is clear: from predefined questions toward arbitrary queryability, from isolated service monitoring toward cross-system correlation, from reactive alerting toward proactive detection. The systems we operate have become more complex than anything the original monitoring model was designed for. The tools are evolving to match.
