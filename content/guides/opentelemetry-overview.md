@@ -37,7 +37,7 @@ flowchart TD
 
     subgraph col ["OTel Collector"]
         R[Receivers]
-        P[Processors\nbatch · filter · transform · sample]
+        P[Processors<br/>batch · filter · transform · sample]
         E[Exporters]
         R --> P --> E
     end

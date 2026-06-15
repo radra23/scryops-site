@@ -59,23 +59,23 @@ The monitoring-to-observability spectrum is easier to navigate with a concrete s
 flowchart TD
     A["Do you track predefined metrics?"]
     A -->|Yes| B["You have: Monitoring"]
-    A -->|No| Z1["Start here\nAdd baseline metrics\nand dashboards"]
+    A -->|No| Z1["Start here<br/>Add baseline metrics<br/>and dashboards"]
 
-    B --> C{"Do you alert\non those metrics?"}
+    B --> C{"Do you alert<br/>on those metrics?"}
     C -->|Yes| D["You have: Monitoring + Alerting"]
-    C -->|No| Z2["Alerting gap\nMetrics without alerts\nrequire someone to be watching"]
+    C -->|No| Z2["Alerting gap<br/>Metrics without alerts<br/>require someone to be watching"]
 
-    D --> E{"Can you investigate\nunknown failures\nwithout adding new code?"}
+    D --> E{"Can you investigate<br/>unknown failures<br/>without adding new code?"}
     E -->|Yes| F["You have: Observability"]
-    E -->|No| Z3["Observability gap\nAdd structured events, tracing,\nand flexible ad-hoc querying"]
+    E -->|No| Z3["Observability gap<br/>Add structured events, tracing,<br/>and flexible ad-hoc querying"]
 
-    F --> G{"Can you trace a single request\nacross all your services?"}
+    F --> G{"Can you trace a single request<br/>across all your services?"}
     G -->|Yes| H["You have: Distributed Tracing"]
-    G -->|No| Z4["Tracing gap\nAdd context propagation\nacross service boundaries"]
+    G -->|No| Z4["Tracing gap<br/>Add context propagation<br/>across service boundaries"]
 
-    H --> I{"Can you see DB queries,\nexternal call durations,\nand method-level timing?"}
+    H --> I{"Can you see DB queries,<br/>external call durations,<br/>and method-level timing?"}
     I -->|Yes| J["Full-stack APM coverage"]
-    I -->|No| Z5["APM gap\nAdd code-level instrumentation\nor an auto-instrumentation agent"]
+    I -->|No| Z5["APM gap<br/>Add code-level instrumentation<br/>or an auto-instrumentation agent"]
 {{< /mermaid >}}
 
 Most production systems land somewhere in the middle — monitoring and alerting in place, partial tracing on the critical path, APM coverage on a handful of services. The decision tree shows which gap is adjacent. Which gap is most expensive depends on the failure modes you actually encounter. A system where distributed tracing would have cut last quarter's worst incident in half has a clear next step.

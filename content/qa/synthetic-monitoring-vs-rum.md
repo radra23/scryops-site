@@ -24,27 +24,7 @@ The practical consequence: an outage that synthetic detects but RUM doesn't mean
 
 **When to use both:** anything with an SLA or a user experience SLO. Synthetic validates availability; RUM validates quality of experience for real users. An availability SLO of 99.9% is a synthetic claim. A Core Web Vitals target of LCP under 2.5 seconds at p75 is a RUM claim.
 
-{{< mermaid >}}
-flowchart LR
-    subgraph syn["Synthetic monitoring"]
-        s1["Scripted journeys<br/>run on schedule"]
-        s2["Known locations<br/>& network conditions"]
-        s3["Catches outages<br/>before users do"]
-    end
-    subgraph rum["Real User Monitoring"]
-        r1["Real user sessions<br/>captured in browser"]
-        r2["Real devices<br/>& networks"]
-        r3["Catches degradation<br/>for real conditions"]
-    end
-    sla["SLA / availability<br/>validation"] 
-    ux["User-perceived<br/>performance"]
-
-    syn --> sla
-    rum --> ux
-
-    style syn fill:#0D0D1A,stroke:#3A6FAF
-    style rum fill:#0D1A0D,stroke:#1C7A2E
-{{< /mermaid >}}
+{{< obs-synthetic-vs-rum >}}
 
 Without synthetic, you learn about outages from user complaints. Without RUM, you can confirm the service responds but not whether the experience real users receive is acceptable.
 

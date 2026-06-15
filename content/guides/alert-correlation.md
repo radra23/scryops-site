@@ -17,8 +17,8 @@ flowchart TD
     B[Alert: Service A Latency] --> C
     D[Alert: Service B Error Rate] --> C
     E[Alert: Cache Miss Rate] --> C
-    C --> F[Incident Group:\nDatabase Connectivity Failure]
-    C --> G[Incident Group:\nCache Degradation]
+    C --> F[Incident Group:<br/>Database Connectivity Failure]
+    C --> G[Incident Group:<br/>Cache Degradation]
 {{< /mermaid >}}
 
 ## Correlation Techniques
@@ -67,12 +67,12 @@ Group alerts that describe the same failure mode across different services. An e
 
 {{< mermaid >}}
 flowchart TD
-    A[Error Rate: Service A] --> C{Correlate\nby Type + Window}
+    A[Error Rate: Service A] --> C{Correlate<br/>by Type + Window}
     B[Error Rate: Service B] --> C
-    D[High Latency: Service X] --> E{Correlate\nby Type + Window}
+    D[High Latency: Service X] --> E{Correlate<br/>by Type + Window}
     F[High Latency: Service Y] --> E
-    C --> G[Incident Group:\nError Rate Spike]
-    E --> H[Incident Group:\nLatency Degradation]
+    C --> G[Incident Group:<br/>Error Rate Spike]
+    E --> H[Incident Group:<br/>Latency Degradation]
 {{< /mermaid >}}
 
 Semantic correlation requires consistent alert naming conventions. An alert called `PaymentServiceErrorRate` and one called `InventoryHighErrorCount` will not be recognisably similar to a naive correlator. OTel semantic conventions for metrics names — combined with standardised alert rule naming — make semantic grouping tractable.
@@ -85,11 +85,11 @@ Once alerts are grouped, the correlation output becomes an input to triage: is t
 
 {{< mermaid >}}
 flowchart TD
-    A[Correlated Alert Group] --> B{Matches\nKnown Pattern?}
-    B -->|Yes| C[Trigger Runbook\nAutomatically or with One-Click]
-    B -->|No| D[Route to On-Call\nwith Group as Context]
+    A[Correlated Alert Group] --> B{Matches<br/>Known Pattern?}
+    B -->|Yes| C[Trigger Runbook<br/>Automatically or with One-Click]
+    B -->|No| D[Route to On-Call<br/>with Group as Context]
     C --> E[Automated or Guided Remediation]
-    D --> F[Manual Investigation\nwith Correlation as Starting Point]
+    D --> F[Manual Investigation<br/>with Correlation as Starting Point]
 {{< /mermaid >}}
 
 The pattern-matching layer is where AIOps platforms add value: building a model of "what alert groups have appeared together historically, and what was the resolution?" That model makes the correlation output increasingly actionable over time. For teams without an AIOps platform, the same effect can be achieved manually: maintain a decision table in the runbook repository mapping known alert group signatures to runbooks.

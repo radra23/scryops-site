@@ -60,15 +60,15 @@ Step-by-step instructions for confirming or ruling out each potential cause. Eac
 
 {{< mermaid >}}
 flowchart TD
-    A[Alert Triggered] --> B{Payment Gateway\nLatency > 5s?}
-    B -->|Yes| C{Gateway Error Rate\nin Logs?}
-    B -->|No| D{DB Connection Pool\n> 90% Utilised?}
-    C -->|Errors Found| E[Cause: Gateway Timeout\nSee Remediation §4.1]
+    A[Alert Triggered] --> B{Payment Gateway<br/>Latency > 5s?}
+    B -->|Yes| C{Gateway Error Rate<br/>in Logs?}
+    B -->|No| D{DB Connection Pool<br/>> 90% Utilised?}
+    C -->|Errors Found| E[Cause: Gateway Timeout<br/>See Remediation §4.1]
     C -->|No Errors| D
-    D -->|Yes| F[Cause: Connection Pool\nSee Remediation §4.2]
-    D -->|No| G{Recent Deploy\nin Last 2 Hours?}
-    G -->|Yes| H[Cause: Regression\nSee Remediation §4.3]
-    G -->|No| I[Unknown Cause\nEscalate per §5]
+    D -->|Yes| F[Cause: Connection Pool<br/>See Remediation §4.2]
+    D -->|No| G{Recent Deploy<br/>in Last 2 Hours?}
+    G -->|Yes| H[Cause: Regression<br/>See Remediation §4.3]
+    G -->|No| I[Unknown Cause<br/>Escalate per §5]
 {{< /mermaid >}}
 
 Good diagnostic steps reference exact dashboard panels, log queries, or CLI commands:
