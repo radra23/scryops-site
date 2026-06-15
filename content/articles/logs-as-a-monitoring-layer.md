@@ -23,6 +23,8 @@ The log stream at 14:22 UTC shows something different: `payment-api` returning H
 
 The metric told you something was wrong. The log told you what.
 
+{{< obs-logs-vs-metrics >}}
+
 ## The Signal Hidden in Structured Logs
 
 Free-text logs are searchable. Structured logs are queryable. That gap determines what your monitoring layer can actually do.
@@ -48,6 +50,29 @@ A high-traffic customer segment hits an undocumented rate limit on a third-party
 A retry storm is underway. Individual request error rates look normal because the retries eventually succeed. But the same `request_id` or `user_id` appears fifteen times in sixty seconds. Nobody instrumented a metric for client-side retry frequency. It's not a counter anyone thought to expose. The log stream captures it as a natural consequence of logging each attempt — the pattern is there if you look for it.
 
 In all three cases, the log alert is not a fallback for absent metrics. It is a fundamentally different kind of check. Metrics summarize populations. Log-based alerts target specific conditions within those populations. The monitoring capability is not redundant — it's orthogonal.
+
+{{< mermaid >}}
+flowchart LR
+    failure["Narrow failure\n(gateway=stripe, 402)"]
+
+    subgraph metric["Metric threshold"]
+        m1["Error rate: 4.0%\nthreshold: 5%"]
+        m2["No alert fires"]
+    end
+
+    subgraph log["Log-based alert"]
+        l1["gateway=stripe\nAND http_status=402"]
+        l2["Alert fires immediately"]
+    end
+
+    failure --> m1
+    m1 --> m2
+    failure --> l1
+    l1 --> l2
+
+    style m2 fill:#2A1A1A,stroke:#CD384B,color:#FF6060
+    style l2 fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+{{< /mermaid >}}
 
 ## The Right Mental Model
 
