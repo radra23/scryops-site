@@ -29,7 +29,7 @@ This is where the classic three-category problem emerges:
 
 **Unknown-unknowns** — failure modes you could not have predicted. Novel interaction patterns between services. Complex failure cascades triggered by an edge case in a third-party integration. A new fraud pattern that emerged from a combination of signals nobody thought to watch.
 
-Traditional monitoring handles the first category. It is mostly blind to the third. Most interesting production incidents land in the third.
+Traditional monitoring covers the first category. The third is invisible to it. Most interesting production incidents land in the third.
 
 {{< obs-knowledge-tiers >}}
 
@@ -73,16 +73,17 @@ A contemporary equivalent:
 What you can ask: is this payment slow? Is it slow for a specific provider? Is it slow for a specific region? Is it slow for premium-tier users specifically? Is it correlated with a particular app version? These are the questions that turn a "latency spiked" alert into a "stripe auth latency spiked for EU premium users on v4.2.1" root cause.
 
 {{< mermaid >}}
-graph TD
-    A[Raw Logs] -->|Aggregation| B[Basic Metrics]
-    B -->|Correlation| C[Traces]
-    C -->|Context| D[Rich Structured Events]
-    D -->|Analysis| E[System Understanding]
+flowchart LR
+    A["2000s · Raw logs\n'Did it succeed?'"]
+    B["2010s · Metrics\n'Is error rate rising?'"]
+    C["2012+ · Traces\n'Which service is slow?'"]
+    D["Today · Rich events\n'Why, for whom, in which version?'"]
+    A --> B --> C --> D
 {{< /mermaid >}}
 
 ## The Observability Shift
 
-Distributed tracing — the ability to follow a request's path across service boundaries — was the first systematic response to the microservices debugging problem. It gave engineers a cross-service view they had never had before.
+Distributed tracing — the ability to follow a request's path across service boundaries — offered one of the first systematic responses to the microservices debugging problem. It gave engineers a cross-service view they had never had before.
 
 This was a step toward a broader concept: **observability**. The word comes from control theory. A system is observable if you can reconstruct its internal state from external measurements alone, without needing to insert probes at every possible failure point.
 
@@ -90,7 +91,7 @@ Applied to software: an observable system lets you ask any question about its be
 
 Three shifts characterise the move from monitored to observable:
 
-**Reactive to proactive.** Traditional monitoring waits for thresholds to fire. Observable systems surface anomalies before they cross user-visible thresholds — because the telemetry is rich enough to detect degradation patterns early.
+**Reactive to proactive.** Traditional monitoring waits for thresholds to fire. Observable systems can surface anomalies before they cross user-visible thresholds — because the telemetry is rich enough to detect degradation patterns early.
 
 **Isolated to connected.** Traditional monitoring tracks each service independently. Observable systems correlate signals across service boundaries, so a slow database query in service A is visible as latency in service B's downstream call.
 
@@ -106,20 +107,13 @@ OpenTelemetry, launched as a CNCF project in 2019 through the merger of OpenCens
 
 With a shared standard, the instrumentation an engineer writes is portable across backends, queryable alongside signals from other services, and maintainable without specialist knowledge of any particular vendor.
 
-{{< mermaid >}}
-graph LR
-    A[Logs] --> D(Observability)
-    B[Metrics] --> D
-    C[Traces] --> D
-{{< /mermaid >}}
-
 ## What Comes Next
 
 The evolution has not stopped.
 
 **Continuous profiling** adds a fourth signal: low-overhead execution profiles collected from production services in real time. Where traces show which request was slow, profiling shows why — which functions consumed CPU, which allocations caused GC pressure, which I/O patterns created contention.
 
-**ML-based anomaly detection** reduces the alert-writing burden. Instead of requiring engineers to anticipate failure modes and codify them as thresholds, statistical models learn normal behaviour from telemetry and surface deviations automatically. This is not a replacement for human judgment — it is a reduction in the minimum detectable signal, surfacing subtle degradations that would never cross a static threshold.
+**Threshold-free anomaly detection** reduces the alert-writing burden. Instead of requiring engineers to anticipate failure modes and codify them as thresholds, statistical models — from rolling baselines to time-series anomaly detection — learn normal behaviour from telemetry and surface deviations automatically. This is not a replacement for human judgment — it is a reduction in the minimum detectable signal, surfacing subtle degradations that would never cross a static threshold.
 
 **Business context integration** closes the gap between system health and user impact. A latency spike matters differently if it affects checkout versus a background sync job. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise not just by severity but by consequence.
 
