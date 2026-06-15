@@ -82,14 +82,7 @@ A contemporary equivalent:
 
 What you can ask: is this payment slow? Is it slow for a specific provider? Is it slow for a specific region? Is it slow for premium-tier users specifically? Is it correlated with a particular app version? These are the questions that turn a "latency spiked" alert into a "stripe auth latency spiked for EU premium users on v4.2.1" root cause.
 
-{{< mermaid alt="Timeline of four telemetry eras, each answering a question the last could not: 2000s raw logs ('did it succeed?'), 2010s metrics ('is the error rate rising?'), 2012-onward distributed traces ('which service is slow?'), and today's rich events ('why, for whom, and in which version?')." caption="Fig. — Four eras of telemetry: raw logs, metrics, traces, rich events." >}}
-flowchart LR
-    A["2000s · Raw logs<br/>'Did it succeed?'"]
-    B["2010s · Metrics<br/>'Is error rate rising?'"]
-    C["2012+ · Traces<br/>'Which service is slow?'"]
-    D["Today · Rich events<br/>'Why, for whom, in which version?'"]
-    A --> B --> C --> D
-{{< /mermaid >}}
+{{< obs-telemetry-techtree >}}
 
 ## The Observability Shift
 
