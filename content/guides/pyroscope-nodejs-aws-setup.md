@@ -22,7 +22,7 @@ STRUCTURE:
 ## What You're Building
 Open with the architecture diagram from the source material (adapted as a
 Mermaid diagram — the ASCII art in the source is good but should become a
-proper {{< mermaid >}} shortcode):
+proper {{</* mermaid */>}} shortcode):
 
 Node.js tasks (ECS Fargate) → Pyroscope server (EC2 or ECS) → Grafana
 
