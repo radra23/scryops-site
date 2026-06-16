@@ -1,0 +1,32 @@
+<!-- styling: .obs-table / .v1 / .v2 from themes/scryops/static/css/style.css -->
+<figure class="diagram" aria-label="Comparison table: Traditional Monitoring versus Observable System across three dimensions — when each responds, how much it sees, and what questions it can answer. Traditional monitoring acts after a threshold breach; observable systems can surface anomalies before users notice. Traditional monitoring sees each service in isolation; observable systems correlate across boundaries. Traditional monitoring only answers pre-built dashboard questions; observable systems answer arbitrary queries at investigation time.">
+  <div style="overflow-x:auto">
+  <table class="obs-table">
+    <thead>
+      <tr>
+        <th scope="col" style="width:22%" aria-label="Dimension"></th>
+        <th scope="col" class="v1">Traditional Monitoring</th>
+        <th scope="col" class="v2">Observable System</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row">When it acts</th>
+        <td class="v1">After threshold breach &mdash; user impact already underway</td>
+        <td class="v2">On anomaly pattern &mdash; surface degradation before users notice</td>
+      </tr>
+      <tr>
+        <th scope="row">What it sees</th>
+        <td class="v1">Each service in isolation &mdash; cause and effect in separate tools</td>
+        <td class="v2">Signals correlated across service boundaries &mdash; one chain, one view</td>
+      </tr>
+      <tr>
+        <th scope="row">Questions it answers</th>
+        <td class="v1">Only pre-built dashboard questions, anticipated at design time</td>
+        <td class="v2">Arbitrary queries at investigation time &mdash; no dashboard required</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <figcaption>Fig. &mdash; When it acts, how much it sees, how freely it can be queried: three dimensions that shift together.</figcaption>
+</figure>

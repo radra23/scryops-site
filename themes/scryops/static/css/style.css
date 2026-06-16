@@ -938,10 +938,12 @@ footer a:hover { text-decoration: underline; }
 ═══════════════════════════════════════════════ */
 
 /* ── Shared diagram wrapper ── */
-figure.diagram {
+figure.diagram,
+figure.knt-fig {
   margin: 2.5rem 0 2rem;
 }
-figure.diagram figcaption {
+figure.diagram figcaption,
+figure.knt-fig figcaption {
   font-size: 0.7rem;
   color: var(--muted);
   font-style: italic;
@@ -1015,7 +1017,8 @@ figure.diagram figcaption {
 .obs-table th.v1 { color: var(--muted); border-bottom: 2px solid var(--amber-deep); }
 .obs-table th.v2 { color: var(--klein-mid); border-bottom: 2px solid var(--klein-mid); }
 .obs-table td { border: 1px solid var(--border); padding: 0.5rem 1rem; font-size: 0.75rem; vertical-align: middle; }
-.obs-table td:first-child { color: var(--muted); font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; background: var(--bg); }
+.obs-table td:first-child,
+.obs-table tbody th[scope="row"] { color: var(--muted); font-weight: 400; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.08em; white-space: nowrap; background: var(--bg); text-align: left; }
 .obs-table td.v1 { color: var(--text); }
 .obs-table td.v2 { color: var(--klein-mid); }
 .obs-table tr:nth-child(even) td { background: rgba(255,255,255,0.015); }

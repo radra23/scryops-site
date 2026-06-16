@@ -1,0 +1,73 @@
+<style>
+.knt-wrap{background:#161616;border:1px solid #2A2A2A;border-top:3px solid #F5A623;padding:1.4rem 1.4rem 1.2rem;font-family:'Commit Mono','Courier New',monospace;}
+.knt-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:#A8A8A0;letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+.knt-lane{background:#0D0D0D;border:1px solid #2A2A2A;border-left:4px solid;display:grid;grid-template-columns:180px 1fr 148px;gap:.8rem;align-items:center;padding:.95rem .8rem;margin-bottom:.7rem;}
+@media(max-width:640px){.knt-lane{grid-template-columns:1fr;gap:.55rem;}}
+.knt-lp{font-family:'Press Start 2P',monospace;font-size:.62rem;font-weight:700;line-height:1.5;}
+.knt-ls{font-family:'Press Start 2P',monospace;font-size:.52rem;color:#808080;letter-spacing:.06em;margin-top:.3rem;}
+.knt-desc{font-size:.82rem;color:#D8D6CE;line-height:1.5;}
+.knt-desc b{color:#F0EEE8;}
+.knt-desc small{display:block;color:#A8A8A0;font-size:.72rem;margin-top:.2rem;}
+.knt-tag{font-family:'Press Start 2P',monospace;font-size:.52rem;letter-spacing:.04em;padding:.45rem .55rem;border:1px solid;text-align:center;line-height:1.6;justify-self:end;}
+@media(max-width:640px){.knt-tag{justify-self:start;}}
+.knt-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid #2A2A2A;font-size:.8rem;color:#A8A8A0;line-height:1.5;}
+.knt-foot b{color:#FF6060;}
+</style>
+
+<figure class="knt-fig"
+  aria-label="Four tiers of monitoring coverage using cartographic naming. Charted: failure modes you have instrumented and alerted on — explored territory. Marked: gaps you know exist but have not yet instrumented — on the map, unexplored. Rumored: signals already in your telemetry that nobody has queried — the data exists, the monitoring capability does not. Here Be Dragons: failure modes that could not have been predicted — off the edge of every map, no alert possible. The fastest wins are in the Rumored tier. The most interesting incidents live at the bottom.">
+  <div class="knt-wrap">
+    <div class="knt-hdr">WHAT YOUR MONITORING SYSTEM CAN SEE</div>
+
+    <div class="knt-lane" style="border-left-color:#28CA41;">
+      <div>
+        <div class="knt-lp" style="color:#28CA41;">Charted</div>
+        <div class="knt-ls">EXPLORED</div>
+      </div>
+      <div class="knt-desc">
+        <b>Payment success rate, p99 latency, transaction volume</b>
+        <small>Failure modes you&rsquo;ve seen before. Alerts written. Dashboards built.</small>
+      </div>
+      <div class="knt-tag" style="color:#28CA41;border-color:#28CA41;background:rgba(40,202,65,0.1);">MONITORED<br>&amp; ALERTED</div>
+    </div>
+
+    <div class="knt-lane" style="border-left-color:#F5A623;">
+      <div>
+        <div class="knt-lp" style="color:#F5A623;">Marked</div>
+        <div class="knt-ls">ON THE MAP</div>
+      </div>
+      <div class="knt-desc">
+        <b>Regional latency variance, untested load spikes</b>
+        <small>You know the instrumentation is missing. It&rsquo;s on the backlog.</small>
+      </div>
+      <div class="knt-tag" style="color:#F5A623;border-color:#F5A623;background:rgba(245,166,35,0.1);">KNOWN<br>GAP</div>
+    </div>
+
+    <div class="knt-lane" style="border-left-color:#5B8DEF;">
+      <div>
+        <div class="knt-lp" style="color:#5B8DEF;">Rumored</div>
+        <div class="knt-ls">UNQUERIED</div>
+      </div>
+      <div class="knt-desc">
+        <b>Fields logged for months, never filtered on</b>
+        <small>The data exists. Nobody has built the alert yet. Fastest wins live here.</small>
+      </div>
+      <div class="knt-tag" style="color:#5B8DEF;border-color:#5B8DEF;background:rgba(91,141,239,0.1);">DATA<br>EXISTS</div>
+    </div>
+
+    <div class="knt-lane" style="border-left-color:#FF6060;">
+      <div>
+        <div class="knt-lp" style="color:#FF6060;">Here Be Dragons</div>
+        <div class="knt-ls">BEYOND THE MAP</div>
+      </div>
+      <div class="knt-desc">
+        <b>Novel cascades, edge-case third-party interactions, emergent failure modes</b>
+        <small>No alert could have been written. The failure mode didn&rsquo;t exist yet.</small>
+      </div>
+      <div class="knt-tag" style="color:#FF6060;border-color:#FF6060;background:rgba(255,96,96,0.1);">NO ALERT<br>POSSIBLE</div>
+    </div>
+
+    <div class="knt-foot">Traditional monitoring covers only the top tier. The fastest wins are in the third. The most interesting incidents live at the <b>bottom</b>.</div>
+  </div>
+  <figcaption>Fig. &mdash; Four tiers of coverage, from charted territory to the edge of the map. Most teams explore them in reverse order.</figcaption>
+</figure>
