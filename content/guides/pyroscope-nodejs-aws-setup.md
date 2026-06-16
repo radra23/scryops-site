@@ -230,7 +230,7 @@ Include the mental checklist (public subnet, security groups, DNS resolution,
 data directory permissions, durable AWS credentials).
 
 FORMAT NOTES:
-- The architecture diagram should be a {{< mermaid >}} sequenceDiagram or
+- The architecture diagram should be a {{</* mermaid */>}} sequenceDiagram or
   flowchart — the ASCII art from the source is good; convert it
 - Include the Docker Compose config and task definition JSON verbatim
   (they're working configs from the real project)
