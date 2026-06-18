@@ -707,6 +707,36 @@ nav.topic-list {
   flex-wrap: wrap;
 }
 
+/* ── TABLE OF CONTENTS (inline, top of longer articles) ── */
+.toc {
+  max-width: 42rem;
+  margin: 0 0 2.2rem;
+  padding: 1rem 1.2rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+}
+.toc-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+  margin-bottom: 0.75rem;
+}
+.toc #TableOfContents ul { list-style: none; margin: 0; padding-left: 0; }
+.toc #TableOfContents ul ul { padding-left: 1rem; margin-top: 0.25rem; }
+.toc #TableOfContents li { margin: 0.3rem 0; line-height: 1.4; }
+.toc #TableOfContents a {
+  color: var(--muted);
+  font-size: 0.9rem;
+  text-decoration: none;
+  transition: color 0.12s;
+}
+.toc #TableOfContents a:hover { color: var(--amber); }
+/* anchor jumps (TOC links, deep links) clear the sticky nav instead of hiding under it */
+.prose h2, .prose h3 { scroll-margin-top: 5rem; }
+
 .prose {
   font-size: 1rem;
   line-height: 1.85;
