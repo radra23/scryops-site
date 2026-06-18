@@ -453,15 +453,23 @@ nav.topic-list {
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
 }
+.tag-pill::before {
+  content: "#";
+  color: var(--amber-deep);
+  font-weight: 700;
+  margin-right: 0.15rem;
+}
 .tag-pill:hover {
   color: var(--amber);
   border-color: var(--amber-deep);
+  background: rgba(245, 166, 35, 0.06);
 }
+.tag-pill:hover::before { color: var(--amber); }
 
 /* ── END-OF-ARTICLE ZONE (resources + related) ── */
 .article-end {
@@ -844,7 +852,7 @@ nav.topic-list {
   font-family: var(--font-sans);
 }
 /* Reading column: the article title block and body text share one width so they
-   line up; figures, code, and tables still run full-width. ~48rem ≈ 80ch. */
+   line up; figures, code, and tables still run full-width. ~42rem ≈ 72ch. */
 .single-header,
 .prose > p,
 .prose > ul,
@@ -853,7 +861,7 @@ nav.topic-list {
 .prose > h3,
 .prose > blockquote,
 .art-excerpt {
-  max-width: 48rem;
+  max-width: 42rem;
 }
 
 /* visible keyboard focus (previously only the skip link had one) */
