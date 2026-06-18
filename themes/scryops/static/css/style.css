@@ -765,12 +765,14 @@ nav.topic-list {
   margin-bottom: 0.3rem;
 }
 .prose code {
+  font-family: var(--font-mono);
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
   font-size: 0.88em;
 }
 .prose pre {
+  font-family: var(--font-mono);
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--amber);
@@ -1476,3 +1478,25 @@ figure.diagram figcaption {
   font-size: 0.75rem;
   color: var(--muted);
 }
+
+/* ── SYNTAX HIGHLIGHTING — class-based chroma tokens (ported from stg) ── */
+.chroma { color: var(--text); background: none; }
+.chroma .err { color: #FF6188; background: none; }                 /* error            */
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs,
+.chroma .cp, .chroma .cpf { color: #A6A28C; font-style: italic; }  /* comments  ~7:1   */
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn,
+.chroma .kp, .chroma .kr, .chroma .kt { color: #FF6188; }          /* keywords  ~6.3:1 */
+.chroma .o, .chroma .ow, .chroma .p { color: var(--text); }        /* operators/punct  */
+.chroma .n, .chroma .na, .chroma .nl, .chroma .nv,
+.chroma .vc, .chroma .vg, .chroma .vi { color: var(--text); }      /* names / vars     */
+.chroma .nb, .chroma .bp, .chroma .nc, .chroma .nn,
+.chroma .no, .chroma .nt { color: #66D9EF; }                       /* builtins/types ~11:1 */
+.chroma .nf, .chroma .fm { color: #A6E22E; }                       /* functions ~11.7:1 */
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl,
+.chroma .sd, .chroma .s2, .chroma .se, .chroma .sh, .chroma .si,
+.chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: #E6DB74; } /* strings ~12.7:1 */
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh,
+.chroma .mi, .chroma .il, .chroma .mo { color: #AE81FF; }          /* numbers ~6.4:1   */
+.chroma .gd { color: #FF6188; }
+.chroma .gi { color: #A6E22E; }
+.chroma .gh, .chroma .gu { color: #66D9EF; }
