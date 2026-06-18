@@ -16,6 +16,15 @@
     <h1>{{ .Title }}</h1>
     {{ with .Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
   </div>
+
+  {{/* ── TABLE OF CONTENTS: only for longer pieces (>=4 sections) ── */}}
+  {{ if ge (len (findRE "(?i)<h2" .Content)) 4 }}
+  <div class="toc">
+    <p class="toc-head">On this page</p>
+    {{ .TableOfContents }}
+  </div>
+  {{ end }}
+
   <div class="prose">
     {{ .Content }}
   </div>
