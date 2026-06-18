@@ -28,5 +28,50 @@
   <div class="prose">
     {{ .Content }}
   </div>
+
+  {{/* ── END-OF-ARTICLE ZONE: resources (frontmatter-driven) + related posts ── */}}
+  {{ $hasRes := or .Params.references .Params.tools }}
+  {{ $related := first 3 (.Site.RegularPages.Related .) }}
+  {{ if or $hasRes $related }}
+  <aside class="article-end">
+
+    {{ if $hasRes }}
+    <div class="resources">
+      {{ with .Params.references }}
+      <section class="resource-group">
+        <h2 class="resource-head">References</h2>
+        <ul class="resource-list">
+          {{ range . }}
+          <li><a href="{{ .url }}"{{ if not (hasPrefix .url "/") }} target="_blank" rel="noopener"{{ end }}>{{ .title }}</a>{{ with .note }}<span class="resource-note">{{ . }}</span>{{ end }}</li>
+          {{ end }}
+        </ul>
+      </section>
+      {{ end }}
+      {{ with .Params.tools }}
+      <section class="resource-group">
+        <h2 class="resource-head">Tools &amp; repositories</h2>
+        <ul class="resource-list">
+          {{ range . }}
+          <li><a href="{{ .url }}"{{ if not (hasPrefix .url "/") }} target="_blank" rel="noopener"{{ end }}>{{ .title }}</a>{{ with .note }}<span class="resource-note">{{ . }}</span>{{ end }}</li>
+          {{ end }}
+        </ul>
+      </section>
+      {{ end }}
+    </div>
+    {{ end }}
+
+    {{ with $related }}
+    <section class="related">
+      <h2 class="related-head">Related reading</h2>
+      <div class="related-grid">
+        {{ range $i, $p := . }}
+          {{ partial "article-card.html" (dict "num" (add $i 1) "page" $p) }}
+        {{ end }}
+      </div>
+    </section>
+    {{ end }}
+
+  </aside>
+  {{ end }}
 </article>
 {{ end }}
