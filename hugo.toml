@@ -26,6 +26,7 @@ theme = "scryops"
   [markup.highlight]
     style = "monokai"
     lineNos = false
+    noClasses = false
   [markup.tableOfContents]
     startLevel = 2
     endLevel = 2
