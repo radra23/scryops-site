@@ -5,6 +5,29 @@ draft: false
 excerpt: "From reading log files to predicting failures — how our ability to understand complex systems has evolved over 30 years of distributed computing."
 readtime: 6
 tags: ["Observability", "Philosophy"]
+references:
+  - title: "A brief history of OpenTelemetry (So Far)"
+    url: "https://www.cncf.io/blog/2019/05/21/a-brief-history-of-opentelemetry-so-far/"
+    note: "Sigelman & McLean (CNCF, 2019) on the OpenTracing + OpenCensus merger that formed OpenTelemetry."
+  - title: "OpenTelemetry"
+    url: "https://opentelemetry.io/"
+    note: "Vendor-neutral SDKs, the OTLP protocol, and the Collector."
+  - title: "OTLP — OpenTelemetry Protocol specification"
+    url: "https://opentelemetry.io/docs/specs/otlp/"
+    note: "The common wire protocol for traces, metrics, and logs."
+  - title: "Observability (control theory) — Wikipedia"
+    url: "https://en.wikipedia.org/wiki/Observability"
+    note: "Where the term originates: inferring internal state from external outputs."
+tools:
+  - title: "opentelemetry-collector"
+    url: "https://github.com/open-telemetry/opentelemetry-collector"
+    note: "Core receive / process / export pipelines."
+  - title: "opentelemetry-collector-contrib"
+    url: "https://github.com/open-telemetry/opentelemetry-collector-contrib"
+    note: "OTTL transforms and most real-world components."
+  - title: "Grafana Pyroscope"
+    url: "https://github.com/grafana/pyroscope"
+    note: "Continuous profiling — the emerging fourth signal."
 ---
 
 For most of computing history, understanding a running system meant reading its logs, watching its dashboards, and writing an alert for the last thing that broke you. That worked when systems were small, stable, and well-understood. It stopped working around 2010, when the industry shifted from monoliths to microservices and the assumptions underneath traditional monitoring became untrue.
