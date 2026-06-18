@@ -1027,7 +1027,13 @@ figure.knt-fig figcaption {
   border: 1px solid var(--border);
   border-top: 3px solid var(--amber);
   padding: 1.4rem 1.4rem 1.2rem;
+  overflow-x: auto;
 }
+/* Wide diagram figures (viewBox ~760) keep a legible minimum width and scroll
+   horizontally on phones instead of shrinking the whole SVG to a thumbnail.
+   The skill-tree set this pattern; this extends it to the whole obs-* family.
+   (The mascot uses .cucco-fig, not .diag-card, so it is unaffected.) */
+.diag-card > svg { min-width: 640px; }
 
 /* ── DIAGRAM 1: Reactive loop ── */
 .flow-row {
