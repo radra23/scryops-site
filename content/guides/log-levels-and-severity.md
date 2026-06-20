@@ -1,16 +1,15 @@
 ---
 title: "Log Levels: When to Whisper, Speak, or Shout"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "Log levels are the emotional register of your system's voice. The definitive guide to using ERROR, WARN, INFO, DEBUG, and TRACE correctly — with real examples, anti-patterns, and cost impact."
 readtime: 10
 tags: ["Logs", "Observability", "Best Practices"]
 ---
 
-Log levels exist to let operators filter signal from noise. Without them, every event competes equally for attention — a startup trace lands next to a payment failure, and neither gets the response it deserves. The level is a contract between the code that emits the log and the person or system that reads it.
+It's 3am, the pager just went off, and you're scrolling a wall of logs where a routine startup trace sits right next to the payment failure that actually woke you. Nothing tells them apart, so neither gets the response it deserves. That is what log levels are for: a contract between the code that emits a log and the person — or system — that has to read it under pressure.
 
-## **RFC 5424: The Numeric Severity Scale**
-
+## RFC 5424: The Numeric Severity Scale
 RFC 5424 (the IETF syslog standard) defines eight severity levels, numbered 0–7, with 0 being most severe. Most application frameworks map to a subset of these, typically collapsing the top three into FATAL or CRITICAL.
 
 {{< mermaid >}}
@@ -50,8 +49,7 @@ graph TD
 | 6 | Informational | Informational messages | User logged in |
 | 7 | Debug | Debug-level messages | Variable values during execution |
 
-## **ERROR - The Operation Failed**
-
+## ERROR - The Operation Failed
 ERROR means the operation failed and a human needs to know. It should be rare enough that every occurrence warrants attention. If an operator sees an ERROR and has no clear next step, either the log lacks context or the level is wrong.
 
 Use ERROR when the failure affects a user or degrades a business process — a payment that didn't go through, a database connection that dropped, an external integration that returned an unrecoverable status. Do not use ERROR for expected failures like a user entering a wrong password; those are application flow, not system errors.
@@ -90,8 +88,7 @@ Use ERROR when the failure affects a user or degrades a business process — a p
 }
 ```
 
-## **WARN - Degraded but Not Broken**
-
+## WARN - Degraded but Not Broken
 WARN signals that something is wrong but the system is still functioning. The operation succeeded, or recovered, but in a way that may not hold. The distinction from ERROR is operational: an ERROR demands investigation now; a WARN demands investigation before it becomes an ERROR.
 
 Good WARN logs are actionable on a schedule. Memory at 85% of threshold, a retry that eventually succeeded, a deprecated API call that will break in the next version — these belong at WARN. If left unaddressed they become errors; addressed proactively, they never do.
@@ -123,8 +120,7 @@ Good WARN logs are actionable on a schedule. Memory at 85% of threshold, a retry
 }
 ```
 
-## **INFO - Significant Events in Normal Operation**
-
+## INFO - Significant Events in Normal Operation
 INFO records events that matter for understanding what the system did, without recording every step of how it did it. A completed order, a user login, a configuration reload — these belong at INFO. An operator reading INFO logs should get a coherent picture of system activity without drowning in implementation detail.
 
 The test: would you want this event in a daily summary? If yes, it's INFO. If it appears dozens of times per second under normal load, it's too frequent for INFO unless the volume is genuinely meaningful. High-frequency INFO logging has real cost implications at scale — route it to cold storage or sample it.
@@ -158,8 +154,7 @@ The test: would you want this event in a daily summary? If yes, it's INFO. If it
 }
 ```
 
-## **DEBUG - Internal State for Development and Incident Investigation**
-
+## DEBUG - Internal State for Development and Incident Investigation
 DEBUG captures the internal state and decision points that explain why the system behaved as it did. It is disabled in production by default because it generates high volume and the overhead adds up in tight loops. Enable it per-service when actively investigating a problem, then disable it again.
 
 A DEBUG log should answer "why did this code take this path?" — variable values, decision branch outcomes, intermediate computation results. If you find yourself reaching for DEBUG to understand normal operation, that's a signal the INFO logs need work.
@@ -191,8 +186,7 @@ A DEBUG log should answer "why did this code take this path?" — variable value
 }
 ```
 
-## **TRACE - Step-by-Step Execution Detail**
-
+## TRACE - Step-by-Step Execution Detail
 TRACE records method-level execution: entry and exit points, loop iterations, granular timing. It is the most expensive level by volume and belongs only in development or during targeted debugging sessions. Leaving TRACE enabled in production generates enough noise to mask the signal you're trying to find.
 
 **Use TRACE for:**
@@ -219,9 +213,9 @@ TRACE records method-level execution: entry and exit points, loop iterations, gr
 }
 ```
 
-## **Real-World Cost Impact: Harness Case Study**
+## Cost Impact: Criticality-Based Routing
 
-A common outcome of criticality-based routing:
+You rarely need every level in the same place at the same cost. DEBUG and TRACE are usually the bulk of raw log lines, so routing them to local-only — or dropping them in production — removes most of your shipped volume before it ever reaches central storage. Route what is left by how fast you will actually read it:
 
 {{< mermaid >}}
 graph TD
@@ -250,8 +244,7 @@ graph TD
 - **Info**: Daily batch processing for historical reports
 - **Debug/Trace**: Local environment only, not shipped to central logging
 
-## **Performance Impact**
-
+## Performance Impact
 Verbosity has a cost. The relative processing overhead increases sharply as you move to more verbose levels — debug and trace logging can add substantial overhead in tight loops:
 
 {{< mermaid >}}
@@ -269,11 +262,12 @@ graph LR
     style I fill:#66bb6a
 {{< /mermaid >}}
 
-## **Anti-Pattern Analysis**
+The fix is cheap and worth making a habit: gate verbose calls behind a level check — `if (logger.IsEnabled(LogLevel.Debug))` — so the string formatting and allocation never run when the level is off. In a tight loop, that one guard is the difference between free and expensive.
 
+## Anti-Pattern Analysis
 These are the most common logging anti-patterns seen in production codebases:
 
-### **1. Log-and-Throw**
+### 1. Log-and-Throw
 ```csharp
 // ❌ Don't do this - logs the same error multiple times
 try
@@ -298,7 +292,7 @@ catch (PaymentException ex)
 }
 ```
 
-### **2. Exception Swallowing**
+### 2. Exception Swallowing
 ```csharp
 // ❌ Silent failures without logging
 try
@@ -321,7 +315,7 @@ catch (Exception ex)
 }
 ```
 
-### **3. Flooding Patterns**
+### 3. Flooding Patterns
 ```csharp
 // ❌ Logging in tight loops without rate limiting
 foreach (var item in millionsOfItems)
@@ -341,8 +335,7 @@ foreach (var item in millionsOfItems)
 }
 ```
 
-## **Dynamic Level Management Implementation**
-
+## Dynamic Level Management Implementation
 ```csharp
 public class SmartLogLevelManager
 {
@@ -416,8 +409,7 @@ public class SmartLogLevelManager
 }
 ```
 
-## **Choosing the Right Level Under Pressure**
-
+## Choosing the Right Level Under Pressure
 When an incident is active and you need more signal, the instinct is to turn everything up to DEBUG or TRACE. Resist it. Verbose logging under load adds CPU and I/O pressure to a system that's already struggling, and the extra volume makes it harder to find the relevant lines — not easier.
 
 Instead, enable DEBUG scoped to the specific service or request path you're investigating. RFC 5424's numeric scale is a useful anchor here: if you're unsure between two levels, pick the one closer to 0. Emitting too little at a given level is better than log flooding.
@@ -448,8 +440,7 @@ A practical level-to-impact mapping that reflects how on-call teams actually tri
 - **INFO**: Anything that helps reconstruct what a user experienced
 - **DEBUG**: Anything that helps diagnose why it happened
 
-## **Automated Log Level Optimization**
-
+## Automated Log Level Optimization
 ```csharp
 public class AutoLogLevelOptimizer
 {
@@ -574,8 +565,7 @@ catch (Exception ex)
 
 The thresholds (0.5, 10, 0.1, 3) are a starting point. Calibrate them against your service's normal error baseline and the SLO error budget it has available. Unit-test `DetermineLogLevel` directly — pass (errorRate, consecutiveFailures) pairs and assert the expected level.
 
-## **Quick Reference**
-
+## Quick Reference
 | Level | Trigger | Operator action | Production default |
 |-------|---------|-----------------|-------------------|
 | ERROR | Operation failed, user impact | Investigate now | Always on |
