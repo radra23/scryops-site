@@ -1,7 +1,7 @@
 ---
 title: "Observability vs. Monitoring: Why the Distinction Matters"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "Monitoring tells you when something is wrong. Observability lets you figure out why. The gap between them is where most teams get stuck."
 readtime: 5
 tags: ["Observability", "Monitoring", "Philosophy"]
@@ -41,6 +41,14 @@ A system that is truly observable — not just monitored — needs five capabili
 
 Most teams have partial versions of all five. The gaps between "partial" and "complete" are where incidents become prolonged.
 
+## The Cost Dimension
+
+Observability is not free, and the bill scales with exactly the thing that makes it useful. Monitoring stores pre-aggregated metrics: a fixed set of series, decided in advance, that stays bounded no matter how much traffic flows through it. Observability stores raw events and traces, kept at enough fidelity to answer the questions you have not asked yet — and that volume grows with both traffic and cardinality. Add a single high-cardinality attribute like `user_id` and the number of distinct series can multiply by thousands.
+
+{{< obs-observability-cost >}}
+
+The instinct when the bill arrives is to collect less. That defeats the point: the telemetry you drop is the question you can no longer answer. The real levers are sampling — keep every error and a representative fraction of the rest — and tiered retention: raw events hot for days, rolled-up aggregates warm for months. Observability is the ability to ask any question; cost control is deciding which questions are worth keeping the data to answer.
+
 ## The Practical Test
 
 The clearest way to distinguish a monitored system from an observable one is to ask what happens during an incident you have never seen before.
@@ -51,6 +59,37 @@ In an observable system: the on-call engineer queries the telemetry with arbitra
 
 The goal of instrumentation is to reach the second state. Not just for incidents you have already seen. For any incident.
 
-<!-- TODO: Add section contrasting specific tool categories: APM vs Observability platforms -->
-<!-- TODO: Add section on the cost dimension: observability generates more data, costs more to store -->
-<!-- TODO: Cross-reference to observability-maturity-model.md for the progression from monitoring to observability -->
+## Where Does Your System Stand?
+
+The monitoring-to-observability spectrum is easier to navigate with a concrete self-assessment. This decision tree is not a score — it is a map that shows which capability you currently have and what the adjacent gap looks like.
+
+{{< mermaid >}}
+flowchart TD
+    A["Do you track predefined metrics?"]
+    A -->|Yes| B["You have: Monitoring"]
+    A -->|No| Z1["Start here<br/>Add baseline metrics<br/>and dashboards"]
+
+    B --> C{"Do you alert<br/>on those metrics?"}
+    C -->|Yes| D["You have: Monitoring + Alerting"]
+    C -->|No| Z2["Alerting gap<br/>Metrics without alerts<br/>require someone to be watching"]
+
+    D --> E{"Can you investigate<br/>unknown failures<br/>without adding new code?"}
+    E -->|Yes| F["You have: Observability"]
+    E -->|No| Z3["Observability gap<br/>Add structured events, tracing,<br/>and flexible ad-hoc querying"]
+
+    F --> G{"Can you trace a single request<br/>across all your services?"}
+    G -->|Yes| H["You have: Distributed Tracing"]
+    G -->|No| Z4["Tracing gap<br/>Add context propagation<br/>across service boundaries"]
+
+    H --> I{"Can you see DB queries,<br/>external call durations,<br/>and method-level timing?"}
+    I -->|Yes| J["Full-stack APM coverage"]
+    I -->|No| Z5["APM gap<br/>Add code-level instrumentation<br/>or an auto-instrumentation agent"]
+{{< /mermaid >}}
+
+Most production systems land somewhere in the middle — monitoring and alerting in place, partial tracing on the critical path, APM coverage on a handful of services. The decision tree shows which gap is adjacent. Which gap is most expensive depends on the failure modes you actually encounter. A system where distributed tracing would have cut last quarter's worst incident in half has a clear next step.
+
+## APM and Observability Platforms: Where They Sit
+
+"APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, Lightstep, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
+
+In practice, most modern APM tools have expanded toward observability, and most observability platforms now include APM-style code-level features. The spectrum matters more than the label: the question to ask of any tool is not "is it APM or observability?" but "does it let me answer questions I did not anticipate before the incident?"
