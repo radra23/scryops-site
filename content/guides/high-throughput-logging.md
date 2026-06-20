@@ -1,7 +1,7 @@
 ---
 title: "High-Throughput Logging: Scaling Observability to Internet Scale"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "When your systems hit hundreds of thousands of requests per second, traditional logging collapses. Here is how to rethink collection, sampling, and export for extreme scale."
 readtime: 12
 tags: ["Logs", "OpenTelemetry", "Observability", "Sampling"]
@@ -688,9 +688,10 @@ builder.Logging.AddOpenTelemetry(options =>
         otlpOptions.Protocol  = OtlpExportProtocol.Grpc;
 
         // Small, frequent deliveries to the local Collector
-        processorOptions.MaxExportBatchSize       = 200;
-        processorOptions.ExportIntervalMilliseconds = 50;
-        processorOptions.MaxQueueSize             = 2_048;
+        var batch = processorOptions.BatchExportProcessorOptions;
+        batch.MaxExportBatchSize         = 200;
+        batch.ScheduledDelayMilliseconds = 50;
+        batch.MaxQueueSize               = 2_048;
     });
 });
 ```
