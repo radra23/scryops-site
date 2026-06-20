@@ -7,6 +7,4 @@ readtime: 5
 tags: ["Observability", "Operations", "Cost"]
 ---
 
-# Observability Data Retention
-
 Content coming soon.

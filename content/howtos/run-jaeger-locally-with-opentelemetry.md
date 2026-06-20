@@ -7,8 +7,6 @@ readtime: 8
 tags: ["Tracing", "Jaeger", "OpenTelemetry", "Collector", "How-to"]
 ---
 
-# A Guide to Jaeger and OpenTelemetry Locally
-
 ## What is Jaeger?
 
 A distributed trace records the path a single request takes across multiple services — each hop becomes a span, spans nest into a tree, and the tree becomes a trace. Without a trace backend, those spans are discarded the moment they're emitted. Jaeger is an open-source trace backend: it receives spans, stores them, and lets you query and visualize the full request path.
