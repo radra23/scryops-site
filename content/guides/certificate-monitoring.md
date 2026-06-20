@@ -7,8 +7,6 @@ readtime: 8
 tags: ["Security", "Observability", "Monitoring"]
 ---
 
-# Certificate Monitoring
-
 ## The Mechanics of Certificate Management
 
 Effective certificate monitoring requires purpose-built tools for this specific observability domain.
