@@ -3,7 +3,7 @@ title: "High-Throughput Logging: Scaling Observability to Internet Scale"
 date: 2026-06-07
 draft: true
 excerpt: "When your systems hit hundreds of thousands of requests per second, traditional logging collapses. Here is how to rethink collection, sampling, and export for extreme scale."
-readtime: 8
+readtime: 10
 tags: ["Logs", "OpenTelemetry", "Observability", "Sampling"]
 ---
 
@@ -717,8 +717,122 @@ The net effect: the application holds at most ~2,000 records in its in-process q
 
 This architecture shift is worth making when you can measure GC pause contributions from logging buffers in profiling output. If your Channel queue stays well below its bound and GC pressure is low, the in-process approach is simpler — the Collector adds an operational dependency that the SDK-only path avoids.
 
-<!-- TODO: Add BenchmarkDotNet baseline measurements comparing sync vs Channel-based logging under sustained load -->
-<!-- TODO: Add serialization optimization section (System.Text.Json options, GZip compression for OTLP payloads) -->
+## Benchmarking the Baseline: Sync vs Channel
+
+Every decision in this guide rests on one claim: synchronous logging makes the calling thread wait for I/O, and a bounded channel takes that wait off the hot path. That is worth measuring rather than asserting. The [BenchmarkDotNet](https://benchmarkdotnet.org/) harness below pits a synchronous, locked write against a `Channel`-based enqueue under a scaling number of concurrent producers — the regime a high-throughput service actually runs in.
+
+```csharp
+// requires: BenchmarkDotNet, System.Threading.Channels
+[MemoryDiagnoser]
+[SimpleJob(warmupCount: 3, iterationCount: 10)]
+public class LoggingThroughputBenchmark
+{
+    private StreamWriter _sink   = null!;
+    private readonly object _sinkLock = new();
+    private Channel<string> _channel = null!;
+    private Task _drain = null!;
+
+    [Params(1, 8, 32)]   // 1, 8, 32 concurrent producer threads
+    public int Producers;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        // A sink that performs a real write+flush, like a file or console
+        _sink = new StreamWriter(File.Create(Path.GetTempFileName())) { AutoFlush = true };
+
+        _channel = Channel.CreateBounded<string>(new BoundedChannelOptions(100_000)
+        {
+            FullMode     = BoundedChannelFullMode.DropOldest,
+            SingleReader = true,
+            SingleWriter = false
+        });
+        // One background consumer drains the queue and pays the I/O cost off the hot path
+        _drain = Task.Run(async () =>
+        {
+            await foreach (var line in _channel.Reader.ReadAllAsync())
+                _sink.Write(line);
+        });
+    }
+
+    // Synchronous: the caller serializes AND writes, serialized behind a lock —
+    // exactly what a thread-safe synchronous sink does under concurrency.
+    [Benchmark(Baseline = true)]
+    public void SynchronousWrite() => Parallel.For(0, Producers * 10_000,
+        new ParallelOptions { MaxDegreeOfParallelism = Producers },
+        _ => { var line = Render(); lock (_sinkLock) _sink.Write(line); });
+
+    // Channel: the caller serializes and enqueues; the drain task absorbs the I/O.
+    [Benchmark]
+    public void ChannelEnqueue() => Parallel.For(0, Producers * 10_000,
+        new ParallelOptions { MaxDegreeOfParallelism = Producers },
+        _ => _channel.Writer.TryWrite(Render()));
+
+    private static string Render() =>
+        $"{DateTime.UtcNow:O} INFO order processed id={Random.Shared.Next()}";
+
+    [GlobalCleanup]
+    public void Cleanup()
+    {
+        _channel.Writer.Complete();
+        _drain.Wait();
+        _sink.Dispose();
+    }
+}
+```
+
+The absolute numbers depend entirely on your sink and host, so run it for your own — but the *shape* is stable across hardware. A synchronous write makes each caller wait for the serialize and the flush behind a shared lock, so its per-call cost is the sink's I/O latency, and that cost climbs as producers contend for the lock. A bounded-channel `TryWrite` is an in-memory enqueue — tens of nanoseconds uncontended, and even with many writers it stays far below the cost of one I/O flush — so it holds roughly flat as producers scale. Once the sink does real I/O, the per-call gap is frequently two to three orders of magnitude, and it *widens* with concurrency.
+
+Two cautions when you run this. Measure caller latency — the time the request thread is blocked — not just total wall-clock; that blocked time is what your p99 pays. And measure under saturation, not just steady state: the channel's speed comes with a trade-off the synchronous path does not have. Once producers outrun the drain task, `DropOldest` sheds records. The question the benchmark answers is not "which is faster when nothing is contended" but "which one protects the request thread when everything is."
+
+## Serialization and Wire Efficiency
+
+Two costs survive even after logging is asynchronous and batched: turning each record into bytes, and pushing those bytes over the wire. At 1.5M events per second both land in your CPU and egress bills, and both have well-understood fixes.
+
+**Serialize with the source generator, not reflection.** By default `System.Text.Json` works out how to serialize a type at runtime through reflection, caching the metadata on first use. On a logging hot path that reflection is pure overhead — you serialize the same handful of record shapes billions of times and never deserialize them. The source generator moves that work to compile time. Declare a `JsonSerializerContext`, and because logging only ever writes, opt into *serialization-optimization* (fast-path) mode, which emits code that writes straight to a `Utf8JsonWriter`:
+
+```csharp
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+[JsonSourceGenerationOptions(
+    GenerationMode         = JsonSourceGenerationMode.Serialization,  // fast path: write-only, highest throughput
+    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(LogEntry))]
+internal partial class LogJsonContext : JsonSerializerContext { }
+
+// Use the generated, strongly-typed metadata — no reflection, no per-call options object
+static byte[] Serialize(LogEntry e) =>
+    JsonSerializer.SerializeToUtf8Bytes(e, LogJsonContext.Default.LogEntry);
+```
+
+Microsoft's guidance is explicit: source generation eliminates runtime reflection and reduces private memory, and serialization-optimization mode specifically increases serialization throughput — it is also the only path that works under Native AOT. Three rules carry most of the benefit: reuse a single serializer context (constructing options per call rebuilds and re-caches metadata), drop nulls with `DefaultIgnoreCondition` so absent fields cost zero bytes, and never set `WriteIndented = true` in production — pretty-printing inflates every payload with whitespace you immediately pay to store and ship.
+
+**Compress the OTLP payload.** Telemetry is repetitive JSON — the same keys, levels, and service names on every record — which is exactly what gzip is built for; OTLP log and trace batches routinely compress several-fold. The exporter supports it directly:
+
+```csharp
+builder.Logging.AddOpenTelemetry(o =>
+{
+    o.AddOtlpExporter((otlp, processor) =>
+    {
+        otlp.Endpoint    = new Uri("http://localhost:4317");
+        otlp.Protocol    = OtlpExportProtocol.Grpc;
+        otlp.Compression = OtlpExportCompression.GZip;   // gzip the batch before it leaves the process
+    });
+});
+```
+
+The same switch is available without touching code through the `OTEL_EXPORTER_OTLP_COMPRESSION=gzip` environment variable. The trade is CPU for bytes: gzip spends processor time to shrink what crosses the network, so it pays off most on the egress-billed hop. When the SDK ships to a Collector on `localhost`, the bytes never leave the box — so don't compress there; compress on the Collector's *exporter* instead, on the way to the backend where the network actually costs:
+
+```yaml
+# OTel Collector — compress on the expensive hop, not the localhost one
+exporters:
+  otlphttp/backend:
+    endpoint: https://otlp.example.com
+    compression: gzip
+```
+
+Measure the CPU cost before enabling it everywhere. On a service already CPU-bound at 1.5M events/second, compression competes with request handling; on a network- or egress-bound service it is nearly free savings. The decision is per hop, not global.
 
 The right sampling and pipeline design keeps your logs useful at 13TB/day — the wrong defaults make them either incomplete or cost-prohibitive.
 
