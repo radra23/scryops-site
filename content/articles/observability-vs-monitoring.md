@@ -1,7 +1,7 @@
 ---
 title: "Observability vs. Monitoring: Why the Distinction Matters"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "Monitoring tells you when something is wrong. Observability lets you figure out why. The gap between them is where most teams get stuck."
 readtime: 5
 tags: ["Observability", "Monitoring", "Philosophy"]
@@ -40,6 +40,14 @@ A system that is truly observable — not just monitored — needs five capabili
 **5. Flexible analysis.** Raw telemetry answers no questions on its own. The tooling that queries it — the ability to filter by any attribute, aggregate over any dimension, correlate spans to logs, and ask questions that were not anticipated at instrumentation time — is what converts telemetry into understanding.
 
 Most teams have partial versions of all five. The gaps between "partial" and "complete" are where incidents become prolonged.
+
+## The Cost Dimension
+
+Observability is not free, and the bill scales with exactly the thing that makes it useful. Monitoring stores pre-aggregated metrics: a fixed set of series, decided in advance, that stays bounded no matter how much traffic flows through it. Observability stores raw events and traces, kept at enough fidelity to answer the questions you have not asked yet — and that volume grows with both traffic and cardinality. Add a single high-cardinality attribute like `user_id` and the number of distinct series can multiply by thousands.
+
+{{< obs-observability-cost >}}
+
+The instinct when the bill arrives is to collect less. That defeats the point: the telemetry you drop is the question you can no longer answer. The real levers are sampling — keep every error and a representative fraction of the rest — and tiered retention: raw events hot for days, rolled-up aggregates warm for months. Observability is the ability to ask any question; cost control is deciding which questions are worth keeping the data to answer.
 
 ## The Practical Test
 
@@ -85,6 +93,3 @@ Most production systems land somewhere in the middle — monitoring and alerting
 "APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, Lightstep, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
 
 In practice, most modern APM tools have expanded toward observability, and most observability platforms now include APM-style code-level features. The spectrum matters more than the label: the question to ask of any tool is not "is it APM or observability?" but "does it let me answer questions I did not anticipate before the incident?"
-
-<!-- TODO: Add section on the cost dimension: observability generates more data, costs more to store -->
-<!-- Cross-reference: see /guides/observability-maturity-model/ for the progression from monitoring to observability and how to plan the journey between tiers -->
