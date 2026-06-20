@@ -1,13 +1,11 @@
 ---
 title: "High-Throughput Logging: Scaling Observability to Internet Scale"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "When your systems hit hundreds of thousands of requests per second, traditional logging collapses. Here is how to rethink collection, sampling, and export for extreme scale."
 readtime: 12
 tags: ["Logs", "OpenTelemetry", "Observability", "Sampling"]
 ---
-
-# High-Throughput Logging: Scaling Observability to Internet Scale
 
 At 1.5 million log events per second — the rate a 100,000 req/s service produces at 15 log lines per request — synchronous logging stops being an option and becomes a bottleneck. The queue fills, the write thread blocks, and the service pays latency for log I/O. The challenge is not just volume: it is that every architecture decision made at moderate scale (blocking writes, uniform log levels, single-threaded export) hits a hard ceiling at this rate.
 
@@ -688,9 +686,10 @@ builder.Logging.AddOpenTelemetry(options =>
         otlpOptions.Protocol  = OtlpExportProtocol.Grpc;
 
         // Small, frequent deliveries to the local Collector
-        processorOptions.MaxExportBatchSize       = 200;
-        processorOptions.ExportIntervalMilliseconds = 50;
-        processorOptions.MaxQueueSize             = 2_048;
+        var batch = processorOptions.BatchExportProcessorOptions;
+        batch.MaxExportBatchSize         = 200;
+        batch.ScheduledDelayMilliseconds = 50;
+        batch.MaxQueueSize               = 2_048;
     });
 });
 ```
