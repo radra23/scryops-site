@@ -7,8 +7,6 @@ readtime: 10
 tags: ["Logs", "Observability", "Best Practices"]
 ---
 
-# Log Levels: When to Whisper, Speak, or Shout
-
 Log levels exist to let operators filter signal from noise. Without them, every event competes equally for attention — a startup trace lands next to a payment failure, and neither gets the response it deserves. The level is a contract between the code that emits the log and the person or system that reads it.
 
 ## **RFC 5424: The Numeric Severity Scale**
