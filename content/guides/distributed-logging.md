@@ -7,8 +7,6 @@ readtime: 8
 tags: ["Logs", "Observability", "OpenTelemetry"]
 ---
 
-# Distributed Logging
-
 Single-service logging is a solved problem. Distributed logging is not. When a request touches ten services, each service writes its own log stream to its own destination, and those streams share nothing but a timestamp you can't fully trust. Correlating a failure across that span requires trace IDs threaded through every log line, a central aggregation layer, and a consistent schema. Without those, you're reading ten separate stories and guessing at the plot.
 
 ## Core Concepts

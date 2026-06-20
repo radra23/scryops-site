@@ -7,6 +7,4 @@ readtime: 6
 tags: ["OpenTelemetry", "Collector", "Debugging", "How-to"]
 ---
 
-# How to Troubleshoot Your Observability Pipeline
-
 Content coming soon.
