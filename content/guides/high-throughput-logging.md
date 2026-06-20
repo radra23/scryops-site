@@ -26,6 +26,8 @@ At 1M+ log events per minute, standard synchronous logging exhausts I/O budgets 
 | High-traffic service | 10,000 | 12 | 120,000 | 10.4B | 1 TB |
 | Internet scale | 100,000 | 15 | 1,500,000 | 130B | 13 TB |
 
+{{< obs-throughput-volume >}}
+
 ## Building on Async Foundations: The Performance Multiplier
 
 Async logging at standard scale uses a single background writer and a modest queue. At high throughput, that single writer becomes the bottleneck: the queue fills faster than one thread drains it, and you need multiple concurrent consumers, explicit back-pressure signaling, and overflow policies that shed low-priority logs before they cause producer stalls.
@@ -457,7 +459,7 @@ public class CircuitBreaker
 
 public class ResilientLogProcessor
 {
-    private readonly Dictionary<string, CircuitBreaker> _circuitBreakers = new();
+    private readonly ConcurrentDictionary<string, CircuitBreaker> _circuitBreakers = new();
     private readonly IFallbackSink _fallbackSink;
 
     public ResilientLogProcessor(IFallbackSink fallbackSink)
@@ -477,22 +479,27 @@ public class ResilientLogProcessor
         }
     }
 
-    private CircuitBreaker GetOrCreate(string sinkName)
-    {
-        if (!_circuitBreakers.TryGetValue(sinkName, out var cb))
-        {
-            cb = new CircuitBreaker(
-                failureThreshold: 5,
-                recoveryTime:     TimeSpan.FromMinutes(2),
-                timeout:          TimeSpan.FromSeconds(30));
-            _circuitBreakers[sinkName] = cb;
-        }
-        return cb;
-    }
+    // ConcurrentDictionary.GetOrAdd is thread-safe. Under contention the factory
+    // may run more than once, but only one CircuitBreaker per sink is ever stored —
+    // a plain Dictionary written from many logging threads would corrupt instead.
+    private CircuitBreaker GetOrCreate(string sinkName) =>
+        _circuitBreakers.GetOrAdd(sinkName, _ => new CircuitBreaker(
+            failureThreshold: 5,
+            recoveryTime:     TimeSpan.FromMinutes(2),
+            timeout:          TimeSpan.FromSeconds(30)));
 }
 ```
 
-The fallback sink should target something that cannot fail — stderr or a local file on disk. The circuit stays open for `recoveryTime` before sending one probe; on success it closes.
+The fallback sink should target something that cannot fail — stderr or a local file on disk. The circuit stays open for `recoveryTime`, then admits a probe; on success it closes. One caveat worth knowing: while half-open, the implementation above can let more than one probe through at once — in production you usually single-flight that probe (an `Interlocked` gate) so a sink that is only just recovering is not hit by a burst.
+
+{{< mermaid >}}
+stateDiagram-v2
+    [*] --> Closed
+    Closed --> Open: failure count >= threshold
+    Open --> HalfOpen: recoveryTime elapsed
+    HalfOpen --> Closed: probe succeeds
+    HalfOpen --> Open: probe fails
+{{< /mermaid >}}
 
 ## OTel Processor Pattern
 
