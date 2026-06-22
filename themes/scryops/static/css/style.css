@@ -772,7 +772,7 @@ nav.topic-list {
 
 /* ── TABLE OF CONTENTS (inline, top of longer articles) ── */
 .toc {
-  max-width: 42rem;
+  max-width: 48rem;
   margin: 0 0 2.2rem;
   padding: 1rem 1.2rem 1.1rem;
   background: var(--surface);
@@ -804,6 +804,7 @@ nav.topic-list {
   font-size: 1rem;
   line-height: 1.85;
   color: var(--text);
+  max-width: 48rem;
 }
 .prose h2 {
   font-size: 1.5rem;
@@ -871,9 +872,9 @@ nav.topic-list {
   margin: 1rem 0;
 }
 
-/* ── READABILITY: reading face on body text + ~70ch measure ──
-   Figures, code blocks, tables, and all obs-* diagrams intentionally stay
-   full-width and Commit Mono — only running prose moves to the reading face. */
+/* ── READABILITY: reading face on body text ──
+   Figures, code blocks, tables, and all obs-* diagrams keep Commit Mono — only
+   running prose moves to the sans reading face. (Column width is unified below.) */
 .prose p,
 .prose li,
 .prose blockquote,
@@ -883,8 +884,9 @@ nav.topic-list {
 .qa-a {
   font-family: var(--font-sans);
 }
-/* Reading column: the article title block and body text share one width so they
-   line up; figures, code, and tables still run full-width. ~42rem ≈ 72ch. */
+/* Reading column: title, body text, AND the figures/code/tables inside .prose
+   all share one width — .prose itself is capped to 48rem above — so text and
+   images line up exactly. ~48rem ≈ 80ch. */
 .single-header,
 .prose > p,
 .prose > ul,
@@ -893,7 +895,7 @@ nav.topic-list {
 .prose > h3,
 .prose > blockquote,
 .art-excerpt {
-  max-width: 42rem;
+  max-width: 48rem;
 }
 
 /* visible keyboard focus (previously only the skip link had one) */
