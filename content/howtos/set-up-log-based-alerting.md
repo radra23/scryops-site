@@ -1,7 +1,7 @@
 ---
 title: "Set Up Log-Based Alerting with Loki and Grafana"
 date: 2026-06-10
-draft: true
+draft: false
 excerpt: "Wire a Loki log stream into a Grafana alert rule that fires on error rate, specific error codes, or a pattern your metrics don't capture. Covers ingestion verification, LogQL query patterns, notification routing, and end-to-end testing."
 readtime: 7
 tags: ["Logs", "Observability", "Alerting", "Grafana"]
@@ -10,6 +10,18 @@ tags: ["Logs", "Observability", "Alerting", "Grafana"]
 Metrics alert on rates. Logs alert on specifics. If you need to fire when a particular error code appears more than N times per minute — or when a specific dependency starts failing — and you don't have a metric for it, the log stream is what you have.
 
 The result is a Grafana alert rule backed by a LogQL query, routing to PagerDuty or Slack based on severity labels, with a tested notification payload that includes a runbook link.
+
+{{< mermaid >}}
+flowchart LR
+    app["Service logs<br/>(structured JSON)"] --> agent["Alloy<br/>(log shipper)"]
+    agent --> loki[("Loki")]
+    loki --> rule["Grafana alert rule<br/>LogQL + threshold"]
+    rule -->|severity=critical| pd["PagerDuty (P1)"]
+    rule -->|severity=warning| slack["Slack"]
+    style rule fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+    style pd fill:#2A1414,stroke:#CD384B,color:#FF6060
+    style slack fill:#2A2410,stroke:#D4820A,color:#F5A623
+{{< /mermaid >}}
 
 ## Prerequisites
 
@@ -219,4 +231,10 @@ scrape_configs:
           __path__: /var/log/app/*.log
 ```
 
-For production, replace Promtail with Grafana Alloy — Promtail is in maintenance mode. The scrape config syntax is compatible; the agent binary and image name change, not the config structure.
+The Promtail image above still runs, but treat it as legacy-only for local testing.
+
+{{< insight bookmark >}}
+**Promtail is end-of-life — ship new deployments with Grafana Alloy.** Promtail entered LTS in February 2025 and reached end-of-life on **March 2, 2026**: no further updates, fixes, or support. Grafana Alloy is the official replacement for sending logs to Loki. Migrate an existing Promtail config with `alloy convert --source-format=promtail --output=config.alloy promtail-config.yaml` — the scrape semantics carry over; the config language changes.
+{{< /insight >}}
+
+{{< obs-mascot class="bard" quip="Every log line is a verse; every stack trace, a tragic ballad. I have arranged ten thousand gateway_timeout errors into a concept album. It pages at 2am. It is my finest work. On-call did not ask for a concept album." caption="Bawk Dylan, who swears the error rate has a rhythm if you'd just LISTEN." >}}

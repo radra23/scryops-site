@@ -1,9 +1,9 @@
 ---
 title: "How to Wire Trace IDs Into Your Logs"
 date: 2026-05-26
-draft: true
-excerpt: "Logs and traces live in separate worlds until you connect them. Wire trace context into your log output and let your observability platform handle correlation automatically."
-readtime: 6
+draft: false
+excerpt: "Logs and traces live in separate worlds until you connect them. Wire trace context into your log output — in .NET, Go, or Python — and let your observability platform handle correlation automatically."
+readtime: 8
 tags: ["OpenTelemetry", "Logs", "Tracing", "Python", "How-to"]
 ---
 
@@ -27,80 +27,130 @@ flowchart LR
     end
 {{< /mermaid >}}
 
-Three approaches cover the common cases: automatic SDK injection, manual span context extraction, and a structlog processor. Pick the one that fits your service's logging stack.
+Two approaches cover the common cases in every language: let the SDK inject trace context automatically, or extract it from the active span yourself. Which one fits depends on a single question — do your logs already flow through the OpenTelemetry pipeline, or are they plain lines on stdout that an agent scrapes?
 
 {{< mermaid >}}
 flowchart TD
-    A{Already using structlog?} -->|yes| B[structlog processor]
-    A -->|no| C{Need selective injection<br/>or unsupported logger?}
-    C -->|yes| D[manual extraction]
-    C -->|no| E[automatic SDK — start here]
+    A{Logs exported through<br/>the OTel pipeline / OTLP?} -->|yes| E[Automatic injection — start here]
+    A -->|no — plain stdout / JSON| C{Need selective control<br/>or an unsupported logger?}
+    C -->|no| E
+    C -->|yes| D[Manual extraction]
     style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
 {{< /mermaid >}}
 
 ## What you'll need
 
-- `opentelemetry-sdk` installed and a `TracerProvider` initialised — your service must already be creating spans
-- Python's standard `logging` module, or `structlog`
+- A service that already creates spans — a `TracerProvider`/tracing pipeline initialised. Trace IDs in logs are only meaningful when there are traces to correlate them with.
+- Your platform's standard logger: `ILogger` (.NET), `slog` (Go), or the `logging`/`structlog` stack (Python).
 
-If your service isn't yet instrumented, start with [How to Instrument a Python Service with OpenTelemetry](/howtos/instrument-python-service-opentelemetry/) first. Trace IDs in logs are only meaningful when there are traces to correlate them with.
+If your service isn't yet instrumented, start with [How to Instrument a Service with OpenTelemetry](/howtos/instrument-python-service-opentelemetry/) first.
 
-## The Automatic Way — Let the SDK Do It
+## Approach 1 — Let the SDK Inject Trace Context
 
-This is the right approach for most services. One call to the OTel logging instrumentor and every log record emitted during an active span will automatically carry `trace_id` and `span_id`.
+This is the right approach when your logs flow through the OpenTelemetry logging pipeline. The SDK reads the active span and stamps `trace_id` and `span_id` onto every record emitted inside it — no per-call work.
 
-```bash
-pip install opentelemetry-instrumentation-logging
+{{< codetabs >}}
+```csharp
+// Program.cs — logs emitted inside an Activity carry TraceId/SpanId automatically.
+// OpenTelemetry.Extensions.Hosting + OpenTelemetry.Exporter.OpenTelemetryProtocol
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.IncludeScopes = true;
+    logging.IncludeFormattedMessage = true;
+    logging.AddOtlpExporter();          // gRPC http://localhost:4317 by default
+});
+
+// Anywhere inside an active span — no manual extraction:
+_logger.LogInformation("Charging order {OrderId}", order.Id);
+// emitted record: TraceId=<32 hex>, SpanId=<16 hex>, matched to the active Activity
 ```
+```go
+// otelslog reads the active span off the context and attaches trace_id/span_id.
+// go.opentelemetry.io/contrib/bridges/otelslog — pre-1.0 (beta); pin the v0.x version.
+import (
+	"context"
+	"log/slog"
 
+	"go.opentelemetry.io/contrib/bridges/otelslog"
+)
+
+func main() {
+	slog.SetDefault(otelslog.NewLogger("payments")) // backed by the global LoggerProvider
+}
+
+func handle(ctx context.Context) {
+	// MUST use the ...Context variant so the active span is read from ctx.
+	slog.InfoContext(ctx, "charging order", "order.id", orderID)
+}
+```
 ```python
+# LoggingInstrumentor stamps otelTraceID/otelSpanID onto stdlib logging records.
+# pip install opentelemetry-instrumentation-logging
 from opentelemetry.instrumentation.logging import LoggingInstrumentor
 import logging
 
-# basicConfig must run first — it is a no-op if handlers already exist.
-# LoggingInstrumentor with set_logging_format=True attaches its own handler
-# when none are configured, which would make this basicConfig call silently ignored.
 logging.basicConfig(
-    format=(
-        "%(asctime)s %(levelname)s [%(name)s] "
-        "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] "
-        "%(message)s"
-    ),
+    format=("%(asctime)s %(levelname)s [%(name)s] "
+            "[trace_id=%(otelTraceID)s span_id=%(otelSpanID)s] %(message)s"),
     level=logging.INFO,
 )
-
-# Call this after your TracerProvider is initialised and after basicConfig
 LoggingInstrumentor().instrument(set_logging_format=True)
+
+# Every logger.info(...) during an active span now carries the IDs.
 ```
+{{< /codetabs >}}
 
-Every `logger.info(...)`, `logger.error(...)`, or `logger.warning(...)` call made while a span is active will now include `otelTraceID` and `otelSpanID` in the log record. When no span is active, both fields emit as `0000000000000000` — a useful signal that the request wasn't traced.
+One distinction worth understanding, because it changes what "automatic" buys you. In .NET (`AddOpenTelemetry`) and Go (`otelslog`), your logs become OpenTelemetry log records *exported over OTLP* — correlation is built into the data model. Python's `LoggingInstrumentor` only *injects* the IDs into your existing stdlib records; it does not ship logs anywhere. To export Python logs through OTLP as well, add the Logs SDK's `LoggingHandler`. Either way, the correlation IDs are now present in the output.
 
-For JSON log output, serialise the record fields rather than the format string:
+When no span is active, the behaviours differ in a useful way: Python emits `otelTraceID` as `0000000000000000` (a clear signal the request wasn't traced), while the .NET and Go patterns simply omit the fields when there's no active span.
 
-```python
-import json
-import logging
+## Approach 2 — Extract Trace Context Yourself
 
-class JsonFormatter(logging.Formatter):
-    def format(self, record):
-        return json.dumps({
-            "timestamp": self.formatTime(record, self.datefmt),
-            "level": record.levelname,
-            "logger": record.name,
-            "message": record.getMessage(),
-            "trace_id": getattr(record, "otelTraceID", ""),
-            "span_id": getattr(record, "otelSpanID", ""),
-        })
+Use this when your logs *don't* flow through OpenTelemetry — plain stdout or JSON scraped by an agent — or when you need selective control. Pull the IDs off the active span and attach them, guarding for the case where no span is active.
 
-handler = logging.StreamHandler()
-handler.setFormatter(JsonFormatter())
-logging.getLogger().addHandler(handler)
+{{< codetabs >}}
+```csharp
+using System.Diagnostics;
+
+// Read the IDs off the current Activity; attach them via a log scope.
+public static void LogWithTrace(ILogger logger, string message)
+{
+    var a = Activity.Current;
+    using (logger.BeginScope(new Dictionary<string, object>
+    {
+        ["trace_id"] = a?.TraceId.ToString() ?? "",   // 32 hex chars (W3C)
+        ["span_id"]  = a?.SpanId.ToString()  ?? "",   // 16 hex chars (W3C)
+    }))
+    {
+        logger.LogInformation("{Message}", message);
+    }
+}
 ```
+```go
+import (
+	"context"
+	"log/slog"
 
-## The Manual Way — When You Need Full Control
+	"go.opentelemetry.io/otel/trace"
+)
 
-Use this when the instrumentor doesn't support your logging system, or when you need selective injection. Extract trace context directly from the active span:
+// traceHandler injects trace_id/span_id only when a valid span is on the context.
+type traceHandler struct{ slog.Handler }
 
+func (h traceHandler) Handle(ctx context.Context, r slog.Record) error {
+	if sc := trace.SpanContextFromContext(ctx); sc.IsValid() {
+		r.AddAttrs(
+			slog.String("trace_id", sc.TraceID().String()), // 32 hex chars
+			slog.String("span_id", sc.SpanID().String()),   // 16 hex chars
+		)
+	}
+	return h.Handler.Handle(ctx, r)
+}
+
+// base := slog.NewJSONHandler(os.Stdout, nil)
+// slog.SetDefault(slog.New(traceHandler{base}))
+// slog.InfoContext(ctx, "payment completed")
+```
 ```python
 from opentelemetry import trace
 import logging
@@ -108,62 +158,47 @@ import logging
 logger = logging.getLogger(__name__)
 
 def log_with_trace(message: str, level: str = "info", **kwargs):
-    span = trace.get_current_span()
-    ctx = span.get_span_context()
-
-    extra = {
-        "trace_id": format(ctx.trace_id, "032x"),
-        "span_id": format(ctx.span_id, "016x"),
-        **kwargs,
-    }
-
-    getattr(logger, level)(message, extra=extra)
+    ctx = trace.get_current_span().get_span_context()
+    extra = {}
+    if ctx.is_valid:
+        extra = {
+            "trace_id": format(ctx.trace_id, "032x"),  # 32 hex chars
+            "span_id": format(ctx.span_id, "016x"),    # 16 hex chars
+        }
+    getattr(logger, level)(message, extra={**extra, **kwargs})
 ```
+{{< /codetabs >}}
 
-Call it inside any traced context:
+The hex formatting is the part that silently bites people. `format(ctx.trace_id, "032x")` in Python, `.TraceID().String()` in Go, and `TraceId.ToString()` in .NET all produce the same thing: the 32-character (trace) and 16-character (span) lowercase-hex strings defined by the W3C Trace Context spec — the format Jaeger, Tempo, and every OTLP-compatible backend expect. Emit the raw integer or a truncated value and your log query will match nothing, even when the trace ID is technically correct.
 
-```python
-with tracer.start_as_current_span("payment.process") as span:
-    span.set_attribute("order.id", order_id)
-    log_with_trace("Payment processing started", order_id=order_id, amount=amount)
-    # ... do work ...
-    log_with_trace("Payment completed", charge_id=result.id)
-```
+### Structured loggers — enrich once
 
-The `format(ctx.trace_id, "032x")` call converts the integer trace ID to the 32-character hex string defined by the W3C TraceContext spec — the format Jaeger, Tempo, and all OTLP-compatible backends expect. Get this format wrong and your log query will match nothing, even when the trace ID is right.
-
-## The structlog Way — For Structured-First Codebases
-
-If your service already uses `structlog`, add a processor that binds trace context to every log event automatically:
+If you use a structured logging library, bind the trace context in one place rather than decorating every call. In Python with `structlog`, that's a processor:
 
 ```python
 import structlog
 from opentelemetry import trace
 
 def add_otel_context(logger, method, event_dict):
-    span = trace.get_current_span()
-    ctx = span.get_span_context()
-    if ctx.is_valid:
+    ctx = trace.get_current_span().get_span_context()
+    if ctx.is_valid:                       # omit the field entirely outside a span
         event_dict["trace_id"] = format(ctx.trace_id, "032x")
         event_dict["span_id"] = format(ctx.span_id, "016x")
     return event_dict
 
-structlog.configure(
-    processors=[
-        add_otel_context,                          # inject trace context first
-        structlog.processors.add_log_level,
-        structlog.processors.TimeStamper(fmt="iso"),
-        structlog.processors.JSONRenderer(),
-    ],
-    logger_factory=structlog.PrintLoggerFactory(),
-)
+structlog.configure(processors=[
+    add_otel_context,                      # inject trace context first
+    structlog.processors.add_log_level,
+    structlog.processors.TimeStamper(fmt="iso"),
+    structlog.processors.JSONRenderer(),
+])
 ```
 
-The `ctx.is_valid` guard omits `trace_id` entirely when no span is active — background jobs and health checks don't need a zero-value field cluttering the log.
+The same pattern applies elsewhere: a Serilog enricher reading `Activity.Current` in .NET, or the `slog.Handler` shown above in Go. Bind the IDs once and every event inherits them.
 
 ## Closing the Loop — Verify It's Working
 
-After deploying, the verification has two steps. Make a traced request, grab the trace ID from your backend, then search your log aggregator for that exact value.
+After deploying, verification is two steps. Make a traced request, grab the trace ID from your backend, then search your log aggregator for that exact value.
 
 A quick sanity check locally — if you're printing JSON logs to stdout:
 
@@ -176,7 +211,7 @@ curl http://localhost:8080/checkout
 Take that `trace_id` and paste it into your tracing backend. You should see the corresponding trace. Paste the same value into your log aggregator. You should see exactly the log lines from that request — and only those lines.
 
 ❌ **If trace IDs appear as all zeros:**
-Your logging setup is running before `init_tracing()` initialises the `TracerProvider`. Move `init_tracing()` earlier in your startup sequence, before any logging configuration runs.
+Your logging setup is running before the `TracerProvider` is initialised. Move tracing initialisation earlier in your startup sequence, before any logging configuration runs.
 
 ✅ **If trace IDs are present but correlation isn't working in the UI:**
 The field name may not match what your backend indexes. Most backends expect `trace_id` in snake_case. Datadog expects `dd.trace_id`. If there's a mismatch, add a field rename in the Collector's `transform` processor rather than changing your application code — it keeps the service portable.
