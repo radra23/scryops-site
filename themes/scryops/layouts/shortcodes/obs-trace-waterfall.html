@@ -1,0 +1,70 @@
+<figure class="diagram"
+  aria-label="A distributed trace for one GET /checkout request, drawn as a waterfall of six spans across 240 milliseconds. The root request span runs the full width. Nested beneath it: auth.verify (16ms) and a SELECT cart_items query (32ms), both auto-instrumented and shown in blue; then payment.process (152ms), a manual business span in amber that holds most of the request's time; nested under it, an outbound POST to api.stripe.com/charge (130ms) in blue; and finally an UPDATE orders query (20ms) that failed, shown in red. Most of the latency lives inside the manual payment span, waiting on the outbound Stripe call.">
+  <div class="diag-card" style="padding:0.9rem;">
+    <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="tw-title tw-desc" shape-rendering="crispEdges"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="tw-title">Trace Waterfall — one GET /checkout request</title>
+      <desc id="tw-desc">Six spans across 240 milliseconds. Auto-instrumented HTTP and database spans are blue; the manual payment.process span in amber holds most of the duration; the outbound Stripe call nests beneath it; and a final UPDATE orders span fails in red.</desc>
+
+      <rect width="760" height="360" fill="#161616"/>
+
+      <!-- eyebrow -->
+      <text x="24" y="30" fill="#F0EEE8" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">TRACE WATERFALL</text>
+      <text x="24" y="48" fill="#C8C6C0" font-size="12">// one request, GET /checkout &#183; where the 240 ms went</text>
+
+      <!-- time axis gridlines + labels -->
+      <line x1="288" y1="80" x2="288" y2="312" stroke="#2A2A2A" stroke-width="1"/>
+      <line x1="391" y1="80" x2="391" y2="312" stroke="#222222" stroke-width="1"/>
+      <line x1="494" y1="80" x2="494" y2="312" stroke="#222222" stroke-width="1"/>
+      <line x1="597" y1="80" x2="597" y2="312" stroke="#222222" stroke-width="1"/>
+      <line x1="700" y1="80" x2="700" y2="312" stroke="#2A2A2A" stroke-width="1"/>
+      <text x="288" y="72" fill="#808080" font-size="10" text-anchor="start">0 ms</text>
+      <text x="391" y="72" fill="#808080" font-size="10" text-anchor="middle">60</text>
+      <text x="494" y="72" fill="#808080" font-size="10" text-anchor="middle">120</text>
+      <text x="597" y="72" fill="#808080" font-size="10" text-anchor="middle">180</text>
+      <text x="700" y="72" fill="#808080" font-size="10" text-anchor="end">240</text>
+
+      <!-- row 1: root request span (auto / blue) -->
+      <rect x="288" y="88" width="412" height="20" fill="#5B8DEF"/>
+      <text x="24" y="102" fill="#D8D6CE" font-size="12">GET /checkout</text>
+      <text x="706" y="102" fill="#9DB6F0" font-size="11" text-anchor="start">240 ms</text>
+
+      <!-- row 2: auth.verify (auto / blue) -->
+      <rect x="302" y="128" width="27" height="20" fill="#5B8DEF"/>
+      <text x="40" y="142" fill="#D8D6CE" font-size="12">auth.verify</text>
+      <text x="335" y="142" fill="#9DB6F0" font-size="11">16 ms</text>
+
+      <!-- row 3: SELECT cart_items (auto / blue) -->
+      <rect x="333" y="168" width="55" height="20" fill="#5B8DEF"/>
+      <text x="40" y="182" fill="#D8D6CE" font-size="12">SELECT cart_items</text>
+      <text x="394" y="182" fill="#9DB6F0" font-size="11">32 ms</text>
+
+      <!-- row 4: payment.process (MANUAL / amber) -->
+      <rect x="394" y="208" width="261" height="20" fill="#F5A623"/>
+      <text x="40" y="222" fill="#F5A623" font-size="12">payment.process</text>
+      <text x="661" y="222" fill="#F5A623" font-size="11" text-anchor="start">152 ms</text>
+
+      <!-- row 5: outbound POST to stripe (auto / blue) -->
+      <rect x="408" y="248" width="223" height="20" fill="#5B8DEF"/>
+      <text x="56" y="262" fill="#D8D6CE" font-size="12">POST api.stripe.com/charge</text>
+      <text x="637" y="262" fill="#9DB6F0" font-size="11">130 ms</text>
+
+      <!-- row 6: UPDATE orders (ERROR / red) -->
+      <rect x="659" y="288" width="34" height="20" fill="#FF6060"/>
+      <text x="40" y="302" fill="#FF6060" font-size="12">UPDATE orders &#10007;</text>
+      <text x="699" y="302" fill="#FF6060" font-size="11">20 ms</text>
+
+      <!-- legend -->
+      <line x1="24" y1="322" x2="736" y2="322" stroke="#2A2A2A" stroke-width="1"/>
+      <rect x="24" y="333" width="11" height="11" fill="#5B8DEF"/>
+      <text x="42" y="343" fill="#C8C6C0" font-size="11">auto-instrumented</text>
+      <rect x="208" y="333" width="11" height="11" fill="#F5A623"/>
+      <text x="226" y="343" fill="#C8C6C0" font-size="11">manual span</text>
+      <rect x="360" y="333" width="11" height="11" fill="#FF6060"/>
+      <text x="378" y="343" fill="#C8C6C0" font-size="11">error</text>
+      <text x="700" y="343" fill="#808080" font-size="11" text-anchor="end">total 240 ms</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &#8212; A trace is one request&rsquo;s story told in spans. The blue spans come free from auto-instrumentation; the amber <code>payment.process</code> span is the one you added by hand &#8212; and the one holding the time. The red span is where it broke.</figcaption>
+</figure>
