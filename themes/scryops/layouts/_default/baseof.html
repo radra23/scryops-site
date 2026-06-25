@@ -174,6 +174,36 @@
         });
       });
     })();
+
+    /* ── TOC scroll-spy: highlight the section currently in view ── */
+    (function() {
+      var links = document.querySelectorAll('.toc #TableOfContents a[href^="#"]');
+      if (!links.length || !('IntersectionObserver' in window)) return;
+      var map = new Map();
+      links.forEach(function(a) {
+        var h = document.getElementById(decodeURIComponent(a.getAttribute('href').slice(1)));
+        if (h) map.set(h, a);
+      });
+      if (!map.size) return;
+      var visible = new Set();
+      function refresh() {
+        if (!visible.size) return;            /* long section: keep the last active link */
+        var top = null;
+        visible.forEach(function(h) {
+          if (!top || h.getBoundingClientRect().top < top.getBoundingClientRect().top) top = h;
+        });
+        links.forEach(function(a) { a.classList.remove('active'); a.removeAttribute('aria-current'); });
+        var link = map.get(top);
+        if (link) { link.classList.add('active'); link.setAttribute('aria-current', 'true'); }
+      }
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(e) {
+          if (e.isIntersecting) visible.add(e.target); else visible.delete(e.target);
+        });
+        refresh();
+      }, { rootMargin: '-88px 0px -70% 0px', threshold: 0 });
+      map.forEach(function(link, heading) { observer.observe(heading); });
+    })();
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>

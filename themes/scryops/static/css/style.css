@@ -792,13 +792,17 @@ nav.topic-list {
 .toc #TableOfContents li { margin: 0; line-height: 1.4; }
 .toc #TableOfContents a {
   display: block;
-  padding: 0.35rem 0;
+  padding: 0.32rem 0.5rem;
+  margin: 0 -0.5rem;          /* let the active row bleed to the box padding, text stays aligned */
+  border-radius: 2px;
   color: var(--muted);
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   text-decoration: none;
-  transition: color 0.12s;
+  transition: color 0.12s, background 0.12s;
 }
 .toc #TableOfContents a:hover { color: var(--amber); }
+/* scroll-spy: the section currently in view */
+.toc #TableOfContents a.active { color: var(--amber); background: rgba(245, 166, 35, 0.12); }
 /* anchor jumps (TOC links, deep links) clear the sticky nav instead of hiding under it */
 .prose h2, .prose h3 { scroll-margin-top: 5rem; }
 
