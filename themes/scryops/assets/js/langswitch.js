@@ -155,7 +155,10 @@
       if (i === -1) return;
       e.preventDefault();
       var next = e.key === "ArrowRight" ? (i + 1) % tabs.length : (i - 1 + tabs.length) % tabs.length;
-      tabs[next].focus(); choose(tabs[next].dataset.lang);
+      var nextLang = tabs[next].dataset.lang;
+      choose(nextLang); // re-renders the tab row, so re-focus the freshly built tab
+      var moved = b.tabbar.querySelector('.ls-tab[data-lang="' + nextLang + '"]');
+      if (moved) moved.focus();
     });
     if (b.copyEl) {
       b.copyEl.addEventListener("click", function () {
