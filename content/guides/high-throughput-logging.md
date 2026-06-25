@@ -727,7 +727,7 @@ This architecture shift is worth making when you can measure GC pause contributi
 
 Every decision in this guide rests on one claim: synchronous logging makes the calling thread wait for I/O, and a queue or channel takes that wait off the hot path. That is worth measuring rather than asserting — and each language has a native way to do it: [BenchmarkDotNet](https://benchmarkdotnet.org/) in .NET, the `testing` package's parallel benchmarks in Go, and `perf_counter` around `QueueHandler` in Python. Each harness below pits a synchronous, locked write against a queue/channel enqueue under concurrent producers — the regime a high-throughput service actually runs in.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 // requires: BenchmarkDotNet, System.Threading.Channels
 [MemoryDiagnoser]
@@ -885,7 +885,7 @@ func (h *channelHandler) Handle(_ context.Context, r slog.Record) error {
 func (h *channelHandler) WithAttrs([]slog.Attr) slog.Handler { return h }
 func (h *channelHandler) WithGroup(string) slog.Handler      { return h }
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 The absolute numbers depend entirely on your sink and host, so run it for your own — but the *shape* is stable across hardware. A synchronous write makes each caller wait for the serialize and the flush behind a shared lock, so its per-call cost is the sink's I/O latency, and that cost climbs as producers contend for the lock. A bounded-channel `TryWrite` is an in-memory enqueue — tens of nanoseconds uncontended, and even with many writers it stays far below the cost of one I/O flush — so it holds roughly flat as producers scale. Once the sink does real I/O, the per-call gap is frequently two to three orders of magnitude, and it *widens* with concurrency. Python is the asterisk here: the GIL caps raw parallelism, so its throughput gap is narrower than Go's or .NET's — but moving the write off the calling thread still protects request-handling latency, which is the whole point.
 
@@ -897,7 +897,7 @@ Two costs survive even after logging is asynchronous and batched: turning each r
 
 **Serialize on the fast path, not the reflective one.** Every JSON library ships two gears: a convenient default that inspects each object by reflection (or builds a dict and walks it), and a faster path that skips that work. On a logging hot path you serialize the same handful of record shapes billions of times and never read them back, so the fast path is pure upside. In .NET that is the `System.Text.Json` source generator in write-only mode; in Python, a native-code serializer like `orjson` in place of the stdlib `json` module; in Go, `slog`'s typed attributes instead of reflective `Any` values.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -942,13 +942,13 @@ logger.LogAttrs(context.Background(), slog.LevelInfo, "order processed",
 // SLOW: Any falls back to reflection; Sprintf allocates a string the handler re-parses
 logger.Info("order processed", slog.Any("order", order), "line", fmt.Sprintf("id=%d", id))
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 Whatever the language, three rules carry most of the benefit: reuse the serializer rather than rebuilding it per call, drop null and empty fields so absent data costs zero bytes, and never pretty-print in production — indentation inflates every payload with whitespace you immediately pay to store and ship. Microsoft's guidance is explicit on the .NET case: source generation eliminates runtime reflection, reduces memory, and in write-only mode raises serialization throughput — the only path that also works under Native AOT.
 
 **Compress the OTLP payload.** Telemetry is repetitive JSON — the same keys, levels, and service names on every record — which is exactly what gzip is built for; OTLP log and trace batches routinely compress several-fold. Every SDK exposes it directly:
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 builder.Logging.AddOpenTelemetry(o =>
 {
@@ -990,7 +990,7 @@ if err != nil {
 }
 processor := log.NewBatchProcessor(exp)
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 The same switch is available without touching code through the `OTEL_EXPORTER_OTLP_COMPRESSION=gzip` environment variable, which all three SDKs honor. The trade is CPU for bytes: gzip spends processor time to shrink what crosses the network, so it pays off most on the egress-billed hop. When the SDK ships to a Collector on `localhost`, the bytes never leave the box — so don't compress there; compress on the Collector's *exporter* instead, on the way to the backend where the network actually costs:
 

@@ -51,7 +51,7 @@ The instrumentation covers resource attributes, auto-instrumented HTTP and datab
 
 Every trace your service emits carries resource attributes that answer "where did this come from?" Before you can observe your service, it needs to know who it is — its `service.name`, `service.version`, and `deployment.environment`. Keep this setup in one place so you can swap backends without touching business code.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 // dotnet add package OpenTelemetry.Extensions.Hosting OpenTelemetry.Exporter.OpenTelemetryProtocol
 //                    OpenTelemetry.Instrumentation.AspNetCore OpenTelemetry.Instrumentation.Http
@@ -140,7 +140,7 @@ def init_tracing():
     provider.add_span_processor(BatchSpanProcessor(exporter))  # batch — not Simple in prod
     trace.set_tracer_provider(provider)
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 The resource attributes you define here appear on every span this service emits, forever — they're worth getting right. Two cross-language notes: in Python, `opentelemetry.sdk.resources` exports `SERVICE_NAME` but **not** `SERVICE_VERSION`, so use the string key `"service.version"` (as above). And the semantic convention for environment was renamed `deployment.environment.name` in recent semconv versions — most backends still index `deployment.environment`, so that's what the examples use; switch if your backend expects the newer key.
 
@@ -148,7 +148,7 @@ The resource attributes you define here appear on every span this service emits,
 
 OpenTelemetry's instrumentation libraries give you spans for every incoming request, every outbound HTTP call, and every database query — without touching a route handler.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 // dotnet add package OpenTelemetry.Instrumentation.SqlClient
 // Registered once at startup (extends the builder from Step 1):
@@ -196,7 +196,7 @@ SQLAlchemyInstrumentor().instrument()   # SQL queries
 
 app = Flask(__name__)
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 That handful of lines gives you spans for every HTTP request in, every outbound call, and every database query — named, timed, and tagged with status codes automatically. Your route handlers stay unchanged. (For FastAPI, swap the Flask instrumentor for `opentelemetry-instrumentation-fastapi`; in Go, wrap whichever router you use.)
 
@@ -204,7 +204,7 @@ That handful of lines gives you spans for every HTTP request in, every outbound 
 
 Auto-instrumentation covers the framework layer. But the work that matters to your business — processing a payment, validating an order, running a fraud check — happens inside those handlers, invisible to the framework instrumentor. That's where manual spans earn their keep.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 using System.Diagnostics;
 
@@ -282,7 +282,7 @@ def process_payment(order_id: str, amount: float) -> dict:
             span.record_exception(e)
             raise
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 Two conventions worth establishing from the start. Use dot-namespaced attribute names (`payment.amount_usd`, not `amount`), and always set an error **status**, not just an exception event — recording the exception and setting `Error` status are two separate calls in every SDK (in .NET, `AddException` replaced the now-obsolete `RecordException`; in Go, `RecordError` does not set status on its own). That `Error` status is what burn rate calculations downstream depend on — don't skip it.
 
@@ -290,7 +290,7 @@ Two conventions worth establishing from the start. Use dot-namespaced attribute 
 
 Here's where most teams stop short: connecting logs to traces. Right now your traces and logs are two separate islands. Add log/trace correlation and the manual timestamp search between them disappears.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 builder.Logging.AddOpenTelemetry(logging =>
 {
@@ -318,7 +318,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 Your observability platform can now jump from any span directly to the log lines from that exact request. The trade-offs between automatic injection and manual extraction — and how to verify correlation end to end — are covered in [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/).
 

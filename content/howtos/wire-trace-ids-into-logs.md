@@ -49,7 +49,7 @@ If your service isn't yet instrumented, start with [How to Instrument a Service 
 
 This is the right approach when your logs flow through the OpenTelemetry logging pipeline. The SDK reads the active span and stamps `trace_id` and `span_id` onto every record emitted inside it — no per-call work.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 // Program.cs — logs emitted inside an Activity carry TraceId/SpanId automatically.
 // OpenTelemetry.Extensions.Hosting + OpenTelemetry.Exporter.OpenTelemetryProtocol
@@ -98,7 +98,7 @@ LoggingInstrumentor().instrument(set_logging_format=True)
 
 # Every logger.info(...) during an active span now carries the IDs.
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 One distinction worth understanding, because it changes what "automatic" buys you. In .NET (`AddOpenTelemetry`) and Go (`otelslog`), your logs become OpenTelemetry log records *exported over OTLP* — correlation is built into the data model. Python's `LoggingInstrumentor` only *injects* the IDs into your existing stdlib records; it does not ship logs anywhere. To export Python logs through OTLP as well, add the Logs SDK's `LoggingHandler`. Either way, the correlation IDs are now present in the output.
 
@@ -108,7 +108,7 @@ When no span is active, the behaviours differ in a useful way: Python emits `ote
 
 Use this when your logs *don't* flow through OpenTelemetry — plain stdout or JSON scraped by an agent — or when you need selective control. Pull the IDs off the active span and attach them, guarding for the case where no span is active.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 using System.Diagnostics;
 
@@ -167,7 +167,7 @@ def log_with_trace(message: str, level: str = "info", **kwargs):
         }
     getattr(logger, level)(message, extra={**extra, **kwargs})
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 The hex formatting is the part that silently bites people. `format(ctx.trace_id, "032x")` in Python, `.TraceID().String()` in Go, and `TraceId.ToString()` in .NET all produce the same thing: the 32-character (trace) and 16-character (span) lowercase-hex strings defined by the W3C Trace Context spec — the format Jaeger, Tempo, and every OTLP-compatible backend expect. Emit the raw integer or a truncated value and your log query will match nothing, even when the trace ID is technically correct.
 
