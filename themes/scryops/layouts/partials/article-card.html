@@ -1,5 +1,6 @@
 {{ $num := .num }}
 {{ $page := .page }}
+{{ $h := .heading | default "h2" }}
 <a href="{{ $page.RelPermalink }}" class="article" style="text-decoration:none;">
   <div class="art-num">{{ printf "%02d" $num }}</div>
   <div>
@@ -12,7 +13,7 @@
       {{ end }}
       {{ with $page.Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
     </div>
-    <h2 class="art-title">{{ $page.Title }}</h2>
+    {{ if eq $h "h3" }}<h3 class="art-title">{{ $page.Title }}</h3>{{ else }}<h2 class="art-title">{{ $page.Title }}</h2>{{ end }}
     {{ with $page.Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
   </div>
 </a>
