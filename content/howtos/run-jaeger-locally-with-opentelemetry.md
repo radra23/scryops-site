@@ -80,7 +80,7 @@ service:
 
 This configuration defines:
 - An OTLP receiver that accepts data over gRPC and HTTP
-- An OTLP exporter targeting Jaeger's native OTLP endpoint at `jaeger:4317`. Because Jaeger speaks OTLP directly, there's no need for the standalone `jaeger` exporter — which was removed from the Collector back in v0.85.0
+- An OTLP exporter targeting Jaeger's native OTLP endpoint at `jaeger:4317`. Because Jaeger speaks OTLP directly, there's no need for the standalone `jaeger` exporter — which was removed from the Collector in v0.86 (it last shipped in v0.85)
 - A traces pipeline connecting the two
 
 Save this configuration to a file named `collector-config.yaml`.

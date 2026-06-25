@@ -142,7 +142,7 @@ def init_tracing():
 ```
 {{< /langswitch >}}
 
-The resource attributes you define here appear on every span this service emits, forever — they're worth getting right. Two cross-language notes: in Python, `opentelemetry.sdk.resources` exports `SERVICE_NAME` but **not** `SERVICE_VERSION`, so use the string key `"service.version"` (as above). And the semantic convention for environment was renamed `deployment.environment.name` in recent semconv versions — most backends still index `deployment.environment`, so that's what the examples use; switch if your backend expects the newer key.
+The resource attributes you define here appear on every span this service emits, forever — they're worth getting right. Two cross-language notes: in Python, set the version with the string key `"service.version"` (as shown above) — `opentelemetry.sdk.resources` does not export a `SERVICE_VERSION` constant, so the string literal is the correct form. There is no `OTEL_SERVICE_VERSION` environment variable either; inject the version as a resource attribute or via `OTEL_RESOURCE_ATTRIBUTES=service.version=1.4.0`. And the semantic convention for environment was renamed `deployment.environment.name` in recent semconv versions — most backends still index `deployment.environment`, so that's what the examples use; switch if your backend expects the newer key.
 
 ## Step 2 — The Work Your Framework Can Do for Free
 
@@ -175,7 +175,7 @@ client := &http.Client{Transport: otelhttp.NewTransport(http.DefaultTransport)}
 
 // Database/sql: open through otelsql for automatic query spans.
 db, err := otelsql.Open("postgres", dsn,
-	otelsql.WithAttributes(attribute.String("db.system", "postgresql")))
+	otelsql.WithAttributes(attribute.String("db.system.name", "postgresql")))
 ```
 ```python
 # pip install opentelemetry-instrumentation-flask \
@@ -256,8 +256,8 @@ func ProcessPayment(ctx context.Context, orderID, provider string, amountUSD flo
 	)
 
 	if err := charge(ctx, provider, amountUSD); err != nil {
-		span.RecordError(err)                         // records the exception event
-		span.SetStatus(codes.Error, "charge failed")  // RecordError does NOT set status itself
+		span.SetStatus(codes.Error, "charge failed") // RecordError does not set status; set it explicitly
+		span.RecordError(err)                        // record the exception event
 		return err
 	}
 	return nil

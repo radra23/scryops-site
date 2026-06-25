@@ -80,8 +80,8 @@ OTEL_PATTERNS = [
      "labels a 'jaeger exporter' — removed in v0.85; use otlp/jaeger -> jaeger:4317"),
     (re.compile(r"otel/opentelemetry-collector(?!-contrib)\b"),
      "uses otel/opentelemetry-collector — prefer ...-collector-contrib for OTTL/most configs"),
-    (re.compile(r"SERVICE_VERSION"),
-     "references SERVICE_VERSION — not exported by sdk.resources; use \"service.version\" literal"),
+    (re.compile(r"OTEL_SERVICE_VERSION"),
+     "references OTEL_SERVICE_VERSION — no such env var; set service.version as a resource attribute or via OTEL_RESOURCE_ATTRIBUTES"),
     (re.compile(r"routing\s+connector[\s\S]{0,40}affinit", re.I),
      "implies routing connector gives trace-ID affinity — use loadbalancingexporter"),
 ]
