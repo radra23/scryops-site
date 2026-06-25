@@ -789,8 +789,10 @@ nav.topic-list {
 }
 .toc #TableOfContents ul { list-style: none; margin: 0; padding-left: 0; }
 .toc #TableOfContents ul ul { padding-left: 1rem; margin-top: 0.25rem; }
-.toc #TableOfContents li { margin: 0.3rem 0; line-height: 1.4; }
+.toc #TableOfContents li { margin: 0; line-height: 1.4; }
 .toc #TableOfContents a {
+  display: block;
+  padding: 0.35rem 0;
   color: var(--muted);
   font-size: 0.9rem;
   text-decoration: none;
@@ -834,6 +836,9 @@ nav.topic-list {
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
   font-size: 0.88em;
+  /* long unbreakable tokens (e.g. Foo.Bar("baz")) wrap instead of pushing the
+     page wider on mobile; code blocks keep white-space:pre so they're unaffected */
+  overflow-wrap: break-word;
 }
 .prose pre {
   font-family: var(--font-mono);
@@ -870,6 +875,15 @@ nav.topic-list {
   max-width: 100%;
   border: 1px solid var(--border);
   margin: 1rem 0;
+}
+/* Markdown tables: contain wide tables so they scroll inside their own box
+   instead of forcing the whole page to scroll sideways on small screens.
+   Scoped to class-less tables so the styled obs-* diagram tables are untouched. */
+.prose table:not([class]) {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 /* ── READABILITY: reading face on body text ──
@@ -1028,6 +1042,9 @@ footer a:hover { text-decoration: underline; }
   .single-header h1 { font-size: 1.6rem; }
   .prose h2 { font-size: 1.25rem; }
   .prose h3 { font-size: 1.1rem; }
+  /* mobile nav stacks + wraps (~150px tall), so anchored headings need a
+     bigger offset than the 5rem desktop value or they land behind the nav */
+  .prose h2, .prose h3 { scroll-margin-top: 10rem; }
   .subscribe-form { flex-direction: column; }
 }
 
