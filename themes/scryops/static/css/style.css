@@ -802,6 +802,34 @@ nav.topic-list {
 /* anchor jumps (TOC links, deep links) clear the sticky nav instead of hiding under it */
 .prose h2, .prose h3 { scroll-margin-top: 5rem; }
 
+/* ── TOC as a sticky rail in the right gutter (wide screens only) ──
+   The article becomes a two-column grid: the 48rem reading column on the left
+   and the TOC parked in the otherwise-empty gutter, kept in view while reading.
+   Gated on .has-toc + width so narrower screens keep the inline TOC fallback. */
+@media (min-width: 1120px) {
+  .has-toc {
+    display: grid;
+    grid-template-columns: minmax(0, 48rem) 1fr;
+    grid-template-rows: auto auto 1fr;
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+  .has-toc > .single-header { grid-column: 1; grid-row: 1; }
+  .has-toc > .prose         { grid-column: 1; grid-row: 2; }
+  .has-toc > .article-end   { grid-column: 1; grid-row: 3; }
+  .has-toc > .toc {
+    grid-column: 2;
+    grid-row: 1 / 4;          /* span the column so the sticky child has room */
+    align-self: start;
+    position: sticky;
+    top: 5.5rem;              /* clear the 74px sticky nav */
+    margin: 0;
+    max-width: none;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+  }
+}
+
 .prose {
   font-size: 1rem;
   line-height: 1.85;

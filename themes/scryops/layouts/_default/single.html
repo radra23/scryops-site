@@ -1,5 +1,6 @@
 {{ define "main" }}
-<article>
+{{ $hasToc := ge (len (findRE "(?i)<h2" .Content)) 4 }}
+<article{{ if $hasToc }} class="has-toc"{{ end }}>
   <div class="single-header">
     <div class="art-meta">
       {{ $type := .Type }}
@@ -18,7 +19,7 @@
   </div>
 
   {{/* ── TABLE OF CONTENTS: only for longer pieces (>=4 sections) ── */}}
-  {{ if ge (len (findRE "(?i)<h2" .Content)) 4 }}
+  {{ if $hasToc }}
   <div class="toc">
     <p class="toc-head">On this page</p>
     {{ .TableOfContents }}
