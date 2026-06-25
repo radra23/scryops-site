@@ -1,0 +1,11 @@
+# Tab label + terminal filename per fence language for the {{< langswitch >}} shortcode.
+# Keyed by the language token authors write in fences (```python, ```csharp, ...).
+# Exposed to langswitch.js as window.scryLangMeta. Add a language by adding a row;
+# only languages actually present in a block render.
+python:     { label: "Python",  file: "app.py" }
+javascript: { label: "Node.js", file: "index.js" }
+go:         { label: "Go",      file: "main.go" }
+java:       { label: "Java",    file: "Main.java" }
+csharp:     { label: ".NET",    file: "Program.cs" }
+rust:       { label: "Rust",    file: "main.rs" }
+ruby:       { label: "Ruby",    file: "app.rb" }

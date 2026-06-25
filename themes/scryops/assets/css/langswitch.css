@@ -1,0 +1,71 @@
+/* langswitch.css — scryops multi-language code switcher (inline edition).
+ * Styles the switcher chrome only; inner code uses the theme's global .chroma
+ * palette. Square corners, hairline borders, single amber accent. Falls back to
+ * literal colors if the theme tokens are absent.
+ */
+.langswitch {
+  --ls-amber: var(--amber, #F5A623);
+  --ls-surface: var(--surface, #161616);
+  --ls-surface-2: var(--surface-2, #1C1C1C);
+  --ls-border: var(--border, #2A2A2A);
+  --ls-border-strong: var(--border-strong, #3A3A3A);
+  --ls-text: var(--text, #F0EEE8);
+  --ls-muted: var(--muted, #9A9A92);
+  --ls-mono: var(--font-mono, "Commit Mono", ui-monospace, "SFMono-Regular", Menlo, monospace);
+  --ls-wash: var(--wash-amber, rgba(245, 166, 35, 0.06));
+
+  background: var(--ls-surface);
+  border: 1px solid var(--ls-border);
+  border-top: 3px solid var(--ls-amber);
+  border-radius: 0;
+  font-family: var(--ls-mono);
+  margin: 1.75rem 0;
+  overflow: hidden;
+}
+
+/* chrome bar */
+.langswitch .ls-chrome { display: flex; align-items: center; gap: 11px; padding: 11px 15px; border-bottom: 1px solid var(--ls-border); }
+.langswitch .ls-dots { display: flex; gap: 6px; }
+.langswitch .ls-dots i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; background: var(--ls-border-strong); }
+.langswitch .ls-dots i:nth-child(1) { background: #FF5F56; }
+.langswitch .ls-dots i:nth-child(2) { background: #FFBD2E; }
+.langswitch .ls-dots i:nth-child(3) { background: #27C93F; }
+.langswitch .ls-file { font-size: 12px; color: var(--ls-muted); }
+.langswitch .ls-copy { margin-left: auto; font-family: var(--ls-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ls-muted); background: transparent; border: 1px solid var(--ls-border-strong); padding: 5px 11px; cursor: pointer; border-radius: 0; transition: color 0.15s, border-color 0.12s, background 0.12s; }
+.langswitch .ls-copy:hover { color: var(--ls-amber); border-color: var(--ls-amber); }
+.langswitch .ls-copy:active { transform: translateY(1px); }
+.langswitch .ls-copy:focus-visible { outline: 2px solid var(--ls-amber); outline-offset: 2px; }
+
+/* tab row */
+.langswitch .ls-tabs { display: flex; align-items: center; padding: 0 8px; border-bottom: 1px solid var(--ls-border); }
+.langswitch .ls-tab { display: inline-flex; align-items: center; font-family: var(--ls-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 12px; background: transparent; border: none; border-bottom: 2px solid transparent; color: var(--ls-muted); cursor: pointer; white-space: nowrap; transition: color 0.15s, border-color 0.12s; }
+.langswitch .ls-tab:hover { color: var(--ls-text); }
+.langswitch .ls-tab.is-active { color: var(--ls-amber); border-bottom-color: var(--ls-amber); }
+.langswitch .ls-tab:focus-visible { outline: 2px solid var(--ls-amber); outline-offset: -2px; }
+.langswitch .ls-tabdot { width: 5px; height: 5px; border-radius: 50%; background: var(--ls-amber); margin-right: 7px; display: inline-block; flex-shrink: 0; }
+
+/* overflow "+N" menu */
+.langswitch .ls-overflow { position: relative; margin-left: auto; }
+.langswitch .ls-more { font-family: var(--ls-mono); font-size: 12px; color: var(--ls-muted); background: transparent; border: none; padding: 10px; cursor: pointer; white-space: nowrap; }
+.langswitch .ls-more:hover, .langswitch .ls-more.is-active { color: var(--ls-amber); }
+.langswitch .ls-more:focus-visible { outline: 2px solid var(--ls-amber); outline-offset: -2px; }
+.langswitch .ls-menu { position: absolute; right: 0; top: calc(100% + 4px); min-width: 170px; z-index: 7; background: var(--ls-surface-2); border: 1px solid var(--ls-border-strong); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45); }
+.langswitch .ls-menuitem { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; font-family: var(--ls-mono); font-size: 12.5px; padding: 9px 12px; background: transparent; border: none; color: var(--ls-text); cursor: pointer; }
+.langswitch .ls-menuitem:hover, .langswitch .ls-menuitem.is-active { background: var(--ls-wash); color: var(--ls-amber); }
+
+/* smart-default hint */
+.langswitch .ls-hint { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--ls-border); background: var(--ls-wash); font-size: 11px; color: var(--ls-muted); }
+.langswitch .ls-hint strong { color: var(--ls-amber); font-weight: 700; }
+.langswitch .ls-hintdot { width: 5px; height: 5px; border-radius: 50%; background: var(--ls-amber); flex-shrink: 0; display: inline-block; }
+
+/* code panels — inner .highlight blocks from Hugo/Chroma.
+   Strip the theme's .prose pre border/margin/background (the container supplies them);
+   inherit theme padding + font sizing so switcher code matches surrounding code. */
+.langswitch .ls-panels { padding: 0; }
+.langswitch .ls-panels .highlight { margin: 0; }
+.langswitch .ls-panels .highlight[hidden] { display: none; }
+.langswitch .ls-panels .highlight pre { margin: 0; border: 0; border-left: 0; border-radius: 0; background: transparent; }
+
+@media (prefers-reduced-motion: reduce) {
+  .langswitch * { transition: none !important; }
+}

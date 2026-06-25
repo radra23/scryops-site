@@ -112,7 +112,7 @@ When you run `docker-compose up`, both Jaeger and the OpenTelemetry Collector wi
 
 Before wiring up a whole service, confirm the pipeline works by emitting a single span to the Collector (or directly to Jaeger — both listen on `localhost:4317`). Each snippet below is a complete, minimal program.
 
-{{< codetabs >}}
+{{< langswitch >}}
 ```csharp
 // dotnet add package OpenTelemetry OpenTelemetry.Exporter.OpenTelemetryProtocol
 using System.Diagnostics;
@@ -172,7 +172,7 @@ with trace.get_tracer("smoke-test").start_as_current_span("hello-jaeger"):
     pass
 provider.shutdown()  # flush the span before exit
 ```
-{{< /codetabs >}}
+{{< /langswitch >}}
 
 Run it, then refresh the Jaeger UI and pick `smoke-test` from the service dropdown — your `hello-jaeger` span should appear within a few seconds.
 
