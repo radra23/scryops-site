@@ -4,7 +4,7 @@ date: 2026-06-10
 draft: false
 excerpt: "Wire a Loki log stream into a Grafana alert rule that fires on error rate, specific error codes, or a pattern your metrics don't capture. Covers ingestion verification, LogQL query patterns, notification routing, and end-to-end testing."
 readtime: 7
-tags: ["Logs", "Observability", "Alerting", "Grafana"]
+tags: ["Logs", "Observability", "Alerting", "Grafana", "How-to"]
 ---
 
 Metrics alert on rates. Logs alert on specifics. If you need to fire when a particular error code appears more than N times per minute — or when a specific dependency starts failing — and you don't have a metric for it, the log stream is what you have.
