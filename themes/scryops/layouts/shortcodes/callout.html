@@ -1,0 +1,16 @@
+{{- /* layouts/shortcodes/callout.html
+     Usage:
+       {{< callout info >}}
+       Resource attributes are set once per process.
+       {{< /callout >}}
+
+     First positional arg = level: info (default) | warn | danger
+     Optional second arg = custom label (defaults to the level
+     name uppercased: INFO / WARN / ERROR). */ -}}
+{{- $level := .Get 0 | default "info" -}}
+{{- $defaults := dict "info" "INFO" "warn" "WARN" "danger" "ERROR" -}}
+{{- $label := .Get 1 | default (index $defaults $level) -}}
+<div class="callout {{ $level }}">
+  <span class="callout-label">{{ $label }}</span>
+  {{ .Inner | markdownify }}
+</div>

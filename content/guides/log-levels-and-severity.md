@@ -491,6 +491,84 @@ public class AutoLogLevelOptimizer
 ```
 
 ## High-Frequency Event Sampling
+<<<<<<< Updated upstream
+=======
+
+Guard expensive debug payloads with `IsEnabled` before building them — the construction cost is paid even when the level is filtered out:
+
+```csharp
+// ❌ BuildDetailedReport() runs even when Debug is disabled
+_logger.LogDebug("Analysis: {@Report}", BuildDetailedReport(order));
+
+// ✅ Guard before the expensive computation
+if (_logger.IsEnabled(LogLevel.Debug))
+{
+    _logger.LogDebug("Analysis: {@Report}", BuildDetailedReport(order));
+}
+```
+
+For high-frequency INFO events, probabilistic sampling avoids logging every occurrence while retaining statistical coverage. Include the sample rate so downstream consumers can reconstruct true volume:
+
+```csharp
+// 1.0 = always log; fractional = sample rate
+private static readonly Dictionary<string, double> _sampleRates = new()
+{
+    ["payment_processed"] = 1.00,  // Always — every payment matters
+    ["order_placed"]      = 1.00,
+    ["api_call"]          = 0.10,  // 10% sample
+    ["cache_hit"]         = 0.01,  // 1% sample
+    ["health_check"]      = 0.001, // 0.1% sample
+};
+
+public void LogSampled(ILogger logger, string eventType, string message, params object[] args)
+{
+    var rate = _sampleRates.GetValueOrDefault(eventType, 0.05);
+
+    // Random.Shared is thread-safe; new Random() is not
+    if (Random.Shared.NextDouble() < rate)
+    {
+        using var scope = logger.BeginScope(
+            new Dictionary<string, object> { ["sampling.rate"] = rate });
+        logger.LogInformation(message, args);
+    }
+}
+```
+
+`sampling.rate` lets aggregation pipelines extrapolate: N observations at rate 0.01 represent ~100N actual occurrences. Without it, sampled logs look like complete counts and mislead rate-of-change alerts.
+
+## Circuit Breaker Log Level Integration
+
+When a circuit breaker handles retries, the log level should reflect what the breaker is observing — a single transient failure isn't `Error`; a 50% error rate is. Separating the level decision into its own method keeps both the level logic and the logging call independently testable:
+
+```csharp
+internal static LogLevel DetermineLogLevel(
+    double errorRate, int consecutiveFailures) =>
+    (errorRate, consecutiveFailures) switch
+    {
+        (> 0.5, _)    => LogLevel.Error,    // High error rate: circuit should open
+        (_, > 10)     => LogLevel.Error,    // Many consecutive failures
+        (> 0.1, > 3)  => LogLevel.Warning,  // Moderate degradation
+        _             => LogLevel.Information // Isolated failure
+    };
+```
+
+Use it in the catch block of the breaker's execute method:
+
+```csharp
+catch (Exception ex)
+{
+    var level = DetermineLogLevel(errorRate, consecutiveFailures);
+    _logger.Log(level, ex,
+        "Operation {Operation} failed: consecutive={ConsecutiveFailures} rate={ErrorRate:P1}",
+        operationName, consecutiveFailures, errorRate);
+    throw;
+}
+```
+
+The thresholds (0.5, 10, 0.1, 3) are a starting point. Calibrate them against your service's normal error baseline and the SLO error budget it has available. Unit-test `DetermineLogLevel` directly — pass (errorRate, consecutiveFailures) pairs and assert the expected level.
+
+## **Quick Reference**
+>>>>>>> Stashed changes
 
 Guard expensive debug payloads with `IsEnabled` before building them — the construction cost is paid even when the level is filtered out:
 
