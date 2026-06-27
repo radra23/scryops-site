@@ -2,7 +2,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — scryops{{ end }}</title>
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet" />
-<link rel="stylesheet" href="{{ "css/style.css" | relURL }}" />
+{{- /* FOUC guard: sync before CSS so the right palette paints on frame 1 */ -}}
+<script>try{if(localStorage.getItem('scryops-mode')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
+{{ $fonts := resources.Get "css/fonts.css" | fingerprint }}
+<link rel="stylesheet" href="{{ $fonts.RelPermalink }}" integrity="{{ $fonts.Data.Integrity }}" crossorigin="anonymous" />
+{{ $tel := resources.Get "css/telemetry.css" | fingerprint }}
+<link rel="stylesheet" href="{{ $tel.RelPermalink }}" integrity="{{ $tel.Data.Integrity }}" crossorigin="anonymous" />
+{{ $syn := resources.Get "css/syntax.css" | fingerprint }}
+<link rel="stylesheet" href="{{ $syn.RelPermalink }}" integrity="{{ $syn.Data.Integrity }}" crossorigin="anonymous" />
+<script>if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js');</script>
 {{ partial "analytics.html" . }}

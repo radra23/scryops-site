@@ -1,7 +1,7 @@
 {{ $num := .num }}
 {{ $page := .page }}
 {{ $h := .heading | default "h2" }}
-<a href="{{ $page.RelPermalink }}" class="article" style="text-decoration:none;">
+<a href="{{ $page.RelPermalink }}" class="art-card" style="text-decoration:none;">
   <div class="art-num">{{ printf "%02d" $num }}</div>
   <div>
     <div class="art-meta">
