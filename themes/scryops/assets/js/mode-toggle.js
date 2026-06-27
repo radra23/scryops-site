@@ -1,9 +1,10 @@
 /* ============================================================
    scryops — dark/light mode toggle
-   - Dark is the default (no class on <html>).
+   - Light (warm paper) is the DEFAULT (no data-theme on <html>).
+   - Dark (soft dark) is applied via data-theme="dark" on <html>.
    - Stores choice in localStorage under 'scryops-mode'.
    - Re-themes Mermaid diagrams on switch (see mermaid-init.js).
-   Inline the FOUC-guard snippet (see README) in <head> BEFORE
+   Inline the FOUC-guard snippet (see head.html) in <head> BEFORE
    CSS so the right mode paints on first frame.
    ============================================================ */
 (function () {
@@ -11,8 +12,8 @@
   var root = document.documentElement;
 
   function apply(mode) {
-    if (mode === 'light') root.classList.add('light');
-    else root.classList.remove('light');
+    if (mode === 'dark') root.setAttribute('data-theme', 'dark');
+    else root.removeAttribute('data-theme');
     document.querySelectorAll('.mode-toggle button').forEach(function (b) {
       b.setAttribute('aria-pressed', String(b.dataset.mode === mode));
     });
@@ -20,7 +21,7 @@
   }
 
   function current() {
-    try { return localStorage.getItem(KEY) || 'dark'; } catch (e) { return 'dark'; }
+    try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; }
   }
 
   function set(mode) {

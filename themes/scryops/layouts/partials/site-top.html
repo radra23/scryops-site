@@ -9,7 +9,7 @@
   <span class="spacer"></span>
   {{ with .Type }}<span class="site-meta">{{ . | upper }}{{ with $.Params.readingTime }} · {{ . }} MIN{{ end }}</span>{{ end }}
   <div class="mode-toggle" role="group" aria-label="Reading mode">
-    <button data-mode="dark"  aria-pressed="true">◑ Dark</button>
-    <button data-mode="light" aria-pressed="false">◐ Light</button>
+    <button data-mode="light" aria-pressed="true">◐ Light</button>
+    <button data-mode="dark"  aria-pressed="false">◑ Dark</button>
   </div>
 </header>

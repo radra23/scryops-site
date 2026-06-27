@@ -3,7 +3,7 @@
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — scryops{{ end }}</title>
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
 {{- /* FOUC guard: sync before CSS so the right palette paints on frame 1 */ -}}
-<script>try{if(localStorage.getItem('scryops-mode')==='light')document.documentElement.classList.add('light');}catch(e){}</script>
+<script>try{if(localStorage.getItem('scryops-mode')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
 {{ $fonts := resources.Get "css/fonts.css" | fingerprint }}
 <link rel="stylesheet" href="{{ $fonts.RelPermalink }}" integrity="{{ $fonts.Data.Integrity }}" crossorigin="anonymous" />
 {{ $tel := resources.Get "css/telemetry.css" | fingerprint }}

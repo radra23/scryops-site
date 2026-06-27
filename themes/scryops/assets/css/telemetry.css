@@ -7,43 +7,54 @@
    ============================================================ */
 
 :root {
-  /* ---- color · dark (default) ---- */
-  --bg:#0A0E0F;
-  --surface:#0C1213;
-  --border:#1E2C2E;
-  --heading:#EAF0EE;
-  --text:#D6DBD9;
-  --muted:#7FA6A0;
-  --green:#3DDC84;          /* healthy / values / INFO */
-  --cyan:#5BD8E8;           /* identifiers / links / edges */
-  --link:#5BD8E8;
-  --warn:#E0C24A;
-  --danger:#FF6B6B;
+  /* ---- color · light default (warm paper) ---- */
+  --bg:#F3EFE6;
+  --surface:#E7E0D2;
+  --line:#D8CFBA;
+  --head:#2B2723;
+  --text:#2B2723;
+  --muted:#6B6457;
+
+  /* accent — terminal heritage amber */
+  --accent:#A65A3C;
+  --accent-hover:#B96A4A;
+  --accent-press:#8A4730;
+  --on-accent:#F3EFE6;
+
+  /* status — pair with label/icon, never hue alone */
+  --ok:#5E6B3F;
+  --pending:#B07D2E;
+  --alert:#B5623A;
+  --info:#4D6470;
 
   /* inline code chip */
-  --ic-bg:#101718; --ic-text:#5BD8E8; --ic-bd:#1C2A2B;
+  --ic-bg:#E7E0D2; --ic-text:#A65A3C; --ic-bd:#D8CFBA;
 
   /* code well — STAYS DARK in both modes */
-  --code-bg:#0C1213; --code-text:#C8D2CF; --code-bd:#182426;
+  --code-bg:#1B1A17; --code-text:#DAD4C8; --code-bd:#322F28;
 
   /* figures */
-  --fig-bg:#0B1011;
-  --fig-grid:linear-gradient(rgba(127,166,160,.07) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(127,166,160,.07) 1px,transparent 1px);
-  --fig-bd:#1E2C2E;
-  --node-fill:#10191A; --node-stroke:#2BAE76; --edge:#5BD8E8; --nlab:#EAF0EE;
+  --fig-bg:#FFFFFF;
+  --fig-grid:linear-gradient(rgba(216,207,186,.5) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(216,207,186,.5) 1px,transparent 1px);
+  --fig-bd:#D8CFBA;
+  --node-fill:#E7E0D2; --node-stroke:#5E6B3F; --edge:#4D6470; --nlab:#2B2723;
 
   /* callouts */
-  --info-bg:rgba(61,220,132,.07); --info-bd:#3DDC84; --info-lb:#5FE39A;
-  --warn-bg:rgba(224,194,74,.08); --warn-bd:#E0C24A; --warn-lb:#E8CE66;
-  --dgr-bg:rgba(255,107,107,.08); --dgr-bd:#FF6B6B; --dgr-lb:#FF8585;
+  --info-bg:rgba(77,100,112,.10); --info-bd:#4D6470; --info-lb:#4D6470;
+  --warn-bg:rgba(176,125,46,.10); --warn-bd:#B07D2E; --warn-lb:#B07D2E;
+  --dgr-bg:rgba(181,98,58,.10);   --dgr-bd:#B5623A; --dgr-lb:#B5623A;
 
   /* tables */
-  --th:#0E1617; --tborder:#182426;
+  --th:#E7E0D2; --tborder:#D8CFBA;
+
+  /* listing row number idle */
+  --num-idle:#C8BFB0;
 
   /* ---- type ---- */
+  --font-body:'Atkinson Hyperlegible', system-ui, sans-serif;
   --font-display:'Space Mono', ui-monospace, monospace;
-  --font-read:'Courier Prime', ui-monospace, monospace;
+  --font-read:'Atkinson Hyperlegible', system-ui, sans-serif;
   --font-code:'IBM Plex Mono', ui-monospace, monospace;
   --font-pixel:'Press Start 2P', monospace;
 
@@ -53,49 +64,60 @@
   --lh-body:1.78;    --lh-lede:1.68;   --lh-code:1.75;
   --measure:66ch;
 
+  /* ---- spacing — 4px base ---- */
+  --sp-1:4px; --sp-2:8px; --sp-3:14px; --sp-4:22px; --sp-5:32px; --sp-6:52px;
+
   /* ---- form ---- */
   --radius:10px; --radius-sm:6px; --space:8px; --hair:1px;
 
-  /* number column idle colour (listing rows) */
-  --num-idle:#27403B;
-
-  /* ---- legacy aliases ----
-     Let the ported pre-Telemetry site chrome read the new palette. These
-     point at flipping tokens, so they flip dark/light automatically. */
-  --amber:var(--green); --amber-deep:var(--green); --gold:var(--green);
-  --klein:var(--cyan); --klein-mid:var(--cyan); --klein-glow:var(--cyan);
+  /* ---- backward-compat aliases ----
+     Old CSS names mapped to new tokens so no downstream rules break. */
+  --border:var(--line);
+  --heading:var(--head);
+  --link:var(--accent);
+  --green:var(--accent);   /* action green → amber */
+  --cyan:var(--info);      /* info cyan → muted blue-gray */
+  --warn:var(--pending);
+  --danger:var(--alert);
+  --amber:var(--accent); --amber-deep:var(--accent-press); --gold:var(--accent);
+  --klein:var(--info); --klein-mid:var(--info); --klein-glow:var(--info);
   --font-mono:var(--font-code); --font-sans:var(--font-read);
 }
 
-html.light {
-  --num-idle:#C7D2CE;
-  --bg:#F4F6F5;
-  --surface:#FFFFFF;
-  --border:#DEE5E2;
-  --heading:#10201A;
-  --text:#18201E;
-  --muted:#5A6863;
-  --green:#157A45;
-  --cyan:#0E7E91;
-  --link:#0B6F80;
-  --warn:#8A6A14;
-  --danger:#C2382F;
+:root[data-theme="dark"] {
+  --num-idle:#4A4438;
+  --bg:#1B1A17;
+  --surface:#26241F;
+  --line:#322F28;
+  --head:#E4DDD0;
+  --text:#DAD4C8;
+  --muted:#948C7C;
 
-  --ic-bg:#E6EDEA; --ic-text:#0E7E91; --ic-bd:#D2DDD8;
+  --accent:#C99A4E;
+  --accent-hover:#DCB273;
+  --accent-press:#A47E3E;
+  --on-accent:#1B1A17;
+
+  --ok:#8DA06B;
+  --pending:#C99A4E;
+  --alert:#CF7A55;
+  --info:#7A93A0;
+
+  --ic-bg:#26241F; --ic-text:#C99A4E; --ic-bd:#322F28;
 
   /* code well intentionally NOT overridden — stays dark */
 
-  --fig-bg:#FFFFFF;
-  --fig-grid:linear-gradient(#E6EDEA 1px,transparent 1px),
-             linear-gradient(90deg,#E6EDEA 1px,transparent 1px);
-  --fig-bd:#DEE5E2;
-  --node-fill:#EAF1ED; --node-stroke:#1E8F52; --edge:#0E7E91; --nlab:#18201E;
+  --fig-bg:#1B1A17;
+  --fig-grid:linear-gradient(rgba(148,140,124,.08) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(148,140,124,.08) 1px,transparent 1px);
+  --fig-bd:#322F28;
+  --node-fill:#26241F; --node-stroke:#8DA06B; --edge:#7A93A0; --nlab:#E4DDD0;
 
-  --info-bg:#E7F2EB; --info-bd:#157A45; --info-lb:#157A45;
-  --warn-bg:#FBF1DA; --warn-bd:#B08A1E; --warn-lb:#8A6A14;
-  --dgr-bg:#FBE9E7; --dgr-bd:#C2382F; --dgr-lb:#A8281F;
+  --info-bg:rgba(122,147,160,.10); --info-bd:#7A93A0; --info-lb:#7A93A0;
+  --warn-bg:rgba(201,154,78,.08);  --warn-bd:#C99A4E; --warn-lb:#C99A4E;
+  --dgr-bg:rgba(207,122,85,.08);   --dgr-bd:#CF7A55; --dgr-lb:#CF7A55;
 
-  --th:#EEF2F0; --tborder:#DEE5E2;
+  --th:#26241F; --tborder:#322F28;
 }
 
 /* ============================================================
