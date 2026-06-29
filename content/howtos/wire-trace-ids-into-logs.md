@@ -1,7 +1,7 @@
 ---
 title: "How to Wire Trace IDs Into Your Logs"
 date: 2026-05-26
-draft: false
+draft: true
 excerpt: "Logs and traces live in separate worlds until you connect them. Wire trace context into your log output — in .NET, Go, or Python — and let your observability platform handle correlation automatically."
 readtime: 8
 tags: ["OpenTelemetry", "Logs", "Tracing", "Python", "How-to"]

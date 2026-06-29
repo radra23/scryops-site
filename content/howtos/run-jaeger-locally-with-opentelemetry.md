@@ -1,7 +1,7 @@
 ---
 title: "How to Run Jaeger Locally with OpenTelemetry"
 date: 2026-06-07
-draft: false
+draft: true
 excerpt: "Set up a local Jaeger instance, configure the OTel Collector to forward traces, and use the Jaeger UI to explore distributed traces — all in Docker Compose."
 readtime: 8
 tags: ["Tracing", "Jaeger", "OpenTelemetry", "Collector", "How-to"]
