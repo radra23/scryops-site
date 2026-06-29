@@ -308,7 +308,12 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    layout: guide template (toc rail + article)
    ============================================================ */
 .layout{max-width:820px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:54px;padding:50px 28px 130px}
-.layout.has-toc{max-width:1080px;grid-template-columns:minmax(0,1fr) 220px}
+/* TOC on the left (matches Telemetry Reading System.dc.html). DOM keeps the
+   article first for reading/screen-reader order; grid placement moves the TOC
+   visually into the left column. */
+.layout.has-toc{max-width:1080px;grid-template-columns:200px minmax(0,1fr)}
+.layout.has-toc > .toc{grid-column:1;grid-row:1}
+.layout.has-toc > .article{grid-column:2;grid-row:1}
 /* Reading column: prose holds the ~680px measure (centered); code, figures,
    and tables break wider for room (GUIDELINES #2 — "evidence gets room,
    prose stays narrow"). */
@@ -327,6 +332,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 
 @media (max-width:820px){
   .layout,.layout.has-toc{max-width:760px;grid-template-columns:1fr;gap:30px;padding:34px 22px 90px}
+  .layout.has-toc > .toc,.layout.has-toc > .article{grid-column:auto;grid-row:auto}
   .toc{position:static}
   .title{font-size:28px}
 }
