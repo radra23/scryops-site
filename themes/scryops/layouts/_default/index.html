@@ -1,53 +1,42 @@
 {{ define "main" }}
-<div class="wrap">
+<div class="front">
 
-{{ $allContent := slice }}
-{{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "qa" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ $sorted := sort $allContent "Date" "desc" }}
-{{ $count := len $allContent }}
-
-<!-- B+C Merge M3: statement + CTA left, latest content feed right -->
-<div class="hp-split">
-
-  <!-- Left: identity statement + CTA buttons + live article counter -->
-  <div class="hp-l">
+  <!-- Identity statement + topics + CTAs -->
+  <section class="front-hero">
     <div class="eyebrow">scrying + ops</div>
-    <h1 class="statement">raw telemetry in. <b>understanding</b> out.</h1>
-    <p class="hp-lead">Observability for working engineers — logs, metrics, traces, OpenTelemetry, made legible.</p>
-    <div class="hp-btns">
-      <a href="/guides/" class="hp-btn hp-btn-pri">Start reading</a>
-      <a href="#subscribe" class="hp-btn hp-btn-gho">Subscribe →</a>
+    <h1 class="landing-statement">raw telemetry in. <b>understanding</b> out.</h1>
+    <p class="landing-lede">{{ site.Params.description }}</p>
+    {{ with site.Params.topics }}
+    <div class="topics">
+      {{ range . }}<span class="topic-chip"><b>#</b>{{ . }}</span>{{ end }}
     </div>
-    <div class="hp-prompt"><span class="hp-pr">scry@ops</span>:<span class="hp-ar">~/</span>$ {{ $count }} articles indexed<span class="hp-cursor"></span></div>
-  </div>
-
-  <!-- Right: latest content feed with type glyphs + excerpts -->
-  <div class="hp-r">
-    <div class="hp-streamlabel"><span class="hp-dot"></span>Latest</div>
-    {{ range first 5 $sorted }}
-    {{ $t := .Type }}
-    <a href="{{ .RelPermalink }}" class="hp-lrow">
-      <span class="hp-lcol">
-        {{ if eq $t "guides" }}<span class="hp-ctype hp-trace">⇉ Guide</span>
-        {{ else if eq $t "articles" }}<span class="hp-ctype hp-metric">◆ Article</span>
-        {{ else if eq $t "howtos" }}<span class="hp-ctype hp-prof">▸ How-to</span>
-        {{ else if eq $t "qa" }}<span class="hp-ctype hp-log">≡ Q&amp;A</span>
-        {{ end }}
-        <span class="hp-ltitle">{{ .Title }}</span>
-        {{ with .Params.excerpt }}<span class="hp-ldek">{{ . }}</span>{{ end }}
-      </span>
-      <span class="hp-lmeta">{{ with .Params.readtime }}{{ . }} min{{ end }}</span>
-    </a>
     {{ end }}
-  </div>
+    <div class="landing-cta">
+      <a class="btn btn-primary" href="{{ "/guides/" | relURL }}">Start reading</a>
+      <a class="btn btn-ghost" href="#subscribe">Subscribe &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Latest pieces as shell output in a terminal window -->
+  {{ $latest := first 6 (sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc") }}
+  <section class="front-feed">
+    <div class="feedwin">
+      <div class="feedhdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="fcursor"></span></div>
+      {{ range $latest }}
+      <a class="trow" href="{{ .RelPermalink }}">
+        {{ partial "type-glyph.html" . }}
+        <span class="tt">{{ .Title }}</span>
+        <span class="tm">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
+      </a>
+      {{ end }}
+    </div>
+  </section>
 
 </div>
 
-<!-- Subscribe -->
+<!-- Subscribe (inline Brevo form, preserved from the prior homepage) -->
 {{ with .Site.Params.brevo_form_url }}
+<div class="wrap">
 <section class="subscribe-section" id="subscribe">
   <h2 class="subscribe-label">Stay in the loop</h2>
   <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
@@ -115,7 +104,7 @@
   });
 }());
 </script>
+</div>
 {{ end }}
 
-</div>
 {{ end }}
