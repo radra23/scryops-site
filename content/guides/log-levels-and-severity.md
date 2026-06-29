@@ -1,7 +1,7 @@
 ---
 title: "Log Levels: When to Whisper, Speak, or Shout"
 date: 2026-06-07
-draft: false
+draft: true
 excerpt: "Log levels are the emotional register of your system's voice. The definitive guide to using ERROR, WARN, INFO, DEBUG, and TRACE correctly — with real examples, anti-patterns, and cost impact."
 readtime: 10
 tags: ["Logs", "Observability", "Best Practices"]

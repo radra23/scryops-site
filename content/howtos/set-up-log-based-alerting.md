@@ -1,7 +1,7 @@
 ---
 title: "Set Up Log-Based Alerting with Loki and Grafana"
 date: 2026-06-10
-draft: false
+draft: true
 excerpt: "Wire a Loki log stream into a Grafana alert rule that fires on error rate, specific error codes, or a pattern your metrics don't capture. Covers ingestion verification, LogQL query patterns, notification routing, and end-to-end testing."
 readtime: 7
 tags: ["Logs", "Observability", "Alerting", "Grafana", "How-to"]
