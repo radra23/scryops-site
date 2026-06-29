@@ -1,57 +1,57 @@
 /* ============================================================
-   scryops — Chroma syntax theme (warm palette)
-   Maps Hugo's Chroma highlighter classes to the warm token
-   palette. The code well is dark in BOTH site modes.
+   scryops — Chroma syntax theme (Telemetry)
+   Maps Hugo's Chroma highlighter classes to the Telemetry
+   syntax tokens. The code well is dark in BOTH site modes,
+   so these colors are constant (no html.light overrides).
 
    Requires in hugo.toml:
      [markup.highlight]
        noClasses = false
 
-   Token map (dark code well, warm palette):
-     keyword   #C99A4E  amber accent
-     string    #8DA06B  earthy green
-     function  #DCB273  amber hover (lighter)
-     type      #7A93A0  info blue-gray
-     number    #8DA06B  earthy green
-     comment   #948C7C  warm muted
-     text      #DAD4C8  warm off-white
+   Token map:
+     keyword   #5BD8E8 cyan
+     string    #3DDC84 green
+     function  #E0C24A amber
+     number    #9FE0C0
+     comment   #6C8882 muted
+     text      #C8D2CF
    ============================================================ */
 
-.chroma{color:#DAD4C8;background:#1B1A17}
+.chroma{color:#C8D2CF;background:#0C1213}
 
 /* line numbers / highlight lines */
 .chroma .lntable{border-spacing:0;padding:0;margin:0;border:0}
-.chroma .lnt,.chroma .ln{color:#4A4438;margin-right:.4em;padding:0 .4em}
-.chroma .hl{background:rgba(201,154,78,.10)}
+.chroma .lnt,.chroma .ln{color:#3D4D4E;margin-right:.4em;padding:0 .4em}
+.chroma .hl{background:rgba(91,216,232,.08)}
 
 /* comments */
-.chroma .c,.chroma .ch,.chroma .cm,.chroma .c1,.chroma .cs,.chroma .cp,.chroma .cpf{color:#948C7C;font-style:italic}
+.chroma .c,.chroma .ch,.chroma .cm,.chroma .c1,.chroma .cs,.chroma .cp,.chroma .cpf{color:#6C8882;font-style:italic}
 
 /* keywords */
-.chroma .k,.chroma .kc,.chroma .kd,.chroma .kn,.chroma .kp,.chroma .kr,.chroma .kt{color:#C99A4E}
+.chroma .k,.chroma .kc,.chroma .kd,.chroma .kn,.chroma .kp,.chroma .kr,.chroma .kt{color:#5BD8E8}
 
 /* names */
-.chroma .nf,.chroma .fm{color:#DCB273}                 /* function — amber-hover */
-.chroma .nb,.chroma .bp{color:#C99A4E}                 /* builtin */
-.chroma .nc,.chroma .nn{color:#7A93A0}                 /* class / namespace — info */
-.chroma .na{color:#DAD4C8}                             /* attribute */
-.chroma .nt{color:#C99A4E}                             /* tag (html/xml) */
-.chroma .nv,.chroma .vc,.chroma .vg,.chroma .vi{color:#DAD4C8}
-.chroma .no{color:#8DA06B}                             /* constant */
+.chroma .nf,.chroma .fm{color:#E0C24A}                 /* function */
+.chroma .nb,.chroma .bp{color:#5BD8E8}                 /* builtin */
+.chroma .nc,.chroma .nn{color:#7FD8C0}                 /* class / namespace */
+.chroma .na{color:#9FD8E8}                             /* attribute */
+.chroma .nt{color:#5BD8E8}                             /* tag (html/xml) */
+.chroma .nv,.chroma .vc,.chroma .vg,.chroma .vi{color:#C8D2CF}
+.chroma .no{color:#9FE0C0}                             /* constant */
 
 /* strings */
-.chroma .s,.chroma .sa,.chroma .sb,.chroma .sc,.chroma .dl,.chroma .sd,.chroma .s2,.chroma .se,.chroma .sh,.chroma .si,.chroma .sx,.chroma .sr,.chroma .s1,.chroma .ss{color:#8DA06B}
+.chroma .s,.chroma .sa,.chroma .sb,.chroma .sc,.chroma .dl,.chroma .sd,.chroma .s2,.chroma .se,.chroma .sh,.chroma .si,.chroma .sx,.chroma .sr,.chroma .s1,.chroma .ss{color:#3DDC84}
 
 /* numbers */
-.chroma .m,.chroma .mb,.chroma .mf,.chroma .mh,.chroma .mi,.chroma .il,.chroma .mo{color:#8DA06B}
+.chroma .m,.chroma .mb,.chroma .mf,.chroma .mh,.chroma .mi,.chroma .il,.chroma .mo{color:#9FE0C0}
 
 /* operators / punctuation */
-.chroma .o,.chroma .ow{color:#948C7C}
-.chroma .p{color:#6B6457}
+.chroma .o,.chroma .ow{color:#8FB4AE}
+.chroma .p{color:#A9B7B2}
 
 /* diff / generic */
-.chroma .gd{color:#CF7A55;background:rgba(207,122,85,.10)}
-.chroma .gi{color:#8DA06B;background:rgba(141,160,107,.10)}
+.chroma .gd{color:#FF8585;background:rgba(255,107,107,.08)}
+.chroma .gi{color:#5FE39A;background:rgba(61,220,132,.08)}
 .chroma .ge{font-style:italic}
 .chroma .gs{font-weight:600}
-.chroma .err{color:#CF7A55}
+.chroma .err{color:#FF6B6B}

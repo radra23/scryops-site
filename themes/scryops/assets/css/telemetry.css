@@ -7,61 +7,58 @@
    ============================================================ */
 
 :root {
-  /* ---- color · light default (warm paper) ---- */
-  --bg:#F3EFE6;
-  --surface:#E7E0D2;
-  --line:#D8CFBA;
-  --head:#2B2723;
-  --text:#2B2723;
-  --muted:#6B6457;
-
-  /* accent — terminal heritage amber */
-  --accent:#A65A3C;
-  --accent-hover:#B96A4A;
-  --accent-press:#8A4730;
-  --on-accent:#F3EFE6;
-
-  /* status — pair with label/icon, never hue alone */
-  --ok:#5E6B3F;
-  --pending:#B07D2E;
-  --alert:#B5623A;
-  --info:#4D6470;
+  /* ---- color · dark (default) — Telemetry ---- */
+  --bg:#0A0E0F;
+  --surface:#0C1213;
+  --border:#1E2C2E;
+  --heading:#EAF0EE;
+  --text:#D6DBD9;
+  --muted:#7FA6A0;
+  --green:#3DDC84;          /* healthy / values / INFO */
+  --cyan:#5BD8E8;           /* identifiers / links / edges */
+  --link:#5BD8E8;
+  --warn:#E0C24A;
+  --danger:#FF6B6B;
+  --violet:#9D7CF0;         /* OpenTelemetry topic accent */
 
   /* inline code chip */
-  --ic-bg:#E7E0D2; --ic-text:#A65A3C; --ic-bd:#D8CFBA;
+  --ic-bg:#101718; --ic-text:#5BD8E8; --ic-bd:#1C2A2B;
 
-  /* code well — STAYS DARK in both modes */
-  --code-bg:#1B1A17; --code-text:#DAD4C8; --code-bd:#322F28;
+  /* code well — STAYS DARK in all three themes */
+  --code-bg:#0C1213; --code-text:#C8D2CF; --code-bd:#182426;
+  /* readout constants — used ON the always-dark code/terminal wells,
+     so they must NOT flip with theme (light/calm leave these alone). */
+  --code-hi:#EAF0EE; --code-muted:#7E9A8E; --code-green:#3DDC84; --code-cyan:#5BD8E8;
+  /* permacomputing — living-green resource-awareness accent (well only) */
+  --eco:#7FB069; --eco-bright:#A8D88A;
 
   /* figures */
-  --fig-bg:#FFFFFF;
-  --fig-grid:linear-gradient(rgba(216,207,186,.5) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(216,207,186,.5) 1px,transparent 1px);
-  --fig-bd:#D8CFBA;
-  --node-fill:#E7E0D2; --node-stroke:#5E6B3F; --edge:#4D6470; --nlab:#2B2723;
+  --fig-bg:#0B1011;
+  --fig-grid:linear-gradient(rgba(127,166,160,.07) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(127,166,160,.07) 1px,transparent 1px);
+  --fig-bd:#1E2C2E;
+  --node-fill:#10191A; --node-stroke:#2BAE76; --edge:#5BD8E8; --nlab:#EAF0EE;
 
   /* callouts */
-  --info-bg:rgba(77,100,112,.10); --info-bd:#4D6470; --info-lb:#4D6470;
-  --warn-bg:rgba(176,125,46,.10); --warn-bd:#B07D2E; --warn-lb:#B07D2E;
-  --dgr-bg:rgba(181,98,58,.10);   --dgr-bd:#B5623A; --dgr-lb:#B5623A;
+  --info-bg:rgba(61,220,132,.07); --info-bd:#3DDC84; --info-lb:#5FE39A;
+  --warn-bg:rgba(224,194,74,.08); --warn-bd:#E0C24A; --warn-lb:#E8CE66;
+  --dgr-bg:rgba(255,107,107,.08); --dgr-bd:#FF6B6B; --dgr-lb:#FF8585;
 
   /* tables */
-  --th:#E7E0D2; --tborder:#D8CFBA;
+  --th:#0E1617; --tborder:#182426;
 
-  /* listing row number idle */
-  --num-idle:#C8BFB0;
-
-  /* ---- type ---- */
-  --font-body:'Atkinson Hyperlegible', system-ui, sans-serif;
+  /* ---- type — all-monospace reading system ---- */
   --font-display:'Space Mono', ui-monospace, monospace;
-  --font-read:'Atkinson Hyperlegible', system-ui, sans-serif;
+  --font-read:'Courier Prime', ui-monospace, monospace;
   --font-code:'IBM Plex Mono', ui-monospace, monospace;
   --font-pixel:'Press Start 2P', monospace;
+  --font-body:var(--font-read);
 
   --fs-display:34px; --fs-h1:29px; --fs-h2:20px; --fs-h3:16px;
   --fs-lede:17.5px;  --fs-body:15.5px; --fs-code:13.5px;
   --fs-label:11px;   --fs-pixel:11px;
   --lh-body:1.78;    --lh-lede:1.68;   --lh-code:1.75;
+  --read-track:.012em;   /* reading-face letter-spacing (loosens in .pref-spacing) */
   --measure:66ch;
 
   /* ---- spacing — 4px base ---- */
@@ -70,55 +67,96 @@
   /* ---- form ---- */
   --radius:10px; --radius-sm:6px; --space:8px; --hair:1px;
 
-  /* ---- backward-compat aliases ----
-     Old CSS names mapped to new tokens so no downstream rules break. */
-  --border:var(--line);
-  --heading:var(--head);
-  --link:var(--accent);
-  --green:var(--accent);   /* action green → amber */
-  --cyan:var(--info);      /* info cyan → muted blue-gray */
-  --warn:var(--pending);
-  --danger:var(--alert);
-  --amber:var(--accent); --amber-deep:var(--accent-press); --gold:var(--accent);
-  --klein:var(--info); --klein-mid:var(--info); --klein-glow:var(--info);
+  /* ---- bridge: repo's evolved (warm-paper) token names → Telemetry ----
+     The repo's components were authored against an earlier vocabulary.
+     Aliasing those names onto the Telemetry tokens re-skins every existing
+     component to the dark-default palette with no per-component edits.
+     var() resolves per-theme, so these follow light/calm automatically. */
+  --line:var(--border);
+  --head:var(--heading);
+  --accent:var(--green);            /* brand / wordmark / CTAs → terminal green */
+  --accent-hover:var(--cyan);
+  --accent-press:var(--green);
+  --on-accent:var(--bg);            /* text on an accent fill = page bg */
+  --ok:var(--green);
+  --pending:var(--warn);
+  --alert:var(--danger);
+  --info:var(--cyan);
+  --num-idle:var(--muted);
+  --ac:var(--green);                /* party-gallery card accent */
+  --amber:var(--warn);              /* 404 page */
+  --amber-deep:var(--warn); --gold:var(--warn);
+  --klein:var(--cyan); --klein-mid:var(--cyan); --klein-glow:var(--cyan);
   --font-mono:var(--font-code); --font-sans:var(--font-read);
 }
 
-:root[data-theme="dark"] {
-  --num-idle:#4A4438;
-  --bg:#1B1A17;
-  --surface:#26241F;
-  --line:#322F28;
-  --head:#E4DDD0;
-  --text:#DAD4C8;
-  --muted:#948C7C;
+html.light {
+  --bg:#F4F6F5;
+  --surface:#FFFFFF;
+  --border:#DEE5E2;
+  --heading:#10201A;
+  --text:#18201E;
+  --muted:#5A6863;
+  --green:#157A45;
+  --cyan:#0E7E91;
+  --link:#0E7E91;
+  --warn:#8A6A14;
+  --danger:#C2382F;
+  --violet:#6B4FC4;
 
-  --accent:#C99A4E;
-  --accent-hover:#DCB273;
-  --accent-press:#A47E3E;
-  --on-accent:#1B1A17;
-
-  --ok:#8DA06B;
-  --pending:#C99A4E;
-  --alert:#CF7A55;
-  --info:#7A93A0;
-
-  --ic-bg:#26241F; --ic-text:#C99A4E; --ic-bd:#322F28;
+  --ic-bg:#E6EDEA; --ic-text:#0E7E91; --ic-bd:#D2DDD8;
 
   /* code well intentionally NOT overridden — stays dark */
 
-  --fig-bg:#1B1A17;
-  --fig-grid:linear-gradient(rgba(148,140,124,.08) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(148,140,124,.08) 1px,transparent 1px);
-  --fig-bd:#322F28;
-  --node-fill:#26241F; --node-stroke:#8DA06B; --edge:#7A93A0; --nlab:#E4DDD0;
+  --fig-bg:#FFFFFF;
+  --fig-grid:linear-gradient(#E6EDEA 1px,transparent 1px),
+             linear-gradient(90deg,#E6EDEA 1px,transparent 1px);
+  --fig-bd:#DEE5E2;
+  --node-fill:#EAF1ED; --node-stroke:#1E8F52; --edge:#0E7E91; --nlab:#18201E;
 
-  --info-bg:rgba(122,147,160,.10); --info-bd:#7A93A0; --info-lb:#7A93A0;
-  --warn-bg:rgba(201,154,78,.08);  --warn-bd:#C99A4E; --warn-lb:#C99A4E;
-  --dgr-bg:rgba(207,122,85,.08);   --dgr-bd:#CF7A55; --dgr-lb:#CF7A55;
+  --info-bg:#E7F2EB; --info-bd:#157A45; --info-lb:#157A45;
+  --warn-bg:#FBF1DA; --warn-bd:#B08A1E; --warn-lb:#8A6A14;
+  --dgr-bg:#FBE9E7; --dgr-bd:#C2382F; --dgr-lb:#A8281F;
 
-  --th:#26241F; --tborder:#322F28;
+  --th:#EEF2F0; --tborder:#DEE5E2;
 }
+
+html.calm {
+  --bg:#17140E;
+  --surface:#1F1B13;
+  --border:#332C20;
+  --heading:#F2EAD8;
+  --text:#E6DECE;
+  --muted:#AA9D84;
+  --green:#8FB386;
+  --cyan:#D6B070;
+  --link:#E0A24A;
+  --warn:#D6B070;
+  --danger:#E58A7A;
+  --violet:#B49AD8;
+
+  --ic-bg:#241F15; --ic-text:#D6B070; --ic-bd:#3A3324;
+
+  /* code well still dark — keep syntax constant */
+
+  --fig-bg:#1A160F;
+  --fig-grid:none;            /* no background pattern — less distraction */
+  --fig-bd:#332C20;
+  --node-fill:#221D14; --node-stroke:#7E6A3C; --edge:#D6B070; --nlab:#F2EAD8;
+
+  --info-bg:rgba(143,179,134,.08); --info-bd:#8FB386; --info-lb:#9CC093;
+  --warn-bg:rgba(214,176,112,.10); --warn-bd:#D6B070; --warn-lb:#E0BE84;
+  --dgr-bg:rgba(229,138,122,.10);  --dgr-bd:#E58A7A; --dgr-lb:#EC9C8D;
+
+  --th:#1C180F; --tborder:#2A2418;
+}
+
+/* Reading prefs — independent, stackable token overrides. */
+html.pref-legible{ --font-read:'Atkinson Hyperlegible', system-ui, sans-serif; --fs-body:16px; --read-track:.01em; }
+html.pref-spacing{ --lh-body:2.0; --lh-lede:1.85; --read-track:.03em; }
+html.pref-spacing .article > * + *{ margin-top:26px; }
+html.pref-reduce *,html.pref-reduce *::before,html.pref-reduce *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
 /* ============================================================
    base
@@ -541,6 +579,111 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .quote-name{display:block;font-family:var(--font-code);font-size:.8rem;font-weight:700;color:var(--green)}
 .quote-role{display:block;font-family:var(--font-code);font-size:.75rem;color:var(--muted)}
 
+/* ── Homepage hero (Front Page B+C Merge · M3 variant) ──────────────── */
+/* Warm-token adaptation of the M3 split: statement+CTA left,
+   content-type feed right. Colors use design tokens so both modes
+   (warm paper / soft dark) update automatically. */
+
+.hp-split{display:grid;grid-template-columns:1fr 1fr;gap:44px;padding:44px 0 52px;border-bottom:1px solid var(--line)}
+.hp-l{display:flex;flex-direction:column;gap:18px;justify-content:center}
+
+.statement{font-family:var(--font-display);font-size:27px;line-height:1.16;letter-spacing:-.01em;color:var(--head);text-transform:lowercase;margin:0}
+.statement b{color:var(--accent);font-weight:400}
+.hp-lead{font-family:var(--font-read);font-size:14.5px;line-height:1.65;color:var(--text);margin:0;max-width:44ch}
+
+.hp-btns{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.hp-btn{font-family:var(--font-code);font-size:12.5px;border-radius:8px;padding:10px 18px;border:1px solid var(--line);color:var(--text);text-decoration:none;display:inline-block;transition:background .13s,color .13s,border-color .13s}
+.hp-btn-pri{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.hp-btn-pri:hover{background:var(--accent-hover);border-color:var(--accent-hover)}
+.hp-btn-gho{border-color:transparent;color:var(--info)}
+.hp-btn-gho:hover{color:var(--accent)}
+
+.hp-prompt{font-family:var(--font-code);font-size:11.5px;color:var(--muted);margin-top:2px}
+.hp-pr{color:var(--accent)}.hp-ar{color:var(--info)}
+.hp-cursor{display:inline-block;width:7px;height:12px;background:var(--accent);vertical-align:-2px;margin-left:2px;animation:blink 1.1s step-end infinite}
+@media (prefers-reduced-motion:reduce){.hp-cursor{animation:none}}
+
+/* right col — latest feed */
+.hp-r{display:flex;flex-direction:column}
+.hp-streamlabel{display:flex;align-items:center;gap:8px;font-family:var(--font-code);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.hp-dot{width:7px;height:7px;border-radius:50%;background:var(--ok);flex-shrink:0}
+
+.hp-lrow{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:start;padding:13px 0;border-bottom:1px solid var(--line);text-decoration:none}
+.hp-lrow:first-of-type{border-top:1px solid var(--line)}
+.hp-lcol{display:flex;flex-direction:column;gap:4px;min-width:0}
+
+.hp-ctype{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-code);font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.hp-trace{color:var(--info)}
+.hp-metric{color:var(--ok)}
+.hp-prof{color:var(--pending)}
+.hp-log{color:var(--muted)}
+
+.hp-ltitle{font-family:var(--font-display);font-size:14.5px;line-height:1.3;color:var(--head);text-transform:lowercase;font-weight:400}
+.hp-lrow:hover .hp-ltitle{color:var(--accent)}
+.hp-ldek{font-family:var(--font-read);font-size:12px;line-height:1.5;color:var(--muted)}
+.hp-lmeta{font-family:var(--font-code);font-size:10px;color:var(--muted);white-space:nowrap;opacity:.75;padding-top:2px}
+
+@media(max-width:760px){
+  .hp-split{grid-template-columns:1fr;gap:30px;padding:30px 0 36px}
+  .statement{font-size:22px}
+  .hp-lead{max-width:none}
+}
+
+/* ── Reading-preferences panel (chrome) ─────────────────────────────── */
+.pref-btn{font-family:var(--font-code);font-size:12px;color:var(--text);background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 13px;cursor:pointer;transition:border-color .15s}
+.pref-btn:hover{border-color:var(--cyan)}
+.pref-btn b{color:var(--cyan);font-weight:400}
+.pref-panel{position:fixed;top:64px;right:24px;z-index:60;width:290px;background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:18px;box-shadow:0 20px 50px -20px rgba(0,0,0,.7)}
+.pref-panel[hidden]{display:none}
+.pref-panel h2{font-family:var(--font-code);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin:0 0 13px}
+.pref-group{margin-bottom:16px}
+.pref-group > .pref-glabel{font-family:var(--font-code);font-size:11px;color:var(--heading);margin-bottom:9px}
+.pref-seg{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.pref-seg button{flex:1;font-family:var(--font-code);font-size:11.5px;color:var(--muted);background:transparent;border:none;padding:8px 4px;cursor:pointer}
+.pref-seg button[aria-pressed="true"]{background:var(--bg);color:var(--heading)}
+.pref-row{display:flex;align-items:center;gap:11px;padding:9px 0;cursor:pointer;border:none;background:transparent;width:100%;text-align:left;border-bottom:1px solid var(--border)}
+.pref-row:last-child{border-bottom:none}
+.pref-row .pref-l{flex:1}
+.pref-row .pref-l .pref-name{font-family:var(--font-code);font-size:12px;color:var(--text)}
+.pref-row .pref-l .pref-desc{font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:2px}
+.pref-sw{width:38px;height:21px;border-radius:999px;background:var(--border);border:1px solid var(--border);flex:none;position:relative;transition:background .15s}
+.pref-sw::after{content:"";position:absolute;top:1px;left:1px;width:17px;height:17px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
+.pref-row[aria-pressed="true"] .pref-sw{background:var(--green)}
+.pref-row[aria-pressed="true"] .pref-sw::after{transform:translateX(17px);background:#06120C}
+
+/* ── Permacomputing · Phase 2 — footprint badge + colophon ──────────────
+   Terminal readouts that live on the always-dark code well, so the
+   living-green eco signal reads identically in warm-paper AND soft-dark.
+   footprint.js fills the real numbers via [data-footprint] + [data-fp-*]. */
+.footprint{font-family:var(--font-code);font-size:12px;line-height:1.85;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:12px 14px;color:var(--code-text)}
+.footprint .fp-pr{color:var(--eco)}
+.footprint .fp-ar{color:var(--code-cyan)}
+.footprint .fp-hi{color:var(--code-hi)}
+.footprint .fp-eco{color:var(--eco)}
+.footprint .fp-status{color:var(--eco)}
+.footprint.over .fp-status{color:var(--danger)}
+.fp-bar{height:7px;border-radius:4px;background:rgba(127,176,105,.14);overflow:hidden;margin:8px 0 4px}
+.fp-fill{height:100%;width:0;background:linear-gradient(90deg,var(--eco),var(--eco-bright));transition:width .4s ease}
+.footprint.over .fp-fill{background:linear-gradient(90deg,var(--danger),var(--warn))}
+.fp-note{font-family:var(--font-read);font-size:10.5px;color:var(--code-muted)}
+.fp-method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid transparent}
+.fp-method:hover{border-bottom-color:var(--code-cyan)}
+@media (prefers-reduced-motion:reduce){.fp-fill{transition:none}}
+
+/* In the site footer the badge stays compact and centered. */
+footer .footprint{max-width:440px;margin:0 auto;text-align:left}
+
+.colophon{font-family:var(--font-code);font-size:12.5px;line-height:1.7;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:16px 18px;color:var(--code-text);max-width:var(--measure)}
+.colophon .co-cmd{color:var(--code-muted);margin-bottom:8px}
+.colophon .co-cmd b{color:var(--eco);font-weight:400}
+.colophon .co-row{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:7px 0;border-bottom:1px solid var(--code-bd)}
+.colophon .co-row:last-child{border-bottom:none}
+.colophon .co-k{color:var(--code-muted)}
+.colophon .co-v{color:var(--code-hi)}
+.colophon .co-v .eco{color:var(--eco)}
+.colophon .co-v a{color:var(--code-cyan);text-decoration:none}
+.colophon .co-v a:hover{text-decoration:underline}
+
 /* ── Print: prepare for the worst — a copy that reads on paper, no power required ── */
 @media print {
   :root { color-scheme: light; }
@@ -548,7 +691,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
   body { color: #111; font-size: 11pt; line-height: 1.5; }
 
   /* Drop interactive + navigational chrome. */
-  .site-top, .accent-line, .toc, .mode-toggle, .site-footer,
+  .site-top, .accent-line, .toc, .mode-toggle, .site-footer, .footprint,
   .ask-cta, .featured-cta { display: none !important; }
 
   /* Single-column, full-bleed article. */

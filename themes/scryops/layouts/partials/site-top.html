@@ -1,5 +1,6 @@
 {{- /* layouts/partials/site-top.html
-     Sticky chrome: pixel wordmark + reading-mode toggle. */ -}}
+     Sticky chrome: pixel wordmark + section nav + reading-preferences panel
+     (theme dark/light/calm + reading toggles; behavior in prefs.js). */ -}}
 <header class="site-top">
   <a class="wordmark" href="/">scry<b>ops</b></a>
   <span class="pixel-tag">obs</span>
@@ -8,8 +9,5 @@
   </nav>
   <span class="spacer"></span>
   {{ with .Type }}<span class="site-meta">{{ . | upper }}{{ with $.Params.readingTime }} · {{ . }} MIN{{ end }}</span>{{ end }}
-  <div class="mode-toggle" role="group" aria-label="Reading mode">
-    <button data-mode="light" aria-pressed="true">◐ Light</button>
-    <button data-mode="dark"  aria-pressed="false">◑ Dark</button>
-  </div>
+  {{ partial "reading-prefs.html" . }}
 </header>

@@ -1,96 +1,54 @@
 {{ define "main" }}
 <div class="wrap">
 
-{{ partial "terminal.html" . }}
-
 {{ $allContent := slice }}
 {{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
 {{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
 {{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
+{{ range where .Site.RegularPages "Type" "qa" }}{{ $allContent = $allContent | append . }}{{ end }}
 {{ $sorted := sort $allContent "Date" "desc" }}
+{{ $count := len $allContent }}
 
-<!-- Two-column hero: featured article + topics sidebar -->
-<div class="hero-grid">
+<!-- B+C Merge M3: statement + CTA left, latest content feed right -->
+<div class="hp-split">
 
-  <!-- Featured article (left) -->
-  {{ with index $sorted 0 }}
-  <a href="{{ .RelPermalink }}" class="featured-article">
-    <div class="featured-meta">
-      {{ $type := .Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ end }}
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
-      <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
+  <!-- Left: identity statement + CTA buttons + live article counter -->
+  <div class="hp-l">
+    <div class="eyebrow">scrying + ops</div>
+    <h1 class="statement">raw telemetry in. <b>understanding</b> out.</h1>
+    <p class="hp-lead">Observability for working engineers — logs, metrics, traces, OpenTelemetry, made legible.</p>
+    <div class="hp-btns">
+      <a href="/guides/" class="hp-btn hp-btn-pri">Start reading</a>
+      <a href="#subscribe" class="hp-btn hp-btn-gho">Subscribe →</a>
     </div>
-    <h1 class="featured-title">{{ .Title }}</h1>
-    {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
-    <span class="featured-cta">Read &rarr;</span>
-  </a>
-  {{ end }}
-
-  <!-- Topics sidebar (right) -->
-  <aside class="hero-topics">
-    <h2 class="topics-label">Topics</h2>
-    {{ $tags := .Site.Taxonomies.tags }}
-    {{ $domains := slice
-      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
-      (dict "slug" "tracing"       "name" "Tracing")
-      (dict "slug" "alerting"      "name" "Alerting")
-      (dict "slug" "slos"          "name" "SLOs")
-      (dict "slug" "observability" "name" "Observability")
-    }}
-    {{ $withCounts := slice }}
-    {{ range $domains }}
-      {{ $pages := index $tags .slug }}
-      {{ if $pages }}
-        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
-      {{ end }}
-    {{ end }}
-    <nav class="topic-list" aria-label="Topics">
-      {{ range sort $withCounts "count" "desc" }}
-      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
-        <span class="topic-name">{{ .name }}</span>
-        <span class="topic-badge">{{ printf "%02d" .count }}</span>
-      </a>
-      {{ end }}
-      <a href="{{ "tags/" | relURL }}" class="topic-all">&rarr; all topics</a>
-    </nav>
-  </aside>
-
-</div>
-
-<!-- Everything else: the rest of the catalog as a responsive card grid (Option C) -->
-{{ $rest := after 1 $sorted }}
-{{ range where .Site.RegularPages "Type" "qa" }}{{ $rest = $rest | append . }}{{ end }}
-{{ $rest = sort $rest "Date" "desc" }}
-{{ with $rest }}
-<section class="post-section">
-  <div class="section-head">
-    <h2 class="section-label">More</h2>
-    <div class="section-rule"></div>
+    <div class="hp-prompt"><span class="hp-pr">scry@ops</span>:<span class="hp-ar">~/</span>$ {{ $count }} articles indexed<span class="hp-cursor"></span></div>
   </div>
-  <div class="post-grid">
-    {{ range first 4 . }}
+
+  <!-- Right: latest content feed with type glyphs + excerpts -->
+  <div class="hp-r">
+    <div class="hp-streamlabel"><span class="hp-dot"></span>Latest</div>
+    {{ range first 5 $sorted }}
     {{ $t := .Type }}
-    <a href="{{ .RelPermalink }}" class="post-card">
-      {{ if eq $t "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $t "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $t "howtos" }}<span class="tag howto">How-to</span>
-      {{ else if eq $t "qa" }}<span class="tag qa">Q&amp;A</span>
-      {{ end }}
-      <div class="post-card-title">{{ .Title }}</div>
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
+    <a href="{{ .RelPermalink }}" class="hp-lrow">
+      <span class="hp-lcol">
+        {{ if eq $t "guides" }}<span class="hp-ctype hp-trace">⇉ Guide</span>
+        {{ else if eq $t "articles" }}<span class="hp-ctype hp-metric">◆ Article</span>
+        {{ else if eq $t "howtos" }}<span class="hp-ctype hp-prof">▸ How-to</span>
+        {{ else if eq $t "qa" }}<span class="hp-ctype hp-log">≡ Q&amp;A</span>
+        {{ end }}
+        <span class="hp-ltitle">{{ .Title }}</span>
+        {{ with .Params.excerpt }}<span class="hp-ldek">{{ . }}</span>{{ end }}
+      </span>
+      <span class="hp-lmeta">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
     </a>
     {{ end }}
   </div>
-</section>
-{{ end }}
+
+</div>
 
 <!-- Subscribe -->
 {{ with .Site.Params.brevo_form_url }}
-<section class="subscribe-section">
+<section class="subscribe-section" id="subscribe">
   <h2 class="subscribe-label">Stay in the loop</h2>
   <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
   <form class="subscribe-form" id="subscribe-form" novalidate>
