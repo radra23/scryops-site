@@ -585,7 +585,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
    (warm paper / soft dark) update automatically. */
 
 .hp-split{display:grid;grid-template-columns:1fr 1fr;gap:44px;padding:44px 0 52px;border-bottom:1px solid var(--line)}
-.hp-l{display:flex;flex-direction:column;gap:18px;justify-content:center}
+.hp-l{display:flex;flex-direction:column;gap:18px;justify-content:flex-start}
 
 .statement{font-family:var(--font-display);font-size:27px;line-height:1.16;letter-spacing:-.01em;color:var(--head);text-transform:lowercase;margin:0}
 .statement b{color:var(--accent);font-weight:400}
