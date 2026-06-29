@@ -7,54 +7,54 @@
       <title id="brw-title">Multi-Window Burn Rate — Diagnostic Sequence</title>
       <desc id="brw-desc">Three time windows serve different diagnostic roles. The 1-hour window fires the page when the budget drains fast. The 6-hour window confirms the burn is sustained, not a spike. The 24-hour window reveals whether this is new or has been building all day.</desc>
 
-      <rect width="760" height="300" fill="#161616"/>
+      <rect width="760" height="300" fill="var(--fig-bg)"/>
 
       <!-- eyebrow -->
-      <text x="24" y="30" fill="#F0EEE8" font-family="'Press Start 2P',monospace"
+      <text x="24" y="30" fill="var(--heading)" font-family="'Press Start 2P',monospace"
             font-size="11" letter-spacing="0.04em">MULTI-WINDOW BURN RATE</text>
-      <text x="24" y="48" fill="#C8C6C0" font-size="12">// is it happening now? &#183; is it real? &#183; how long has it been building?</text>
+      <text x="24" y="48" fill="var(--text)" font-size="12">// is it happening now? &#183; is it real? &#183; how long has it been building?</text>
 
       <!-- ─── Card 1: 1H WINDOW (trigger / red) ─── -->
-      <rect x="24" y="64" width="210" height="196" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <rect x="24" y="64" width="4" height="196" fill="#FF6060"/>
-      <text x="129" y="92" text-anchor="middle" fill="#FF6060" font-size="13" font-weight="700" letter-spacing="0.04em">1H WINDOW</text>
-      <line x1="44" y1="104" x2="214" y2="104" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="129" y="156" text-anchor="middle" fill="#FF6060" font-size="40" font-weight="700">14.2&#215;</text>
-      <text x="129" y="184" text-anchor="middle" fill="#FF6060" font-size="12" font-weight="700" letter-spacing="0.12em">TRIGGER</text>
-      <text x="129" y="216" text-anchor="middle" fill="#D8D6CE" font-size="12">fires the page when</text>
-      <text x="129" y="234" text-anchor="middle" fill="#C8C6C0" font-size="12">the budget drains fast</text>
+      <rect x="24" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="24" y="64" width="4" height="196" fill="var(--danger)"/>
+      <text x="129" y="92" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700" letter-spacing="0.04em">1H WINDOW</text>
+      <line x1="44" y1="104" x2="214" y2="104" stroke="var(--border)" stroke-width="1"/>
+      <text x="129" y="156" text-anchor="middle" fill="var(--danger)" font-size="40" font-weight="700">14.2&#215;</text>
+      <text x="129" y="184" text-anchor="middle" fill="var(--danger)" font-size="12" font-weight="700" letter-spacing="0.12em">TRIGGER</text>
+      <text x="129" y="216" text-anchor="middle" fill="var(--text)" font-size="12">fires the page when</text>
+      <text x="129" y="234" text-anchor="middle" fill="var(--text)" font-size="12">the budget drains fast</text>
 
       <!-- arrow 1 → 2 -->
-      <line x1="242" y1="162" x2="268" y2="162" stroke="#5B8DEF" stroke-width="1.5"/>
-      <polygon points="266,157 276,162 266,167" fill="#5B8DEF"/>
+      <line x1="242" y1="162" x2="268" y2="162" stroke="var(--cyan)" stroke-width="1.5"/>
+      <polygon points="266,157 276,162 266,167" fill="var(--cyan)"/>
 
       <!-- ─── Card 2: 6H WINDOW (confirmation / amber) ─── -->
-      <rect x="275" y="64" width="210" height="196" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <rect x="275" y="64" width="4" height="196" fill="#F5A623"/>
-      <text x="380" y="92" text-anchor="middle" fill="#F5A623" font-size="13" font-weight="700" letter-spacing="0.04em">6H WINDOW</text>
-      <line x1="295" y1="104" x2="465" y2="104" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="380" y="156" text-anchor="middle" fill="#F5A623" font-size="40" font-weight="700">9.1&#215;</text>
-      <text x="380" y="184" text-anchor="middle" fill="#F5A623" font-size="12" font-weight="700" letter-spacing="0.10em">CONFIRMATION</text>
-      <text x="380" y="216" text-anchor="middle" fill="#D8D6CE" font-size="12">sustained, not a spike</text>
-      <text x="380" y="234" text-anchor="middle" fill="#C8C6C0" font-size="12">&#8212; is this real?</text>
+      <rect x="275" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="275" y="64" width="4" height="196" fill="var(--warn)"/>
+      <text x="380" y="92" text-anchor="middle" fill="var(--warn)" font-size="13" font-weight="700" letter-spacing="0.04em">6H WINDOW</text>
+      <line x1="295" y1="104" x2="465" y2="104" stroke="var(--border)" stroke-width="1"/>
+      <text x="380" y="156" text-anchor="middle" fill="var(--warn)" font-size="40" font-weight="700">9.1&#215;</text>
+      <text x="380" y="184" text-anchor="middle" fill="var(--warn)" font-size="12" font-weight="700" letter-spacing="0.10em">CONFIRMATION</text>
+      <text x="380" y="216" text-anchor="middle" fill="var(--text)" font-size="12">sustained, not a spike</text>
+      <text x="380" y="234" text-anchor="middle" fill="var(--text)" font-size="12">&#8212; is this real?</text>
 
       <!-- arrow 2 → 3 -->
-      <line x1="493" y1="162" x2="519" y2="162" stroke="#5B8DEF" stroke-width="1.5"/>
-      <polygon points="517,157 527,162 517,167" fill="#5B8DEF"/>
+      <line x1="493" y1="162" x2="519" y2="162" stroke="var(--cyan)" stroke-width="1.5"/>
+      <polygon points="517,157 527,162 517,167" fill="var(--cyan)"/>
 
       <!-- ─── Card 3: 24H WINDOW (trend / blue) ─── -->
-      <rect x="526" y="64" width="210" height="196" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <rect x="526" y="64" width="4" height="196" fill="#5B8DEF"/>
-      <text x="631" y="92" text-anchor="middle" fill="#5B8DEF" font-size="13" font-weight="700" letter-spacing="0.04em">24H WINDOW</text>
-      <line x1="546" y1="104" x2="716" y2="104" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="631" y="156" text-anchor="middle" fill="#5B8DEF" font-size="40" font-weight="700">3.4&#215;</text>
-      <text x="631" y="184" text-anchor="middle" fill="#5B8DEF" font-size="12" font-weight="700" letter-spacing="0.12em">TREND</text>
-      <text x="631" y="216" text-anchor="middle" fill="#D8D6CE" font-size="12">new, or building</text>
-      <text x="631" y="234" text-anchor="middle" fill="#C8C6C0" font-size="12">since before your shift?</text>
+      <rect x="526" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="526" y="64" width="4" height="196" fill="var(--cyan)"/>
+      <text x="631" y="92" text-anchor="middle" fill="var(--cyan)" font-size="13" font-weight="700" letter-spacing="0.04em">24H WINDOW</text>
+      <line x1="546" y1="104" x2="716" y2="104" stroke="var(--border)" stroke-width="1"/>
+      <text x="631" y="156" text-anchor="middle" fill="var(--cyan)" font-size="40" font-weight="700">3.4&#215;</text>
+      <text x="631" y="184" text-anchor="middle" fill="var(--cyan)" font-size="12" font-weight="700" letter-spacing="0.12em">TREND</text>
+      <text x="631" y="216" text-anchor="middle" fill="var(--text)" font-size="12">new, or building</text>
+      <text x="631" y="234" text-anchor="middle" fill="var(--text)" font-size="12">since before your shift?</text>
 
       <!-- footer note -->
-      <line x1="24" y1="278" x2="736" y2="278" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="380" y="296" text-anchor="middle" fill="#C8C6C0" font-size="12">one elevated window = a spike &#183; all three elevated = a sustained incident</text>
+      <line x1="24" y1="278" x2="736" y2="278" stroke="var(--border)" stroke-width="1"/>
+      <text x="380" y="296" text-anchor="middle" fill="var(--text)" font-size="12">one elevated window = a spike &#183; all three elevated = a sustained incident</text>
     </svg>
   </div>
   <figcaption>Fig. &#8212; Three windows, three questions: is it happening now? is it real? how long has it been building?</figcaption>
