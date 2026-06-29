@@ -5,6 +5,7 @@ theme = "scryops"
 
 [params]
   description = "An independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions."
+  topics = ["logs", "metrics", "traces", "opentelemetry", "distributed-systems"]
   tagline = "observability decoded"
   mission = "The stack is always changing. We help you see through it."
   # Brevo subscription form — paste the action URL from Contacts → Forms → your form → Share
@@ -26,6 +27,11 @@ theme = "scryops"
   [markup.highlight]
     style = "monokai"
     lineNos = false
+    noClasses = false
+  [markup.tableOfContents]
+    startLevel = 2
+    endLevel = 3
+    ordered = false
 
 [menu]
   [[menu.main]]
@@ -61,3 +67,15 @@ theme = "scryops"
 
 [pagination]
   pagerSize = 10
+
+# Related content — drives "Related reading" at the end of articles (matched on shared tags).
+[related]
+  includeNewer = true
+  threshold = 80
+  toLower = true
+  [[related.indices]]
+    name = "tags"
+    weight = 100
+  [[related.indices]]
+    name = "date"
+    weight = 10

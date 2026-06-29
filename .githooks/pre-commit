@@ -1,19 +1,21 @@
 #!/bin/sh
 # .githooks/pre-commit
 #
-# Blocks commits that introduce unknown or incorrectly-cased tags.
+# Blocks commits that introduce:
+#   - unknown or incorrectly-cased tags
+#   - broken article visuals (missing shortcode file, malformed SVG/HTML)
+#
 # Activate once with:
 #   git config core.hooksPath .githooks
 #
-# To auto-fix before committing:
-#   python3 scripts/normalize-tags.py --fix && git add -u && git commit
+# verify_visuals.py runs the visual checks AND the tag check (normalize-tags.py),
+# so this one command covers both. OTel-correctness hits are warnings only and do
+# not block the commit.
 
-python3 scripts/normalize-tags.py
-status=$?
-
-if [ $status -ne 0 ]; then
+if ! python3 scripts/verify_visuals.py; then
   echo ""
-  echo "  Auto-fix:  python3 scripts/normalize-tags.py --fix"
-  echo "  Then:      git add -u && git commit"
+  echo "  pre-commit checks failed (see above)."
+  echo "  Tag casing auto-fix:  python3 scripts/normalize-tags.py --fix && git add -u"
+  echo "  Bypass once:          git commit --no-verify"
   exit 1
 fi

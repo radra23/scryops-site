@@ -1,0 +1,12 @@
+{{- /* layouts/shortcodes/obs-figure.html
+     Generic framed figure for any inline SVG/diagram.
+     Usage:
+       {{< obs-figure caption="Fig 1 — OTLP flow" >}}
+         <svg viewBox="0 0 600 150">…</svg>
+       {{< /obs-figure >}}
+     Apply classes .node / .nlab / .edge / .arr inside your SVG
+     so it inherits the Telemetry figure theme in both modes. */ -}}
+<figure class="obs-fig">
+  {{ .Inner }}
+  {{ with .Get "caption" }}<figcaption class="obs-cap">{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

@@ -7,6 +7,4 @@ readtime: 7
 tags: ["AI", "Observability"]
 ---
 
-# Predictive Analytics in Observability
-
 Content coming soon.

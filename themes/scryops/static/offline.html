@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>offline · scryops</title>
+  <meta name="robots" content="noindex">
+  <!-- Fully self-contained: no external fonts, CSS, or scripts. This page must
+       render when there is no network at all. -->
+  <style>
+    :root { color-scheme: dark; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      display: grid;
+      place-content: center;
+      gap: 1.2rem;
+      padding: 2rem;
+      text-align: center;
+      background: #11130f;
+      color: #c9d1bd;
+      font-family: ui-monospace, 'Courier New', monospace;
+      line-height: 1.6;
+    }
+    .mark { font-size: 1.5rem; letter-spacing: .02em; color: #e8ead9; }
+    .mark b { color: #9bd07a; font-weight: 400; }
+    h1 { font-size: 1.1rem; font-weight: 400; color: #e8ead9; margin: 0; text-transform: lowercase; }
+    p { margin: 0; max-width: 38ch; color: #8b9379; }
+    button {
+      font: inherit;
+      color: #9bd07a;
+      background: transparent;
+      border: 1px solid #3a4030;
+      padding: .55rem 1.2rem;
+      cursor: pointer;
+    }
+    button:hover { border-color: #9bd07a; }
+  </style>
+</head>
+<body>
+  <div class="mark">scry<b>ops</b></div>
+  <h1>you're offline</h1>
+  <p>This page hasn't been cached yet. Pages you've already visited stay readable without a connection — try one of those, or reconnect and retry.</p>
+  <button onclick="location.reload()">retry</button>
+</body>
+</html>

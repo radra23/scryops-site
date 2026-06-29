@@ -3,6 +3,8 @@ name: Deploy Hugo site to Pages
 on:
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
   workflow_dispatch:
 
 permissions:
@@ -19,7 +21,22 @@ defaults:
     shell: bash
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate tag casing
+        run: python3 scripts/normalize-tags.py
+
+      - name: Verify article visuals (shortcode refs, well-formedness, OTel traps)
+        run: python3 scripts/verify_visuals.py
+
   build:
+    needs: validate
+    # Deploy pipeline runs only on pushes to main / manual dispatch — PRs stop at validate.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     env:
       HUGO_VERSION: 0.145.0
