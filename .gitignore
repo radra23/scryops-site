@@ -8,5 +8,9 @@ preview-index.html
 article-diagrams.html
 scryops-audit.html
 DESIGN-CRITIQUE*.md
+ACCESSIBILITY-AUDIT*.md
 CLAUDE*.md
+
+# Local env / secrets — never commit
+.env
 

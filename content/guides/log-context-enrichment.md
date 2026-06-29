@@ -286,6 +286,75 @@ The `Priority` ordering ensures critical, lightweight enrichers (static context,
 **The critical invariant:** enrichers must not perform I/O. All external data must come from the `EnrichmentCache`. An enricher that calls a database or external service directly will add the latency of that call to every log statement it affects — and under load, will cause those calls to queue up behind each other.
 {{< /insight >}}
 
+## Runtime and Infrastructure Context
+
+One category of enrichment sits outside the tier model: dynamic runtime state that is already in-process and requires no external lookup. GC pressure, thread pool utilisation, and process uptime are useful at diagnostic boundaries — when correlating a slow request path with a Gen 2 collection, or confirming that a timeout happened while the thread pool was already saturated.
+
+`RuntimeContextSnapshot.Capture()` produces a dictionary suitable for `BeginScope`:
+
+```csharp
+/// <summary>
+/// Captures a point-in-time snapshot of runtime state for diagnostic context.
+/// Use at error or slow-path boundaries — not on every log event.
+/// </summary>
+public static class RuntimeContextSnapshot
+{
+    public static Dictionary<string, object> Capture()
+    {
+        ThreadPool.GetAvailableThreads(
+            out int availableWorker, out int availableIocp);
+        ThreadPool.GetMaxThreads(
+            out int maxWorker, out int maxIocp);
+
+        return new Dictionary<string, object>
+        {
+            ["runtime.gc.total_memory_bytes"] = GC.GetTotalMemory(forceFullCollection: false),
+            ["runtime.gc.gen0_collections"]   = GC.CollectionCount(0),
+            ["runtime.gc.gen1_collections"]   = GC.CollectionCount(1),
+            ["runtime.gc.gen2_collections"]   = GC.CollectionCount(2),
+            ["runtime.threadpool.worker_in_use"]  = maxWorker - availableWorker,
+            ["runtime.threadpool.worker_max"]     = maxWorker,
+            ["runtime.threadpool.iocp_in_use"]    = maxIocp - availableIocp,
+            ["host.name"]         = Environment.MachineName,
+            ["host.platform"]     = Environment.OSVersion.Platform.ToString(),
+            ["process.id"]        = Environment.ProcessId,
+            ["process.uptime_ms"] = Environment.TickCount64,
+        };
+    }
+}
+```
+
+Use it as a `BeginScope` payload at exception boundaries where multiple log calls may follow:
+
+```csharp
+catch (Exception ex)
+{
+    using (_logger.BeginScope(RuntimeContextSnapshot.Capture()))
+    {
+        _logger.LogError(ex,
+            "Critical failure in {Operation} after {DurationMs}ms",
+            operationName, stopwatch.ElapsedMilliseconds);
+    }
+}
+```
+
+Deployment metadata (region, zone, build version) should come from static Tier 1 enrichment, not from `Environment.GetEnvironmentVariable()` calls inside `Capture()`. Read those values once at startup and include them in the `ResourceBuilder`.
+
+### OTel Baggage for Cross-Service Correlation
+
+When a caller sets values on the OTel Baggage, they propagate through every outbound call via the W3C `baggage` header and are available in downstream services without custom propagation code:
+
+```csharp
+using var scope = _logger.BeginScope(new Dictionary<string, object?>
+{
+    ["correlation.request_id"] = Baggage.Current.GetBaggage("request_id"),
+    ["correlation.tenant_id"]  = Baggage.Current.GetBaggage("tenant_id"),
+    ["correlation.user_tier"]  = Baggage.Current.GetBaggage("user_tier"),
+});
+```
+
+`GetBaggage` returns `null` when the key is absent — the scope entry is included with a null value, which most sinks drop gracefully. Keep Baggage keys to lightweight correlation identifiers and routing hints, not large payloads.
+
 <!-- TODO: Add example implementations of concrete IEnrichmentProvider classes: UserTierEnricher (reads from EnrichmentCache), FeatureFlagEnricher (reads from distributed feature flag store via cache), BusinessContextEnricher (order value buckets, not raw amounts or PII) -->
 <!-- TODO: Add Serilog ILogEventEnricher integration showing how to wire EnrichmentPipeline into the Serilog pipeline as a registered enricher -->
 <!-- TODO: Add BenchmarkDotNet measurements comparing enrichment overhead by tier — static Resource attributes (near-zero), cached hit path (sub-microsecond), cached miss path (measured separately to separate background refresh cost from hot path cost) -->

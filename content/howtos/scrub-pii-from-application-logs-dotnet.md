@@ -26,6 +26,70 @@ The most common sources in a typical .NET service:
 
 IP addresses are personal data under GDPR: they identify a natural person's device and, combined with timestamps and other attributes, can identify the person. They must not appear in log records or span attributes.
 
+## Quasi-Identifier Risk
+
+Direct identifiers — email addresses, SSNs, card numbers — are straightforward to find and remove. Quasi-identifiers are harder: fields that are individually innocuous but identifying when logged together.
+
+The combination `{ zip_code, birth_date, gender }` is a documented example: three low-risk fields together can uniquely identify a large fraction of the population. Risk compounds non-linearly with each additional attribute.
+
+`QuasiIdentifierRiskAnalyzer` helps quantify this before deciding what to log:
+
+```csharp
+/// <summary>
+/// Quantifies re-identification risk from quasi-identifier combinations.
+/// Risk scores are illustrative defaults — calibrate to your data distribution
+/// and jurisdiction before using this for compliance decisions.
+/// </summary>
+public class QuasiIdentifierRiskAnalyzer
+{
+    private readonly Dictionary<string, double> _baseRiskScores = new()
+    {
+        ["zip_code"]        = 0.35,
+        ["birth_date"]      = 0.40,
+        ["gender"]          = 0.15,
+        ["job_title"]       = 0.25,
+        ["income_range"]    = 0.30,
+        ["education_level"] = 0.20,
+        ["marital_status"]  = 0.18
+    };
+
+    /// <summary>Returns true when the combination crosses the 0.6 risk threshold.</summary>
+    public bool ShouldProtectCombination(IEnumerable<string> fieldNames)
+        => CalculateCombinedRisk(fieldNames.ToList()) > 0.6;
+
+    public double CalculateCombinedRisk(List<string> quasiIds)
+    {
+        var present = quasiIds
+            .Where(_baseRiskScores.ContainsKey)
+            .ToList();
+
+        if (present.Count == 0) return 0;
+        if (present.Count == 1) return _baseRiskScores[present[0]];
+
+        // Risk compounds non-linearly: three quasi-IDs together are
+        // far more identifying than the sum of their individual scores
+        var baseRisk         = present.Sum(id => _baseRiskScores[id]);
+        var compoundingFactor = Math.Pow(1.3, present.Count - 1);
+        return Math.Min(baseRisk * compoundingFactor, 1.0);
+    }
+}
+```
+
+Use `ShouldProtectCombination` before writing a log field combination:
+
+```csharp
+var analyzer = new QuasiIdentifierRiskAnalyzer();
+
+// { zip_code, birth_date, gender } → risk ≈ 1.0 (three-field compounding)
+if (analyzer.ShouldProtectCombination(logFields.Keys))
+{
+    // Options: remove quasi-identifiers, generalise (postal prefix only,
+    // age range instead of birth date), or route to restricted-access storage
+}
+```
+
+Generalisation strategy: replace specific values with ranges or prefixes — `"94107"` → `"94"` (postal district), `"1985-03-22"` → `"1980s"`, `"male"` → omit or use only for aggregate statistics. This preserves diagnostic signal while raising the bar for re-identification.
+
 ## Detection
 
 `PIIDetector` scans text for known PII patterns using compiled regex. Compiled regexes are safe for concurrent use across threads.
@@ -135,6 +199,37 @@ public static class RedactionStrategies
 ```
 
 `SHA256.HashData` (static, .NET 5+) avoids the `IDisposable` pattern of `SHA256.Create()`.
+
+The default `MaskEmail` uses minimal masking (preserves domain for support debugging). For stricter contexts, choose the level explicitly:
+
+```csharp
+public enum EmailMaskingLevel
+{
+    Minimal,    // j***@example.com — preserves domain and first character
+    Standard,   // ***@example.com — preserves domain only
+    DomainOnly, // [USER]@example.com — no user-part information
+    Complete    // [REDACTED:EMAIL]
+}
+
+// Overload — the parameterless MaskEmail() corresponds to EmailMaskingLevel.Minimal
+public static string MaskEmail(string email, EmailMaskingLevel level)
+{
+    if (string.IsNullOrEmpty(email) || !email.Contains('@'))
+        return "[REDACTED:EMAIL]";
+
+    var parts = email.Split('@');
+    return level switch
+    {
+        EmailMaskingLevel.Minimal    => $"{parts[0][0]}***@{parts[1]}",
+        EmailMaskingLevel.Standard   => $"***@{parts[1]}",
+        EmailMaskingLevel.DomainOnly => $"[USER]@{parts[1]}",
+        EmailMaskingLevel.Complete   => "[REDACTED:EMAIL]",
+        _                            => $"{parts[0][0]}***@{parts[1]}"
+    };
+}
+```
+
+Healthcare and financial services contexts typically require `DomainOnly` or `Complete`. If your organisation processes sensitive categories of personal data (GDPR Article 9), prefer `Complete` and rely on tokenised identifiers in audit logs rather than email values for correlation.
 
 ## Smart Redaction: Preserving Business Context
 
@@ -369,6 +464,17 @@ public class PIIAccessAuditLogger
     }
 }
 ```
+
+## Regulatory Quick Reference
+
+| Regulation | Scope | Key log obligations | Right to erasure |
+|---|---|---|---|
+| GDPR | EU residents | No sensitive-category data without legal basis; data minimisation; third-party sink agreements required | 30 days |
+| CCPA | California residents | Disclose what personal data is logged; honour deletion requests | 45 days |
+| HIPAA | US health data | PHI prohibited in application logs; Business Associate Agreement required for third-party sinks | Yes |
+| PCI DSS | Cardholder data | No full PAN in logs; no CVV; BIN (first 6) + last 4 digits are permissible | N/A |
+
+For the Collector-side controls that implement these obligations uniformly across services, see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
 
 ## Common Pitfalls
 

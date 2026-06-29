@@ -1,0 +1,38 @@
+{{- /* layouts/partials/reading-prefs.html
+     The "⚙ Reading" button + preferences panel. Behavior + state
+     live in assets/js/prefs.js (loaded in baseof.html). All wiring
+     is via data- attributes the script reads — no inline JS here.
+
+     Accessibility: this panel is the neurodivergent-friendly control
+     surface. Theme includes a Calm (low-stimulation) mode; toggles
+     cover hyperlegible font, increased spacing, and reduced motion.
+     Add it to the site chrome via {{ partial "reading-prefs.html" . }}. */ -}}
+<button class="pref-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="reading-prefs"><b>⚙</b> Reading</button>
+<div class="pref-panel" id="reading-prefs" role="dialog" aria-label="Reading preferences" hidden>
+  <h2>Reading preferences</h2>
+
+  <div class="pref-group">
+    <div class="pref-glabel">Theme</div>
+    <div class="pref-seg" role="group" aria-label="Theme">
+      <button data-pref-theme="dark"  aria-pressed="true">◑ Dark</button>
+      <button data-pref-theme="light" aria-pressed="false">◐ Light</button>
+      <button data-pref-theme="calm"  aria-pressed="false">☾ Calm</button>
+    </div>
+  </div>
+
+  <div class="pref-group">
+    <div class="pref-glabel">Reading</div>
+    <button class="pref-row" data-pref-toggle="legible" aria-pressed="false">
+      <span class="pref-l"><span class="pref-name">Hyperlegible font</span><span class="pref-desc">Atkinson, for low-vision &amp; dyslexia</span></span>
+      <span class="pref-sw" aria-hidden="true"></span>
+    </button>
+    <button class="pref-row" data-pref-toggle="spacing" aria-pressed="false">
+      <span class="pref-l"><span class="pref-name">Increased spacing</span><span class="pref-desc">Looser lines &amp; letter-spacing</span></span>
+      <span class="pref-sw" aria-hidden="true"></span>
+    </button>
+    <button class="pref-row" data-pref-toggle="reduce" aria-pressed="false">
+      <span class="pref-l"><span class="pref-name">Reduce motion</span><span class="pref-desc">No transitions or fades</span></span>
+      <span class="pref-sw" aria-hidden="true"></span>
+    </button>
+  </div>
+</div>

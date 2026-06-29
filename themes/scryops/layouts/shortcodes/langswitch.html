@@ -1,0 +1,41 @@
+{{- /*
+  langswitch — multi-language code switcher for scryops (inline edition).
+  Usage (paired; write one fenced code block per language inside):
+    {{< langswitch >}}
+    ```python
+    ...
+    ```
+    ```go
+    ...
+    ```
+    {{< /langswitch >}}
+  Optional first-load default: {{< langswitch default="go" >}}
+
+  One global language choice, shared across every block on the page and persisted
+  across reloads (assets/js/langswitch.js). Highlighting is server-side Chroma using
+  the theme's global .chroma palette. Assets + langmeta inject once per page.
+*/ -}}
+{{- $default := .Get "default" | default "python" -}}
+{{- $store := .Page.Store -}}
+{{- if not ($store.Get "lsAssets") -}}
+  {{- $store.Set "lsAssets" true -}}
+  {{- with resources.Get "css/langswitch.css" }}<link rel="stylesheet" href="{{ (. | minify | fingerprint).RelPermalink }}">{{ end -}}
+  {{- with resources.Get "js/langswitch.js" }}<script src="{{ (. | minify | fingerprint).RelPermalink }}" defer></script>{{ end -}}
+  {{- /* .Site.Data works on Hugo 0.145 (dev) and 0.159 (deprecation warning only). safeJS so the JSON emits as a JS object, not a quoted string. */ -}}
+  {{- with .Site.Data.langmeta }}<script>window.scryLangMeta={{ . | jsonify | safeJS }};</script>{{ end -}}
+{{- end -}}
+<div class="langswitch" data-langswitch data-default="{{ $default }}">
+  <div class="ls-chrome">
+    <span class="ls-dots" aria-hidden="true"><i></i><i></i><i></i></span>
+    <span class="ls-file" data-ls-file></span>
+    <button class="ls-copy" type="button" data-ls-copy aria-live="polite">Copy</button>
+  </div>
+  <div class="ls-tabs" role="tablist" aria-label="Choose a language" data-ls-tabs></div>
+  <div class="ls-hint" data-ls-hint hidden>
+    <i class="ls-hintdot" aria-hidden="true"></i>
+    <span>Showing <strong data-ls-hint-label></strong> — pick your language and we'll remember it.</span>
+  </div>
+  <div class="ls-panels" data-ls-panels>
+{{ .Inner | markdownify }}
+  </div>
+</div>

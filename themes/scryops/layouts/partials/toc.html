@@ -1,0 +1,31 @@
+{{- /* layouts/partials/toc.html
+     Telemetry table of contents. Hugo builds .TableOfContents
+     from the markup.tableOfContents config; the scrollspy
+     'active' state is added by the small script below. */ -}}
+{{ if .Params.toc | default true }}
+<aside class="toc">
+  <div class="toc-label">On this page</div>
+  {{ .TableOfContents }}
+</aside>
+<script>
+  (function () {
+    var links = document.querySelectorAll('.toc a');
+    if (!links.length) return;
+    var map = {};
+    links.forEach(function (a) {
+      var id = decodeURIComponent(a.getAttribute('href') || '').replace('#', '');
+      if (id) map[id] = a;
+    });
+    var obs = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (e.isIntersecting) {
+          links.forEach(function (a) { a.classList.remove('active'); });
+          var a = map[e.target.id];
+          if (a) a.classList.add('active');
+        }
+      });
+    }, { rootMargin: '-10% 0px -80% 0px' });
+    document.querySelectorAll('.article h2[id], .article h3[id]').forEach(function (h) { obs.observe(h); });
+  })();
+</script>
+{{ end }}

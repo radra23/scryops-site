@@ -278,7 +278,14 @@ nav.topic-list {
 }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 @media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }   /* TOC/anchor jumps don't animate */
   .cursor { animation: none; opacity: 1; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── SECTION LABELS ── */
@@ -453,14 +460,77 @@ nav.topic-list {
   text-transform: uppercase;
   letter-spacing: 0.09em;
   cursor: pointer;
-  transition: border-color 0.15s, color 0.15s;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
   display: inline-flex;
   align-items: center;
   min-height: 44px;
 }
+.tag-pill::before {
+  content: "#";
+  color: var(--amber-deep);
+  font-weight: 700;
+  margin-right: 0.15rem;
+}
 .tag-pill:hover {
   color: var(--amber);
   border-color: var(--amber-deep);
+  background: rgba(245, 166, 35, 0.06);
+}
+.tag-pill:hover::before { color: var(--amber); }
+
+/* ── END-OF-ARTICLE ZONE (resources + related) ── */
+.article-end {
+  margin-top: 3.5rem;
+  padding-top: 2.4rem;
+  border-top: 1px solid var(--border);
+  text-align: left;
+}
+.resources {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+.resource-group {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--amber);
+  padding: 1.1rem 1.3rem 1.2rem;
+}
+.resource-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+  margin-bottom: 1rem;
+}
+.resource-list { list-style: none; margin: 0; }
+.resource-list li { margin-bottom: 0.85rem; line-height: 1.5; }
+.resource-list li:last-child { margin-bottom: 0; }
+.resource-list a {
+  color: var(--amber);
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.15s;
+}
+.resource-list a:hover { border-bottom-color: var(--amber); }
+.resource-note {
+  display: block;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  margin-top: 0.2rem;
+}
+.related-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+  margin-bottom: 0.2rem;
+}
+@media (max-width: 640px) {
+  .resources { grid-template-columns: 1fr; }
 }
 
 /* ── DOMAIN TOPICS ── */
@@ -707,20 +777,85 @@ nav.topic-list {
   flex-wrap: wrap;
 }
 
+/* ── TABLE OF CONTENTS (inline, top of longer articles) ── */
+.toc {
+  max-width: 48rem;
+  margin: 0 0 2.2rem;
+  padding: 1rem 1.2rem 1.1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+}
+.toc-head {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber-deep);
+  margin-bottom: 0.75rem;
+}
+.toc #TableOfContents ul { list-style: none; margin: 0; padding-left: 0; }
+.toc #TableOfContents ul ul { padding-left: 1rem; margin-top: 0.25rem; }
+.toc #TableOfContents li { margin: 0; line-height: 1.4; }
+.toc #TableOfContents a {
+  display: block;
+  padding: 0.32rem 0.5rem;
+  margin: 0 -0.5rem;          /* let the active row bleed to the box padding, text stays aligned */
+  border-radius: 2px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  text-decoration: none;
+  transition: color 0.12s, background 0.12s;
+}
+.toc #TableOfContents a:hover { color: var(--amber); }
+/* scroll-spy: the section currently in view */
+.toc #TableOfContents a.active { color: var(--amber); background: rgba(245, 166, 35, 0.12); }
+/* anchor jumps (TOC links, deep links) clear the sticky nav instead of hiding under it */
+.prose h2, .prose h3 { scroll-margin-top: 5rem; }
+
+/* ── TOC as a sticky rail in the right gutter (wide screens only) ──
+   The article becomes a two-column grid: the 48rem reading column on the left
+   and the TOC parked in the otherwise-empty gutter, kept in view while reading.
+   Gated on .has-toc + width so narrower screens keep the inline TOC fallback. */
+@media (min-width: 1120px) {
+  .has-toc {
+    display: grid;
+    grid-template-columns: minmax(0, 48rem) 1fr;
+    grid-template-rows: auto auto 1fr;
+    column-gap: 2.5rem;
+    align-items: start;
+  }
+  .has-toc > .single-header { grid-column: 1; grid-row: 1; }
+  .has-toc > .prose         { grid-column: 1; grid-row: 2; }
+  .has-toc > .article-end   { grid-column: 1; grid-row: 3; }
+  .has-toc > .toc {
+    grid-column: 2;
+    grid-row: 1 / 4;          /* span the column so the sticky child has room */
+    align-self: start;
+    position: sticky;
+    top: 5.5rem;              /* clear the 74px sticky nav */
+    margin: 0;
+    max-width: none;
+    max-height: calc(100vh - 7rem);
+    overflow-y: auto;
+  }
+}
+
 .prose {
   font-size: 1rem;
   line-height: 1.85;
   color: var(--text);
+  max-width: 48rem;
 }
 .prose h2 {
-  font-size: 1.1rem;
+  font-size: 1.5rem;
   margin: 2.2rem 0 0.8rem;
   color: var(--amber);
   padding-left: 0.75rem;
   border-left: 2px solid var(--amber-deep);
 }
 .prose h3 {
-  font-size: 0.95rem;
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 1.5rem 0 0.6rem;
   color: var(--amber-deep);
@@ -735,12 +870,17 @@ nav.topic-list {
   margin-bottom: 0.3rem;
 }
 .prose code {
+  font-family: var(--font-mono);
   background: var(--surface);
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
   font-size: 0.88em;
+  /* long unbreakable tokens (e.g. Foo.Bar("baz")) wrap instead of pushing the
+     page wider on mobile; code blocks keep white-space:pre so they're unaffected */
+  overflow-wrap: break-word;
 }
 .prose pre {
+  font-family: var(--font-mono);
   background: var(--surface);
   border: 1px solid var(--border);
   border-left: 3px solid var(--amber);
@@ -775,10 +915,19 @@ nav.topic-list {
   border: 1px solid var(--border);
   margin: 1rem 0;
 }
+/* Markdown tables: contain wide tables so they scroll inside their own box
+   instead of forcing the whole page to scroll sideways on small screens.
+   Scoped to class-less tables so the styled obs-* diagram tables are untouched. */
+.prose table:not([class]) {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+}
 
-/* ── READABILITY: reading face on body text + ~70ch measure ──
-   Figures, code blocks, tables, and all obs-* diagrams intentionally stay
-   full-width and Commit Mono — only running prose moves to the reading face. */
+/* ── READABILITY: reading face on body text ──
+   Figures, code blocks, tables, and all obs-* diagrams keep Commit Mono — only
+   running prose moves to the sans reading face. (Column width is unified below.) */
 .prose p,
 .prose li,
 .prose blockquote,
@@ -788,8 +937,9 @@ nav.topic-list {
 .qa-a {
   font-family: var(--font-sans);
 }
-/* Reading column: the article title block and body text share one width so they
-   line up; figures, code, and tables still run full-width. ~48rem ≈ 80ch. */
+/* Reading column: title, body text, AND the figures/code/tables inside .prose
+   all share one width — .prose itself is capped to 48rem above — so text and
+   images line up exactly. ~48rem ≈ 80ch. */
 .single-header,
 .prose > p,
 .prose > ul,
@@ -928,7 +1078,12 @@ footer a:hover { text-decoration: underline; }
   .featured-excerpt { font-size: 0.88rem; }
   .topic-row { flex-basis: 100%; }
   .art-title { font-size: 1.05rem; }
-  .single-header h1 { font-size: 1.45rem; }
+  .single-header h1 { font-size: 1.6rem; }
+  .prose h2 { font-size: 1.25rem; }
+  .prose h3 { font-size: 1.1rem; }
+  /* mobile nav stacks + wraps (~150px tall), so anchored headings need a
+     bigger offset than the 5rem desktop value or they land behind the nav */
+  .prose h2, .prose h3 { scroll-margin-top: 10rem; }
   .subscribe-form { flex-direction: column; }
 }
 
@@ -957,7 +1112,13 @@ figure.knt-fig figcaption {
   border: 1px solid var(--border);
   border-top: 3px solid var(--amber);
   padding: 1.4rem 1.4rem 1.2rem;
+  overflow-x: auto;
 }
+/* Wide diagram figures (viewBox ~760) keep a legible minimum width and scroll
+   horizontally on phones instead of shrinking the whole SVG to a thumbnail.
+   The skill-tree set this pattern; this extends it to the whole obs-* family.
+   (The mascot uses .cucco-fig, not .diag-card, so it is unaffected.) */
+.diag-card > svg { min-width: 640px; }
 
 /* ── DIAGRAM 1: Reactive loop ── */
 .flow-row {
@@ -1444,3 +1605,25 @@ figure.diagram figcaption {
   font-size: 0.75rem;
   color: var(--muted);
 }
+
+/* ── SYNTAX HIGHLIGHTING — class-based chroma tokens (ported from stg) ── */
+.chroma { color: var(--text); background: none; }
+.chroma .err { color: #FF6188; background: none; }                 /* error            */
+.chroma .c, .chroma .ch, .chroma .cm, .chroma .c1, .chroma .cs,
+.chroma .cp, .chroma .cpf { color: #A6A28C; font-style: italic; }  /* comments  ~7:1   */
+.chroma .k, .chroma .kc, .chroma .kd, .chroma .kn,
+.chroma .kp, .chroma .kr, .chroma .kt { color: #FF6188; }          /* keywords  ~6.3:1 */
+.chroma .o, .chroma .ow, .chroma .p { color: var(--text); }        /* operators/punct  */
+.chroma .n, .chroma .na, .chroma .nl, .chroma .nv,
+.chroma .vc, .chroma .vg, .chroma .vi { color: var(--text); }      /* names / vars     */
+.chroma .nb, .chroma .bp, .chroma .nc, .chroma .nn,
+.chroma .no, .chroma .nt { color: #66D9EF; }                       /* builtins/types ~11:1 */
+.chroma .nf, .chroma .fm { color: #A6E22E; }                       /* functions ~11.7:1 */
+.chroma .s, .chroma .sa, .chroma .sb, .chroma .sc, .chroma .dl,
+.chroma .sd, .chroma .s2, .chroma .se, .chroma .sh, .chroma .si,
+.chroma .sx, .chroma .sr, .chroma .s1, .chroma .ss { color: #E6DB74; } /* strings ~12.7:1 */
+.chroma .m, .chroma .mb, .chroma .mf, .chroma .mh,
+.chroma .mi, .chroma .il, .chroma .mo { color: #AE81FF; }          /* numbers ~6.4:1   */
+.chroma .gd { color: #FF6188; }
+.chroma .gi { color: #A6E22E; }
+.chroma .gh, .chroma .gu { color: #66D9EF; }

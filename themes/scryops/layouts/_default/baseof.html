@@ -5,7 +5,8 @@
 </head>
 <body>
   <a href="#main-content" class="skip-link">Skip to content</a>
-  {{ partial "nav.html" . }}
+  {{ partial "site-top.html" . }}
+  <div class="accent-line"></div>
   <main id="main-content">
     {{ block "main" . }}{{ end }}
   </main>
@@ -136,26 +137,6 @@
   */}}
 
   <script>
-    /* ── Terminal collapse (persists via localStorage) ── */
-    (function() {
-      var terminal = document.querySelector('.terminal');
-      if (!terminal) return;
-      var toggle = document.querySelector('.terminal-toggle button');
-      if (!toggle) return;
-      var COLLAPSED = 'scryops_terminal_collapsed';
-      function applyState(collapsed) {
-        terminal.classList.toggle('collapsed', collapsed);
-        toggle.textContent = collapsed ? '+ expand' : '− collapse';
-        toggle.setAttribute('aria-expanded', !collapsed);
-      }
-      applyState(localStorage.getItem(COLLAPSED) === '1');
-      toggle.addEventListener('click', function() {
-        var next = !terminal.classList.contains('collapsed');
-        localStorage.setItem(COLLAPSED, next ? '1' : '0');
-        applyState(next);
-      });
-    })();
-
     /* ── Feed content-type filter ── */
     (function() {
       var btns = document.querySelectorAll('.filter-btn');
@@ -165,7 +146,7 @@
           var type = btn.dataset.type;
           btns.forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
-          document.querySelectorAll('.article').forEach(function(art) {
+          document.querySelectorAll('.art-card').forEach(function(art) {
             if (type === 'all') { art.style.display = ''; return; }
             var tag = art.querySelector('.tag');
             var match = tag && tag.classList.contains(type);
@@ -176,31 +157,14 @@
     })();
   </script>
 
-  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-  <script>
-    mermaid.initialize({
-      startOnLoad: true,
-      theme: 'base',
-      flowchart: { curve: 'linear' },
-      themeVariables: {
-        background:         '#161616',
-        primaryColor:       '#1C1C1C',
-        primaryTextColor:   '#F0EEE8',
-        primaryBorderColor: '#3A3A3A',
-        lineColor:          '#5B8DEF',
-        secondaryColor:     '#161616',
-        tertiaryColor:      '#0D0D0D',
-        edgeLabelBackground:'#161616',
-        clusterBkg:         '#0D0D0D',
-        clusterBorder:      '#2A2A2A',
-        titleColor:         '#F5A623',
-        fontFamily:         'ui-sans-serif, system-ui, -apple-system, sans-serif',
-        fontSize:           '13.5px',
-        nodeBorder:         '#3A3A3A',
-        mainBkg:            '#1C1C1C',
-        nodeTextColor:      '#F0EEE8'
-      }
-    });
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js" integrity="sha384-qX9VvWkP79m/O121ZE6sOYp0nf/pldQgtvWDbkpzi+3mUo4Wn4Ix4cFzNPay3VaB" crossorigin="anonymous"></script>
+  {{ $mermaidInit := resources.Get "js/mermaid-init.js" | fingerprint }}
+  <script src="{{ $mermaidInit.RelPermalink }}" integrity="{{ $mermaidInit.Data.Integrity }}" crossorigin="anonymous"></script>
+  {{/* reading preferences — theme (dark/light/calm) + reading toggles; supersedes mode-toggle.js */}}
+  {{ $prefs := resources.Get "js/prefs.js" | fingerprint }}
+  <script src="{{ $prefs.RelPermalink }}" integrity="{{ $prefs.Data.Integrity }}" crossorigin="anonymous" defer></script>
+  {{/* permacomputing · Phase 2 — measures this page's transfer weight, fills the footprint badge */}}
+  {{ $footprint := resources.Get "js/footprint.js" | fingerprint }}
+  <script src="{{ $footprint.RelPermalink }}" integrity="{{ $footprint.Data.Integrity }}" crossorigin="anonymous" defer></script>
 </body>
 </html>

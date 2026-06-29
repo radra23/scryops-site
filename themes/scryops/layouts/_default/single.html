@@ -1,23 +1,74 @@
 {{ define "main" }}
-<article>
-  <div class="single-header">
-    <div class="art-meta">
-      {{ $type := .Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ else if eq $type "qa" }}<span class="tag qa">Q&amp;A</span>
-      {{ end }}
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
-      {{ range .Params.tags }}
-      <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
-      {{ end }}
+{{ $hasToc := ge (len (findRE "(?i)<h2" .Content)) 4 }}
+<div class="layout{{ if $hasToc }} has-toc{{ end }}">
+  <article class="article">
+    <div class="single-header">
+      <div class="art-meta">
+        {{ $type := .Type }}
+        {{ if eq $type "articles" }}<span class="tag trends">Article</span>
+        {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
+        {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
+        {{ else if eq $type "qa" }}<span class="tag qa">Q&amp;A</span>
+        {{ end }}
+        {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
+        {{ range .Params.tags }}
+        <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
+        {{ end }}
+      </div>
+      <h1>{{ .Title }}</h1>
+      {{ with .Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
     </div>
-    <h1>{{ .Title }}</h1>
-    {{ with .Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
-  </div>
-  <div class="prose">
-    {{ .Content }}
-  </div>
-</article>
+
+    <div class="prose">
+      {{ .Content }}
+    </div>
+
+    {{/* ── END-OF-ARTICLE ZONE: resources (frontmatter-driven) + related posts ── */}}
+    {{ $hasRes := or .Params.references .Params.tools }}
+    {{ $related := first 3 (.Site.RegularPages.Related .) }}
+    {{ if or $hasRes $related }}
+    <aside class="article-end">
+
+      {{ if $hasRes }}
+      <div class="resources">
+        {{ with .Params.references }}
+        <section class="resource-group">
+          <h2 class="resource-head">References</h2>
+          <ul class="resource-list">
+            {{ range . }}
+            <li><a href="{{ .url }}"{{ if not (hasPrefix .url "/") }} target="_blank" rel="noopener"{{ end }}>{{ .title }}</a>{{ with .note }}<span class="resource-note">{{ . }}</span>{{ end }}</li>
+            {{ end }}
+          </ul>
+        </section>
+        {{ end }}
+        {{ with .Params.tools }}
+        <section class="resource-group">
+          <h2 class="resource-head">Tools &amp; repositories</h2>
+          <ul class="resource-list">
+            {{ range . }}
+            <li><a href="{{ .url }}"{{ if not (hasPrefix .url "/") }} target="_blank" rel="noopener"{{ end }}>{{ .title }}</a>{{ with .note }}<span class="resource-note">{{ . }}</span>{{ end }}</li>
+            {{ end }}
+          </ul>
+        </section>
+        {{ end }}
+      </div>
+      {{ end }}
+
+      {{ with $related }}
+      <section class="related">
+        <h2 class="related-head">Related reading</h2>
+        <div class="related-grid">
+          {{ range $i, $p := . }}
+            {{ partial "article-card.html" (dict "num" (add $i 1) "page" $p "heading" "h3") }}
+          {{ end }}
+        </div>
+      </section>
+      {{ end }}
+
+    </aside>
+    {{ end }}
+  </article>
+
+  {{ if $hasToc }}{{ partial "toc.html" . }}{{ end }}
+</div>
 {{ end }}

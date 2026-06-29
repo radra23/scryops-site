@@ -1,13 +1,15 @@
 ---
 title: "How to Create Your First Observability Dashboard"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "From a blank canvas to a dashboard that tells you whether your service is healthy — a step-by-step guide to building a useful first view in Grafana."
 readtime: 7
 tags: ["Grafana", "Observability", "How-to", "Prometheus"]
 ---
 
 A blank Grafana instance and a working Prometheus scrape target are all you need. By the end of this how-to you will have a service health dashboard with request rate, error rate, and latency panels that respond dynamically to a service selector — plus deployment annotations that add context when things go wrong.
+
+{{< obs-dashboard-mockup >}}
 
 ## Prerequisites
 
@@ -152,6 +154,8 @@ In Grafana, panels are dragged by their title bar and resized from the bottom-ri
 {{< insight bookmark >}}
 **The dashboard answers three on-call questions.** Is something wrong right now — error rate stat. When did it start — request rate and latency trends. What changed at that moment — deployment annotations. Every panel beyond those three questions adds noise until you have encountered a question the dashboard cannot answer. Add panels as questions arise, not in advance.
 {{< /insight >}}
+
+{{< obs-mascot class="barbarian" quip="BEFORE THE DASHBOARD: Conan reads ten thousand log lines BY HAND. Uphill. In the snow. AFTER THE DASHBOARD: three panels. Red means bad. Conan is free now. Conan is also, quietly, a little sad about it. Conan is NOT going back." caption="Conan the Bawkbarian would lay down his life for your error-rate stat panel." >}}
 
 - [Set Up SLO Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) — define error budgets and alert before they run out
 - [An Alert Without a Next Step Is Just Noise](/guides/alert-design-principles/) — writing alert bodies that give on-call engineers a starting point

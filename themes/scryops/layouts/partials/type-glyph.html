@@ -1,0 +1,11 @@
+{{- /* Compact, color-coded content-type glyph for the front-page feed.
+       Colored glyph + a visually-hidden label, so type is never conveyed by
+       colour alone. Extend the map to add a content type. Section names match
+       this repo's content/ folders (howtos, not how-tos). */ -}}
+{{- $map := dict
+  "guides"   (slice "⇉" "tp-trace"  "Guide")
+  "articles" (slice "◆" "tp-metric" "Article")
+  "howtos"   (slice "▸" "tp-prof"   "How-to")
+  "qa"       (slice "≡" "tp-log"    "Q&A") -}}
+{{- $m := index $map .Type | default (slice "•" "tp-log" (.Type | humanize)) -}}
+<span class="tg2 {{ index $m 1 }}" title="{{ index $m 2 }}"><span aria-hidden="true">{{ index $m 0 }}</span><span class="sr-only">{{ index $m 2 }}</span></span>

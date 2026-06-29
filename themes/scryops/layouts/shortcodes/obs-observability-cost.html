@@ -1,0 +1,48 @@
+<figure class="diagram">
+  <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;overflow:hidden;">
+    <svg viewBox="0 0 760 376" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="ovc-title ovc-desc"
+         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+      <title id="ovc-title">Telemetry volume and cost as scale grows: monitoring versus observability</title>
+      <desc id="ovc-desc">A chart with telemetry volume and cost on the vertical axis and scale — traffic multiplied by cardinality — on the horizontal axis. Two curves start together at low scale. The monitoring curve rises slightly and then flattens to a plateau, because a fixed set of pre-aggregated metric series stays bounded. The observability curve keeps accelerating upward, because raw events and traces grow with both traffic and the number of distinct attribute values. The widening gap between the two curves is shaded and labelled the cost of being able to ask arbitrary questions.</desc>
+
+      <rect x="0" y="0" width="760" height="376" fill="var(--fig-bg)"/>
+
+      <!-- eyebrow -->
+      <text x="78" y="30" fill="var(--warn)" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">DATA VOLUME vs. SCALE</text>
+      <text x="78" y="47" fill="var(--muted)" font-size="11">// monitoring stays bounded &#8212; observability climbs with cardinality</text>
+
+      <!-- grid -->
+      <g stroke="var(--fig-bg)" stroke-width="1">
+        <line x1="78" y1="240" x2="730" y2="240"/>
+        <line x1="78" y1="180" x2="730" y2="180"/>
+        <line x1="78" y1="120" x2="730" y2="120"/>
+      </g>
+      <!-- axes -->
+      <line x1="78" y1="62" x2="78" y2="300" stroke="var(--border)" stroke-width="1"/>
+      <line x1="78" y1="300" x2="730" y2="300" stroke="var(--border)" stroke-width="1"/>
+      <text x="22" y="180" fill="var(--muted)" font-size="10" transform="rotate(-90 22 180)" text-anchor="middle">telemetry volume &amp; cost &#8594;</text>
+      <text x="404" y="324" fill="var(--muted)" font-size="10" text-anchor="middle">scale &#8594; (traffic &#215; cardinality)</text>
+
+      <!-- gap fill between the two curves -->
+      <path d="M78,288 L160,280 240,268 330,248 430,213 540,162 640,108 730,72 L730,247 640,248 540,250 430,254 330,260 240,268 160,278 78,288 Z" fill="var(--warn)" fill-opacity="0.10"/>
+
+      <!-- monitoring curve (bounded, plateaus) -->
+      <polyline fill="none" stroke="var(--cyan)" stroke-width="2.4" stroke-linejoin="round"
+        points="78,288 160,278 240,268 330,260 430,254 540,250 640,248 730,247"/>
+      <!-- observability curve (super-linear) -->
+      <polyline fill="none" stroke="var(--warn)" stroke-width="2.4" stroke-linejoin="round"
+        points="78,288 160,280 240,268 330,248 430,213 540,162 640,108 730,72"/>
+
+      <!-- curve labels (colour ties each label to its line) -->
+      <text x="306" y="108" fill="var(--warn)" font-size="11">observability</text>
+      <text x="306" y="122" fill="var(--muted)" font-size="10">raw events &#183; high-cardinality</text>
+      <text x="628" y="264" fill="var(--cyan)" font-size="11">monitoring</text>
+      <text x="628" y="276" fill="var(--muted)" font-size="10">bounded series</text>
+
+      <!-- gap label -->
+      <text x="566" y="206" fill="var(--text)" font-size="11">the bill</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &#8212; Monitoring's data is bounded by the series you defined in advance; observability's grows with every new dimension you can ask about. That widening gap is the bill &#8212; and the reason sampling and retention tiers exist.</figcaption>
+</figure>
