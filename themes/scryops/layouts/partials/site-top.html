@@ -8,6 +8,7 @@
     {{ range site.Menus.main }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
   </nav>
   <span class="spacer"></span>
-  {{ with .Type }}<span class="site-meta">{{ . | upper }}{{ with $.Params.readingTime }} · {{ . }} MIN{{ end }}</span>{{ end }}
+  {{/* show the type/reading-time meta only on real content pages — not home, not generic "page" types (about, colophon) where "PAGE" is just noise */}}
+  {{ if and (not .IsHome) (ne .Type "page") }}<span class="site-meta">{{ .Type | upper }}{{ with .Params.readingTime }} · {{ . }} MIN{{ end }}</span>{{ end }}
   {{ partial "reading-prefs.html" . }}
 </header>

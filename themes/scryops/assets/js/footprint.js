@@ -49,10 +49,22 @@
     var bytes = totalBytes();
     hosts.forEach(function (host) {
       if (bytes === null) { host.setAttribute('hidden', ''); return; }
+      var set = function (sel, txt) { var el = host.querySelector(sel); if (el) el.textContent = txt; };
+      var fill0 = host.querySelector('[data-fp-fill]');
+      // Repeat visit: every resource came from cache, so transferSize is 0.
+      // "0 B" reads like a bug — say so plainly instead.
+      if (bytes === 0) {
+        set('[data-fp-size]', 'cached');
+        set('[data-fp-co2]', '~0 g CO₂');
+        set('[data-fp-status]', '✓ served from cache');
+        set('[data-fp-note]', 'no new transfer this visit');
+        if (fill0) fill0.style.width = '0%';
+        host.classList.remove('over');
+        return;
+      }
       var budget = parseInt(host.getAttribute('data-fp-budget'), 10) || DEFAULT_BUDGET;
       var pct = Math.min(100, Math.round(bytes / budget * 100));
       var under = bytes <= budget;
-      var set = function (sel, txt) { var el = host.querySelector(sel); if (el) el.textContent = txt; };
       set('[data-fp-size]', fmtBytes(bytes));
       set('[data-fp-co2]', fmtG(grams(bytes)));
       set('[data-fp-status]', under ? '\u2713 under budget' : '\u26A0 over budget');
