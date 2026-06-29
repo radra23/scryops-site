@@ -55,7 +55,7 @@
   --font-body:var(--font-read);
 
   --fs-display:34px; --fs-h1:29px; --fs-h2:20px; --fs-h3:16px;
-  --fs-lede:17.5px;  --fs-body:15.5px; --fs-code:13.5px;
+  --fs-lede:17.5px;  --fs-body:16px; --fs-code:13.5px;   /* body ≥16px per GUIDELINES non-negotiable #3 */
   --fs-label:11px;   --fs-pixel:11px;
   --lh-body:1.78;    --lh-lede:1.68;   --lh-code:1.75;
   --read-track:.012em;   /* reading-face letter-spacing (loosens in .pref-spacing) */
@@ -302,9 +302,20 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* ============================================================
    layout: guide template (toc rail + article)
    ============================================================ */
-.layout{max-width:760px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:54px;padding:50px 28px 130px}
+.layout{max-width:820px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:54px;padding:50px 28px 130px}
 .layout.has-toc{max-width:1080px;grid-template-columns:minmax(0,1fr) 220px}
+/* Reading column: prose holds the ~680px measure (centered); code, figures,
+   and tables break wider for room (GUIDELINES #2 — "evidence gets room,
+   prose stays narrow"). */
 .layout .article{margin:0;padding:0;max-width:none}
+.layout .article > .single-header,
+.layout .article > .article-end,
+.layout .prose > *{max-width:680px;margin-inline:auto}
+.layout .prose > .highlight,
+.layout .prose > figure,
+.layout .prose > .obs-fig,
+.layout .prose > table,
+.layout .prose > .table-wrap{max-width:none}
 .site-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--bg);border-bottom:1px solid var(--border)}
 .site-top .spacer{flex:1}
 .site-meta{font-family:var(--font-code);font-size:11px;letter-spacing:.14em;color:var(--muted)}

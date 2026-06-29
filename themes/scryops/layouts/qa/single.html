@@ -1,17 +1,21 @@
 {{ define "main" }}
-<article>
-  <div class="single-header">
-    <div class="art-meta">
-      <span class="tag qa">Q&amp;A</span>
-      {{ range .Params.tags }}
-      <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
-      {{ end }}
+{{- /* Use the standard reading shell (no TOC) so Q&A inherits the prose
+       measure + evidence breakout from .layout .article. */ -}}
+<div class="layout">
+  <article class="article">
+    <div class="single-header">
+      <div class="art-meta">
+        <span class="tag qa">Q&amp;A</span>
+        {{ range .Params.tags }}
+        <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
+        {{ end }}
+      </div>
+      <h1>{{ .Title }}</h1>
+      {{ with .Params.answer }}<div class="art-excerpt">{{ . }}</div>{{ end }}
     </div>
-    <h1>{{ .Title }}</h1>
-    {{ with .Params.answer }}<div class="art-excerpt">{{ . }}</div>{{ end }}
-  </div>
-  <div class="prose">
-    {{ .Content }}
-  </div>
-</article>
+    <div class="prose">
+      {{ .Content }}
+    </div>
+  </article>
+</div>
 {{ end }}
