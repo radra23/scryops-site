@@ -5,6 +5,7 @@ theme = "scryops"
 
 [params]
   description = "An independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions."
+  topics = ["logs", "metrics", "traces", "opentelemetry", "distributed-systems"]
   tagline = "observability decoded"
   mission = "The stack is always changing. We help you see through it."
   # Brevo subscription form — paste the action URL from Contacts → Forms → your form → Share
@@ -29,7 +30,7 @@ theme = "scryops"
     noClasses = false
   [markup.tableOfContents]
     startLevel = 2
-    endLevel = 2
+    endLevel = 3
     ordered = false
 
 [menu]

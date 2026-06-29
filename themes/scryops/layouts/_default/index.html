@@ -1,96 +1,43 @@
 {{ define "main" }}
-<div class="wrap">
+<div class="front">
 
-{{ partial "terminal.html" . }}
-
-{{ $allContent := slice }}
-{{ range where .Site.RegularPages "Type" "articles" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "guides" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ range where .Site.RegularPages "Type" "howtos" }}{{ $allContent = $allContent | append . }}{{ end }}
-{{ $sorted := sort $allContent "Date" "desc" }}
-
-<!-- Two-column hero: featured article + topics sidebar -->
-<div class="hero-grid">
-
-  <!-- Featured article (left) -->
-  {{ with index $sorted 0 }}
-  <a href="{{ .RelPermalink }}" class="featured-article">
-    <div class="featured-meta">
-      {{ $type := .Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ end }}
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
-      <span class="featured-date">{{ .Date.Format "Jan 2, 2006" }}</span>
+  <!-- Identity statement + topics + CTAs -->
+  <section class="front-hero">
+    <div class="eyebrow">scrying + ops</div>
+    <h1 class="landing-statement">raw telemetry in. <b>understanding</b> out.</h1>
+    <p class="landing-lede">{{ site.Params.description }}</p>
+    {{ with site.Params.topics }}
+    <div class="topics">
+      {{ range . }}<span class="topic-chip"><b>#</b>{{ . }}</span>{{ end }}
     </div>
-    <h1 class="featured-title">{{ .Title }}</h1>
-    {{ with .Params.excerpt }}<p class="featured-excerpt">{{ . }}</p>{{ end }}
-    <span class="featured-cta">Read &rarr;</span>
-  </a>
-  {{ end }}
-
-  <!-- Topics sidebar (right) -->
-  <aside class="hero-topics">
-    <h2 class="topics-label">Topics</h2>
-    {{ $tags := .Site.Taxonomies.tags }}
-    {{ $domains := slice
-      (dict "slug" "opentelemetry" "name" "OpenTelemetry")
-      (dict "slug" "tracing"       "name" "Tracing")
-      (dict "slug" "alerting"      "name" "Alerting")
-      (dict "slug" "slos"          "name" "SLOs")
-      (dict "slug" "observability" "name" "Observability")
-    }}
-    {{ $withCounts := slice }}
-    {{ range $domains }}
-      {{ $pages := index $tags .slug }}
-      {{ if $pages }}
-        {{ $withCounts = $withCounts | append (dict "slug" .slug "name" .name "count" (len $pages)) }}
-      {{ end }}
     {{ end }}
-    <nav class="topic-list" aria-label="Topics">
-      {{ range sort $withCounts "count" "desc" }}
-      <a href="{{ "tags/" | relURL }}{{ .slug }}/" class="topic-row">
-        <span class="topic-name">{{ .name }}</span>
-        <span class="topic-badge">{{ printf "%02d" .count }}</span>
+    <div class="landing-cta">
+      <a class="btn btn-primary" href="{{ "/guides/" | relURL }}">Start reading</a>
+      <a class="btn btn-ghost" href="#subscribe">Subscribe &rarr;</a>
+    </div>
+  </section>
+
+  <!-- Latest pieces as shell output in a terminal window -->
+  {{ $latest := first 6 (sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc") }}
+  <section class="front-feed">
+    <div class="feedwin">
+      <div class="feedhdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="fcursor"></span></div>
+      {{ range $latest }}
+      <a class="trow" href="{{ .RelPermalink }}">
+        {{ partial "type-glyph.html" . }}
+        <span class="tt">{{ .Title }}</span>
+        <span class="tm">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
       </a>
       {{ end }}
-      <a href="{{ "tags/" | relURL }}" class="topic-all">&rarr; all topics</a>
-    </nav>
-  </aside>
+    </div>
+  </section>
 
 </div>
 
-<!-- Everything else: the rest of the catalog as a responsive card grid (Option C) -->
-{{ $rest := after 1 $sorted }}
-{{ range where .Site.RegularPages "Type" "qa" }}{{ $rest = $rest | append . }}{{ end }}
-{{ $rest = sort $rest "Date" "desc" }}
-{{ with $rest }}
-<section class="post-section">
-  <div class="section-head">
-    <h2 class="section-label">More</h2>
-    <div class="section-rule"></div>
-  </div>
-  <div class="post-grid">
-    {{ range first 4 . }}
-    {{ $t := .Type }}
-    <a href="{{ .RelPermalink }}" class="post-card">
-      {{ if eq $t "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $t "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $t "howtos" }}<span class="tag howto">How-to</span>
-      {{ else if eq $t "qa" }}<span class="tag qa">Q&amp;A</span>
-      {{ end }}
-      <div class="post-card-title">{{ .Title }}</div>
-      {{ with .Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
-    </a>
-    {{ end }}
-  </div>
-</section>
-{{ end }}
-
-<!-- Subscribe -->
+<!-- Subscribe (inline Brevo form, preserved from the prior homepage) -->
 {{ with .Site.Params.brevo_form_url }}
-<section class="subscribe-section">
+<div class="wrap">
+<section class="subscribe-section" id="subscribe">
   <h2 class="subscribe-label">Stay in the loop</h2>
   <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
   <form class="subscribe-form" id="subscribe-form" novalidate>
@@ -157,7 +104,7 @@
   });
 }());
 </script>
+</div>
 {{ end }}
 
-</div>
 {{ end }}

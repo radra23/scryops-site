@@ -2,8 +2,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — scryops{{ end }}</title>
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
-{{- /* FOUC guard: sync before CSS so the right palette paints on frame 1 */ -}}
-<script>try{if(localStorage.getItem('scryops-mode')==='dark')document.documentElement.setAttribute('data-theme','dark');}catch(e){}</script>
+{{- /* FOUC guard: apply stored prefs (theme + reading flags) as <html> classes
+       before CSS so the right theme paints on frame 1. Migrates the legacy
+       scryops-mode key. Dark is the default. */ -}}
+<script>try{var p=JSON.parse(localStorage.getItem('scryops-prefs')||'null')||{theme:(localStorage.getItem('scryops-mode')||'dark')};var c=document.documentElement.classList;if(p.theme==='light')c.add('light');else if(p.theme==='calm')c.add('calm');if(p.legible)c.add('pref-legible');if(p.spacing)c.add('pref-spacing');if(p.reduce)c.add('pref-reduce');}catch(e){}</script>
 {{ $fonts := resources.Get "css/fonts.css" | fingerprint }}
 <link rel="stylesheet" href="{{ $fonts.RelPermalink }}" integrity="{{ $fonts.Data.Integrity }}" crossorigin="anonymous" />
 {{ $tel := resources.Get "css/telemetry.css" | fingerprint }}
