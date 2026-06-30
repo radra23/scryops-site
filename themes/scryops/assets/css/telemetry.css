@@ -274,8 +274,10 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    the left rail on each link carries the structure. */
 .toc nav,.toc ul{margin:0;padding:0;list-style:none}
 .toc li{margin:0}
-.toc ul ul{padding-left:13px}   /* nested h3 entries indent under their h2 */
 .toc a{display:block;font-family:var(--font-code);font-size:12.5px;line-height:1.45;color:var(--muted);text-decoration:none;border-bottom:none;padding:6px 0 6px 13px;border-left:2px solid var(--border)}
+/* nested h3 entries: indent the TEXT, not the rail — every link keeps the same
+   left edge so the rail is one clean continuous line (matches the reference). */
+.toc ul ul a{padding-left:26px}
 .toc a:hover{color:var(--text)}
 .toc a.active{color:var(--link);border-left-color:var(--link)}
 
