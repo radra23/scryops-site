@@ -1,4 +1,4 @@
-const CACHE = 'scryops-v1';
+const CACHE = 'scryops-v2';   /* bump after a structural change (e.g. the Telemetry redesign) to evict returning clients' stale cache-first assets */
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', e =>

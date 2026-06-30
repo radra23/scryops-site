@@ -10,7 +10,7 @@
  *
  * To force all clients onto a fresh cache after a structural change, bump VERSION.
  */
-const VERSION = 'scryops-v1';
+const VERSION = 'scryops-v2';   /* bumped for the Telemetry dark-default redesign — forces returning clients off the old cached assets */
 const STATIC_CACHE = VERSION + '-static';
 const PAGE_CACHE = VERSION + '-pages';
 const OFFLINE_URL = '/offline.html';
