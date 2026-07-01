@@ -158,6 +158,30 @@ html.pref-spacing .article > * + *{ margin-top:26px; }
 html.pref-reduce *,html.pref-reduce *::before,html.pref-reduce *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
+/* Lite mode (permacomputing Phase 3): drop to system fonts (zero web-font
+   bytes) and let the Mermaid runtime be skipped. Auto-applies when the
+   browser signals reduced-data. Fonts are the shared block below. */
+html.pref-lite{
+  --font-display:ui-monospace,'Courier New',monospace;
+  --font-read:ui-monospace,'Courier New',monospace;
+  --font-code:ui-monospace,'Courier New',monospace;
+  --font-body:ui-monospace,'Courier New',monospace;
+  --font-pixel:ui-monospace,monospace;
+}
+@media (prefers-reduced-data: reduce){
+  :root{
+    --font-display:ui-monospace,'Courier New',monospace;
+    --font-read:ui-monospace,'Courier New',monospace;
+    --font-code:ui-monospace,'Courier New',monospace;
+    --font-body:ui-monospace,'Courier New',monospace;
+    --font-pixel:ui-monospace,monospace;
+  }
+}
+/* Lite: no Mermaid runtime — render the diagram's source as a readable static
+   block instead of raw text (graceful degrade). */
+html.pref-lite .diagram .mermaid{white-space:pre-wrap;font-family:var(--font-code);font-size:12px;line-height:1.5;color:var(--code-muted);background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:14px 16px;overflow-x:auto}
+html.pref-lite .diagram .mermaid::before{content:"diagram source · lite mode";display:block;color:var(--eco);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+
 /* ============================================================
    base
    ============================================================ */
