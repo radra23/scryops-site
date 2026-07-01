@@ -16,7 +16,7 @@ arrives at its numbers. Awareness, not absolution.
   <div class="co-row"><span class="co-k">analytics</span><span class="co-v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data</span></div>
   <div class="co-row"><span class="co-k">offline</span><span class="co-v">service worker · reads from cache when the network drops</span></div>
   <div class="co-row"><span class="co-k">fonts</span><span class="co-v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P (no CDN)</span></div>
-  <div class="co-row"><span class="co-k">diagrams</span><span class="co-v">Mermaid via CDN <span class="eco">(self-host pending)</span></span></div>
+  <div class="co-row"><span class="co-k">diagrams</span><span class="co-v">Mermaid · CDN, lazy — diagram pages only <span class="eco">(static-SVG pre-render planned)</span></span></div>
   <div class="co-row"><span class="co-k">deps</span><span class="co-v"><span class="eco">0</span> runtime dependencies · budget: none by default</span></div>
   <div class="co-row"><span class="co-k">carbon</span><span class="co-v">estimated per visit — see <a href="#method">method</a></span></div>
 </div>
