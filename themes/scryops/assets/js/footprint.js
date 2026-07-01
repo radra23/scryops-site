@@ -12,13 +12,22 @@
    is invisible here until you self-host it (that's Phase 4, and a
    reason to do it).
 
-   Carbon is a Sustainable Web Design approximation. For rigor, swap
-   the two constants below for the @tgwf/co2 (CO2.js) library.
+   Carbon uses the Sustainable Web Design v4 model — the one CO2.js
+   (@tgwf/co2) implements — inlined below so the badge adds no runtime
+   dependency. Method + constants are published at /colophon/#method.
    ============================================================ */
 (function () {
-  // --- carbon model (edit these, or replace with CO2.js) ---
-  var KWH_PER_GB = 0.81;   // Sustainable Web Design: total energy per GB
-  var GRID_G_PER_KWH = 442; // global average grid intensity, gCO₂e/kWh
+  // --- carbon model: Sustainable Web Design v4 (as implemented by CO2.js) ---
+  // Per-segment energy in kWh/GB: operational (op*) + embodied (em*). The
+  // green-hosting factor offsets only the data-centre operational share; kept
+  // at 0 — conservative and honest (github.io isn't a verified green host).
+  var SWD = {
+    opDC: 0.055, emDC: 0.012,    // data centre
+    opNet: 0.059, emNet: 0.013,  // network
+    opDev: 0.080, emDev: 0.081,  // user device
+    grid: 494,                   // gCO₂e/kWh — global average (Ember)
+    green: 0                     // green-hosting factor, 0–1
+  };
   var DEFAULT_BUDGET = 120 * 1024; // bytes; per-page override via data-fp-budget
 
   function totalBytes() {
@@ -31,7 +40,14 @@
     return bytes;
   }
 
-  function grams(bytes) { return bytes / 1e9 * KWH_PER_GB * GRID_G_PER_KWH; }
+  // SWD v4 per-byte: sum the segment energy (green offsets only the data-centre
+  // operational share), then apply grid carbon intensity.
+  function grams(bytes) {
+    var kwhPerGB = (SWD.opDC * (1 - SWD.green) + SWD.emDC)
+                 + (SWD.opNet + SWD.emNet)
+                 + (SWD.opDev + SWD.emDev);
+    return bytes / 1e9 * kwhPerGB * SWD.grid;
+  }
 
   function fmtBytes(b) {
     if (b < 1024) return b + ' B';
