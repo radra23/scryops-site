@@ -13,17 +13,20 @@
 (function () {
   var KEY = 'scryops-prefs';
   var root = document.documentElement;
-  var DEFAULTS = { theme: 'dark', legible: false, spacing: false, reduce: false };
+  var DEFAULTS = { theme: 'dark', legible: false, spacing: false, reduce: false, lite: false };
 
   function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (raw) return Object.assign({}, DEFAULTS, JSON.parse(raw));
-      // migrate the old dark/light-only key if present
-      var legacy = localStorage.getItem('scryops-mode');
-      if (legacy) return Object.assign({}, DEFAULTS, { theme: legacy });
-    } catch (e) {}
-    return Object.assign({}, DEFAULTS);
+    var stored = null, legacy = null;
+    try { stored = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch (e) {}
+    try { legacy = localStorage.getItem('scryops-mode'); } catch (e) {}
+    var prefs = Object.assign({}, DEFAULTS, stored || (legacy ? { theme: legacy } : {}));
+    // Auto-enable Lite on a data-saver / metered connection — unless the reader
+    // has already made an explicit Lite choice (permacomputing Phase 3).
+    var explicitLite = stored && Object.prototype.hasOwnProperty.call(stored, 'lite');
+    if (!explicitLite) {
+      try { if (navigator.connection && navigator.connection.saveData) prefs.lite = true; } catch (e) {}
+    }
+    return prefs;
   }
 
   var prefs = load();
@@ -34,8 +37,10 @@
     root.classList.toggle('pref-legible', !!prefs.legible);
     root.classList.toggle('pref-spacing', !!prefs.spacing);
     root.classList.toggle('pref-reduce', !!prefs.reduce);
+    root.classList.toggle('pref-lite', !!prefs.lite);
     syncUI();
-    if (window.scryopsRenderMermaid) window.scryopsRenderMermaid();
+    // In Lite the Mermaid runtime isn't loaded — don't try to re-render it.
+    if (!prefs.lite && window.scryopsRenderMermaid) window.scryopsRenderMermaid();
   }
 
   function save() {

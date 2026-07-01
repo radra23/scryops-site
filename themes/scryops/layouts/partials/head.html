@@ -5,7 +5,7 @@
 {{- /* FOUC guard: apply stored prefs (theme + reading flags) as <html> classes
        before CSS so the right theme paints on frame 1. Migrates the legacy
        scryops-mode key. Dark is the default. */ -}}
-<script>try{var p=JSON.parse(localStorage.getItem('scryops-prefs')||'null')||{theme:(localStorage.getItem('scryops-mode')||'dark')};var c=document.documentElement.classList;if(p.theme==='light')c.add('light');else if(p.theme==='calm')c.add('calm');if(p.legible)c.add('pref-legible');if(p.spacing)c.add('pref-spacing');if(p.reduce)c.add('pref-reduce');}catch(e){}</script>
+<script>try{var raw=localStorage.getItem('scryops-prefs');var p=raw?JSON.parse(raw):null;var t=(p&&p.theme)||localStorage.getItem('scryops-mode')||'dark';var c=document.documentElement.classList;if(t==='light')c.add('light');else if(t==='calm')c.add('calm');if(p){if(p.legible)c.add('pref-legible');if(p.spacing)c.add('pref-spacing');if(p.reduce)c.add('pref-reduce');}var liteSet=p&&('lite'in p);if((liteSet&&p.lite)||(!liteSet&&navigator.connection&&navigator.connection.saveData))c.add('pref-lite');}catch(e){}</script>
 {{ $fonts := resources.Get "css/fonts.css" | fingerprint }}
 <link rel="stylesheet" href="{{ $fonts.RelPermalink }}" integrity="{{ $fonts.Data.Integrity }}" crossorigin="anonymous" />
 {{ $tel := resources.Get "css/telemetry.css" | fingerprint }}

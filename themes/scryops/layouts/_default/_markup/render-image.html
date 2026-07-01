@@ -1,0 +1,4 @@
+{{- /* Markdown image render hook — defer images (permacomputing Phase 3):
+       lazy-load + async-decode every content image so they don't block or
+       download until near the viewport. Especially helps Lite / data-saver. */ -}}
+<img src="{{ .Destination | safeURL }}" alt="{{ .Text }}"{{ with .Title }} title="{{ . }}"{{ end }} loading="lazy" decoding="async">
