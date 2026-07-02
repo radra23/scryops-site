@@ -57,6 +57,36 @@ def test_untokenized_colors_flags_leftovers():
     assert m.untokenized_colors('<rect style="fill:#abc123"/>') == ["#abc123"]
     assert m.untokenized_colors('<rect style="fill:var(--edge)"/>') == []
 
+def test_short_sentinel_does_not_corrupt_longer_hex():
+    # #000 is a 3-char sentinel in PALETTE; it must not match as a prefix
+    # inside an unrelated 6-char hex color like #000fff.
+    out = m.tokenize_svg('<rect fill="#000fff"/>')
+    assert '#000fff' in out
+    assert 'var(--nlab)fff' not in out
+    # a standalone #000 (not part of a longer hex) must still tokenize.
+    solo = m.tokenize_svg('<rect style="fill:#000"/>')
+    assert 'var(--nlab)' in solo  # PALETTE["#000"] == "var(--nlab)"
+
+def test_tokenize_and_guard_handle_rgba_sentinel():
+    # PALETTE["#f05a05"] -> var(--surface); its rgb channels are (240, 90, 5).
+    r, g, b = m._hex_to_rgb('#f05a05')
+    svg = f'<rect style="fill:rgba({r}, {g}, {b}, 0.5)"/>'
+    out = m.tokenize_svg(svg)
+    assert 'var(--surface)' in out
+    assert f'rgba({r}, {g}, {b}, 0.5)' not in out
+    # tokenized output has no leftover sentinel colors
+    assert m.untokenized_colors(out) == []
+    # a sentinel rgba that was NOT run through tokenize_svg is correctly
+    # flagged by the guard as an un-tokenized sentinel leftover.
+    untouched = f'<rect style="fill:rgba({r}, {g}, {b}, 0.5)"/>'
+    assert f'rgba({r}, {g}, {b}, 0.5)' in m.untokenized_colors(untouched)
+
+def test_normalize_upgrades_existing_role_to_img():
+    svg = '<svg role="graphics-document document" viewBox="0 0 10 10"></svg>'
+    out = m.normalize_svg(svg)
+    assert 'role="img"' in out
+    assert 'graphics-document' not in out
+
 def test_normalize_strips_size_adds_role_keeps_viewbox_and_title():
     svg = '<svg width="820" height="410" viewBox="0 0 820 410"><title>x</title></svg>'
     out = m.normalize_svg(svg)

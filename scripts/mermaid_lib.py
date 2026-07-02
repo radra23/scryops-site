@@ -29,6 +29,15 @@ PALETTE = {
     "#eaeaea": "var(--node-fill)",
     "#999": "var(--node-stroke)",
     "#666": "var(--node-stroke)",
+    # sequenceDiagram: the `crosshead` arrow-marker def (used for "destroy"
+    # messages) hardcodes `stroke: "#000000"` in mermaid's renderer, with no
+    # themeVariable hook -- unconditionally emitted in every <defs> block
+    # regardless of whether the diagram actually uses a destroy message,
+    # same as the `#000` KaTeX leak above. Unmasked once tokenize_svg's
+    # hex substitution was anchored to whole tokens (previously the `#000`
+    # sentinel matched as a corrupting prefix of this literal instead of
+    # leaving it as a clean, guard-visible leftover).
+    "#000000": "var(--nlab)",
     # sequenceDiagram: a second hardcoded background rect (`fill:
     # "#EDF2AE"`) drawn behind actor boxes with links/menus.
     "#EDF2AE": "var(--surface)",
@@ -146,9 +155,15 @@ def tokenize_svg(svg):
         var = PALETTE.get(hexv)
         return f'style="{prop}:{var}"' if var else m.group(0)
     out = re.sub(r'(fill|stroke)="(#[0-9a-fA-F]{6}|#[0-9a-fA-F]{3})"', _attr, out)
-    # 2) every remaining sentinel occurrence (style blocks + inline style=)
-    for hexv, var in PALETTE.items():
-        out = re.sub(re.escape(hexv), var, out, flags=re.I)
+    # 2) every remaining sentinel occurrence (style blocks + inline style=).
+    #    Anchor each hex token on both sides with a "not a hex digit" boundary
+    #    so a short 3-char sentinel (e.g. "#000") can't match as a prefix
+    #    inside an unrelated longer hex color (e.g. "#000fff"). Process
+    #    longer keys first so a 6-char key is substituted before any 3-char
+    #    key that happens to be its prefix gets a chance to run.
+    for hexv, var in sorted(PALETTE.items(), key=lambda kv: -len(kv[0])):
+        pattern = r'(?<![0-9a-fA-F])' + re.escape(hexv) + r'(?![0-9a-fA-F])'
+        out = re.sub(pattern, var, out, flags=re.I)
     # 2b) rgb()/rgba() forms of a sentinel (e.g. mermaid's alpha-blended
     #     `.labelBkg` rule) -- match on the (r,g,b) channel tuple, alpha and
     #     all, since var() can't carry a separate opacity here.
