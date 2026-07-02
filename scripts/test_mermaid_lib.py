@@ -1,3 +1,5 @@
+import xml.dom.minidom
+
 import mermaid_lib as m
 
 def test_diagram_hash_matches_pinned_contract():
@@ -28,6 +30,28 @@ def test_tokenize_replaces_style_block_inline_and_presentation_attr():
     assert 'fill="#f04a04"' not in out             # old attr gone
     assert "var(--nlab)" in out
     assert m.untokenized_colors(out) == []
+
+def test_tokenize_merges_fill_and_stroke_on_same_element():
+    # Realistic Mermaid marker/arrowhead polygon: both fill and stroke
+    # presentation attrs on one element. Each was independently rewritten
+    # to its own style="..." attr, producing two style attrs on one tag
+    # (invalid XML -> "duplicate attribute" on parse).
+    svg = '<svg><polygon fill="#f01a01" stroke="#f02a02"/></svg>'
+    out = m.tokenize_svg(svg)
+    assert out.count('style=') == 1
+    assert "fill:var(--node-fill)" in out
+    assert "stroke:var(--node-stroke)" in out
+    xml.dom.minidom.parseString(out)  # raises "duplicate attribute" if unfixed
+
+def test_tokenize_merges_preexisting_style_with_presentation_attr():
+    # Element already has a style="..." AND a fill/stroke presentation attr;
+    # conversion must not add a second style attribute.
+    svg = '<svg><rect style="opacity:0.5" fill="#f01a01"/></svg>'
+    out = m.tokenize_svg(svg)
+    assert out.count('style=') == 1
+    assert "opacity:0.5" in out
+    assert "fill:var(--node-fill)" in out
+    xml.dom.minidom.parseString(out)
 
 def test_untokenized_colors_flags_leftovers():
     assert m.untokenized_colors('<rect style="fill:#abc123"/>') == ["#abc123"]

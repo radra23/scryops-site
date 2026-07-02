@@ -33,6 +33,29 @@ def diagram_hash(source):
     return hashlib.sha256(source.strip().encode("utf-8")).hexdigest()[:12]
 
 
+_STYLE_ATTR = re.compile(r'style="([^"]*)"')
+_START_TAG = re.compile(r"<[a-zA-Z][\w:-]*\b[^>]*>")
+
+
+def _merge_duplicate_style_attrs(tag):
+    styles = _STYLE_ATTR.findall(tag)
+    if len(styles) < 2:
+        return tag
+    # dedupe leading/trailing semicolons from each fragment, then join with ";"
+    parts = [s.strip().strip(";").strip() for s in styles if s.strip().strip(";").strip()]
+    merged = ";".join(parts)
+    # drop every style="..." occurrence, then insert one merged style attr
+    # right after the tag name (order among other attrs doesn't matter for SVG).
+    stripped = _STYLE_ATTR.sub("", tag)
+    stripped = re.sub(r"\s{2,}", " ", stripped)  # collapse gaps left behind
+    name_end = re.match(r"<[a-zA-Z][\w:-]*", stripped).end()
+    return stripped[:name_end] + f' style="{merged}"' + stripped[name_end:]
+
+
+def _merge_duplicate_style_attrs_in_svg(svg):
+    return _START_TAG.sub(lambda m: _merge_duplicate_style_attrs(m.group(0)), svg)
+
+
 def tokenize_svg(svg):
     out = svg
     # 1) presentation attributes fill="#.."/stroke="#.." -> style="fill:var(..)"
@@ -44,6 +67,10 @@ def tokenize_svg(svg):
     # 2) every remaining sentinel occurrence (style blocks + inline style=)
     for hexv, var in PALETTE.items():
         out = re.sub(re.escape(hexv), var, out, flags=re.I)
+    # 3) an element may now carry 2+ style="..." attrs (step 1 converting both
+    #    fill and stroke independently, or a pre-existing style= plus a
+    #    converted presentation attr) -> collapse to a single merged style=.
+    out = _merge_duplicate_style_attrs_in_svg(out)
     return out
 
 
