@@ -53,15 +53,25 @@ service. It sums `transferSize` across every resource the page actually
 pulled, then converts bytes to an estimated carbon figure:
 
 ```text
-grams CO₂e  =  bytes ÷ 1e9  ×  0.81 kWh/GB  ×  442 gCO₂e/kWh
-                            └ energy/GB ┘    └ grid intensity ┘
+gCO₂e = transferred_GB × Σ(segment energy, kWh/GB) × 494 gCO₂e/kWh
+
+  data centre   0.055 operational + 0.012 embodied
+  network       0.059 operational + 0.013 embodied
+  user device   0.080 operational + 0.081 embodied
+                                    ────────────────
+                             Σ =    0.300 kWh/GB
+  (a green-hosting factor would offset the data-centre operational
+   share; we keep it 0 — github.io isn't a verified green host)
 ```
 
-The two constants come from the [Sustainable Web Design model][swd]:
-`0.81 kWh/GB` for total energy per gigabyte transferred, and `442 gCO₂e/kWh`
-for the global average grid intensity. It's an approximation, not a meter —
-treat it as an order-of-magnitude signal, the way you'd treat a sampled
-trace rather than a billing record.
+This is the **[Sustainable Web Design v4][swd]** model — the same one the
+[CO2.js][co2js] library implements — **inlined** into the footprint script so the
+badge adds *no runtime dependency* (keeping the `0 runtime deps` budget above
+honest). Energy is summed across three system segments — data centre, network,
+and user device — each with an operational and an embodied share, then
+multiplied by the global grid intensity, `494 gCO₂e/kWh` ([Ember][ember]). It's
+an approximation, not a meter — treat it as an order-of-magnitude signal, the
+way you'd treat a sampled trace rather than a billing record.
 
 ### What the number honestly leaves out
 
@@ -75,10 +85,10 @@ trace rather than a billing record.
   (diagram pages only) and the Umami analytics script. We treat that as a to-do,
   not a loophole: self-hosting them makes them both lighter *and* visible to the
   meter.
-- **It stops at transfer.** Device energy, the request's share of data-center
-  and network overhead beyond the per-GB model, and embodied hardware carbon
-  are out of scope. For a rigorous figure, swap the two constants above for
-  the [CO2.js][co2js] library.
+- **It's modelled averages, not your request.** The SWD model uses
+  global-average energy intensities and grid carbon — not your actual device,
+  network, or the grid where the page was served. It's a rigorous industry
+  estimate, not a per-request measurement.
 
 The point isn't a precise gram count. It's the habit: a publication about
 seeing your systems clearly should be able to see itself.
@@ -86,3 +96,4 @@ seeing your systems clearly should be able to see itself.
 [perf]: https://developer.mozilla.org/en-US/docs/Web/API/Performance_API
 [swd]: https://sustainablewebdesign.org/estimating-digital-emissions/
 [co2js]: https://developers.thegreenwebfoundation.org/co2js/overview/
+[ember]: https://ember-energy.org/data/
