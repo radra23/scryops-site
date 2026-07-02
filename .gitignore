@@ -14,3 +14,4 @@ CLAUDE*.md
 # Local env / secrets — never commit
 .env
 
+node_modules/
