@@ -39,8 +39,6 @@
     root.classList.toggle('pref-reduce', !!prefs.reduce);
     root.classList.toggle('pref-lite', !!prefs.lite);
     syncUI();
-    // In Lite the Mermaid runtime isn't loaded — don't try to re-render it.
-    if (!prefs.lite && window.scryopsRenderMermaid) window.scryopsRenderMermaid();
   }
 
   function save() {
