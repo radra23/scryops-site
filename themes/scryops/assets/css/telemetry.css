@@ -283,7 +283,7 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 .obs-fig .arr{fill:var(--edge)}
 figcaption,.obs-cap{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin:6px 2px 0}
 
-/* mermaid: themed via assets/js/mermaid-init.js; container just frames it */
+/* mermaid: pre-rendered static SVG, themed via CSS vars; container just frames it */
 .mermaid{
   background:var(--fig-bg);background-image:var(--fig-grid);background-size:26px 26px;
   border:1px solid var(--fig-bd);border-radius:var(--radius);padding:18px;

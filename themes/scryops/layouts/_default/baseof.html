@@ -157,29 +157,6 @@
     })();
   </script>
 
-  {{/* Mermaid — load the runtime only when the page actually has a diagram AND
-       we're not in Lite mode (permacomputing Phase 3: no diagram JS on
-       data-saver; the .mermaid source shows as a static fallback instead). */}}
-  {{ $mermaidInit := resources.Get "js/mermaid-init.js" | fingerprint }}
-  <script>
-  (function(){
-    if(document.documentElement.classList.contains('pref-lite'))return;
-    if(!document.querySelector('.mermaid'))return;
-    var m=document.createElement('script');
-    m.src='https://cdn.jsdelivr.net/npm/mermaid@10.9.6/dist/mermaid.min.js';
-    m.integrity='sha384-qX9VvWkP79m/O121ZE6sOYp0nf/pldQgtvWDbkpzi+3mUo4Wn4Ix4cFzNPay3VaB';
-    m.crossOrigin='anonymous';
-    m.onload=function(){
-      var i=document.createElement('script');
-      i.src='{{ $mermaidInit.RelPermalink }}';
-      i.integrity='{{ $mermaidInit.Data.Integrity }}';
-      i.crossOrigin='anonymous';
-      i.onload=function(){ if(window.scryopsRenderMermaid) window.scryopsRenderMermaid(); };
-      document.body.appendChild(i);
-    };
-    document.body.appendChild(m);
-  })();
-  </script>
   {{/* reading preferences — theme (dark/light/calm) + reading toggles; supersedes mode-toggle.js */}}
   {{ $prefs := resources.Get "js/prefs.js" | fingerprint }}
   <script src="{{ $prefs.RelPermalink }}" integrity="{{ $prefs.Data.Integrity }}" crossorigin="anonymous" defer></script>
