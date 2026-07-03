@@ -177,13 +177,13 @@ html.pref-lite{
     --font-pixel:ui-monospace,monospace;
   }
 }
-/* Mermaid fallback — when the runtime can't/shouldn't render (Lite mode OR
-   JS disabled), render the diagram's source as a readable static block instead
-   of raw text (graceful degrade). */
-html.pref-lite .diagram .mermaid,
-html:not(.js) .diagram .mermaid{white-space:pre-wrap;font-family:var(--font-code);font-size:12px;line-height:1.5;color:var(--code-muted);background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:14px 16px;overflow-x:auto}
-html.pref-lite .diagram .mermaid::before,
-html:not(.js) .diagram .mermaid::before{content:"diagram source";display:block;color:var(--eco);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+/* Mermaid fallback — diagrams are static inline SVG (no JS needed), so no-JS
+   visitors get the real diagram. The .mermaid source stays dormant and is
+   shown as a readable text block only in Lite/data-saver mode. */
+.diagram .mermaid{display:none}
+html.pref-lite .diagram .diag-card > svg{display:none}
+html.pref-lite .diagram .mermaid{display:block;white-space:pre-wrap;font-family:var(--font-code);font-size:12px;line-height:1.5;color:var(--code-muted);background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:14px 16px;overflow-x:auto}
+html.pref-lite .diagram .mermaid::before{content:"diagram source";display:block;color:var(--eco);font-size:10px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
 
 /* No-JS resilience (Permacomputing Phase 4): the footprint badge needs JS to
    fill real numbers — hide its placeholders entirely when JS is off. */
