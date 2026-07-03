@@ -83,7 +83,7 @@ After transformation:
 
 {{< mermaid >}}
 graph LR
-    A@{ shape: das, label: "Data input"} --> B(Identifiers)
+    A[/"Data input"/] --> B(Identifiers)
     A --> C(Locations)
     A --> D(Metrics)
     A --> E(Timestamps)
