@@ -7,65 +7,69 @@
    ============================================================ */
 
 :root {
-  /* ---- color · dark (default) — Telemetry ---- */
-  --bg:#0A0E0F;
-  --surface:#0C1213;
-  --border:#1E2C2E;
-  --heading:#EAF0EE;
-  --text:#D6DBD9;
-  --muted:#7FA6A0;
-  --green:#3DDC84;          /* healthy / values / INFO */
-  --cyan:#5BD8E8;           /* identifiers / links / edges */
-  --link:#5BD8E8;
-  --warn:#E0C24A;
-  --danger:#FF6B6B;
-  --violet:#9D7CF0;         /* OpenTelemetry topic accent */
+  /* ---- color · dark (default) — Telemetry, warm/de-neon (DS Jul-2026) ---- */
+  --bg:#141210;             /* warm charcoal — softened near-black (body still ~12.6:1) */
+  --surface:#1C1915;        /* card elevation above the page */
+  --border:#2B2620;
+  --heading:#ECE6D9;
+  --text:#D7D0C4;
+  --muted:#9B9382;
+  --green:#66C892;          /* healthy / values / INFO / brand / CTA (de-neoned) */
+  --cyan:#6FC6D1;           /* identifiers / links / edges (softened) */
+  --link:#6FC6D1;
+  --warn:#DCC061;
+  --danger:#F0857A;         /* softer coral — reads as error, not alarm */
+  --violet:#A78FE0;         /* OpenTelemetry topic accent */
 
   /* inline code chip */
-  --ic-bg:#101718; --ic-text:#5BD8E8; --ic-bd:#1C2A2B;
+  --ic-bg:#1E1A14; --ic-text:#6FC6D1; --ic-bd:#241F18;
 
   /* code well — STAYS DARK in all three themes */
-  --code-bg:#0C1213; --code-text:#C8D2CF; --code-bd:#182426;
+  --code-bg:#100E0B; --code-text:#CEC8BC; --code-bd:#201C16;
   /* readout constants — used ON the always-dark code/terminal wells,
      so they must NOT flip with theme (light/calm leave these alone). */
-  --code-hi:#EAF0EE; --code-muted:#7E9A8E; --code-green:#3DDC84; --code-cyan:#5BD8E8;
+  --code-hi:#ECE6D9; --code-muted:#8E877A; --code-green:#66C892; --code-cyan:#6FC6D1;
   /* permacomputing — living-green resource-awareness accent (well only) */
   --eco:#7FB069; --eco-bright:#A8D88A;
 
   /* figures */
-  --fig-bg:#0B1011;
-  --fig-grid:linear-gradient(rgba(127,166,160,.07) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(127,166,160,.07) 1px,transparent 1px);
-  --fig-bd:#1E2C2E;
-  --node-fill:#10191A; --node-stroke:#2BAE76; --edge:#5BD8E8; --nlab:#EAF0EE;
+  --fig-bg:#17130E;
+  --fig-grid:linear-gradient(rgba(155,147,130,.06) 1px,transparent 1px),
+             linear-gradient(90deg,rgba(155,147,130,.06) 1px,transparent 1px);
+  --fig-bd:#2B2620;
+  --node-fill:#16120C; --node-stroke:#4FA77C; --edge:#6FC6D1; --nlab:#ECE6D9;
 
   /* callouts */
-  --info-bg:rgba(61,220,132,.07); --info-bd:#3DDC84; --info-lb:#5FE39A;
-  --warn-bg:rgba(224,194,74,.08); --warn-bd:#E0C24A; --warn-lb:#E8CE66;
-  --dgr-bg:rgba(255,107,107,.08); --dgr-bd:#FF6B6B; --dgr-lb:#FF8585;
+  --info-bg:rgba(102,200,146,.07); --info-bd:#66C892; --info-lb:#8AD4A8;
+  --warn-bg:rgba(220,192,97,.09); --warn-bd:#DCC061; --warn-lb:#E6CE7A;
+  --dgr-bg:rgba(240,133,122,.09); --dgr-bd:#F0857A; --dgr-lb:#F5A096;
 
   /* tables */
-  --th:#0E1617; --tborder:#182426;
+  --th:#211D17; --tborder:#221E18;
 
-  /* ---- type — all-monospace reading system ---- */
+  /* ---- type — proportional reading face, monospace chrome ----
+     Reading face is the proportional Atkinson Hyperlegible (already loaded);
+     Space Mono headings + IBM Plex Mono code/labels keep the terminal voice.
+     Courier Prime is retained as an opt-in typewriter face (--font-typewriter). */
   --font-display:'Space Mono', ui-monospace, monospace;
-  --font-read:'Courier Prime', ui-monospace, monospace;
+  --font-read:'Atkinson Hyperlegible', system-ui, sans-serif;
   --font-code:'IBM Plex Mono', ui-monospace, monospace;
   --font-pixel:'Press Start 2P', monospace;
+  --font-typewriter:'Courier Prime', ui-monospace, monospace;
   --font-body:var(--font-read);
 
   --fs-display:34px; --fs-h1:29px; --fs-h2:20px; --fs-h3:16px;
   --fs-lede:17.5px;  --fs-body:16px; --fs-code:13.5px;   /* body ≥16px per GUIDELINES non-negotiable #3 */
   --fs-label:11px;   --fs-pixel:11px;
-  --lh-body:1.78;    --lh-lede:1.68;   --lh-code:1.75;
-  --read-track:.012em;   /* reading-face letter-spacing (loosens in .pref-spacing) */
+  --lh-body:1.75;    --lh-lede:1.72;   --lh-code:1.75;
+  --read-track:0;   /* proportional reading face wants no extra tracking (loosens in .pref-spacing) */
   --measure:66ch;
 
   /* ---- spacing — 4px base ---- */
   --sp-1:4px; --sp-2:8px; --sp-3:14px; --sp-4:22px; --sp-5:32px; --sp-6:52px;
 
   /* ---- form ---- */
-  --radius:10px; --radius-sm:6px; --space:8px; --hair:1px;
+  --radius:10px; --radius-sm:6px; --radius-retro:3px; --radius-pill:999px; --space:8px; --hair:1px;
 
   /* ---- bridge: repo's evolved (warm-paper) token names → Telemetry ----
      The repo's components were authored against an earlier vocabulary.
@@ -91,34 +95,34 @@
 }
 
 html.light {
-  --bg:#F4F6F5;
-  --surface:#FFFFFF;
-  --border:#DEE5E2;
-  --heading:#10201A;
-  --text:#18201E;
-  --muted:#5A6863;
+  --bg:#F6F3EC;
+  --surface:#FFFDF7;
+  --border:#E6DFD2;
+  --heading:#1E1811;
+  --text:#2C261E;
+  --muted:#6F6556;
   --green:#157A45;
   --cyan:#0E7E91;
-  --link:#0E7E91;
+  --link:#0B6C7D;   /* AA: ~4.5:1 on --bg */
   --warn:#8A6A14;
   --danger:#C2382F;
   --violet:#6B4FC4;
 
-  --ic-bg:#E6EDEA; --ic-text:#0E7E91; --ic-bd:#D2DDD8;
+  --ic-bg:#EDE7DB; --ic-text:#0E7E91; --ic-bd:#DED6C7;
 
   /* code well intentionally NOT overridden — stays dark */
 
-  --fig-bg:#FFFFFF;
-  --fig-grid:linear-gradient(#E6EDEA 1px,transparent 1px),
-             linear-gradient(90deg,#E6EDEA 1px,transparent 1px);
-  --fig-bd:#DEE5E2;
-  --node-fill:#EAF1ED; --node-stroke:#1E8F52; --edge:#0E7E91; --nlab:#18201E;
+  --fig-bg:#FFFDF7;
+  --fig-grid:linear-gradient(#EDE7DB 1px,transparent 1px),
+             linear-gradient(90deg,#EDE7DB 1px,transparent 1px);
+  --fig-bd:#E6DFD2;
+  --node-fill:#F0EBE0; --node-stroke:#1E8F52; --edge:#0E7E91; --nlab:#2C261E;
 
-  --info-bg:#E7F2EB; --info-bd:#157A45; --info-lb:#157A45;
+  --info-bg:#E9F0E4; --info-bd:#157A45; --info-lb:#157A45;
   --warn-bg:#FBF1DA; --warn-bd:#B08A1E; --warn-lb:#8A6A14;
-  --dgr-bg:#FBE9E7; --dgr-bd:#C2382F; --dgr-lb:#A8281F;
+  --dgr-bg:#F8E9E4; --dgr-bd:#C2382F; --dgr-lb:#A8281F;
 
-  --th:#EEF2F0; --tborder:#DEE5E2;
+  --th:#EFEAE0; --tborder:#E6DFD2;
 }
 
 html.calm {
@@ -152,7 +156,7 @@ html.calm {
 }
 
 /* Reading prefs — independent, stackable token overrides. */
-html.pref-legible{ --font-read:'Atkinson Hyperlegible', system-ui, sans-serif; --fs-body:16px; --read-track:.01em; }
+html.pref-legible{ --fs-body:18px; --fs-lede:19px; --lh-body:1.72; }  /* Atkinson is the default reading face now; this option enlarges it for low-vision & dyslexia */
 html.pref-spacing{ --lh-body:2.0; --lh-lede:1.85; --read-track:.03em; }
 html.pref-spacing .article > * + *{ margin-top:26px; }
 html.pref-reduce *,html.pref-reduce *::before,html.pref-reduce *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
@@ -234,7 +238,7 @@ p{margin:0;color:var(--text)}
 
 a{color:var(--link);text-decoration:none;border-bottom:1px solid var(--border)}
 a:hover{border-bottom-color:var(--link)}
-a:visited{color:var(--muted)}
+a:visited{color:var(--link)}
 
 /* inline code */
 :not(pre) > code{
@@ -325,6 +329,9 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* skip link — off-screen until keyboard focus */
 .skip-link{position:absolute;left:-9999px;top:0}
 .skip-link:focus{left:8px;top:8px;z-index:10;background:var(--surface);color:var(--link);font-family:var(--font-code);font-size:13px;padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius-sm)}
+/* Visible keyboard focus for every interactive element (WCAG 2.4.7). --link is
+   high-contrast in all three themes (cyan/teal/amber); offset lifts it off the control. */
+:focus-visible{outline:2px solid var(--link);outline-offset:2px}
 
 .mode-toggle{display:flex;border:1px solid var(--border);border-radius:8px;overflow:hidden}
 .mode-toggle button{font-family:var(--font-code);font-size:12px;color:var(--muted);background:transparent;border:none;padding:7px 13px;cursor:pointer;min-height:40px}
@@ -448,7 +455,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* top-bar main menu (added to site-top.html) */
 .top-nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
-.top-nav a{font-family:var(--font-code);font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted)}
+.top-nav a{font-family:var(--font-code);font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:7px 0;display:inline-block}
 .top-nav a:hover,.top-nav a[aria-current="page"]{color:var(--cyan)}
 
 /* terminal identity strip (homepage hero line) */
@@ -574,7 +581,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 /* tag cloud (taxonomy) */
 .tags-section{margin-bottom:4rem}
 .tag-cloud{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
-.tag-pill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:0 .9rem;text-transform:uppercase;letter-spacing:.09em;display:inline-flex;align-items:center;min-height:44px}
+.tag-pill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
 .tag-pill::before{content:"#";color:var(--green);font-weight:700;margin-right:.15rem}
 .tag-pill:hover{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 6%,transparent)}
 
@@ -591,7 +598,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .subscribe-label{font-family:var(--font-display);font-size:1.05rem;color:var(--heading);margin-bottom:.4rem;text-transform:lowercase}
 .subscribe-desc{font-family:var(--font-read);font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
 .subscribe-form{display:flex;gap:.6rem;flex-wrap:wrap}
-.subscribe-input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--border);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px;outline:none}
+.subscribe-input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--muted);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px}
 .subscribe-input::placeholder{color:var(--muted)}
 .subscribe-input:focus{border-color:var(--green)}
 .subscribe-btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--bg);background:var(--green);border:none;padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap}
@@ -688,10 +695,10 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .pref-row .pref-l{flex:1}
 .pref-row .pref-l .pref-name{font-family:var(--font-code);font-size:12px;color:var(--text)}
 .pref-row .pref-l .pref-desc{font-family:var(--font-code);font-size:10px;color:var(--muted);margin-top:2px}
-.pref-sw{width:38px;height:21px;border-radius:999px;background:var(--border);border:1px solid var(--border);flex:none;position:relative;transition:background .15s}
+.pref-sw{width:38px;height:21px;border-radius:999px;background:var(--border);border:1px solid var(--muted);flex:none;position:relative;transition:background .15s}
 .pref-sw::after{content:"";position:absolute;top:1px;left:1px;width:17px;height:17px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
-.pref-row[aria-pressed="true"] .pref-sw{background:var(--green)}
-.pref-row[aria-pressed="true"] .pref-sw::after{transform:translateX(17px);background:#06120C}
+.pref-row[aria-checked="true"] .pref-sw{background:var(--green)}
+.pref-row[aria-checked="true"] .pref-sw::after{transform:translateX(17px);background:#06120C}
 
 /* ── Permacomputing · Phase 2 — footprint badge + colophon ──────────────
    Terminal readouts that live on the always-dark code well, so the
