@@ -9,7 +9,7 @@
     <img src="{{ $image }}" alt="{{ $author }}" class="quote-avatar{{ if $pixel }} quote-avatar--pixel{{ end }}">
     {{ else }}
     <div class="quote-avatar-initials">
-      {{ if $author }}{{ $w := split (trim $author " ") " " }}{{ $ini := substr (index $w 0) 0 1 }}{{ if gt (len $w) 1 }}{{ $ini = printf "%s%s" $ini (substr (index $w 1) 0 1) }}{{ end }}{{ $ini | upper }}{{ end }}
+      {{ if $author }}{{ $words := slice }}{{ range split (trim $author " \t\n") " " }}{{ if ne . "" }}{{ $words = $words | append . }}{{ end }}{{ end }}{{ $ini := "" }}{{ if ge (len $words) 1 }}{{ $ini = substr (index $words 0) 0 1 }}{{ end }}{{ if ge (len $words) 2 }}{{ $ini = printf "%s%s" $ini (substr (index $words 1) 0 1) }}{{ end }}{{ $ini | upper }}{{ end }}
     </div>
     {{ end }}
     <div class="quote-meta">
