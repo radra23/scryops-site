@@ -3,7 +3,7 @@
 
   <!-- Identity statement + topics + CTAs -->
   <section class="front-hero">
-    <div class="eyebrow">scrying + ops</div>
+    <div class="eyebrow brand">scrying + ops</div>
     <h1 class="landing-statement">raw telemetry in. <b>understanding</b> out.</h1>
     <p class="landing-lede">{{ site.Params.description }}</p>
     {{ with site.Params.topics }}
@@ -43,7 +43,8 @@
   <form class="subscribe-form" id="subscribe-form" novalidate>
     <input type="hidden" name="email_address_check" value="">
     <input type="hidden" name="locale" value="en">
-    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
+    <label for="subscribe-email" class="sr-only">Email address</label>
+    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required autocomplete="email">
     <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
   <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
