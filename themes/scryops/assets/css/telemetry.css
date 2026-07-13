@@ -339,9 +339,16 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* ============================================================
    buttons
    ============================================================ */
-.btn{font-family:var(--font-code);font-size:13px;border-radius:8px;padding:9px 16px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text)}
-.btn-primary{background:var(--green);color:#06120C;border-color:var(--green)}
-.btn-ghost{border-color:transparent;color:var(--link);text-decoration:underline}
+.btn{font-family:var(--font-code);font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:9px 16px;min-height:40px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);text-decoration:none;transition:border-color .12s,background .12s,color .12s;white-space:nowrap}
+.btn:hover{border-color:var(--cyan);color:var(--heading)}
+.btn:active{transform:translateY(1px)}
+.btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.btn.sm{font-size:12px;padding:7px 12px;min-height:34px}
+.btn-primary{background:var(--green);color:var(--on-accent);border-color:var(--green);font-weight:500}
+.btn-primary:hover{background:var(--cyan);border-color:var(--cyan);color:var(--on-accent)}
+.btn-ghost{border-color:transparent;color:var(--link);text-decoration:underline;text-underline-offset:3px}
+.btn-ghost:hover{color:var(--cyan);background:transparent}
 
 /* ============================================================
    layout: guide template (toc rail + article)
