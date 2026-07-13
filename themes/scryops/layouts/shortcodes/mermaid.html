@@ -1,10 +1,12 @@
 {{- $src := .Inner | strings.TrimSpace -}}
 {{- $hash := substr (sha256 $src) 0 12 -}}
 {{- $svg := resources.Get (printf "diagrams/%s.svg" $hash) -}}
+{{- $alt := .Get "alt" | default (.Get "caption") | default "Diagram" -}}
 {{- if $svg -}}
 <figure class="diagram">
-  <div class="diag-card">{{ $svg.Content | safeHTML }}</div>
+  <div class="diag-card" role="img" aria-label="{{ $alt }}">{{ $svg.Content | safeHTML }}</div>
   <div class="mermaid">{{ .Inner }}</div>
+  {{ with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
 </figure>
 {{- else -}}
   {{- errorf "mermaid: no pre-rendered SVG for hash %s (in %s) — run scripts/render-diagrams.py" $hash .Page.File.Path -}}

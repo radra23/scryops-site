@@ -52,7 +52,7 @@
       b.setAttribute('aria-pressed', String(b.dataset.prefTheme === prefs.theme));
     });
     document.querySelectorAll('[data-pref-toggle]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(!!prefs[b.dataset.prefToggle]));
+      b.setAttribute('aria-checked', String(!!prefs[b.dataset.prefToggle]));
     });
   }
 
