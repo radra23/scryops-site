@@ -2,7 +2,7 @@
   <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;overflow:hidden;">
     <svg viewBox="0 0 760 376" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="thr-title thr-desc"
-         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+         style="width:100%;display:block;font-family:var(--font-code);">
       <title id="thr-title">Static threshold versus a real 24-hour traffic pattern</title>
       <desc id="thr-desc">A service metric over 24 hours follows a diurnal curve: low overnight, a large midday and afternoon peak. A single flat alert threshold is drawn across it. During the normal afternoon peak the metric rises above the line and fires false alarms. At 3am a real incident spikes the metric well above its overnight baseline, but it stays just under the daytime-tuned threshold, so no alert fires and the incident is missed.</desc>
 
