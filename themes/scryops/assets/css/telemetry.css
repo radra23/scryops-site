@@ -643,7 +643,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .quote-with-author blockquote p::after{content:'\201D';color:var(--green);font-style:normal}
 .quote-attribution{display:flex;align-items:center;gap:.7rem}
 .quote-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);object-fit:cover;flex-shrink:0}
-.quote-avatar--pixel{width:64px;height:64px;border-radius:7px;object-fit:contain;background:var(--surface);padding:1px;image-rendering:pixelated;image-rendering:crisp-edges}
+.quote-avatar--pixel{width:56px;height:56px;border-radius:7px;object-fit:contain;background:var(--surface);padding:1px;image-rendering:pixelated;image-rendering:crisp-edges}
 .quote-avatar-initials{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--font-pixel);font-size:.6rem;color:var(--green);flex-shrink:0}
 .quote-name{display:block;font-family:var(--font-code);font-size:.8rem;font-weight:700;color:var(--green)}
 .quote-role{display:block;font-family:var(--font-code);font-size:.75rem;color:var(--muted)}
