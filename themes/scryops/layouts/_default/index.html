@@ -12,8 +12,8 @@
     </div>
     {{ end }}
     <div class="landing-cta">
-      <a class="btn btn-primary" href="{{ "/guides/" | relURL }}">Start reading</a>
-      <a class="btn btn-ghost" href="#subscribe">Subscribe &rarr;</a>
+      <a class="scry-btn primary" href="{{ "/guides/" | relURL }}">Start reading</a>
+      <a class="scry-btn ghost" href="#subscribe">Subscribe &rarr;</a>
     </div>
   </section>
 
@@ -37,17 +37,17 @@
 <!-- Subscribe (inline Brevo form, preserved from the prior homepage) -->
 {{ with .Site.Params.brevo_form_url }}
 <div class="wrap">
-<section class="subscribe-section" id="subscribe">
-  <h2 class="subscribe-label">Stay in the loop</h2>
-  <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
-  <form class="subscribe-form" id="subscribe-form" novalidate>
+<section class="scry-sub" id="subscribe">
+  <h2 class="scry-sub__label">Stay in the loop</h2>
+  <p class="scry-sub__desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
+  <form class="scry-sub__form" id="subscribe-form" novalidate>
     <input type="hidden" name="email_address_check" value="">
     <input type="hidden" name="locale" value="en">
     <label for="subscribe-email" class="sr-only">Email address</label>
-    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required autocomplete="email">
-    <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
+    <input class="scry-sub__input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required autocomplete="email">
+    <button class="scry-sub__btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
-  <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
+  <p class="scry-sub__msg" id="subscribe-msg" aria-live="polite" hidden></p>
 </section>
 
 <script>
@@ -61,7 +61,7 @@
   function setState(state, text) {
     msg.textContent = text;
     msg.hidden = false;
-    msg.className = 'subscribe-msg subscribe-msg--' + state;
+    msg.className = 'scry-sub__msg ' + state;
     if (state === 'loading') {
       btn.disabled = true;
       btn.textContent = 'Subscribing…';

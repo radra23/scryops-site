@@ -339,16 +339,16 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* ============================================================
    buttons
    ============================================================ */
-.btn{font-family:var(--font-code);font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:9px 16px;min-height:40px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);text-decoration:none;transition:border-color .12s,background .12s,color .12s;white-space:nowrap}
-.btn:hover{border-color:var(--cyan);color:var(--heading)}
-.btn:active{transform:translateY(1px)}
-.btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
-.btn[disabled],.btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
-.btn.sm{font-size:12px;padding:7px 12px;min-height:34px}
-.btn-primary{background:var(--green);color:var(--on-accent);border-color:var(--green);font-weight:500}
-.btn-primary:hover{background:var(--cyan);border-color:var(--cyan);color:var(--on-accent)}
-.btn-ghost{border-color:transparent;color:var(--link);text-decoration:underline;text-underline-offset:3px}
-.btn-ghost:hover{color:var(--cyan);background:transparent}
+.scry-btn{font-family:var(--font-code);font-size:13px;line-height:1;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:9px 16px;min-height:40px;cursor:pointer;border:1px solid var(--border);background:transparent;color:var(--text);text-decoration:none;transition:border-color .12s,background .12s,color .12s;white-space:nowrap}
+.scry-btn:hover{border-color:var(--cyan);color:var(--heading)}
+.scry-btn:active{transform:translateY(1px)}
+.scry-btn:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+.scry-btn[disabled],.scry-btn[aria-disabled="true"]{opacity:.45;cursor:not-allowed;pointer-events:none}
+.scry-btn.sm{font-size:12px;padding:7px 12px;min-height:34px}
+.scry-btn.primary{background:var(--green);color:var(--on-accent);border-color:var(--green);font-weight:500}
+.scry-btn.primary:hover{background:var(--cyan);border-color:var(--cyan);color:var(--on-accent)}
+.scry-btn.ghost{border-color:transparent;color:var(--link);text-decoration:underline;text-underline-offset:3px}
+.scry-btn.ghost:hover{color:var(--cyan);background:transparent}
 
 /* ============================================================
    layout: guide template (toc rail + article)
@@ -601,19 +601,19 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .about-content a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
 
 /* subscribe */
-.subscribe-section{margin-bottom:4rem;border:1px solid var(--border);border-left:3px solid var(--green);padding:1.6rem 2rem;background:var(--surface)}
-.subscribe-label{font-family:var(--font-display);font-size:1.05rem;color:var(--heading);margin-bottom:.4rem;text-transform:lowercase}
-.subscribe-desc{font-family:var(--font-read);font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
-.subscribe-form{display:flex;gap:.6rem;flex-wrap:wrap}
-.subscribe-input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--muted);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px}
-.subscribe-input::placeholder{color:var(--muted)}
-.subscribe-input:focus{border-color:var(--green)}
-.subscribe-btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--bg);background:var(--green);border:none;padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap}
-.subscribe-btn:hover{background:var(--cyan)}
-.subscribe-msg{font-family:var(--font-code);font-size:.82rem;margin-top:.75rem;line-height:1.5}
-.subscribe-msg--success{color:var(--green)}
-.subscribe-msg--error{color:var(--danger)}
-.subscribe-msg--loading{color:var(--muted)}
+.scry-sub{margin-bottom:4rem;border:1px solid var(--border);border-left:3px solid var(--green);padding:1.6rem 2rem;background:var(--surface)}
+.scry-sub__label{font-family:var(--font-display);font-size:1.05rem;color:var(--heading);margin-bottom:.4rem;text-transform:lowercase}
+.scry-sub__desc{font-family:var(--font-read);font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
+.scry-sub__form{display:flex;gap:.6rem;flex-wrap:wrap}
+.scry-sub__input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--muted);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px}
+.scry-sub__input::placeholder{color:var(--muted)}
+.scry-sub__input:focus{border-color:var(--green)}
+.scry-sub__btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--bg);background:var(--green);border:none;padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap}
+.scry-sub__btn:hover{background:var(--cyan)}
+.scry-sub__msg{font-family:var(--font-code);font-size:.82rem;margin-top:.75rem;line-height:1.5}
+.scry-sub__msg.success{color:var(--green)}
+.scry-sub__msg.error{color:var(--danger)}
+.scry-sub__msg.loading{color:var(--muted)}
 
 /* footer */
 .site-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center}
@@ -628,7 +628,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
   .featured-article{padding-right:0;border-right:none;border-bottom:1px solid var(--border);padding-bottom:2rem}
   .featured-title{font-size:1.3rem}
   .wrap{padding:30px 20px 70px}
-  .subscribe-form{flex-direction:column}
+  .scry-sub__form{flex-direction:column}
   .top-nav{gap:12px}
 }
 
@@ -661,7 +661,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .topic-chip{font-family:var(--font-code);font-size:12px;color:var(--text);border:1px solid var(--border);border-radius:999px;padding:6px 13px}
 .topic-chip b{color:var(--cyan);font-weight:400}
 .landing-cta{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin:6px 0 0}
-.landing-cta .btn{text-decoration:none}
+.landing-cta .scry-btn{text-decoration:none}
 
 .front-feed{padding:24px 0}
 .feedwin{background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);overflow:hidden}
