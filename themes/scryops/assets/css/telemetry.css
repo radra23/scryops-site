@@ -421,15 +421,15 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .flow-divider{height:1px;background:var(--border);margin:19px 0}
 
 /* comparison / two-version tables (obs-comparison-table, obs-monitoring-shifts) */
-.obs-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);font-size:14px}
-.obs-table th{background:var(--th);border:1px solid var(--tborder);padding:9px 14px;font-family:var(--font-code);font-size:11px;text-align:left;letter-spacing:.04em;color:var(--text)}
-.obs-table th:first-child{color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
-.obs-table th.v1{color:var(--muted);border-bottom:2px solid var(--green)}
-.obs-table th.v2{color:var(--cyan);border-bottom:2px solid var(--cyan)}
-.obs-table td{border:1px solid var(--tborder);padding:8px 14px;font-size:13px;line-height:1.5;vertical-align:middle;color:var(--text)}
-.obs-table td:first-child,.obs-table tbody th[scope="row"]{font-family:var(--font-code);color:var(--muted);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;background:var(--th);text-align:left}
-.obs-table td.v1{color:var(--text)}
-.obs-table td.v2{color:var(--cyan)}
+.scry-table{width:100%;border-collapse:collapse;background:var(--surface);border:1px solid var(--border);font-size:14px}
+.scry-table th{background:var(--th);border:1px solid var(--tborder);padding:9px 14px;font-family:var(--font-code);font-size:11px;text-align:left;letter-spacing:.04em;color:var(--text)}
+.scry-table th:first-child{color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.scry-table th.v1{color:var(--muted);border-bottom:2px solid var(--green)}
+.scry-table th.v2{color:var(--cyan);border-bottom:2px solid var(--cyan)}
+.scry-table td{border:1px solid var(--tborder);padding:8px 14px;font-size:13px;line-height:1.5;vertical-align:middle;color:var(--text)}
+.scry-table td:first-child,.scry-table tbody th[scope="row"]{font-family:var(--font-code);color:var(--muted);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;background:var(--th);text-align:left}
+.scry-table td.v1{color:var(--text)}
+.scry-table td.v2{color:var(--cyan)}
 
 /* insight callout (insight shortcode) */
 .scry-insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin:24px 0}
@@ -764,7 +764,7 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
   }
 
   /* Don't split figures, tables, or code across pages; keep headings with bodies. */
-  figure, table, pre, .scry-callout, .scry-insight__body, .obs-fig, .obs-table { page-break-inside: avoid; break-inside: avoid; }
+  figure, table, pre, .scry-callout, .scry-insight__body, .obs-fig, .scry-table { page-break-inside: avoid; break-inside: avoid; }
   h1, h2, h3 { page-break-after: avoid; }
 
   /* Legible boxes without color fills. */
