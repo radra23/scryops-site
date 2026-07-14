@@ -520,8 +520,8 @@ nav.topic-list{padding:0;justify-content:flex-start}
 /* page header */
 .lhead{display:flex;align-items:flex-end;gap:16px;padding:40px 0 22px;border-bottom:1px solid var(--border);margin-bottom:26px}
 .lh-l{flex:1}
-.eyebrow{font-family:var(--font-code);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
-.eyebrow.brand{color:var(--green)}
+.scry-eyebrow{font-family:var(--font-code);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:11px}
+.scry-eyebrow.brand{color:var(--green)}
 .lh-title{font-family:var(--font-display);font-weight:400;font-size:32px;line-height:1.1;color:var(--heading);text-transform:lowercase;margin:0}
 .lh-sub{font-family:var(--font-read);font-size:15px;line-height:1.6;color:var(--text);max-width:60ch;margin:14px 0 0}
 .cnt{font-family:var(--font-code);font-size:11.5px;color:var(--muted);border:1px solid var(--border);border-radius:999px;padding:5px 12px;white-space:nowrap;flex-shrink:0}
