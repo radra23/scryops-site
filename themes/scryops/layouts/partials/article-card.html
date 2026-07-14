@@ -6,10 +6,10 @@
   <div>
     <div class="art-meta">
       {{ $type := $page.Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ else if eq $type "qa" }}<span class="tag qa">Q&amp;A</span>
+      {{ if eq $type "articles" }}<span class="scry-tag trends">Article</span>
+      {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide</span>
+      {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to</span>
+      {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A</span>
       {{ end }}
       {{ with $page.Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
     </div>

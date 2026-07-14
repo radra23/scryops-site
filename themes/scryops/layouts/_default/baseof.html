@@ -148,7 +148,7 @@
           btn.classList.add('active');
           document.querySelectorAll('.art-card').forEach(function(art) {
             if (type === 'all') { art.style.display = ''; return; }
-            var tag = art.querySelector('.tag');
+            var tag = art.querySelector('.scry-tag');
             var match = tag && tag.classList.contains(type);
             art.style.display = match ? '' : 'none';
           });

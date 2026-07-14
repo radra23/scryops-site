@@ -2,19 +2,19 @@
 {{ $title  := .Get "title" }}
 {{ $image  := .Get "image" }}
 {{ $pixel  := .Get "pixel" }}
-<div class="quote-with-author">
+<div class="scry-quote">
   <blockquote>{{ .Inner | markdownify }}</blockquote>
-  <div class="quote-attribution">
+  <div class="scry-quote__attr">
     {{ if $image }}
-    <img src="{{ $image }}" alt="{{ $author }}" class="quote-avatar{{ if $pixel }} quote-avatar--pixel{{ end }}">
+    <img src="{{ $image }}" alt="{{ $author }}" class="scry-quote__avatar{{ if $pixel }} pixel{{ end }}">
     {{ else }}
-    <div class="quote-avatar-initials">
+    <div class="scry-quote__initials">
       {{ if $author }}{{ $words := slice }}{{ range split (trim $author " \t\n") " " }}{{ if ne . "" }}{{ $words = $words | append . }}{{ end }}{{ end }}{{ $ini := "" }}{{ if ge (len $words) 1 }}{{ $ini = substr (index $words 0) 0 1 }}{{ end }}{{ if ge (len $words) 2 }}{{ $ini = printf "%s%s" $ini (substr (index $words 1) 0 1) }}{{ end }}{{ $ini | upper }}{{ end }}
     </div>
     {{ end }}
-    <div class="quote-meta">
-      <span class="quote-name">{{ $author }}</span>
-      <span class="quote-role">{{ $title }}</span>
+    <div class="scry-quote__meta">
+      <span class="scry-quote__name">{{ $author }}</span>
+      <span class="scry-quote__role">{{ $title }}</span>
     </div>
   </div>
 </div>

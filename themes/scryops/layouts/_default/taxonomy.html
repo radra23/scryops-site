@@ -6,7 +6,7 @@
   </div>
   <div class="tag-cloud">
     {{ range .Pages }}
-    <a href="{{ .RelPermalink }}" class="tag-pill">{{ .Title }} ({{ len .Pages }})</a>
+    <a href="{{ .RelPermalink }}" class="scry-tagpill">{{ .Title }} ({{ len .Pages }})</a>
     {{ end }}
   </div>
 </section>

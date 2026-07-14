@@ -36,7 +36,7 @@
         </svg>
       </div>
       {{ $firstTag := index .Params.tags 0 | default "" }}
-      <span class="tag">{{ $stype }}{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      <span class="scry-tag">{{ $stype }}{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
       <h2 class="herotitle">{{ .Title }}</h2>
       {{ with .Params.excerpt }}<p class="cc-dek">{{ . }}</p>{{ end }}
       <div class="cc-meta">{{ with .Params.readtime }}{{ . }} min · {{ end }}{{ .Date.Format "Jan 2006" | lower }}</div>

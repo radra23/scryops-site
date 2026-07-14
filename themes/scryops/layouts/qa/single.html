@@ -5,9 +5,9 @@
   <article class="article">
     <div class="single-header">
       <div class="art-meta">
-        <span class="tag qa">Q&amp;A</span>
+        <span class="scry-tag qa">Q&amp;A</span>
         {{ range .Params.tags }}
-        <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="tag-pill">{{ . }}</a>
+        <a href="{{ "tags/" | relURL }}{{ . | urlize }}/" class="scry-tagpill">{{ . }}</a>
         {{ end }}
       </div>
       <h1>{{ .Title }}</h1>

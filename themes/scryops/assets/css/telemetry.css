@@ -263,15 +263,15 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 /* ============================================================
    callouts  —  {{< callout info >}} … {{< /callout >}}
    ============================================================ */
-.callout{border-radius:var(--radius);padding:14px 17px;font-size:15px;line-height:1.6;color:var(--text)}
-.callout > :first-child{margin-top:0}
-.callout-label{font-family:var(--font-code);font-size:11px;letter-spacing:.1em;font-weight:600;display:block;margin-bottom:5px}
-.callout.info{background:var(--info-bg);border-left:3px solid var(--info-bd)}
-.callout.info  .callout-label{color:var(--info-lb)}
-.callout.warn{background:var(--warn-bg);border-left:3px solid var(--warn-bd)}
-.callout.warn  .callout-label{color:var(--warn-lb)}
-.callout.danger{background:var(--dgr-bg);border-left:3px solid var(--dgr-bd)}
-.callout.danger .callout-label{color:var(--dgr-lb)}
+.scry-callout{border-radius:var(--radius);padding:14px 17px;font-size:15px;line-height:1.6;color:var(--text)}
+.scry-callout > :first-child{margin-top:0}
+.scry-callout__label{font-family:var(--font-code);font-size:11px;letter-spacing:.1em;font-weight:600;display:block;margin-bottom:5px}
+.scry-callout.info{background:var(--info-bg);border-left:3px solid var(--info-bd)}
+.scry-callout.info  .scry-callout__label{color:var(--info-lb)}
+.scry-callout.warn{background:var(--warn-bg);border-left:3px solid var(--warn-bd)}
+.scry-callout.warn  .scry-callout__label{color:var(--warn-lb)}
+.scry-callout.danger{background:var(--dgr-bg);border-left:3px solid var(--dgr-bd)}
+.scry-callout.danger .scry-callout__label{color:var(--dgr-lb)}
 
 /* ============================================================
    figures — obs-* shortcodes + mermaid
@@ -432,17 +432,17 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .obs-table td.v2{color:var(--cyan)}
 
 /* insight callout (insight shortcode) */
-.insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin:24px 0}
-.insight.lightbulb{border-left:3px solid var(--green)}
-.insight.bookmark{border-left:3px solid var(--cyan)}
-.insight-icon{flex-shrink:0;margin-top:3px;width:16px;height:16px}
-.insight.lightbulb .insight-icon{color:var(--green)}
-.insight.bookmark .insight-icon{color:var(--cyan)}
-.insight-body{font-family:var(--font-read);font-size:14.5px;line-height:1.66;color:var(--text)}
-.insight-body strong{display:block;font-weight:700;margin-bottom:4px}
-.insight.lightbulb .insight-body strong{color:var(--green)}
-.insight.bookmark .insight-body strong{color:var(--cyan)}
-.insight-body p{margin:0;color:var(--text)}
+.scry-insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin:24px 0}
+.scry-insight.lightbulb{border-left:3px solid var(--green)}
+.scry-insight.bookmark{border-left:3px solid var(--cyan)}
+.scry-insight__icon{flex-shrink:0;margin-top:3px;width:16px;height:16px}
+.scry-insight.lightbulb .scry-insight__icon{color:var(--green)}
+.scry-insight.bookmark .scry-insight__icon{color:var(--cyan)}
+.scry-insight__body{font-family:var(--font-read);font-size:14.5px;line-height:1.66;color:var(--text)}
+.scry-insight__body strong{display:block;font-weight:700;margin-bottom:4px}
+.scry-insight.lightbulb .scry-insight__body strong{color:var(--green)}
+.scry-insight.bookmark .scry-insight__body strong{color:var(--cyan)}
+.scry-insight__body p{margin:0;color:var(--text)}
 
 /* ============================================================
    site chrome — nav menu, homepage, listings, cards, tags, Q&A,
@@ -557,10 +557,10 @@ nav.topic-list{padding:0;justify-content:flex-start}
 
 /* content-type tags (palette constrained to tokens: identifiers=cyan,
    how-to=green, Q&A=neutral) */
-.tag{font-family:var(--font-code);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--cyan);border:1px solid var(--cyan);padding:.08rem .4rem;background:color-mix(in srgb,var(--cyan) 8%,transparent)}
-.tag.guide,.tag.trends,.tag.article{color:var(--cyan);border-color:var(--cyan)}
-.tag.howto{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 8%,transparent)}
-.tag.qa{color:var(--muted);border-color:var(--border);background:var(--surface)}
+.scry-tag{font-family:var(--font-code);font-size:.68rem;text-transform:uppercase;letter-spacing:.09em;color:var(--cyan);border:1px solid var(--cyan);padding:.08rem .4rem;background:color-mix(in srgb,var(--cyan) 8%,transparent)}
+.scry-tag.guide,.scry-tag.trends,.scry-tag.article{color:var(--cyan);border-color:var(--cyan)}
+.scry-tag.howto{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 8%,transparent)}
+.scry-tag.qa{color:var(--muted);border-color:var(--border);background:var(--surface)}
 .read-time{font-family:var(--font-code);font-size:.75rem;color:var(--muted)}
 
 /* homepage "More" card grid */
@@ -568,7 +568,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .post-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.9rem;margin-top:1rem}
 .post-card{display:flex;flex-direction:column;gap:.55rem;padding:1.1rem 1.1rem 1rem;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--border);text-decoration:none;transition:border-top-color .15s,background .12s}
 .post-card:hover{border-top-color:var(--green);background:color-mix(in srgb,var(--green) 4%,transparent)}
-.post-card .tag{align-self:flex-start}
+.post-card .scry-tag{align-self:flex-start}
 .post-card-title{font-family:var(--font-display);font-size:1rem;font-weight:400;line-height:1.3;color:var(--heading);text-transform:lowercase}
 .post-card:hover .post-card-title{color:var(--cyan)}
 .post-card .read-time{margin-top:auto}
@@ -588,9 +588,9 @@ nav.topic-list{padding:0;justify-content:flex-start}
 /* tag cloud (taxonomy) */
 .tags-section{margin-bottom:4rem}
 .tag-cloud{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
-.tag-pill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
-.tag-pill::before{content:"#";color:var(--green);font-weight:700;margin-right:.15rem}
-.tag-pill:hover{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 6%,transparent)}
+.scry-tagpill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
+.scry-tagpill::before{content:"#";color:var(--green);font-weight:700;margin-right:.15rem}
+.scry-tagpill:hover{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 6%,transparent)}
 
 /* single-header (qa/single) + about page */
 .single-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
@@ -636,17 +636,17 @@ nav.topic-list{padding:0;justify-content:flex-start}
 .site-top{flex-wrap:wrap;row-gap:10px}
 
 /* quote_with_author shortcode */
-.quote-with-author{margin:24px 0;border-left:3px solid var(--green);padding:4px 0 4px 1.2rem}
-.quote-with-author blockquote{border:none;padding:0;margin:0 0 .8rem;color:var(--text);font-style:italic;font-family:var(--font-read);font-size:.95rem;line-height:1.65}
-.quote-with-author blockquote p{margin:0}
-.quote-with-author blockquote p::before{content:'\201C';color:var(--green);font-style:normal}
-.quote-with-author blockquote p::after{content:'\201D';color:var(--green);font-style:normal}
-.quote-attribution{display:flex;align-items:center;gap:.7rem}
-.quote-avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);object-fit:cover;flex-shrink:0}
-.quote-avatar--pixel{width:56px;height:56px;border-radius:7px;object-fit:contain;background:var(--surface);padding:1px;image-rendering:pixelated;image-rendering:crisp-edges}
-.quote-avatar-initials{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--font-pixel);font-size:.6rem;color:var(--green);flex-shrink:0}
-.quote-name{display:block;font-family:var(--font-code);font-size:.8rem;font-weight:700;color:var(--green)}
-.quote-role{display:block;font-family:var(--font-code);font-size:.75rem;color:var(--muted)}
+.scry-quote{margin:24px 0;border-left:3px solid var(--green);padding:4px 0 4px 1.2rem}
+.scry-quote blockquote{border:none;padding:0;margin:0 0 .8rem;color:var(--text);font-style:italic;font-family:var(--font-read);font-size:.95rem;line-height:1.65}
+.scry-quote blockquote p{margin:0}
+.scry-quote blockquote p::before{content:'\201C';color:var(--green);font-style:normal}
+.scry-quote blockquote p::after{content:'\201D';color:var(--green);font-style:normal}
+.scry-quote__attr{display:flex;align-items:center;gap:.7rem}
+.scry-quote__avatar{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);object-fit:cover;flex-shrink:0}
+.scry-quote__avatar.pixel{width:56px;height:56px;border-radius:7px;object-fit:contain;background:var(--surface);padding:1px;image-rendering:pixelated;image-rendering:crisp-edges}
+.scry-quote__initials{width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:var(--surface);display:flex;align-items:center;justify-content:center;font-family:var(--font-pixel);font-size:.6rem;color:var(--green);flex-shrink:0}
+.scry-quote__name{display:block;font-family:var(--font-code);font-size:.8rem;font-weight:700;color:var(--green)}
+.scry-quote__role{display:block;font-family:var(--font-code);font-size:.75rem;color:var(--muted)}
 
 /* ── Front page (layouts/index.html) — split hero + terminal feed ────────
    Identity statement + CTA left; the latest pieces as shell output in a
@@ -764,11 +764,11 @@ footer .footprint{max-width:440px;margin:0 auto;text-align:left}
   }
 
   /* Don't split figures, tables, or code across pages; keep headings with bodies. */
-  figure, table, pre, .callout, .insight-body, .obs-fig, .obs-table { page-break-inside: avoid; break-inside: avoid; }
+  figure, table, pre, .scry-callout, .scry-insight__body, .obs-fig, .obs-table { page-break-inside: avoid; break-inside: avoid; }
   h1, h2, h3 { page-break-after: avoid; }
 
   /* Legible boxes without color fills. */
-  pre, code, .callout, table, th, td {
+  pre, code, .scry-callout, table, th, td {
     border-color: #999 !important; background: transparent !important; color: #111 !important;
   }
 }
