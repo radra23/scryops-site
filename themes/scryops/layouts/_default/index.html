@@ -20,13 +20,13 @@
   <!-- Latest pieces as shell output in a terminal window -->
   {{ $latest := first 6 (sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc") }}
   <section class="front-feed">
-    <div class="feedwin">
-      <div class="feedhdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="fcursor"></span></div>
+    <div class="scry-feed">
+      <div class="scry-feed__hdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="scry-feed__cursor"></span></div>
       {{ range $latest }}
-      <a class="trow" href="{{ .RelPermalink }}">
+      <a class="scry-feed__row" href="{{ .RelPermalink }}">
         {{ partial "type-glyph.html" . }}
-        <span class="tt">{{ .Title }}</span>
-        <span class="tm">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
+        <span class="scry-feed__title">{{ .Title }}</span>
+        <span class="scry-feed__meta">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
       </a>
       {{ end }}
     </div>
