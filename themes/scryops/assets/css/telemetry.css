@@ -191,7 +191,7 @@ html.pref-lite .diagram .mermaid::before{content:"diagram source";display:block;
 
 /* No-JS resilience (Permacomputing Phase 4): the footprint badge needs JS to
    fill real numbers — hide its placeholders entirely when JS is off. */
-html:not(.js) .footprint{display:none}
+html:not(.js) .scry-fp{display:none}
 
 /* ============================================================
    base
@@ -711,34 +711,34 @@ nav.topic-list{padding:0;justify-content:flex-start}
    Terminal readouts that live on the always-dark code well, so the
    living-green eco signal reads identically in warm-paper AND soft-dark.
    footprint.js fills the real numbers via [data-footprint] + [data-fp-*]. */
-.footprint{font-family:var(--font-code);font-size:12px;line-height:1.85;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:12px 14px;color:var(--code-text)}
-.footprint .fp-pr{color:var(--eco)}
-.footprint .fp-ar{color:var(--code-cyan)}
-.footprint .fp-hi{color:var(--code-hi)}
-.footprint .fp-eco{color:var(--eco)}
-.footprint .fp-status{color:var(--eco)}
-.footprint.over .fp-status{color:var(--danger)}
-.fp-bar{height:7px;border-radius:4px;background:rgba(127,176,105,.14);overflow:hidden;margin:8px 0 4px}
-.fp-fill{height:100%;width:0;background:linear-gradient(90deg,var(--eco),var(--eco-bright));transition:width .4s ease}
-.footprint.over .fp-fill{background:linear-gradient(90deg,var(--danger),var(--warn))}
-.fp-note{font-family:var(--font-read);font-size:10.5px;color:var(--code-muted)}
-.fp-method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid transparent}
-.fp-method:hover{border-bottom-color:var(--code-cyan)}
-@media (prefers-reduced-motion:reduce){.fp-fill{transition:none}}
+.scry-fp{font-family:var(--font-code);font-size:12px;line-height:1.85;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:12px 14px;color:var(--code-text)}
+.scry-fp .scry-fp__pr{color:var(--eco)}
+.scry-fp .scry-fp__ar{color:var(--code-cyan)}
+.scry-fp .scry-fp__hi{color:var(--code-hi)}
+.scry-fp .scry-fp__eco{color:var(--eco)}
+.scry-fp .scry-fp__status{color:var(--eco)}
+.scry-fp.over .scry-fp__status{color:var(--danger)}
+.scry-fp__bar{height:7px;border-radius:4px;background:rgba(127,176,105,.14);overflow:hidden;margin:8px 0 4px}
+.scry-fp__fill{height:100%;width:0;background:linear-gradient(90deg,var(--eco),var(--eco-bright));transition:width .4s ease}
+.scry-fp.over .scry-fp__fill{background:linear-gradient(90deg,var(--danger),var(--warn))}
+.scry-fp__note{font-family:var(--font-read);font-size:10.5px;color:var(--code-muted)}
+.scry-fp__method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid transparent}
+.scry-fp__method:hover{border-bottom-color:var(--code-cyan)}
+@media (prefers-reduced-motion:reduce){.scry-fp__fill{transition:none}}
 
 /* In the site footer the badge stays compact and centered. */
-footer .footprint{max-width:440px;margin:0 auto;text-align:left}
+footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 
-.colophon{font-family:var(--font-code);font-size:12.5px;line-height:1.7;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:16px 18px;color:var(--code-text);max-width:var(--measure)}
-.colophon .co-cmd{color:var(--code-muted);margin-bottom:8px}
-.colophon .co-cmd b{color:var(--eco);font-weight:400}
-.colophon .co-row{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:7px 0;border-bottom:1px solid var(--code-bd)}
-.colophon .co-row:last-child{border-bottom:none}
-.colophon .co-k{color:var(--code-muted)}
-.colophon .co-v{color:var(--code-hi)}
-.colophon .co-v .eco{color:var(--eco)}
-.colophon .co-v a{color:var(--code-cyan);text-decoration:none}
-.colophon .co-v a:hover{text-decoration:underline}
+.scry-colophon{font-family:var(--font-code);font-size:12.5px;line-height:1.7;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:16px 18px;color:var(--code-text);max-width:var(--measure)}
+.scry-colophon .scry-colophon__cmd{color:var(--code-muted);margin-bottom:8px}
+.scry-colophon .scry-colophon__cmd b{color:var(--eco);font-weight:400}
+.scry-colophon .scry-colophon__row{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:7px 0;border-bottom:1px solid var(--code-bd)}
+.scry-colophon .scry-colophon__row:last-child{border-bottom:none}
+.scry-colophon .scry-colophon__k{color:var(--code-muted)}
+.scry-colophon .scry-colophon__v{color:var(--code-hi)}
+.scry-colophon .scry-colophon__v .eco{color:var(--eco)}
+.scry-colophon .scry-colophon__v a{color:var(--code-cyan);text-decoration:none}
+.scry-colophon .scry-colophon__v a:hover{text-decoration:underline}
 
 /* ── Print: prepare for the worst — a copy that reads on paper, no power required ── */
 @media print {
@@ -747,7 +747,7 @@ footer .footprint{max-width:440px;margin:0 auto;text-align:left}
   body { color: #111; font-size: 11pt; line-height: 1.5; }
 
   /* Drop interactive + navigational chrome. */
-  .site-top, .accent-line, .toc, .mode-toggle, .site-footer, .footprint,
+  .site-top, .accent-line, .toc, .mode-toggle, .site-footer, .scry-fp,
   .ask-cta, .featured-cta { display: none !important; }
 
   /* Single-column, full-bleed article. */
