@@ -505,15 +505,15 @@ nav.topic-list{padding:0;justify-content:flex-start}
 /* article feed (list/term) + cards (was .article — renamed .art-card to avoid
    colliding with the reading column .article) */
 .feed{margin-bottom:4rem}
-.art-card{display:grid;grid-template-columns:2.8rem 1fr;gap:1rem;padding:1.6rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;text-decoration:none}
-.art-card:first-child{border-top:1px solid var(--border)}
-.art-card:hover{background:color-mix(in srgb,var(--cyan) 4%,transparent)}
-.art-num{font-family:var(--font-pixel);font-size:.63rem;color:var(--muted);padding-top:.4rem;line-height:1.8}
-.art-card:hover .art-num{color:var(--cyan)}
-.art-meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem}
-.art-title{font-family:var(--font-display);font-size:1.15rem;font-weight:400;line-height:1.35;margin-bottom:.4rem;color:var(--heading);text-transform:lowercase}
-.art-card:hover .art-title{color:var(--cyan)}
-.art-excerpt{font-family:var(--font-read);font-size:.95rem;color:var(--text);line-height:1.7;margin-top:.5rem}
+.scry-artcard{display:grid;grid-template-columns:2.8rem 1fr;gap:1rem;padding:1.6rem 0;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s;text-decoration:none}
+.scry-artcard:first-child{border-top:1px solid var(--border)}
+.scry-artcard:hover{background:color-mix(in srgb,var(--cyan) 4%,transparent)}
+.scry-artcard__num{font-family:var(--font-pixel);font-size:.63rem;color:var(--muted);padding-top:.4rem;line-height:1.8}
+.scry-artcard:hover .scry-artcard__num{color:var(--cyan)}
+.scry-artcard__meta{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin-bottom:.45rem}
+.scry-artcard__title{font-family:var(--font-display);font-size:1.15rem;font-weight:400;line-height:1.35;margin-bottom:.4rem;color:var(--heading);text-transform:lowercase}
+.scry-artcard:hover .scry-artcard__title{color:var(--cyan)}
+.scry-artcard__excerpt{font-family:var(--font-read);font-size:.95rem;color:var(--text);line-height:1.7;margin-top:.5rem}
 
 /* ── M3 section listing ──────────────────────────────────────────────── */
 

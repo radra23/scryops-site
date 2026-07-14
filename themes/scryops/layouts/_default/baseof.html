@@ -146,7 +146,7 @@
           var type = btn.dataset.type;
           btns.forEach(function(b) { b.classList.remove('active'); });
           btn.classList.add('active');
-          document.querySelectorAll('.art-card').forEach(function(art) {
+          document.querySelectorAll('.scry-artcard').forEach(function(art) {
             if (type === 'all') { art.style.display = ''; return; }
             var tag = art.querySelector('.scry-tag');
             var match = tag && tag.classList.contains(type);
