@@ -59,8 +59,8 @@
   document.addEventListener('DOMContentLoaded', function () {
     apply();
 
-    var panel = document.querySelector('.pref-panel');
-    var btn = document.querySelector('.pref-btn');
+    var panel = document.querySelector('.scry-prefs__panel');
+    var btn = document.querySelector('.scry-prefs__btn');
     if (btn && panel) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();

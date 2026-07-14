@@ -7,40 +7,40 @@
      surface. Theme includes a Calm (low-stimulation) mode; toggles
      cover hyperlegible font, increased spacing, and reduced motion.
      Add it to the site chrome via {{ partial "reading-prefs.html" . }}. */ -}}
-<button class="pref-btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="reading-prefs"><b>⚙</b> Reading</button>
-<div class="pref-panel" id="reading-prefs" role="dialog" aria-label="Reading preferences" hidden>
+<button class="scry-prefs__btn" aria-haspopup="dialog" aria-expanded="false" aria-controls="reading-prefs"><b>⚙</b> Reading</button>
+<div class="scry-prefs__panel" id="reading-prefs" role="dialog" aria-label="Reading preferences" hidden>
   <h2>Reading preferences</h2>
 
-  <div class="pref-group">
-    <div class="pref-glabel">Theme</div>
-    <div class="pref-seg" role="group" aria-label="Theme">
+  <div class="scry-prefs__group">
+    <div class="scry-prefs__glabel">Theme</div>
+    <div class="scry-prefs__seg" role="group" aria-label="Theme">
       <button data-pref-theme="dark"  aria-pressed="true">◑ Dark</button>
       <button data-pref-theme="light" aria-pressed="false">◐ Light</button>
       <button data-pref-theme="calm"  aria-pressed="false">☾ Calm</button>
     </div>
   </div>
 
-  <div class="pref-group">
-    <div class="pref-glabel">Reading</div>
-    <button class="pref-row" data-pref-toggle="legible" role="switch" aria-checked="false">
-      <span class="pref-l"><span class="pref-name">Larger text</span><span class="pref-desc">Bigger body size — extra clarity for low-vision &amp; dyslexia</span></span>
-      <span class="pref-sw" aria-hidden="true"></span>
+  <div class="scry-prefs__group">
+    <div class="scry-prefs__glabel">Reading</div>
+    <button class="scry-prefs__row" data-pref-toggle="legible" role="switch" aria-checked="false">
+      <span class="scry-prefs__l"><span class="scry-prefs__name">Larger text</span><span class="scry-prefs__desc">Bigger body size — extra clarity for low-vision &amp; dyslexia</span></span>
+      <span class="scry-prefs__sw" aria-hidden="true"></span>
     </button>
-    <button class="pref-row" data-pref-toggle="spacing" role="switch" aria-checked="false">
-      <span class="pref-l"><span class="pref-name">Increased spacing</span><span class="pref-desc">Looser lines &amp; letter-spacing</span></span>
-      <span class="pref-sw" aria-hidden="true"></span>
+    <button class="scry-prefs__row" data-pref-toggle="spacing" role="switch" aria-checked="false">
+      <span class="scry-prefs__l"><span class="scry-prefs__name">Increased spacing</span><span class="scry-prefs__desc">Looser lines &amp; letter-spacing</span></span>
+      <span class="scry-prefs__sw" aria-hidden="true"></span>
     </button>
-    <button class="pref-row" data-pref-toggle="reduce" role="switch" aria-checked="false">
-      <span class="pref-l"><span class="pref-name">Reduce motion</span><span class="pref-desc">No transitions or fades</span></span>
-      <span class="pref-sw" aria-hidden="true"></span>
+    <button class="scry-prefs__row" data-pref-toggle="reduce" role="switch" aria-checked="false">
+      <span class="scry-prefs__l"><span class="scry-prefs__name">Reduce motion</span><span class="scry-prefs__desc">No transitions or fades</span></span>
+      <span class="scry-prefs__sw" aria-hidden="true"></span>
     </button>
   </div>
 
-  <div class="pref-group">
-    <div class="pref-glabel">Energy</div>
-    <button class="pref-row" data-pref-toggle="lite" role="switch" aria-checked="false">
-      <span class="pref-l"><span class="pref-name">☘ Lite mode</span><span class="pref-desc">System fonts, deferred images, no diagram JS — auto-on for data-saver</span></span>
-      <span class="pref-sw" aria-hidden="true"></span>
+  <div class="scry-prefs__group">
+    <div class="scry-prefs__glabel">Energy</div>
+    <button class="scry-prefs__row" data-pref-toggle="lite" role="switch" aria-checked="false">
+      <span class="scry-prefs__l"><span class="scry-prefs__name">☘ Lite mode</span><span class="scry-prefs__desc">System fonts, deferred images, no diagram JS — auto-on for data-saver</span></span>
+      <span class="scry-prefs__sw" aria-hidden="true"></span>
     </button>
   </div>
 </div>
