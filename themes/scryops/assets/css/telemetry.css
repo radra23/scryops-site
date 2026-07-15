@@ -359,7 +359,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    visually into the left column. */
 .layout.has-toc{max-width:1080px;grid-template-columns:200px minmax(0,1fr)}
 .layout.has-toc > .toc{grid-column:1;grid-row:1}
-.layout.has-toc > .article{grid-column:2;grid-row:1}
+.layout.has-toc > .article{grid-column:2;grid-row:1;min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page */
 /* Reading column: prose holds the ~680px measure (centered); code, figures,
    and tables break wider for room (GUIDELINES #2 — "evidence gets room,
    prose stays narrow"). */
