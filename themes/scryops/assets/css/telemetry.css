@@ -589,7 +589,7 @@ nav.topic-list{padding:0;justify-content:flex-start}
 /* tag cloud (taxonomy) */
 .tags-section{margin-bottom:4rem}
 .tag-cloud{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
-.scry-tagpill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
+.scry-tagpill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius-pill);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
 .scry-tagpill::before{content:"#";color:var(--green);font-weight:700;margin-right:.15rem}
 .scry-tagpill:hover{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 6%,transparent)}
 
