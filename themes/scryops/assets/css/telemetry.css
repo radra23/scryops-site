@@ -427,9 +427,10 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .scry-table th.v1{color:var(--muted);border-bottom:2px solid var(--green)}
 .scry-table th.v2{color:var(--cyan);border-bottom:2px solid var(--cyan)}
 .scry-table td{border:1px solid var(--tborder);padding:8px 14px;font-size:13px;line-height:1.5;vertical-align:middle;color:var(--text)}
-.scry-table td:first-child,.scry-table tbody th[scope="row"]{font-family:var(--font-code);color:var(--muted);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;background:var(--th);text-align:left}
+.scry-table td:first-child,.scry-table tbody th[scope="row"],.scry-table tbody th.rowhead{font-family:var(--font-code);color:var(--muted);font-weight:400;font-size:11px;text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;background:var(--th);text-align:left}
 .scry-table td.v1{color:var(--text)}
 .scry-table td.v2{color:var(--cyan)}
+.scry-table-wrap{overflow-x:auto}
 
 /* insight callout (insight shortcode) */
 .scry-insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin:24px 0}

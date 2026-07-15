@@ -1,4 +1,5 @@
 <figure class="diagram" aria-label="Comparison table: Observability 1.0 versus Observability 2.0">
+  <div class="scry-table-wrap">
   <table class="scry-table" aria-describedby="scry-table-caption">
     <caption id="scry-table-caption" style="caption-side:bottom;font-size:0.7rem;color:var(--muted);font-style:italic;text-align:left;padding:0.5rem 0.2rem 0;display:none;">
       Observability 1.0 is reactive and threshold-based. Observability 2.0 is predictive and pattern-based.
@@ -12,41 +13,42 @@
     </thead>
     <tbody>
       <tr>
-        <td>Core question</td>
+        <th scope="row" class="rowhead">Core question</th>
         <td class="v1">What happened?</td>
         <td class="v2">What's about to happen?</td>
       </tr>
       <tr>
-        <td>Action trigger</td>
+        <th scope="row" class="rowhead">Action trigger</th>
         <td class="v1">Threshold breach</td>
         <td class="v2">Anomaly pattern recognition</td>
       </tr>
       <tr>
-        <td>Signal view</td>
+        <th scope="row" class="rowhead">Signal view</th>
         <td class="v1">Siloed — logs, metrics, traces in separate tools</td>
         <td class="v2">Unified — correlated across all signals</td>
       </tr>
       <tr>
-        <td>Response</td>
+        <th scope="row" class="rowhead">Response</th>
         <td class="v1">On-call engineer investigates</td>
         <td class="v2">Automated remediation</td>
       </tr>
       <tr>
-        <td>Time to act</td>
+        <th scope="row" class="rowhead">Time to act</th>
         <td class="v1">After user impact</td>
         <td class="v2">Before user impact</td>
       </tr>
       <tr>
-        <td>Primary tool</td>
+        <th scope="row" class="rowhead">Primary tool</th>
         <td class="v1">Dashboards + alerting rules</td>
         <td class="v2">ML models + prediction pipelines</td>
       </tr>
       <tr>
-        <td>Outcome</td>
+        <th scope="row" class="rowhead">Outcome</th>
         <td class="v1" style="color:var(--danger);">✗ Reactive fix — damage already done</td>
         <td class="v2" style="color:var(--green);">✓ Prevented incident — users never notice</td>
       </tr>
     </tbody>
   </table>
+  </div>
   <figcaption>Fig. 4 — Every dimension of the model shifts: the question, the trigger, the responder, the outcome.</figcaption>
 </figure>
