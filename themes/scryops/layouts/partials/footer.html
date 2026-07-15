@@ -3,10 +3,5 @@
   <p>observability decoded &mdash; <a href="{{ "/about/" | relURL }}">about</a> &middot; <a href="{{ "/qa/" | relURL }}">q&amp;a</a> &middot; <a href="{{ "/colophon/" | relURL }}">colophon</a> &middot; <a href="{{ "/tags/" | relURL }}">tags</a></p>
 
   {{/* permacomputing · Phase 2 — live page-weight + CO₂ badge, filled by footprint.js */}}
-  <div class="scry-fp" data-footprint data-fp-budget="122880">
-    <div><span class="scry-fp__pr">scry@ops</span>:<span class="scry-fp__ar">~</span>$ du -h --footprint thispage</div>
-    <div><span class="scry-fp__hi" data-fp-size>…</span> transferred · <span class="scry-fp__eco" data-fp-co2>…</span> / visit · <span class="scry-fp__status" data-fp-status>measuring…</span></div>
-    <div class="scry-fp__bar"><div class="scry-fp__fill" data-fp-fill></div></div>
-    <span class="scry-fp__note" data-fp-note>…</span> · <a class="scry-fp__method" href="{{ "/colophon/#method" | relURL }}">method ↗</a>
-  </div>
+  {{ partial "footprint-badge.html" (dict "budget" 122880) }}
 </footer>
