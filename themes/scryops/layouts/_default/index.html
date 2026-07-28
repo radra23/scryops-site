@@ -50,6 +50,17 @@
       {{ end }}
     </div>
   </div>
+  <div class="front-explore__col">
+    <span class="topics-label">browse by topic</span>
+    <nav class="topic-list">
+      {{ range first 6 site.Taxonomies.tags.ByCount }}
+      <a class="topic-row" href="{{ .Page.RelPermalink }}">
+        <span class="topic-name">{{ .Page.Title }}</span>
+        <span class="topic-badge">{{ .Count }}</span>
+      </a>
+      {{ end }}
+    </nav>
+  </div>
 </section>
 {{ end }}
 
