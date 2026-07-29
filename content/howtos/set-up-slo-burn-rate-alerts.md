@@ -188,4 +188,4 @@ The next piece: making sure these alerts route to the right people via the right
 
 Pages now carry burn rate context and a runbook link — the information needed to act, not just a notification that something is wrong.
 
-{{< obs-mascot class="wizard" quip="Two windows must align before I name the omen real — the short for speed, the long for truth. A single flicker is a moth, not a fire. But when both burn at 14&#215;, I foresee it plainly: two days to ruin. I page. Heed the rune." >}}
+{{< obs-mascot class="wizard" quip="Two windows must align before I name the omen real — the short for speed, the long for truth. A single flicker is a moth, not a fire. But when both burn at 14×, I foresee it plainly: two days to ruin. I page. Heed the rune." >}}
