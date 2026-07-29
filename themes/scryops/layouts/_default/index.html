@@ -18,7 +18,9 @@
   </section>
 
   <!-- Latest pieces as shell output in a terminal window -->
-  {{ $latest := first 6 (sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc") }}
+  {{ $sorted := sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc" }}
+  {{ $latest := first 6 $sorted }}
+  {{ $more   := first 6 (after 6 $sorted) }}
   <section class="front-feed">
     <div class="scry-feed">
       <div class="scry-feed__hdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="scry-feed__cursor"></span></div>
@@ -33,6 +35,34 @@
   </section>
 
 </div>
+
+{{ if gt (len $more) 0 }}
+<section class="front-explore">
+  <div class="front-explore__col">
+    <span class="topics-label">more reading</span>
+    <div class="post-grid">
+      {{ range $more }}
+      <a class="post-card" href="{{ .RelPermalink }}">
+        <span class="scry-tag">{{ .Type }}</span>
+        <span class="post-card-title">{{ .Title }}</span>
+        {{ with .Params.readtime }}<span class="read-time">{{ . }}m</span>{{ end }}
+      </a>
+      {{ end }}
+    </div>
+  </div>
+  <div class="front-explore__col">
+    <span class="topics-label">browse by topic</span>
+    <nav class="topic-list">
+      {{ range first 6 site.Taxonomies.tags.ByCount }}
+      <a class="topic-row" href="{{ .Page.RelPermalink }}">
+        <span class="topic-name">{{ .Page.Title }}</span>
+        <span class="topic-badge">{{ .Count }}</span>
+      </a>
+      {{ end }}
+    </nav>
+  </div>
+</section>
+{{ end }}
 
 {{ partial "subscribe-form.html" . }}
 
