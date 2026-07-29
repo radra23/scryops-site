@@ -1,0 +1,8 @@
+{
+  "name": "scryops-site-build",
+  "private": true,
+  "description": "Dev-only diagram tooling. Not shipped, not installed in CI.",
+  "devDependencies": {
+    "@mermaid-js/mermaid-cli": "10.9.1"
+  }
+}

@@ -21,7 +21,7 @@
 
 /* line numbers / highlight lines */
 .chroma .lntable{border-spacing:0;padding:0;margin:0;border:0}
-.chroma .lnt,.chroma .ln{color:#3D4D4E;margin-right:.4em;padding:0 .4em}
+.chroma .lnt,.chroma .ln{color:#708A85;margin-right:.4em;padding:0 .4em}
 .chroma .hl{background:rgba(91,216,232,.08)}
 
 /* comments */

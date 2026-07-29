@@ -9,16 +9,16 @@ Observability turned on its own publication. This page is the honest accounting:
 how the site is built, what it loads, and how the footprint badge in the footer
 arrives at its numbers. Awareness, not absolution.
 
-<div class="colophon">
-  <div class="co-cmd"><b>scry@ops</b>:~$ cat colophon.txt</div>
-  <div class="co-row"><span class="co-k">generator</span><span class="co-v">Hugo · static HTML, no server runtime</span></div>
-  <div class="co-row"><span class="co-k">delivery</span><span class="co-v">prebuilt files served as-is</span></div>
-  <div class="co-row"><span class="co-k">analytics</span><span class="co-v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data</span></div>
-  <div class="co-row"><span class="co-k">offline</span><span class="co-v">service worker · reads from cache when the network drops</span></div>
-  <div class="co-row"><span class="co-k">fonts</span><span class="co-v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P (no CDN)</span></div>
-  <div class="co-row"><span class="co-k">diagrams</span><span class="co-v">Mermaid · CDN, lazy — diagram pages only <span class="eco">(static-SVG pre-render planned)</span></span></div>
-  <div class="co-row"><span class="co-k">deps</span><span class="co-v"><span class="eco">0</span> runtime dependencies · budget: none by default</span></div>
-  <div class="co-row"><span class="co-k">carbon</span><span class="co-v">estimated per visit — see <a href="#method">method</a></span></div>
+<div class="scry-colophon">
+  <div class="scry-colophon__cmd"><b>scry@ops</b>:~$ cat colophon.txt</div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">generator</span><span class="scry-colophon__v">Hugo · static HTML, no server runtime</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">delivery</span><span class="scry-colophon__v">prebuilt files served as-is</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">analytics</span><span class="scry-colophon__v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">offline</span><span class="scry-colophon__v">service worker · reads from cache when the network drops</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">fonts</span><span class="scry-colophon__v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P (no CDN)</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">diagrams</span><span class="scry-colophon__v">Mermaid · pre-rendered static SVG <span class="eco">(0 JS, themes via CSS vars)</span></span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">deps</span><span class="scry-colophon__v"><span class="eco">0</span> runtime dependencies · budget: none by default</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">carbon</span><span class="scry-colophon__v">estimated per visit — see <a href="#method">method</a></span></div>
 </div>
 
 ## Annual footprint
@@ -27,14 +27,14 @@ The loop opened when we first instrumented the publication closes here: the site
 measuring itself, published openly. **2026 is the baseline year** — each future
 year lands beside it so the trend is visible, not just asserted.
 
-<div class="colophon">
-  <div class="co-cmd"><b>scry@ops</b>:~$ footprint --year 2026</div>
-  <div class="co-row"><span class="co-k">pages</span><span class="co-v">24 published</span></div>
-  <div class="co-row"><span class="co-k">median page</span><span class="co-v"><span class="eco">2.9 KB</span> · HTML, gzipped</span></div>
-  <div class="co-row"><span class="co-k">heaviest</span><span class="co-v">24.5 KB · HTML, gzipped</span></div>
-  <div class="co-row"><span class="co-k">shared</span><span class="co-v">29.2 KB · CSS + JS, cached after the first visit</span></div>
-  <div class="co-row"><span class="co-k">font set</span><span class="co-v">277.5 KB · all faces, cached; a page uses a subset — Lite / blocked = 0</span></div>
-  <div class="co-row"><span class="co-k">trend</span><span class="co-v"><span class="eco">baseline</span> · first year of record</span></div>
+<div class="scry-colophon">
+  <div class="scry-colophon__cmd"><b>scry@ops</b>:~$ footprint --year 2026</div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">pages</span><span class="scry-colophon__v">24 published</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">median page</span><span class="scry-colophon__v"><span class="eco">2.9 KB</span> · HTML, gzipped</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">heaviest</span><span class="scry-colophon__v">24.5 KB · HTML, gzipped</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">shared</span><span class="scry-colophon__v">29.2 KB · CSS + JS, cached after the first visit</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">font set</span><span class="scry-colophon__v">277.5 KB · all faces, cached; a page uses a subset — Lite / blocked = 0</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">trend</span><span class="scry-colophon__v"><span class="eco">baseline</span> · first year of record</span></div>
 </div>
 
 Measured from the built site (`public/`), gzipped, by

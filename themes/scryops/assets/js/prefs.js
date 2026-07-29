@@ -39,8 +39,6 @@
     root.classList.toggle('pref-reduce', !!prefs.reduce);
     root.classList.toggle('pref-lite', !!prefs.lite);
     syncUI();
-    // In Lite the Mermaid runtime isn't loaded — don't try to re-render it.
-    if (!prefs.lite && window.scryopsRenderMermaid) window.scryopsRenderMermaid();
   }
 
   function save() {
@@ -54,15 +52,15 @@
       b.setAttribute('aria-pressed', String(b.dataset.prefTheme === prefs.theme));
     });
     document.querySelectorAll('[data-pref-toggle]').forEach(function (b) {
-      b.setAttribute('aria-pressed', String(!!prefs[b.dataset.prefToggle]));
+      b.setAttribute('aria-checked', String(!!prefs[b.dataset.prefToggle]));
     });
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     apply();
 
-    var panel = document.querySelector('.pref-panel');
-    var btn = document.querySelector('.pref-btn');
+    var panel = document.querySelector('.scry-prefs__panel');
+    var btn = document.querySelector('.scry-prefs__btn');
     if (btn && panel) {
       btn.addEventListener('click', function (e) {
         e.stopPropagation();

@@ -3,7 +3,7 @@
 
   <!-- Identity statement + topics + CTAs -->
   <section class="front-hero">
-    <div class="eyebrow">scrying + ops</div>
+    <div class="scry-eyebrow brand">scrying + ops</div>
     <h1 class="landing-statement">raw telemetry in. <b>understanding</b> out.</h1>
     <p class="landing-lede">{{ site.Params.description }}</p>
     {{ with site.Params.topics }}
@@ -12,21 +12,21 @@
     </div>
     {{ end }}
     <div class="landing-cta">
-      <a class="btn btn-primary" href="{{ "/guides/" | relURL }}">Start reading</a>
-      <a class="btn btn-ghost" href="#subscribe">Subscribe &rarr;</a>
+      <a class="scry-btn primary" href="{{ "/guides/" | relURL }}">Start reading</a>
+      <a class="scry-btn ghost" href="#subscribe">Subscribe &rarr;</a>
     </div>
   </section>
 
   <!-- Latest pieces as shell output in a terminal window -->
   {{ $latest := first 6 (sort (where site.RegularPages "Type" "in" (slice "guides" "articles" "howtos" "qa")) "Date" "desc") }}
   <section class="front-feed">
-    <div class="feedwin">
-      <div class="feedhdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="fcursor"></span></div>
+    <div class="scry-feed">
+      <div class="scry-feed__hdr"><span class="fp">scry@ops</span>:<span class="fa">~</span>$ ls ~/latest<span class="scry-feed__cursor"></span></div>
       {{ range $latest }}
-      <a class="trow" href="{{ .RelPermalink }}">
+      <a class="scry-feed__row" href="{{ .RelPermalink }}">
         {{ partial "type-glyph.html" . }}
-        <span class="tt">{{ .Title }}</span>
-        <span class="tm">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
+        <span class="scry-feed__title">{{ .Title }}</span>
+        <span class="scry-feed__meta">{{ with .Params.readtime }}{{ . }}m{{ end }}</span>
       </a>
       {{ end }}
     </div>
@@ -34,77 +34,6 @@
 
 </div>
 
-<!-- Subscribe (inline Brevo form, preserved from the prior homepage) -->
-{{ with .Site.Params.brevo_form_url }}
-<div class="wrap">
-<section class="subscribe-section" id="subscribe">
-  <h2 class="subscribe-label">Stay in the loop</h2>
-  <p class="subscribe-desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
-  <form class="subscribe-form" id="subscribe-form" novalidate>
-    <input type="hidden" name="email_address_check" value="">
-    <input type="hidden" name="locale" value="en">
-    <input class="subscribe-input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required aria-label="Email address" autocomplete="email">
-    <button class="subscribe-btn" id="subscribe-btn" type="submit">Subscribe</button>
-  </form>
-  <p class="subscribe-msg" id="subscribe-msg" aria-live="polite" hidden></p>
-</section>
-
-<script>
-(function () {
-  var FORM_URL = {{ . | jsonify | safeJS }};
-  var form  = document.getElementById('subscribe-form');
-  var input = document.getElementById('subscribe-email');
-  var btn   = document.getElementById('subscribe-btn');
-  var msg   = document.getElementById('subscribe-msg');
-
-  function setState(state, text) {
-    msg.textContent = text;
-    msg.hidden = false;
-    msg.className = 'subscribe-msg subscribe-msg--' + state;
-    if (state === 'loading') {
-      btn.disabled = true;
-      btn.textContent = 'Subscribing…';
-    } else {
-      btn.disabled = false;
-      btn.textContent = 'Subscribe';
-    }
-    if (state === 'success') {
-      form.hidden = true;
-    }
-  }
-
-  form.addEventListener('submit', function (e) {
-    e.preventDefault();
-    var email = input.value.trim();
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setState('error', 'Please enter a valid email address.');
-      input.focus();
-      return;
-    }
-    setState('loading', '');
-    var params = new URLSearchParams();
-    params.append('EMAIL', email);
-    params.append('email_address_check', '');
-    params.append('locale', 'en');
-    params.append('html_type', 'simple');
-    // no-cors: sibforms.com doesn't return CORS headers we can read,
-    // so we post fire-and-forget and show success optimistically.
-    fetch(FORM_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: params.toString()
-    })
-    .then(function () {
-      setState('success', "You're in. New pieces land in your inbox as they ship.");
-    })
-    .catch(function () {
-      setState('error', 'Something went wrong. Check your connection and try again.');
-    });
-  });
-}());
-</script>
-</div>
-{{ end }}
+{{ partial "subscribe-form.html" . }}
 
 {{ end }}

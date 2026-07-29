@@ -1,19 +1,19 @@
 {{ $num := .num }}
 {{ $page := .page }}
 {{ $h := .heading | default "h2" }}
-<a href="{{ $page.RelPermalink }}" class="art-card" style="text-decoration:none;">
-  <div class="art-num">{{ printf "%02d" $num }}</div>
+<a href="{{ $page.RelPermalink }}" class="scry-artcard" style="text-decoration:none;">
+  <div class="scry-artcard__num">{{ printf "%02d" $num }}</div>
   <div>
-    <div class="art-meta">
+    <div class="scry-artcard__meta">
       {{ $type := $page.Type }}
-      {{ if eq $type "articles" }}<span class="tag trends">Article</span>
-      {{ else if eq $type "guides" }}<span class="tag guide">Guide</span>
-      {{ else if eq $type "howtos" }}<span class="tag howto">How-to</span>
-      {{ else if eq $type "qa" }}<span class="tag qa">Q&amp;A</span>
+      {{ if eq $type "articles" }}<span class="scry-tag trends">Article</span>
+      {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide</span>
+      {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to</span>
+      {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A</span>
       {{ end }}
       {{ with $page.Params.readtime }}<span class="read-time">{{ . }} min read</span>{{ end }}
     </div>
-    {{ if eq $h "h3" }}<h3 class="art-title">{{ $page.Title }}</h3>{{ else }}<h2 class="art-title">{{ $page.Title }}</h2>{{ end }}
-    {{ with $page.Params.excerpt }}<div class="art-excerpt">{{ . }}</div>{{ end }}
+    {{ if eq $h "h3" }}<h3 class="scry-artcard__title">{{ $page.Title }}</h3>{{ else }}<h2 class="scry-artcard__title">{{ $page.Title }}</h2>{{ end }}
+    {{ with $page.Params.excerpt }}<div class="scry-artcard__excerpt">{{ . }}</div>{{ end }}
   </div>
 </a>

@@ -50,8 +50,8 @@
   --klein:      #002FA7;
   --klein-mid:  #5B8DEF;
   --klein-glow: #4D7FFF;
-  --font-mono:  'Commit Mono', 'Courier New', monospace;
-  --font-sans:  'iA Writer Quattro', 'Commit Mono', 'Courier New', monospace;
+  --font-mono:  var(--font-code);
+  --font-sans:  'iA Writer Quattro', var(--font-code);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,7 +60,7 @@ html { scroll-behavior: smooth; }
 body {
   background: var(--bg);
   color: var(--text);
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 16px;
   line-height: 1.65;
   -webkit-font-smoothing: antialiased;
@@ -172,7 +172,7 @@ main {
   margin-left: auto;
 }
 .featured-title {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 1.65rem;
   font-weight: 700;
   line-height: 1.2;
@@ -559,7 +559,7 @@ nav.topic-list {
 }
 .post-card .tag { align-self: flex-start; }
 .post-card-title {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.3;
@@ -642,7 +642,7 @@ nav.topic-list {
   margin-bottom: 1.2rem;
 }
 .filter-btn {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 0.72rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -699,7 +699,7 @@ nav.topic-list {
   flex-wrap: wrap;
 }
 .subscribe-input {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 0.85rem;
   background: var(--bg);
   border: 1px solid var(--border);
@@ -713,7 +713,7 @@ nav.topic-list {
 .subscribe-input::placeholder { color: var(--muted); }
 .subscribe-input:focus { border-color: var(--amber-deep); }
 .subscribe-btn {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 0.82rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -732,7 +732,7 @@ nav.topic-list {
   margin-top: 0.6rem;
 }
 .subscribe-msg {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 0.82rem;
   margin-top: 0.75rem;
   line-height: 1.5;
@@ -764,7 +764,7 @@ nav.topic-list {
   border-bottom: 1px solid var(--border);
 }
 .single-header h1 {
-  font-family: 'Commit Mono', 'Courier New', monospace;
+  font-family: var(--font-code);
   font-size: 1.9rem;
   font-weight: 700;
   line-height: 1.25;

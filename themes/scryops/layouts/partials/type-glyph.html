@@ -3,9 +3,9 @@
        colour alone. Extend the map to add a content type. Section names match
        this repo's content/ folders (howtos, not how-tos). */ -}}
 {{- $map := dict
-  "guides"   (slice "⇉" "tp-trace"  "Guide")
-  "articles" (slice "◆" "tp-metric" "Article")
-  "howtos"   (slice "▸" "tp-prof"   "How-to")
-  "qa"       (slice "≡" "tp-log"    "Q&A") -}}
-{{- $m := index $map .Type | default (slice "•" "tp-log" (.Type | humanize)) -}}
-<span class="tg2 {{ index $m 1 }}" title="{{ index $m 2 }}"><span aria-hidden="true">{{ index $m 0 }}</span><span class="sr-only">{{ index $m 2 }}</span></span>
+  "guides"   (slice "⇉" "scry-tp-trace"  "Guide")
+  "articles" (slice "◆" "scry-tp-metric" "Article")
+  "howtos"   (slice "▸" "scry-tp-prof"   "How-to")
+  "qa"       (slice "≡" "scry-tp-log"    "Q&A") -}}
+{{- $m := index $map .Type | default (slice "•" "scry-tp-log" (.Type | humanize)) -}}
+<span class="scry-feed__glyph {{ index $m 1 }}" title="{{ index $m 2 }}"><span aria-hidden="true">{{ index $m 0 }}</span><span class="sr-only">{{ index $m 2 }}</span></span>

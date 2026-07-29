@@ -2,7 +2,7 @@
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 244" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="brt-title brt-desc"
-         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+         style="width:100%;display:block;font-family:var(--font-code);">
       <title id="brt-title">Burn-rate triage</title>
       <desc id="brt-desc">Burn-rate triage as two questions. First: is the SLO error budget burning? If not, monitor and log it. If yes, ask how fast it is burning, which sets a proportional response. A slow burn (under 2 times the sustainable rate, weeks of budget left) becomes a ticket to investigate this week. A moderate burn (around 6 times, on the one-hour and six-hour windows) notifies the team and escalates cross-functionally if on-call cannot resolve it. A fast burn (14 times on the one-hour window) pages on-call and is declared a major incident if users are severely hit.</desc>
 

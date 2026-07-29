@@ -17,6 +17,7 @@ Standard library only.
 import sys, os, re, glob, subprocess
 import xml.dom.minidom as minidom
 from html.parser import HTMLParser
+import mermaid_lib
 
 SHORTCODE_DIR = os.path.join("themes", "scryops", "layouts", "shortcodes")
 VOID = {"br", "hr", "img", "input", "meta", "link", "rect", "line", "circle",
@@ -101,6 +102,29 @@ def shortcode_refs(md):
     return re.findall(r"{{<\s*([a-zA-Z0-9_-]+)", txt)
 
 
+def check_diagram_svgs(articles):
+    """Every {{< mermaid >}} block must have a committed, current SVG; warn on orphans."""
+    out_dir = os.path.join("themes", "scryops", "assets", "diagrams")
+    referenced = set()
+    hard = False
+    print(f"\n{DIM}— diagram SVG pre-render —{OFF}")
+    for md, source in mermaid_lib.iter_mermaid_blocks(articles):
+        h = mermaid_lib.diagram_hash(source)
+        referenced.add(h)
+        if os.path.exists(os.path.join(out_dir, f"{h}.svg")):
+            ok(f"{md} [{h}]: SVG present")
+        else:
+            fail(f"{md} [{h}]: missing SVG — run scripts/render-diagrams.py")
+            hard = True
+    # orphan check only meaningful on a full scan (no file args)
+    if len(sys.argv) <= 1 and os.path.isdir(out_dir):
+        for svg in glob.glob(os.path.join(out_dir, "*.svg")):
+            h = os.path.splitext(os.path.basename(svg))[0]
+            if h not in referenced:
+                warn(f"orphan SVG {svg} — no diagram references it (safe to git rm)")
+    return hard
+
+
 def main():
     if not os.path.isdir(SHORTCODE_DIR):
         fail(f"run me from the repo root — {SHORTCODE_DIR} not found")
@@ -147,6 +171,9 @@ def main():
             hard_fail = True
     else:
         warn(f"{tagscript} not found — skipping")
+
+    if check_diagram_svgs(articles):
+        hard_fail = True
 
     print()
     if hard_fail:

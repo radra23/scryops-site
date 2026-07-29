@@ -10,7 +10,7 @@
 {{- $level := .Get 0 | default "info" -}}
 {{- $defaults := dict "info" "INFO" "warn" "WARN" "danger" "ERROR" -}}
 {{- $label := .Get 1 | default (index $defaults $level) -}}
-<div class="callout {{ $level }}">
-  <span class="callout-label">{{ $label }}</span>
+<div class="scry-callout {{ $level }}">
+  <span class="scry-callout__label">{{ $label }}</span>
   {{ .Inner | markdownify }}
 </div>

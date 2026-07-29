@@ -2,7 +2,7 @@
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="alc-title alc-desc"
-         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+         style="width:100%;display:block;font-family:var(--font-code);">
       <title id="alc-title">The alert lifecycle</title>
       <desc id="alc-desc">The alert lifecycle as a loop. Alerts are created, tested in staging, and deployed active, then enter a recurring monthly review. The review sends each alert to one of three fates: keep it (it fires and drives real fixes) and re-review next month; refine it (high false-positive rate) by fixing and redeploying; or retire it (it never fires, or is acknowledged with no action) by removing it.</desc>
 

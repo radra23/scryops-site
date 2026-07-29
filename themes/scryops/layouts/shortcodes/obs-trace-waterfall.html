@@ -3,7 +3,7 @@
   <div class="diag-card" style="padding:0.9rem;">
     <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="tw-title tw-desc" shape-rendering="crispEdges"
-         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+         style="width:100%;display:block;font-family:var(--font-code);">
       <title id="tw-title">Trace Waterfall — one GET /checkout request</title>
       <desc id="tw-desc">Six spans across 240 milliseconds. Auto-instrumented HTTP and database spans are blue; the manual payment.process span in amber holds most of the duration; the outbound Stripe call nests beneath it; and a final UPDATE orders span fails in red.</desc>
 

@@ -6,7 +6,7 @@
        {{< /obs-figure >}}
      Apply classes .node / .nlab / .edge / .arr inside your SVG
      so it inherits the Telemetry figure theme in both modes. */ -}}
-<figure class="obs-fig">
+<figure class="obs-fig"{{ with (.Get "alt" | default (.Get "caption")) }} role="img" aria-label="{{ . }}"{{ end }}>
   {{ .Inner }}
   {{ with .Get "caption" }}<figcaption class="obs-cap">{{ . | markdownify }}</figcaption>{{ end }}
 </figure>

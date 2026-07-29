@@ -1,6 +1,6 @@
 {{ $variant := .Get 0 | default "lightbulb" }}
-<div class="insight {{ $variant }}">
-  <div class="insight-icon" aria-hidden="true">
+<div class="scry-insight {{ $variant }}">
+  <div class="scry-insight__icon" aria-hidden="true">
     {{ if eq $variant "lightbulb" }}
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter">
       <path d="M9 21h6M12 2a7 7 0 0 1 4 12.874V17H8v-2.126A7 7 0 0 1 12 2z"/>
@@ -12,5 +12,5 @@
     </svg>
     {{ end }}
   </div>
-  <div class="insight-body">{{ .Inner | markdownify }}</div>
+  <div class="scry-insight__body">{{ .Inner | markdownify }}</div>
 </div>

@@ -2,7 +2,7 @@
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-labelledby="tlc-title tlc-desc"
-         style="width:100%;display:block;font-family:'Commit Mono','Courier New',monospace;">
+         style="width:100%;display:block;font-family:var(--font-code);">
       <title id="tlc-title">A log line without and with trace context</title>
       <desc id="tlc-desc">Two-panel diagram. Left panel — WITHOUT TRACE ID — shows a log line with timestamp, level, message, and order ID, but the trace_id and span_id slots are absent (shown as dashed empty boxes). Bottom label: search all services by timestamp. Right panel — WITH TRACE ID — shows the same log line with trace_id and span_id fields present and highlighted in blue. Bottom label: click trace_id to open correlated spans.</desc>
 

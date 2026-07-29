@@ -1,0 +1,12 @@
+{{- /* Reusable page-weight + CO₂ badge. Params: budget (bytes, default 122880),
+       methodHref (default /colophon/#method). Markup + data-* hooks match what
+       footprint.js selects — the JS needs no change. No id attrs → safe to use
+       more than once per page. */ -}}
+{{- $budget := .budget | default 122880 -}}
+{{- $method := .methodHref | default "/colophon/#method" -}}
+<div class="scry-fp" data-footprint data-fp-budget="{{ $budget }}">
+  <div><span class="scry-fp__pr">scry@ops</span>:<span class="scry-fp__ar">~</span>$ du -h --footprint thispage</div>
+  <div><span class="scry-fp__hi" data-fp-size>…</span> transferred · <span class="scry-fp__eco" data-fp-co2>…</span> / visit · <span class="scry-fp__status" data-fp-status>measuring…</span></div>
+  <div class="scry-fp__bar"><div class="scry-fp__fill" data-fp-fill></div></div>
+  <span class="scry-fp__note" data-fp-note>…</span> · <a class="scry-fp__method" href="{{ $method | relURL }}">method ↗</a>
+</div>
