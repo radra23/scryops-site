@@ -744,6 +744,51 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 .scry-colophon .scry-colophon__v a{color:var(--code-cyan);text-decoration:none}
 .scry-colophon .scry-colophon__v a:hover{text-decoration:underline}
 
+/* ── Mascot ("the Cucco") — pixel-art RPG chicken party, Phase 3c ────────
+   Structural chrome reads Telemetry tokens so it recolors across
+   dark/light/calm. --ac (set once per rendered instance) carries the
+   fixed per-class identity accent through every variant — same pattern
+   .party-card already uses. HP hearts read --danger, not the accent. */
+.scry-cucco{margin:2.5rem 0 2rem;font-family:var(--font-code)}
+.scry-cucco__wrap{display:flex;gap:16px;align-items:stretch;background:var(--surface);border:1px solid var(--border);border-top:2px solid var(--ac);border-radius:var(--radius-retro);padding:16px;overflow:hidden}
+@media(max-width:560px){.scry-cucco__wrap{flex-direction:column;text-align:center}}
+.scry-cucco__sprite{width:104px;flex-shrink:0;align-self:center}
+.scry-cucco__sprite img{width:100%;height:auto;display:block;image-rendering:pixelated}
+.scry-cucco__bubble{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.scry-cucco__name{font-family:var(--font-pixel);font-size:.68rem;line-height:1.5;color:var(--ac)}
+.scry-cucco__role{font-size:.72rem;color:var(--muted);margin-bottom:6px}
+.scry-cucco__quip{font-family:var(--font-read);font-size:.9rem;line-height:1.55;color:var(--heading);margin:0}
+.scry-cucco__quip::before{content:'\201C'}
+.scry-cucco__quip::after{content:'\201D'}
+.scry-cucco__stats{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+.scry-cucco__lvl{font-family:var(--font-pixel);font-size:.55rem;border:1px solid var(--ac);color:var(--ac);padding:4px 6px;line-height:1}
+.scry-cucco__hp{letter-spacing:1px;font-size:.8rem}
+.scry-cucco__hp .scry-cucco__heart--filled{color:var(--danger)}
+.scry-cucco__hp .scry-cucco__heart--empty{color:var(--border)}
+.scry-cucco__xplabel{font-family:var(--font-pixel);font-size:.5rem;color:var(--muted)}
+.scry-cucco__xp{position:relative;flex:1;min-width:60px;max-width:130px;height:8px;background:var(--bg);border:1px solid var(--border);overflow:hidden}
+.scry-cucco__xp>span{position:absolute;left:0;top:0;bottom:0;display:block;background:var(--ac)}
+.scry-cucco__cap{font-size:12px;line-height:1.45;color:var(--muted);font-style:italic;margin-top:10px}
+.scry-cucco__badge{display:inline-flex;flex-direction:column;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-retro);padding:14px 16px;text-align:center}
+.scry-cucco__medallion{width:88px;height:88px;display:flex;align-items:center;justify-content:center;background:var(--bg);border:1px solid var(--border);border-radius:50%;overflow:hidden}
+.scry-cucco__medallion img{width:78%;height:auto;image-rendering:pixelated}
+.scry-cucco__plate{font-family:var(--font-pixel);font-size:.6rem;color:var(--ac)}
+.scry-cucco__sub{font-size:.68rem;color:var(--muted)}
+.scry-cucco__solo{width:120px}
+.scry-cucco__solo img{width:100%;height:auto;image-rendering:pixelated}
+.scry-cucco__fg{display:flex;gap:15px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:15px}
+@media(max-width:560px){.scry-cucco__fg{flex-direction:column;text-align:center}}
+.scry-cucco__fgframe{width:88px;flex:none;align-self:center;background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:7px}
+.scry-cucco__fgframe img{width:100%;height:auto;image-rendering:pixelated;display:block}
+.scry-cucco__fgbody{min-width:0}
+.scry-cucco__fgnm{display:flex;align-items:center;gap:9px;font-family:var(--font-pixel);font-size:.58rem;line-height:1.4;color:var(--heading)}
+.scry-cucco__fgdot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--ac)}
+.scry-cucco__fgrole{font-family:var(--font-code);font-size:.72rem;color:var(--muted);margin:6px 0 9px}
+.scry-cucco__fgquip{font-family:var(--font-read);font-size:.88rem;color:var(--text);line-height:1.55;margin:0 0 11px}
+.scry-cucco__fgstat{font-family:var(--font-code);font-size:.73rem;color:var(--muted);letter-spacing:.02em}
+.scry-cucco__fgstat b{font-weight:600;color:var(--ac)}
+.scry-cucco__fgsep{opacity:.5;margin:0 7px}
+
 /* ── Print: prepare for the worst — a copy that reads on paper, no power required ── */
 @media print {
   :root { color-scheme: light; }
