@@ -28,11 +28,13 @@
       <path d="M78,288 L160,280 240,268 330,248 430,213 540,162 640,108 730,72 L730,247 640,248 540,250 430,254 330,260 240,268 160,278 78,288 Z" fill="var(--warn)" fill-opacity="0.10"/>
 
       <!-- monitoring curve (bounded, plateaus) -->
-      <polyline fill="none" stroke="var(--cyan)" stroke-width="2.4" stroke-linejoin="round"
+      <polyline fill="none" stroke="var(--cyan)" stroke-width="2" stroke-dasharray="6 4" stroke-linejoin="round"
         points="78,288 160,278 240,268 330,260 430,254 540,250 640,248 730,247"/>
-      <!-- observability curve (super-linear) -->
-      <polyline fill="none" stroke="var(--warn)" stroke-width="2.4" stroke-linejoin="round"
+      <circle cx="730" cy="247" r="4" fill="none" stroke="var(--cyan)" stroke-width="2"/>
+      <!-- observability curve (super-linear, the one this figure is about) -->
+      <polyline fill="none" stroke="var(--warn)" stroke-width="2.6" stroke-linejoin="round"
         points="78,288 160,280 240,268 330,248 430,213 540,162 640,108 730,72"/>
+      <circle cx="730" cy="72" r="4.5" fill="var(--warn)"/>
 
       <!-- curve labels (colour ties each label to its line) -->
       <text x="306" y="108" fill="var(--warn)" font-size="11">observability</text>
