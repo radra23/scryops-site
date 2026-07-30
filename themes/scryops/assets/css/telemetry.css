@@ -406,14 +406,14 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .flow-version.v1{color:var(--muted)}
 .flow-version.v2{color:var(--cyan)}
 .flow-box{font-family:var(--font-code);padding:6px 10px;font-size:12px;border:1px solid var(--border);background:var(--bg);white-space:nowrap}
-.flow-box.breach {border-color:var(--warn);  color:var(--warn-lb); background:var(--warn-bg)}
+.flow-box.breach {border-color:var(--warn);  border-width:2px; color:var(--warn-lb); background:var(--warn-bg)}
 .flow-box.damage {border-color:var(--danger); color:var(--dgr-lb);  background:var(--dgr-bg)}
 .flow-box.human  {border-color:var(--border); color:var(--muted);   background:var(--surface)}
-.flow-box.pattern{border-color:var(--cyan);   color:var(--cyan);    background:var(--surface)}
+.flow-box.pattern{border-color:var(--cyan);   border-width:2px; color:var(--cyan);    background:var(--surface)}
 .flow-box.predict{border-color:var(--cyan);   color:var(--cyan);    background:var(--surface)}
 .flow-box.prevent{border-color:var(--green);  color:var(--green);   background:var(--info-bg)}
 .flow-arrow{font-family:var(--font-code);font-size:14px;padding:0 4px;flex-shrink:0;color:var(--muted)}
-.flow-arrow.bad{color:var(--danger)}
+.flow-arrow.bad{color:var(--danger); font-weight:700}
 .flow-arrow.good{color:var(--green)}
 .flow-outcome{flex:1;text-align:right;font-family:var(--font-code);font-size:13px;font-weight:700;padding-left:13px;white-space:nowrap}
 .flow-outcome.bad{color:var(--danger)}
