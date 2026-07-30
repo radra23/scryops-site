@@ -135,7 +135,7 @@ html.calm {
   --green:#8FB386;
   --cyan:#D6B070;
   --link:#E0A24A;
-  --warn:#D6B070;
+  --warn:#D9944A;
   --danger:#E58A7A;
   --violet:#B49AD8;
 
@@ -149,7 +149,7 @@ html.calm {
   --node-fill:#221D14; --node-stroke:#7E6A3C; --edge:#D6B070; --nlab:#F2EAD8;
 
   --info-bg:rgba(143,179,134,.08); --info-bd:#8FB386; --info-lb:#9CC093;
-  --warn-bg:rgba(214,176,112,.10); --warn-bd:#D6B070; --warn-lb:#E0BE84;
+  --warn-bg:rgba(217,148,74,.10); --warn-bd:#D9944A; --warn-lb:#E2A35F;
   --dgr-bg:rgba(229,138,122,.10);  --dgr-bd:#E58A7A; --dgr-lb:#EC9C8D;
 
   --th:#1C180F; --tborder:#2A2418;
