@@ -789,6 +789,49 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 .scry-cucco__fgstat b{font-weight:600;color:var(--ac)}
 .scry-cucco__fgsep{opacity:.5;margin:0 7px}
 
+/* ── Accessible monochrome charting tokens, Phase 5 ───────────────────
+   Ported verbatim from the DS bundle (.claude/skills/scryops-design/
+   tokens/charts.css), itself ported from the "Accessible monochrome
+   chart templates" handoff. Hue is NEVER the sole carrier of meaning —
+   every category, rank and relationship is encoded through value
+   (lightness), texture, stroke treatment, shape or position too.
+   Light theme uses the handoff's values verbatim; dark/calm value-invert
+   the ramp (brightest = highest rank) so ordering survives on a dark
+   ground. */
+:root {
+  --mc-ink:var(--heading);
+  --mc-ink-secondary:var(--text);
+  --mc-ink-muted:var(--muted);
+  --mc-border:var(--border);
+
+  --mc-ramp-1:#ECE6D9;   /* highest */
+  --mc-ramp-2:#BDB3A0;
+  --mc-ramp-3:#8E8574;
+  --mc-ramp-4:#635C4F;
+  --mc-ramp-5:#413B32;   /* lowest */
+}
+
+html.light {
+  --mc-ink:#1F1E1B;
+  --mc-ink-secondary:#3C3A35;
+  --mc-ink-muted:#6E6A62;
+  --mc-border:#DBD7CD;
+
+  --mc-ramp-1:#1F1E1B;   /* highest */
+  --mc-ramp-2:#4F4C45;
+  --mc-ramp-3:#7C786F;
+  --mc-ramp-4:#ABA79D;
+  --mc-ramp-5:#D5D1C7;   /* lowest */
+}
+
+html.calm {
+  --mc-ramp-1:#F2EAD8;
+  --mc-ramp-2:#C9BC9E;
+  --mc-ramp-3:#9C8F74;
+  --mc-ramp-4:#6E6450;
+  --mc-ramp-5:#453E30;
+}
+
 /* ── Print: prepare for the worst — a copy that reads on paper, no power required ── */
 @media print {
   :root { color-scheme: light; }
