@@ -6,60 +6,60 @@
       <title id="tlc-title">A log line without and with trace context</title>
       <desc id="tlc-desc">Two-panel diagram. Left panel — WITHOUT TRACE ID — shows a log line with timestamp, level, message, and order ID, but the trace_id and span_id slots are absent (shown as dashed empty boxes). Bottom label: search all services by timestamp. Right panel — WITH TRACE ID — shows the same log line with trace_id and span_id fields present and highlighted in blue. Bottom label: click trace_id to open correlated spans.</desc>
 
-      <rect width="760" height="270" fill="#161616"/>
+      <rect width="760" height="270" fill="var(--fig-bg)"/>
 
       <!-- ── LEFT PANEL: without trace ID ─────────────────────────────── -->
-      <rect x="8" y="8" width="344" height="254" fill="#111111" rx="1"/>
-      <rect x="8" y="8" width="344" height="2" fill="#3A3A3A"/>
-      <text x="180" y="27" fill="#808080" font-size="9" text-anchor="middle"
+      <rect x="8" y="8" width="344" height="254" fill="var(--fig-bg)" rx="1"/>
+      <rect x="8" y="8" width="344" height="2" fill="var(--border)"/>
+      <text x="180" y="27" fill="var(--muted)" font-size="9" text-anchor="middle"
             font-family="'Press Start 2P',monospace" letter-spacing="0.06em">WITHOUT TRACE ID</text>
 
-      <rect x="24" y="38" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="36" y="56" fill="#A8A8A0" font-size="10">[02:14:33] ERROR payment.process</text>
+      <rect x="24" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="36" y="56" fill="var(--muted)" font-size="10">[02:14:33] ERROR payment.process</text>
 
-      <rect x="24" y="72" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="36" y="90" fill="#A8A8A0" font-size="10">msg="Payment failed: gateway timeout"</text>
+      <rect x="24" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="36" y="90" fill="var(--muted)" font-size="10">msg="Payment failed: gateway timeout"</text>
 
-      <rect x="24" y="106" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="36" y="124" fill="#A8A8A0" font-size="10">order_id=ord_9f3b2a4c</text>
+      <rect x="24" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="36" y="124" fill="var(--muted)" font-size="10">order_id=ord_9f3b2a4c</text>
 
       <!-- absent trace_id — dashed outline -->
-      <rect x="24" y="140" width="312" height="28" fill="#0D0D0D" stroke="#333333" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="158" fill="#3A3A3A" font-size="10" text-anchor="middle">trace_id — not present</text>
+      <rect x="24" y="140" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
+      <text x="180" y="158" fill="var(--border)" font-size="10" text-anchor="middle">trace_id — not present</text>
 
       <!-- absent span_id — dashed outline -->
-      <rect x="24" y="174" width="312" height="28" fill="#0D0D0D" stroke="#333333" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="192" fill="#3A3A3A" font-size="10" text-anchor="middle">span_id — not present</text>
+      <rect x="24" y="174" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
+      <text x="180" y="192" fill="var(--border)" font-size="10" text-anchor="middle">span_id — not present</text>
 
-      <text x="180" y="234" fill="#CC4444" font-size="10" text-anchor="middle">&#10007; search all services by timestamp</text>
+      <text x="180" y="234" fill="var(--danger)" font-size="10" text-anchor="middle">&#10007; search all services by timestamp</text>
 
       <!-- ── CENTER GAP ARROW ──────────────────────────────────────────── -->
-      <text x="380" y="141" fill="#F5A623" font-size="18" text-anchor="middle">&#8594;</text>
+      <text x="380" y="141" fill="var(--warn)" font-size="18" text-anchor="middle">&#8594;</text>
 
       <!-- ── RIGHT PANEL: with trace ID ───────────────────────────────── -->
-      <rect x="408" y="8" width="344" height="254" fill="#111111" rx="1"/>
-      <rect x="408" y="8" width="344" height="2" fill="#5B8DEF" opacity="0.8"/>
-      <text x="580" y="27" fill="#5B8DEF" font-size="9" text-anchor="middle"
+      <rect x="408" y="8" width="344" height="254" fill="var(--fig-bg)" rx="1"/>
+      <rect x="408" y="8" width="344" height="2" fill="var(--cyan)" opacity="0.8"/>
+      <text x="580" y="27" fill="var(--cyan)" font-size="9" text-anchor="middle"
             font-family="'Press Start 2P',monospace" letter-spacing="0.06em">WITH TRACE ID</text>
 
-      <rect x="424" y="38" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="436" y="56" fill="#D0CEC8" font-size="10">[02:14:33] ERROR payment.process</text>
+      <rect x="424" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="436" y="56" fill="var(--text)" font-size="10">[02:14:33] ERROR payment.process</text>
 
-      <rect x="424" y="72" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="436" y="90" fill="#D0CEC8" font-size="10">msg="Payment failed: gateway timeout"</text>
+      <rect x="424" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="436" y="90" fill="var(--text)" font-size="10">msg="Payment failed: gateway timeout"</text>
 
-      <rect x="424" y="106" width="312" height="28" fill="#0D0D0D" stroke="#2A2A2A" stroke-width="1"/>
-      <text x="436" y="124" fill="#D0CEC8" font-size="10">order_id=ord_9f3b2a4c</text>
+      <rect x="424" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="436" y="124" fill="var(--text)" font-size="10">order_id=ord_9f3b2a4c</text>
 
       <!-- trace_id — present, highlighted in blue -->
-      <rect x="424" y="140" width="312" height="28" fill="#0C1A2E" stroke="#3A6FAF" stroke-width="1.5"/>
-      <text x="436" y="158" fill="#5B8DEF" font-size="10">trace_id=4bf92f3577b34da6&#8230;</text>
+      <rect x="424" y="140" width="312" height="28" fill="var(--cyan)" fill-opacity="0.14" stroke="var(--cyan)" stroke-width="1.5"/>
+      <text x="436" y="158" fill="var(--cyan)" font-size="10">trace_id=4bf92f3577b34da6&#8230;</text>
 
       <!-- span_id — present -->
-      <rect x="424" y="174" width="312" height="28" fill="#0A1520" stroke="#2A4060" stroke-width="1"/>
-      <text x="436" y="192" fill="#4A7AB8" font-size="10">span_id=a2fb4a1d1a96d312</text>
+      <rect x="424" y="174" width="312" height="28" fill="var(--cyan)" fill-opacity="0.08" stroke="var(--cyan)" stroke-width="1"/>
+      <text x="436" y="192" fill="var(--cyan)" font-size="10">span_id=a2fb4a1d1a96d312</text>
 
-      <text x="580" y="234" fill="#28CA41" font-size="10" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
+      <text x="580" y="234" fill="var(--green)" font-size="10" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
 
     </svg>
   </div>
