@@ -5,6 +5,7 @@
      • legible : Atkinson Hyperlegible face   -> html.pref-legible
      • spacing : looser lines & tracking      -> html.pref-spacing
      • reduce  : no transitions/animations     -> html.pref-reduce
+     • mono    : collapse hue onto value ramp -> html.pref-mono
    Stored as JSON under 'scryops-prefs'. Re-themes Mermaid on change.
 
    Inline the FOUC guard (see README) in <head> BEFORE the stylesheet
@@ -13,7 +14,7 @@
 (function () {
   var KEY = 'scryops-prefs';
   var root = document.documentElement;
-  var DEFAULTS = { theme: 'dark', legible: false, spacing: false, reduce: false, lite: false };
+  var DEFAULTS = { theme: 'dark', legible: false, spacing: false, reduce: false, mono: false, lite: false };
 
   function load() {
     var stored = null, legacy = null;
@@ -37,6 +38,7 @@
     root.classList.toggle('pref-legible', !!prefs.legible);
     root.classList.toggle('pref-spacing', !!prefs.spacing);
     root.classList.toggle('pref-reduce', !!prefs.reduce);
+    root.classList.toggle('pref-mono', !!prefs.mono);
     root.classList.toggle('pref-lite', !!prefs.lite);
     syncUI();
   }
