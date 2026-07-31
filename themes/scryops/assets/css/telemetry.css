@@ -107,25 +107,32 @@ html.light {
   --text:#2C261E;
   --muted:#6F6556;
   --green:#157A45;
-  --cyan:#0E7E91;
-  --link:#0B6C7D;   /* AA: ~4.5:1 on --bg */
-  --warn:#8A6A14;
-  --danger:#C2382F;
-  --violet:#6B4FC4;
+  --cyan:#1E1811;           /* identifiers / links / hover — ink, not a hue */
+  --link:#1E1811;           /* darker than body text, plus the underline */
+  --warn:#7A6220;
+  --danger:#A8483C;
+  --violet:#5E5648;
 
-  --ic-bg:#EDE7DB; --ic-text:#0E7E91; --ic-bd:#DED6C7;
+  --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:#DED6C7;
 
   /* code well intentionally NOT overridden — stays dark */
+
+  /* Callout LABELS are nudged toward the heading ink here (rails are left
+     on the pure accent). On cream, the accents land at 4.39–4.60:1 against
+     the tinted well — under or barely at the 4.5:1 text threshold, since an
+     11px/600 label is normal-size text, not large. The rail is a non-text
+     UI component (3:1) and already clears ~4.9–5.3:1, so only the text
+     moves and the severity hues stay intact. */
+  --info-lb:color-mix(in srgb,var(--green) 80%,var(--heading));
+  --warn-lb:color-mix(in srgb,var(--warn) 88%,var(--heading));
+  --dgr-lb:color-mix(in srgb,var(--danger) 80%,var(--heading));
 
   --fig-bg:#FFFDF7;
   --fig-grid:linear-gradient(#EDE7DB 1px,transparent 1px),
              linear-gradient(90deg,#EDE7DB 1px,transparent 1px);
   --fig-bd:#E6DFD2;
-  --node-fill:#F0EBE0; --node-stroke:#1E8F52; --edge:#0E7E91; --nlab:#2C261E;
-
-  --info-bg:#E9F0E4; --info-bd:#157A45; --info-lb:#157A45;
-  --warn-bg:#FBF1DA; --warn-bd:#B08A1E; --warn-lb:#8A6A14;
-  --dgr-bg:#F8E9E4; --dgr-bd:#C2382F; --dgr-lb:#A8281F;
+  --node-fill:#F0EBE0;
+  /* node-stroke / edge / nlab and all callout -bg/-bd tokens are derived in :root */
 
   --th:#EFEAE0; --tborder:#E6DFD2;
 }
