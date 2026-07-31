@@ -171,6 +171,90 @@ html.pref-spacing .article > * + *{ margin-top:26px; }
 html.pref-reduce *,html.pref-reduce *::before,html.pref-reduce *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
+/* ------------------------------------------------------------
+   MONOCHROME — the charting system's core law, applied whole-system.
+   Every semantic hue collapses onto the neutral value ramp, so meaning
+   must survive on the redundant channels the components already carry:
+   labels (INFO / WARN / ERROR), icon silhouettes, dashes, stroke weight,
+   texture, position, and printed values.
+
+   Serves colour-vision deficiency, greyscale print, OS colour filters,
+   and readers who want the lowest-stimulation surface available. It is
+   also the system's own honesty test: if a component becomes ambiguous
+   here, it was leaning on hue and needs another channel.
+
+   Written against --mc-ramp-*, which is already theme-scoped, so this one
+   block resolves correctly in dark, light and calm. Also exposed as a
+   bare `.pref-mono` class so a single subtree can be shown monochrome
+   (used by the redundant-encoding specimen).
+   ------------------------------------------------------------ */
+html.pref-mono, .pref-mono {
+  /* brightest step = the channels that must read first */
+  --cyan:var(--mc-ramp-1);
+  --link:var(--mc-ramp-1);
+  --danger:var(--mc-ramp-1);
+  /* second step = brand, values, warnings */
+  --green:var(--mc-ramp-2);
+  --warn:var(--mc-ramp-2);
+  --eco:var(--mc-ramp-2);
+  --eco-bright:var(--mc-ramp-1);
+  /* third step = topical accents */
+  --violet:var(--mc-ramp-3);
+
+  /* the code well stays dark in every theme, so it takes fixed neutrals */
+  --code-green:#B9B2A4;
+  --code-cyan:#E4DED0;
+  --code-warn:#B9B2A4;
+  --code-danger:#E4DED0;
+  --code-violet:#9C9587;
+  --code-eco:#B9B2A4;
+  --ic-text:#D8D2C4;
+
+  /* Derived tokens compute in the scope that DECLARES them, so they don't
+     re-derive from the overrides above in a subtree. Restate them here — this
+     is a no-op for html.pref-mono and required for a .pref-mono subtree.
+     Value is monotonic with severity (ERROR brightest → INFO calmest), so
+     brightness itself becomes a working redundant channel.
+
+     RAIL vs LABEL are decoupled on purpose: the rail is a non-text UI
+     component (WCAG 1.4.11, needs 3:1) so it stays exactly on the ramp step
+     that encodes severity; the label is TEXT (1.4.3, needs 4.5:1 — 11px/600
+     is normal-size, not large). INFO sits on the faintest of the three
+     steps, so its LABEL alone is nudged toward the theme's strongest ink
+     until it clears 4.5:1, without moving the rail off the ramp or
+     colliding with WARN's value. Mixing against --mc-ink keeps this correct
+     in every theme: --mc-ink is bright in dark/calm and near-black in
+     light, so the nudge always increases contrast. */
+  --info-bg:color-mix(in srgb,var(--mc-ramp-3) 12%,transparent);
+  --info-bd:var(--mc-ramp-3);
+  --info-lb:color-mix(in srgb,var(--mc-ramp-3) 72%,var(--mc-ink));
+  --warn-bg:color-mix(in srgb,var(--mc-ramp-2) 10%,transparent);
+  --warn-bd:var(--mc-ramp-2); --warn-lb:var(--mc-ramp-2);
+  --dgr-bg:color-mix(in srgb,var(--mc-ramp-1) 10%,transparent);
+  --dgr-bd:var(--mc-ramp-1); --dgr-lb:var(--mc-ramp-1);
+  --node-stroke:var(--mc-ramp-2); --edge:var(--mc-ramp-1);
+}
+
+/* Pixel art is full-colour SVG; desaturate rather than hide it. */
+html.pref-mono .scry-cucco__sprite img, html.pref-mono .scry-cucco__sprite svg,
+html.pref-mono .scry-cucco__medallion img, html.pref-mono .scry-cucco__medallion svg,
+html.pref-mono .scry-cucco__fgframe img, html.pref-mono .scry-cucco__fgframe svg,
+html.pref-mono .scry-cucco__solo img, html.pref-mono .scry-cucco__solo svg,
+.pref-mono .scry-cucco__sprite img, .pref-mono .scry-cucco__fgframe img {
+  filter:grayscale(1);
+}
+
+/* Mascot class accents are inline (set per class in JS), so they need an
+   explicit override here — the party reads by name + role + stats instead. */
+html.pref-mono .scry-cucco__wrap, html.pref-mono .scry-cucco__fg { border-top-color:var(--muted) !important; }
+html.pref-mono .scry-cucco__name, html.pref-mono .scry-cucco__plate,
+html.pref-mono .scry-cucco__fgnm { color:var(--heading) !important; }
+html.pref-mono .scry-cucco__lvl { color:var(--heading) !important; border-color:var(--border) !important; }
+html.pref-mono .scry-cucco__fgdot { background:var(--muted) !important; }
+html.pref-mono .scry-cucco__fgstat b { color:var(--heading) !important; }
+html.pref-mono .scry-cucco__xp > span { background:var(--muted) !important; }
+html.pref-mono .scry-cucco__hp > span { color:var(--muted) !important; }
+
 /* Lite mode (permacomputing Phase 3): drop to system fonts (zero web-font
    bytes) and let the Mermaid runtime be skipped. Auto-applies when the
    browser signals reduced-data. Fonts are the shared block below. */
