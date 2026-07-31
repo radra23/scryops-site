@@ -145,24 +145,21 @@ html.calm {
   --text:#E6DECE;
   --muted:#AA9D84;
   --green:#8FB386;
-  --cyan:#D6B070;
-  --link:#E0A24A;
-  --warn:#D9944A;
-  --danger:#E58A7A;
-  --violet:#B49AD8;
+  --cyan:#EFE7D6;           /* identifiers / links / hover — bright warm ink */
+  --link:#EFE7D6;
+  --warn:#C9AE7B;
+  --danger:#DE9384;
+  --violet:#B0A48C;
 
-  --ic-bg:#241F15; --ic-text:#D6B070; --ic-bd:#3A3324;
+  --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:#3A3324;
 
   /* code well still dark — keep syntax constant */
 
   --fig-bg:#1A160F;
   --fig-grid:none;            /* no background pattern — less distraction */
   --fig-bd:#332C20;
-  --node-fill:#221D14; --node-stroke:#7E6A3C; --edge:#D6B070; --nlab:#F2EAD8;
-
-  --info-bg:rgba(143,179,134,.08); --info-bd:#8FB386; --info-lb:#9CC093;
-  --warn-bg:rgba(217,148,74,.10); --warn-bd:#D9944A; --warn-lb:#E2A35F;
-  --dgr-bg:rgba(229,138,122,.10);  --dgr-bd:#E58A7A; --dgr-lb:#EC9C8D;
+  --node-fill:#221D14;
+  /* node-stroke / edge / nlab and all callout tokens are derived in :root */
 
   --th:#1C180F; --tborder:#2A2418;
 }
