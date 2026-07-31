@@ -15,34 +15,39 @@
   --text:#D7D0C4;
   --muted:#9B9382;
   --green:#66C892;          /* healthy / values / INFO / brand / CTA (de-neoned) */
-  --cyan:#6FC6D1;           /* identifiers / links / edges (softened) */
-  --link:#6FC6D1;
-  --warn:#DCC061;
-  --danger:#F0857A;         /* softer coral — reads as error, not alarm */
-  --violet:#A78FE0;         /* OpenTelemetry topic accent */
+  --cyan:#E4DDCE;           /* identifiers / links / edges — warm ink, not a hue */
+  --link:#E4DDCE;
+  --warn:#C9AE6B;
+  --danger:#D98E80;         /* muted terracotta — reads as error, not alarm */
+  --violet:#A79E8C;         /* OpenTelemetry topic accent — warm mid ink */
 
   /* inline code chip */
-  --ic-bg:#1E1A14; --ic-text:#6FC6D1; --ic-bd:#241F18;
+  --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:#241F18;
 
   /* code well — STAYS DARK in all three themes */
   --code-bg:#100E0B; --code-text:#CEC8BC; --code-bd:#201C16;
   /* readout constants — used ON the always-dark code/terminal wells,
-     so they must NOT flip with theme (light/calm leave these alone). */
-  --code-hi:#ECE6D9; --code-muted:#8E877A; --code-green:#66C892; --code-cyan:#6FC6D1;
-  /* permacomputing — living-green resource-awareness accent (well only) */
-  --eco:#7FB069; --eco-bright:#A8D88A;
+     so they must NOT flip with theme (light/calm leave these alone). Anything
+     drawn on the well must use these, never --green/--cyan/--warn/--danger:
+     those invert with the theme and vanish against the dark surface. */
+  --code-hi:#ECE6D9; --code-muted:#8E877A; --code-green:#66C892; --code-cyan:#E4DDCE;
+  --code-warn:#C9AE6B; --code-danger:#D98E80; --code-violet:#A79E8C; --code-eco:#8AA97C;
+  /* permacomputing — resource-awareness accent (page level; the well uses --code-eco) */
+  --eco:#8AA97C; --eco-bright:#A9C79B;
 
   /* figures */
   --fig-bg:#17130E;
   --fig-grid:linear-gradient(rgba(155,147,130,.06) 1px,transparent 1px),
              linear-gradient(90deg,rgba(155,147,130,.06) 1px,transparent 1px);
   --fig-bd:#2B2620;
-  --node-fill:#16120C; --node-stroke:#4FA77C; --edge:#6FC6D1; --nlab:#ECE6D9;
+  --node-fill:#16120C; --node-stroke:var(--muted); --edge:var(--cyan); --nlab:var(--heading);
 
-  /* callouts */
-  --info-bg:rgba(102,200,146,.07); --info-bd:#66C892; --info-lb:#8AD4A8;
-  --warn-bg:rgba(220,192,97,.09); --warn-bd:#DCC061; --warn-lb:#E6CE7A;
-  --dgr-bg:rgba(240,133,122,.09); --dgr-bd:#F0857A; --dgr-lb:#F5A096;
+  /* callouts — mapped to log levels INFO / WARN / ERROR.
+     DERIVED from the semantic accents (not hard-coded), so they follow every
+     theme and the monochrome mode automatically. One source of truth. */
+  --info-bg:color-mix(in srgb,var(--green) 8%,transparent); --info-bd:var(--green); --info-lb:var(--green);
+  --warn-bg:color-mix(in srgb,var(--warn) 10%,transparent); --warn-bd:var(--warn); --warn-lb:var(--warn);
+  --dgr-bg:color-mix(in srgb,var(--danger) 10%,transparent); --dgr-bd:var(--danger); --dgr-lb:var(--danger);
 
   /* tables */
   --th:#211D17; --tborder:#221E18;
