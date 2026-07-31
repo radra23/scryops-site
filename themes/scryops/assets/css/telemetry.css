@@ -236,7 +236,7 @@ h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);co
 p{margin:0;color:var(--text)}
 .lede{font-size:var(--fs-lede);line-height:var(--lh-lede);color:var(--text)}
 
-a{color:var(--link);text-decoration:none;border-bottom:1px solid var(--border)}
+a{color:var(--link);text-decoration:none;border-bottom:1px solid color-mix(in srgb,currentColor 72%,transparent)}
 a:hover{border-bottom-color:var(--link)}
 a:visited{color:var(--link)}
 
