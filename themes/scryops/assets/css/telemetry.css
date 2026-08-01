@@ -74,7 +74,7 @@
   --sp-1:4px; --sp-2:8px; --sp-3:14px; --sp-4:22px; --sp-5:32px; --sp-6:52px;
 
   /* ---- form ---- */
-  --radius:10px; --radius-sm:6px; --radius-retro:3px; --radius-pill:999px; --space:8px; --hair:1px;
+  --radius:6px; --radius-sm:4px; --radius-retro:3px; --radius-pill:999px; --space:8px; --hair:1px;
 
   /* ---- bridge: repo's evolved (warm-paper) token names → Telemetry ----
      The repo's components were authored against an earlier vocabulary.
@@ -322,10 +322,6 @@ body{
    siblings; .article's own > * + * above only spans its few structural
    children (single-header / prose / article-end). */
 .prose > * + *{margin-top:var(--sp-4)}
-.article figure,
-.article .obs-fig,
-.article pre,
-.article .mermaid{max-width:none}     /* code + diagrams break wider than prose */
 
 /* ============================================================
    headings — Space Mono, lowercase
@@ -478,18 +474,17 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .layout.has-toc{max-width:1080px;grid-template-columns:200px minmax(0,1fr)}
 .layout.has-toc > .toc{grid-column:1;grid-row:1}
 .layout.has-toc > .article{grid-column:2;grid-row:1;min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page */
-/* Reading column: prose holds the ~680px measure (centered); code, figures,
-   and tables break wider for room (GUIDELINES #2 — "evidence gets room,
-   prose stays narrow"). */
+/* Reading column: prose holds the ~680px measure (centered). Evidence
+   (code, figures, tables) shares that same measure and aligns flush with
+   the prose left/right edges, rather than breaking out wider (GUIDELINES
+   #2 — "one measure for prose and evidence alike"). Anything still too
+   wide for 680px (a dense comparison table, a wide diagram) scrolls
+   inside its own overflow-x:auto container instead of forcing the column
+   wider. */
 .layout .article{margin:0;padding:0;max-width:none}
 .layout .article > .single-header,
 .layout .article > .article-end,
 .layout .prose > *{max-width:680px;margin-inline:auto}
-.layout .prose > .highlight,
-.layout .prose > figure,
-.layout .prose > .obs-fig,
-.layout .prose > table,
-.layout .prose > .table-wrap{max-width:none}
 .site-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--bg);border-bottom:1px solid var(--border)}
 .site-top .spacer{flex:1}
 .site-meta{font-family:var(--font-code);font-size:11px;letter-spacing:.14em;color:var(--muted)}
@@ -516,7 +511,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 figure.diagram,figure.knt-fig,.obs-fig{margin:34px 0}
 figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:10px;padding-left:2px}
 .diag-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
-.diag-card > svg{min-width:640px}
+.diag-card > svg{min-width:636px}
 
 /* flow rows (reactive loop, before/after chains) */
 .flow-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:6px}
