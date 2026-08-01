@@ -255,6 +255,12 @@ html.pref-mono .scry-cucco__fgstat b { color:var(--heading) !important; }
 html.pref-mono .scry-cucco__xp > span { background:var(--muted) !important; }
 html.pref-mono .scry-cucco__hp > span { color:var(--muted) !important; }
 
+/* party-gallery.html (.party-card) uses the same --ac fixed-identity-accent
+   pattern the mascot comment above references — needs the same override. */
+html.pref-mono .party-card { border-top-color:var(--muted) !important; }
+html.pref-mono .party-name { color:var(--heading) !important; }
+html.pref-mono .party-ph-cls { color:var(--muted) !important; }
+
 /* Lite mode (permacomputing Phase 3): drop to system fonts (zero web-font
    bytes) and let the Mermaid runtime be skipped. Auto-applies when the
    browser signals reduced-data. Fonts are the shared block below. */
