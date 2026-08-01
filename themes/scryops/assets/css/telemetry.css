@@ -167,7 +167,8 @@ html.calm {
 /* Reading prefs — independent, stackable token overrides. */
 html.pref-legible{ --fs-body:18px; --fs-lede:19px; --lh-body:1.72; }  /* Atkinson is the default reading face now; this option enlarges it for low-vision & dyslexia */
 html.pref-spacing{ --lh-body:2.0; --lh-lede:1.85; --read-track:.03em; }
-html.pref-spacing .article > * + *{ margin-top:26px; }
+html.pref-spacing .article > * + *,
+html.pref-spacing .prose > * + *{ margin-top:calc(var(--sp-4) + 4px); }
 html.pref-reduce *,html.pref-reduce *::before,html.pref-reduce *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
 
@@ -315,7 +316,12 @@ body{
    article shell + measure
    ============================================================ */
 .article{max-width:var(--measure);margin:0 auto;padding:0 24px}
-.article > * + *{margin-top:20px}
+.article > * + *{margin-top:var(--sp-4)}
+/* Paragraph rhythm for the actual content — .Content renders directly into
+   .prose (see single.html), so this is the selector that spaces prose
+   siblings; .article's own > * + * above only spans its few structural
+   children (single-header / prose / article-end). */
+.prose > * + *{margin-top:var(--sp-4)}
 .article figure,
 .article .obs-fig,
 .article pre,
@@ -358,6 +364,11 @@ pre,.highlight pre,.chroma{
   overflow-x:auto;
 }
 pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
+/* Evidence gets more vertical air than the paragraph rhythm (34px vs
+   --sp-4's 22px — deliberately off the 4px scale, per the DS readme) —
+   scoped to a direct child of .prose, which is where .Content actually
+   renders, so a code block inside a card isn't double-margined. */
+.prose > .highlight{margin:34px 0}
 
 /* ============================================================
    callouts  —  {{< callout info >}} … {{< /callout >}}
@@ -396,6 +407,14 @@ figcaption,.obs-cap{font-family:var(--font-code);font-size:12px;line-height:1.45
    tables
    ============================================================ */
 table{width:100%;border-collapse:collapse;font-size:14px}
+/* Evidence (code, figures, tables) gets more vertical air than the paragraph
+   rhythm (34px vs --sp-4's 22px — deliberately off the 4px scale, per the
+   DS readme) — a table header band or code well's own fill reads as flush
+   against the line above it at plain paragraph spacing. Scoped to direct
+   children of .prose (where .Content actually renders) so a table already
+   nested inside a figure card (e.g. obs-comparison-table.html's
+   .scry-table) isn't double-margined. */
+.prose > table{margin:34px 0}
 thead th{text-align:left;font-family:var(--font-code);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:9px 13px;background:var(--th);border-bottom:1px solid var(--tborder)}
 tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tborder);line-height:1.5;vertical-align:top}
 
@@ -494,7 +513,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    ============================================================ */
 
 /* shared figure wrapper + flat diagram card (green top accent) */
-figure.diagram,figure.knt-fig{margin:38px 0 30px}
+figure.diagram,figure.knt-fig,.obs-fig{margin:34px 0}
 figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:10px;padding-left:2px}
 .diag-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
 .diag-card > svg{min-width:640px}
