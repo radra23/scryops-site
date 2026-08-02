@@ -327,8 +327,19 @@ body{
    headings — Space Mono, lowercase
    ============================================================ */
 h1,.h1{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h1);line-height:1.25;letter-spacing:-.01em;color:var(--heading);text-transform:lowercase;margin:0}
-h2,.h2{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h2);line-height:1.3;color:var(--heading);text-transform:lowercase;margin:46px 0 0}
-h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);color:var(--heading);text-transform:lowercase;margin:34px 0 0}
+h2,.h2{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h2);line-height:1.3;color:var(--heading);text-transform:lowercase;margin:var(--sp-6) 0 0}
+h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);color:var(--heading);text-transform:lowercase;margin:38px 0 0}
+/* A plain element right after a heading gets a tighter step than the general
+   34px evidence / 22px paragraph rhythm (--sp-4) — 30px, deliberately off the
+   4px scale, per the DS reading-page template. The :not() guards are
+   intentional, not decorative: .prose > table / .prose > .highlight (both
+   higher- or equal-specificity than this rule) are meant to keep their full
+   evidence spacing even directly after a heading, and relying on specificity
+   alone for that is fragile (a plain .prose > table tie with this rule,
+   broken only by file order) — the explicit exclusion is what actually
+   guarantees the correct outcome regardless of future edits to this file. */
+.prose > h2 + *:not(table):not(.highlight):not(figure),
+.prose > h3 + *:not(table):not(.highlight):not(figure){margin-top:30px}
 .title{font-family:var(--font-display);font-weight:400;font-size:var(--fs-display);line-height:1.18;letter-spacing:-.01em;color:var(--heading);text-transform:lowercase;margin:0}
 
 /* ============================================================
@@ -365,6 +376,28 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
    scoped to a direct child of .prose, which is where .Content actually
    renders, so a code block inside a card isn't double-margined. */
 .prose > .highlight{margin:34px 0}
+/* Plain (non-langswitch) code blocks: strip the block's own left/right
+   border and horizontal padding, keep the top/bottom border, and move
+   padding + horizontal scrolling onto the inner <code> element instead —
+   so code text sits flush with the 680px prose measure's edges rather
+   than inset, per the DS reading-page template. Scoped through a direct
+   .prose child on purpose: langswitch's Chroma output lives several DOM
+   levels inside .langswitch .ls-panels, never as a direct .prose child,
+   so these selectors cannot reach it — no langswitch-specific override
+   needed. Two selector forms cover both cases Hugo actually renders: a
+   Chroma-highlighted fence is .prose > .highlight > pre.chroma > code
+   (the border/padding being overridden here lives on that inner pre, not
+   on .highlight itself — .highlight carries no box-model styling of its
+   own); a bare fence with no language tag (e.g.
+   content/guides/building-observability-standards.md) has no .highlight
+   wrapper or Chroma classes at all and renders as .prose > pre > code
+   directly. */
+.prose > .highlight pre,.prose > pre{
+  border-left:none;border-right:none;padding:0;overflow:hidden;
+}
+.prose > .highlight pre > code,.prose > pre > code{
+  display:block;padding:16px 0;overflow-x:auto;
+}
 
 /* ============================================================
    callouts  —  {{< callout info >}} … {{< /callout >}}
