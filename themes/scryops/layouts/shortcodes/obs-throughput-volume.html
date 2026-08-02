@@ -41,10 +41,11 @@
       <!-- High-traffic -->
       <rect x="460" y="158" width="70" height="142" fill="var(--mc-ramp-2)" stroke="var(--mc-ink)" stroke-width="1"/>
       <text x="495" y="152" fill="var(--heading)" font-size="11" text-anchor="middle">1 TB</text>
-      <!-- Internet scale (the ceiling) -->
-      <rect x="625" y="108" width="70" height="192" fill="var(--mc-ramp-1)" stroke="var(--mc-ink)" stroke-width="1"/>
-      <rect x="625" y="108" width="70" height="192" fill="none" stroke="var(--danger)" stroke-width="1.5"/>
-      <text x="660" y="101" fill="var(--danger)" font-size="12" text-anchor="middle" font-weight="700">13 TB/day</text>
+      <!-- Internet scale (the ceiling) — emphasis via a heavier ink outline + bold, larger
+           label, not colour, matching the monochrome value-ramp system's other charts
+           (e.g. the emphasized span in obs-trace-waterfall.html uses the same pattern). -->
+      <rect x="625" y="108" width="70" height="192" fill="var(--mc-ramp-1)" stroke="var(--mc-ink)" stroke-width="2"/>
+      <text x="660" y="101" fill="var(--mc-ink)" font-size="12" text-anchor="middle" font-weight="700">13 TB/day</text>
 
       <g font-family="'Press Start 2P',monospace" font-size="9" fill="var(--muted)" text-anchor="middle" letter-spacing="0.02em">
         <text x="165" y="318">SMALL</text>
