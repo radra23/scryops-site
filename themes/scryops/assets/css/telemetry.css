@@ -332,11 +332,13 @@ h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);co
 /* A plain element right after a heading gets a tighter step than the general
    34px evidence / 22px paragraph rhythm (--sp-4) — 30px, deliberately off the
    4px scale, per the DS reading-page template. The :not() guards are
-   intentional, not decorative: without them, .prose > table / .prose > .highlight
-   would tie this rule at equal specificity, with the winner decided fragilely
-   by file order — the explicit exclusion means those elements structurally
-   cannot match this rule at all, so they keep their full evidence spacing
-   after a heading regardless of future edits to this file. */
+   intentional, not decorative: without them, .prose > table (1 class + 1
+   type, same as this rule's own 1 class + 1 type) would *tie* it, with the
+   winner decided fragilely by file order; .prose > .highlight (2 classes)
+   already *outranks* it (1 class + 1 type) regardless of order. The explicit
+   :not() exclusion makes both structurally unmatchable here either way, so
+   evidence keeps full spacing after a heading regardless of future edits to
+   this file. */
 .prose > h2 + *:not(table):not(.highlight):not(figure),
 .prose > h3 + *:not(table):not(.highlight):not(figure){margin-top:30px}
 /* .prose > * + * (line 324) has higher specificity (one class) than the bare
