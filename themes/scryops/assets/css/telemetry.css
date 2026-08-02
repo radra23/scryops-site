@@ -332,14 +332,22 @@ h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);co
 /* A plain element right after a heading gets a tighter step than the general
    34px evidence / 22px paragraph rhythm (--sp-4) — 30px, deliberately off the
    4px scale, per the DS reading-page template. The :not() guards are
-   intentional, not decorative: .prose > table / .prose > .highlight (both
-   higher- or equal-specificity than this rule) are meant to keep their full
-   evidence spacing even directly after a heading, and relying on specificity
-   alone for that is fragile (a plain .prose > table tie with this rule,
-   broken only by file order) — the explicit exclusion is what actually
-   guarantees the correct outcome regardless of future edits to this file. */
+   intentional, not decorative: without them, .prose > table / .prose > .highlight
+   would tie this rule at equal specificity, with the winner decided fragilely
+   by file order — the explicit exclusion means those elements structurally
+   cannot match this rule at all, so they keep their full evidence spacing
+   after a heading regardless of future edits to this file. */
 .prose > h2 + *:not(table):not(.highlight):not(figure),
 .prose > h3 + *:not(table):not(.highlight):not(figure){margin-top:30px}
+/* .prose > * + * (line 324) has higher specificity (one class) than the bare
+   h2,.h2 / h3,.h3 selectors above (one type selector for a plain <h2>/<h3>),
+   so it silently wins margin-top for any heading that isn't .prose's first
+   child — i.e. essentially every real heading. These two rules restore the
+   intended heading rhythm specifically inside prose content, without
+   touching the base h2,.h2/h3,.h3 rule that other, non-.prose headings
+   (e.g. card titles) still rely on. */
+.prose > h2{margin-top:var(--sp-6)}
+.prose > h3{margin-top:38px}
 .title{font-family:var(--font-display);font-weight:400;font-size:var(--fs-display);line-height:1.18;letter-spacing:-.01em;color:var(--heading);text-transform:lowercase;margin:0}
 
 /* ============================================================
