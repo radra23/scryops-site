@@ -4,6 +4,7 @@
 .obs-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.6rem;}
 @media(max-width:640px){.obs-stat-grid{grid-template-columns:repeat(2,1fr);}}
 .obs-stat-card{background:var(--bg);border:1px solid var(--border);border-top:3px solid;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.3rem;padding:1rem .8rem .8rem;}
+.obs-stat-card svg.obs-stat-glyph{width:13px;height:13px;display:block;}
 .obs-stat-num{font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:-.02em;}
 .obs-stat-desc{font-size:.78rem;color:var(--muted);line-height:1.5;flex:1;}
 .obs-stat-src{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.04em;margin-top:.4rem;}
@@ -12,7 +13,7 @@
 .obs-mttd-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:.8rem;margin-bottom:.7rem;}
 @media(max-width:640px){.obs-mttd-row{grid-template-columns:90px 1fr auto;}}
 .obs-mttd-lbl{font-size:.8rem;color:var(--muted);text-align:right;word-break:break-word;line-height:1.4;}
-@media(max-width:640px){.obs-mttd-lbl{font-size:.68rem;}}
+@media(max-width:640px){.obs-mttd-lbl{font-size:.7rem;}}
 .obs-mttd-track{background:var(--bg);border:1px solid var(--border);height:28px;position:relative;overflow:hidden;}
 .obs-mttd-bar{height:100%;width:0;transition:width .9s cubic-bezier(.25,.46,.45,.94);position:relative;display:flex;align-items:center;}
 /* Respect reduced motion preference */
@@ -21,16 +22,17 @@
 .obs-mttd-bar-border{position:absolute;inset:0;border:1.5px solid;}
 .obs-mttd-val{font-size:.8rem;font-weight:700;white-space:nowrap;padding-left:.4rem;}
 .obs-mttd-badge{font-size:.8rem;font-weight:700;white-space:nowrap;text-align:right;min-width:80px;}
-.obs-mttd-badge small{display:block;font-size:.65rem;font-weight:400;color:var(--muted);}
+.obs-mttd-badge small{display:block;font-size:.7rem;font-weight:400;color:var(--muted);}
+.obs-mttd-lbl svg.obs-mttd-glyph{width:11px;height:11px;flex:none;display:inline-block;vertical-align:-1.5px;margin-right:.4rem;}
 .obs-mttd-axis{display:flex;justify-content:space-between;padding:.3rem 0 0;margin-left:calc(160px + .8rem);font-size:.75rem;color:var(--muted);}
-@media(max-width:640px){.obs-mttd-axis{margin-left:calc(90px + .8rem);font-size:.65rem;}}
+@media(max-width:640px){.obs-mttd-axis{margin-left:calc(90px + .8rem);font-size:.7rem;}}
 .obs-src{margin-top:1.2rem;font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.04em;}
 figure.obs-fig{margin:2.5rem 0 2rem;}
 figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
 </style>
 
 <figure class="obs-fig"
-  aria-label="Industry observability statistics 2023–2024. Four key metrics: 58% of incidents are reported by customers before internal teams know, 74% of alerts are noise or false positives, 37% of engineering capacity is lost to unplanned reactive work, and only 26% of teams can detect issues before users do. Mean time to detect: 45 minutes with threshold-only alerting versus 8 minutes with ML-assisted detection — a 5.6× improvement.">
+  aria-label="Industry observability statistics 2023–2024, each figure marked with a distinct shape rather than a colour. Four key metrics: 58%, marked with a square, of incidents are reported by customers before internal teams know. 74%, marked with a triangle, of alerts are noise or false positives. 37%, marked with a diamond, of engineering capacity is lost to unplanned reactive work. Only 26%, marked with a circle, of teams can detect issues before users do. Mean time to detect, marked with the same square-versus-circle pairing: 45 minutes with threshold-only alerting versus 8 minutes with ML-assisted detection — a 5.6× improvement.">
   <div class="obs-chart-wrap">
     <div class="obs-chart-hdr">INDUSTRY DATA &nbsp;·&nbsp; 2023–2024</div>
     <div class="obs-stat-grid" id="obs-stat-cards"></div>
@@ -47,17 +49,33 @@ figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;m
   <figcaption>Fig. 5 — Most teams are flying blind. Only 26% detect issues before customers do — and when they do react, it takes 45 minutes. ML-assisted systems close that gap to 8.</figcaption>
 </figure>
 
+{{- /* Four stat cards and two MTTD bars, each with its own glyph +
+     --mc-ramp value referenced directly. Previously the cards used
+     --danger/--warn/--warn/--green and the bars used --danger/--green;
+     under html.pref-mono --danger resolves to --mc-ramp-1 and both
+     --warn and --green resolve to --mc-ramp-2, so three of the four
+     cards (74%, 37%, 26%) rendered in the same tone. */ -}}
 <script>
 (function () {
+  var GLYPH = {
+    square:   '<svg class="obs-stat-glyph" viewBox="0 0 13 13" aria-hidden="true"><rect x="1" y="1" width="11" height="11" fill="currentColor"/></svg>',
+    triangle: '<svg class="obs-stat-glyph" viewBox="0 0 13 13" aria-hidden="true"><polygon points="6.5,0.8 12.2,12.2 0.8,12.2" fill="currentColor"/></svg>',
+    diamond:  '<svg class="obs-stat-glyph" viewBox="0 0 13 13" aria-hidden="true"><polygon points="6.5,0.5 12.5,6.5 6.5,12.5 0.5,6.5" fill="currentColor"/></svg>',
+    disc:     '<svg class="obs-stat-glyph" viewBox="0 0 13 13" aria-hidden="true"><circle cx="6.5" cy="6.5" r="5.5" fill="currentColor"/></svg>'
+  };
+  var MTTD_GLYPH = {
+    square: '<svg class="obs-mttd-glyph" viewBox="0 0 11 11" aria-hidden="true"><rect x="0.5" y="0.5" width="10" height="10" fill="currentColor"/></svg>',
+    disc:   '<svg class="obs-mttd-glyph" viewBox="0 0 11 11" aria-hidden="true"><circle cx="5.5" cy="5.5" r="4.7" fill="currentColor"/></svg>'
+  };
   var STATS = [
-    { pct: 58, lines: ['of incidents reported', 'by customers first'],  color: 'var(--danger)', source: 'xMatters 2024'   },
-    { pct: 74, lines: ['of alerts are noise',   'or false positives'],   color: 'var(--warn)', source: 'PagerDuty 2023' },
-    { pct: 37, lines: ['of eng capacity',       'lost to firefighting'], color: 'var(--warn)', source: 'DORA 2023'      },
-    { pct: 26, lines: ['of teams detect',       'before users do'],      color: 'var(--green)', source: 'Dynatrace 2024' },
+    { pct: 58, lines: ['of incidents reported', 'by customers first'],  color: 'var(--mc-ramp-1)', glyph: 'square',   source: 'xMatters 2024'   },
+    { pct: 74, lines: ['of alerts are noise',   'or false positives'],   color: 'var(--mc-ramp-2)', glyph: 'triangle', source: 'PagerDuty 2023' },
+    { pct: 37, lines: ['of eng capacity',       'lost to firefighting'], color: 'var(--mc-ramp-3)', glyph: 'diamond',  source: 'DORA 2023'      },
+    { pct: 26, lines: ['of teams detect',       'before users do'],      color: 'var(--mc-ramp-4)', glyph: 'disc',     source: 'Dynatrace 2024' },
   ];
   var MTTD = [
-    { label: 'threshold-only alerting', min: 45, color: 'var(--danger)' },
-    { label: 'ML-assisted detection',   min:  8, color: 'var(--green)' },
+    { label: 'threshold-only alerting', min: 45, color: 'var(--mc-ramp-1)', glyph: 'square' },
+    { label: 'ML-assisted detection',   min:  8, color: 'var(--mc-ramp-3)', glyph: 'disc' },
   ];
   var MAX_MIN = 45, STEP = 5;
   var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -69,6 +87,7 @@ figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;m
     card.className = 'obs-stat-card';
     card.style.borderTopColor = s.color;
     card.innerHTML =
+      '<div style="color:' + s.color + '">' + GLYPH[s.glyph] + '</div>' +
       '<div class="obs-stat-num" style="color:' + s.color + '">' + s.pct + '%</div>' +
       '<div class="obs-stat-desc">' + s.lines.join('<br>') + '</div>' +
       '<div class="obs-stat-src">'  + s.source + '</div>';
@@ -81,12 +100,12 @@ figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;m
   MTTD.forEach(function(d, i) {
     var pct = (d.min / MAX_MIN * 100).toFixed(2) + '%';
     var badge = i === 0
-      ? '<div class="obs-mttd-badge" style="color:var(--danger)" aria-label="Threshold-only alerting: 45 minutes">45&nbsp;min<small>threshold only</small></div>'
-      : '<div class="obs-mttd-badge" style="color:var(--green)" aria-label="ML-assisted detection: 8 minutes, 5.6 times faster than threshold alerting">8&nbsp;min<small>5.6× faster</small></div>';
+      ? '<div class="obs-mttd-badge" style="color:var(--mc-ramp-1)" aria-label="Threshold-only alerting: 45 minutes">45&nbsp;min<small>threshold only</small></div>'
+      : '<div class="obs-mttd-badge" style="color:var(--mc-ramp-3)" aria-label="ML-assisted detection: 8 minutes, 5.6 times faster than threshold alerting">8&nbsp;min<small>5.6× faster</small></div>';
     var row = document.createElement('div');
     row.className = 'obs-mttd-row';
     row.innerHTML =
-      '<div class="obs-mttd-lbl">' + d.label + '</div>' +
+      '<div class="obs-mttd-lbl" style="color:' + d.color + '">' + MTTD_GLYPH[d.glyph] + d.label + '</div>' +
       '<div class="obs-mttd-track">' +
         '<div class="obs-mttd-bar" data-w="' + pct + '" style="width:' + (prefersReducedMotion ? pct : '0') + '"' +
             ' role="progressbar" aria-valuenow="' + d.min + '" aria-valuemin="0" aria-valuemax="' + MAX_MIN + '"' +
