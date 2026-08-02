@@ -550,10 +550,10 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    below this line — components read tokens only.
    ============================================================ */
 
-/* shared figure wrapper + flat diagram card (green top accent) */
+/* shared figure wrapper + flat diagram card (neutral frame, no chromatic accent) */
 figure.diagram,figure.knt-fig,.obs-fig{margin:34px 0}
 figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:10px;padding-left:2px}
-.diag-card{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--green);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
+.diag-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
 .diag-card > svg{min-width:636px}
 
 /* flow rows (reactive loop, before/after chains) */
