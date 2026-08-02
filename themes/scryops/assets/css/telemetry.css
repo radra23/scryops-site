@@ -965,6 +965,7 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
   --mc-ramp-3:#8E8574;
   --mc-ramp-4:#635C4F;
   --mc-ramp-5:#413B32;   /* lowest */
+  --mc-tint:#2A251D;
 }
 
 html.light {
@@ -978,6 +979,7 @@ html.light {
   --mc-ramp-3:#7C786F;
   --mc-ramp-4:#ABA79D;
   --mc-ramp-5:#D5D1C7;   /* lowest */
+  --mc-tint:#EAE7DF;
 }
 
 html.calm {
@@ -986,6 +988,7 @@ html.calm {
   --mc-ramp-3:#9C8F74;
   --mc-ramp-4:#6E6450;
   --mc-ramp-5:#453E30;
+  --mc-tint:#2A2418;
 }
 
 /* ── Print: prepare for the worst — a copy that reads on paper, no power required ── */
