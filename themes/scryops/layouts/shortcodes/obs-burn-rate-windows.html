@@ -1,11 +1,19 @@
+{{- /* layouts/shortcodes/obs-burn-rate-windows.html
+     Three windows, three non-chromatic identities:
+       glyph      square -> triangle -> disc      (1H most urgent, the Callout set)
+       rail value ramp-1 -> ramp-2 -> ramp-3       (brightest -> faintest)
+       rail width 4 -> 3 -> 2px
+     Previously 1H used --danger and 24H used --cyan; both resolve to
+     --mc-ramp-1 under html.pref-mono, so the fastest and slowest windows
+     rendered IDENTICALLY. Ramp steps are now referenced directly. */ -}}
 <figure class="diagram"
-  aria-label="Multi-window burn rate diagnostic sequence. The 1-hour window at 14.2 times the normal rate triggers the page — it answers: is the budget draining right now? The 6-hour window at 9.1 times confirms the degradation is sustained, not a transient spike — it answers: is this real? The 24-hour window at 3.4 times reveals the trend — is this a new incident or one that has been building all day? One elevated window may be a spike; all three elevated together means a sustained incident.">
+  aria-label="Multi-window burn rate diagnostic sequence, each window marked with a distinct shape and rail weight rather than a colour. The 1-hour window, marked with a square on the widest rail, at 14.2 times the normal rate triggers the page — it answers: is the budget draining right now? The 6-hour window, marked with a triangle, at 9.1 times confirms the degradation is sustained, not a transient spike — it answers: is this real? The 24-hour window, marked with a circle on the narrowest rail, at 3.4 times reveals the trend — is this a new incident or one that has been building all day? One elevated window may be a spike; all three elevated together means a sustained incident.">
   <div class="diag-card" style="padding:0.9rem;">
     <svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="brw-title brw-desc"
          style="width:100%;display:block;font-family:var(--font-code);">
       <title id="brw-title">Multi-Window Burn Rate — Diagnostic Sequence</title>
-      <desc id="brw-desc">Three time windows serve different diagnostic roles. The 1-hour window fires the page when the budget drains fast. The 6-hour window confirms the burn is sustained, not a spike. The 24-hour window reveals whether this is new or has been building all day.</desc>
+      <desc id="brw-desc">Three time windows serve different diagnostic roles, each marked with a distinct shape and rail weight. The 1-hour window, a square on the widest rail, fires the page when the budget drains fast. The 6-hour window, a triangle, confirms the burn is sustained, not a spike. The 24-hour window, a circle on the narrowest rail, reveals whether this is new or has been building all day.</desc>
 
       <rect width="760" height="300" fill="var(--fig-bg)"/>
 
@@ -14,41 +22,44 @@
             font-size="11" letter-spacing="0.04em">MULTI-WINDOW BURN RATE</text>
       <text x="24" y="48" fill="var(--text)" font-size="12">// is it happening now? &#183; is it real? &#183; how long has it been building?</text>
 
-      <!-- ─── Card 1: 1H WINDOW (trigger / red) ─── -->
+      <!-- ─── Card 1: 1H WINDOW · square · ramp-1 · widest rail ─── -->
       <rect x="24" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="24" y="64" width="4" height="196" fill="var(--danger)"/>
-      <text x="129" y="92" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700" letter-spacing="0.04em">1H WINDOW</text>
+      <rect x="24" y="64" width="4" height="196" fill="var(--mc-ramp-1)"/>
+      <rect x="118" y="76" width="10" height="10" fill="var(--mc-ramp-1)"/>
+      <text x="140" y="92" text-anchor="start" fill="var(--mc-ramp-1)" font-size="13" font-weight="700" letter-spacing="0.04em">1H WINDOW</text>
       <line x1="44" y1="104" x2="214" y2="104" stroke="var(--border)" stroke-width="1"/>
-      <text x="129" y="156" text-anchor="middle" fill="var(--danger)" font-size="40" font-weight="700">14.2&#215;</text>
-      <text x="129" y="184" text-anchor="middle" fill="var(--danger)" font-size="12" font-weight="700" letter-spacing="0.12em">TRIGGER</text>
+      <text x="129" y="156" text-anchor="middle" fill="var(--mc-ramp-1)" font-size="40" font-weight="700">14.2&#215;</text>
+      <text x="129" y="184" text-anchor="middle" fill="var(--mc-ramp-1)" font-size="12" font-weight="700" letter-spacing="0.12em">TRIGGER</text>
       <text x="129" y="216" text-anchor="middle" fill="var(--text)" font-size="12">fires the page when</text>
       <text x="129" y="234" text-anchor="middle" fill="var(--text)" font-size="12">the budget drains fast</text>
 
       <!-- arrow 1 → 2 -->
-      <line x1="242" y1="162" x2="268" y2="162" stroke="var(--cyan)" stroke-width="1.5"/>
-      <polygon points="266,157 276,162 266,167" fill="var(--cyan)"/>
+      <line x1="242" y1="162" x2="268" y2="162" stroke="var(--mc-ink)" stroke-width="1.5"/>
+      <polygon points="266,157 276,162 266,167" fill="var(--mc-ink)"/>
 
-      <!-- ─── Card 2: 6H WINDOW (confirmation / amber) ─── -->
+      <!-- ─── Card 2: 6H WINDOW · triangle · ramp-2 · medium rail ─── -->
       <rect x="275" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="275" y="64" width="4" height="196" fill="var(--warn)"/>
-      <text x="380" y="92" text-anchor="middle" fill="var(--warn)" font-size="13" font-weight="700" letter-spacing="0.04em">6H WINDOW</text>
+      <rect x="275" y="64" width="3" height="196" fill="var(--mc-ramp-2)"/>
+      <polygon points="374,75.5 380.5,87.5 367.5,87.5" fill="var(--mc-ramp-2)"/>
+      <text x="391" y="92" text-anchor="start" fill="var(--mc-ramp-2)" font-size="13" font-weight="700" letter-spacing="0.04em">6H WINDOW</text>
       <line x1="295" y1="104" x2="465" y2="104" stroke="var(--border)" stroke-width="1"/>
-      <text x="380" y="156" text-anchor="middle" fill="var(--warn)" font-size="40" font-weight="700">9.1&#215;</text>
-      <text x="380" y="184" text-anchor="middle" fill="var(--warn)" font-size="12" font-weight="700" letter-spacing="0.10em">CONFIRMATION</text>
+      <text x="380" y="156" text-anchor="middle" fill="var(--mc-ramp-2)" font-size="40" font-weight="700">9.1&#215;</text>
+      <text x="380" y="184" text-anchor="middle" fill="var(--mc-ramp-2)" font-size="12" font-weight="700" letter-spacing="0.10em">CONFIRMATION</text>
       <text x="380" y="216" text-anchor="middle" fill="var(--text)" font-size="12">sustained, not a spike</text>
       <text x="380" y="234" text-anchor="middle" fill="var(--text)" font-size="12">&#8212; is this real?</text>
 
       <!-- arrow 2 → 3 -->
-      <line x1="493" y1="162" x2="519" y2="162" stroke="var(--cyan)" stroke-width="1.5"/>
-      <polygon points="517,157 527,162 517,167" fill="var(--cyan)"/>
+      <line x1="493" y1="162" x2="519" y2="162" stroke="var(--mc-ink)" stroke-width="1.5"/>
+      <polygon points="517,157 527,162 517,167" fill="var(--mc-ink)"/>
 
-      <!-- ─── Card 3: 24H WINDOW (trend / blue) ─── -->
+      <!-- ─── Card 3: 24H WINDOW · disc · ramp-3 · narrowest rail ─── -->
       <rect x="526" y="64" width="210" height="196" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="526" y="64" width="4" height="196" fill="var(--cyan)"/>
-      <text x="631" y="92" text-anchor="middle" fill="var(--cyan)" font-size="13" font-weight="700" letter-spacing="0.04em">24H WINDOW</text>
+      <rect x="526" y="64" width="2" height="196" fill="var(--mc-ramp-3)"/>
+      <circle cx="629" cy="81" r="5.5" fill="var(--mc-ramp-3)"/>
+      <text x="641" y="92" text-anchor="start" fill="var(--mc-ramp-3)" font-size="13" font-weight="700" letter-spacing="0.04em">24H WINDOW</text>
       <line x1="546" y1="104" x2="716" y2="104" stroke="var(--border)" stroke-width="1"/>
-      <text x="631" y="156" text-anchor="middle" fill="var(--cyan)" font-size="40" font-weight="700">3.4&#215;</text>
-      <text x="631" y="184" text-anchor="middle" fill="var(--cyan)" font-size="12" font-weight="700" letter-spacing="0.12em">TREND</text>
+      <text x="631" y="156" text-anchor="middle" fill="var(--mc-ramp-3)" font-size="40" font-weight="700">3.4&#215;</text>
+      <text x="631" y="184" text-anchor="middle" fill="var(--mc-ramp-3)" font-size="12" font-weight="700" letter-spacing="0.12em">TREND</text>
       <text x="631" y="216" text-anchor="middle" fill="var(--text)" font-size="12">new, or building</text>
       <text x="631" y="234" text-anchor="middle" fill="var(--text)" font-size="12">since before your shift?</text>
 
