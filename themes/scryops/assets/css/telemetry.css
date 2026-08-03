@@ -30,6 +30,18 @@
   --party-warlock:#8B6CEF;
   --party-artificer:#D98A2B;
 
+  /* obs-mascot.html fixed per-class identity accents — same pattern as
+     the party-gallery tokens above (flavor, not data) */
+  --mascot-noob:#A99E88;
+  --mascot-warrior:#D98166;
+  --mascot-wizard:#8FA8C4;
+  --mascot-rogue:#7FB37E;
+  --mascot-bard:#B0A2D8;
+  --mascot-cleric:#D8B85C;
+  --mascot-ranger:#6FB39A;
+  --mascot-oracle:#A78FE0;
+  --mascot-barbarian:#D2894F;
+
   /* inline code chip */
   --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:#241F18;
 
@@ -135,6 +147,17 @@ html.light {
   --party-warlock:#7D5AED;
   --party-artificer:#A5671E;
 
+  /* same reasoning as the party-gallery light overrides above */
+  --mascot-noob:#80745D;
+  --mascot-warrior:#C25330;
+  --mascot-wizard:#5578A1;
+  --mascot-rogue:#4D814C;
+  --mascot-bard:#7E67BF;
+  --mascot-cleric:#8E7222;
+  --mascot-ranger:#44806A;
+  --mascot-oracle:#8260D3;
+  --mascot-barbarian:#AA642C;
+
   --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:#DED6C7;
 
   /* code well intentionally NOT overridden — stays dark */
@@ -181,6 +204,17 @@ html.calm {
   --party-sorcerer:#E55DC8;
   --party-warlock:#9078F2;
   --party-artificer:#D98A2B;
+
+  /* all clear 4.5:1 against calm's card surface unchanged from dark */
+  --mascot-noob:#A99E88;
+  --mascot-warrior:#D98166;
+  --mascot-wizard:#8FA8C4;
+  --mascot-rogue:#7FB37E;
+  --mascot-bard:#B0A2D8;
+  --mascot-cleric:#D8B85C;
+  --mascot-ranger:#6FB39A;
+  --mascot-oracle:#A78FE0;
+  --mascot-barbarian:#D2894F;
 
   --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:#3A3324;
 

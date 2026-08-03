@@ -1,15 +1,15 @@
 {{- $variant := .Get "variant" | default "card" -}}
 {{- $class := .Get "class" | default "noob" -}}
 {{- $classes := dict
-  "noob"      (dict "accent" "#A99E88" "label" "NOOB"      "name" "Bawkward"            "role" "lvl 1 · hasn't read the runbook" "lvl" 1  "hp" 1 "xp" 8)
-  "warrior"   (dict "accent" "#D98166" "label" "WARRIOR"   "name" "Cluck Norris"         "role" "the false-alarm slayer"          "lvl" 30 "hp" 5 "xp" 72)
-  "wizard"    (dict "accent" "#8FA8C4" "label" "WIZARD"    "name" "Cluckdalf"            "role" "seer of burn-rate runes"         "lvl" 99 "hp" 3 "xp" 99)
-  "rogue"     (dict "accent" "#7FB37E" "label" "ROGUE"     "name" "Featherfingers"       "role" "silencer of alerts"              "lvl" 24 "hp" 3 "xp" 55)
-  "bard"      (dict "accent" "#B0A2D8" "label" "BARD"      "name" "Bawk Dylan"           "role" "every log line is a lyric"       "lvl" 12 "hp" 2 "xp" 40)
-  "cleric"    (dict "accent" "#D8B85C" "label" "CLERIC"    "name" "Friar Cluck"          "role" "keeper of the postmortem"        "lvl" 40 "hp" 5 "xp" 66)
-  "ranger"    (dict "accent" "#6FB39A" "label" "RANGER"    "name" "Bawkeye"              "role" "tracer of the root cause"        "lvl" 27 "hp" 4 "xp" 61)
-  "oracle"    (dict "accent" "#A78FE0" "label" "ORACLE"    "name" "Nostradamhen"         "role" "sees the outage in the spans"    "lvl" 88 "hp" 3 "xp" 91)
-  "barbarian" (dict "accent" "#D2894F" "label" "BARBARIAN" "name" "Conan the Bawkbarian" "role" "ten thousand log lines, by hand" "lvl" 18 "hp" 5 "xp" 35)
+  "noob"      (dict "accent" "var(--mascot-noob)"      "label" "NOOB"      "name" "Bawkward"            "role" "lvl 1 · hasn't read the runbook" "lvl" 1  "hp" 1 "xp" 8)
+  "warrior"   (dict "accent" "var(--mascot-warrior)"   "label" "WARRIOR"   "name" "Cluck Norris"         "role" "the false-alarm slayer"          "lvl" 30 "hp" 5 "xp" 72)
+  "wizard"    (dict "accent" "var(--mascot-wizard)"    "label" "WIZARD"    "name" "Cluckdalf"            "role" "seer of burn-rate runes"         "lvl" 99 "hp" 3 "xp" 99)
+  "rogue"     (dict "accent" "var(--mascot-rogue)"     "label" "ROGUE"     "name" "Featherfingers"       "role" "silencer of alerts"              "lvl" 24 "hp" 3 "xp" 55)
+  "bard"      (dict "accent" "var(--mascot-bard)"      "label" "BARD"      "name" "Bawk Dylan"           "role" "every log line is a lyric"       "lvl" 12 "hp" 2 "xp" 40)
+  "cleric"    (dict "accent" "var(--mascot-cleric)"    "label" "CLERIC"    "name" "Friar Cluck"          "role" "keeper of the postmortem"        "lvl" 40 "hp" 5 "xp" 66)
+  "ranger"    (dict "accent" "var(--mascot-ranger)"    "label" "RANGER"    "name" "Bawkeye"              "role" "tracer of the root cause"        "lvl" 27 "hp" 4 "xp" 61)
+  "oracle"    (dict "accent" "var(--mascot-oracle)"    "label" "ORACLE"    "name" "Nostradamhen"         "role" "sees the outage in the spans"    "lvl" 88 "hp" 3 "xp" 91)
+  "barbarian" (dict "accent" "var(--mascot-barbarian)" "label" "BARBARIAN" "name" "Conan the Bawkbarian" "role" "ten thousand log lines, by hand" "lvl" 18 "hp" 5 "xp" 35)
 -}}
 {{- $meta := index $classes $class -}}
 {{- if not $meta -}}{{- $class = "noob" -}}{{- $meta = index $classes "noob" -}}{{- end -}}
@@ -32,7 +32,7 @@
 </figure>
 {{- else if eq $variant "badge" -}}
 <figure class="scry-cucco" aria-label="{{ $alt }} badge">
-  <div class="scry-cucco__badge" style="--ac:{{ $accent }}">
+  <div class="scry-cucco__badge" style="--ac:{{ $accent | safeCSS }}">
     <div class="scry-cucco__medallion" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__plate">{{ $name }}</div>
     <div class="scry-cucco__sub">{{ $label }} &#183; {{ $role }}</div>
@@ -40,7 +40,7 @@
 </figure>
 {{- else if eq $variant "quiet" -}}
 <figure class="scry-cucco" aria-label="{{ $alt }}, says: {{ $quip }}">
-  <div class="scry-cucco__fg" style="--ac:{{ $accent }}">
+  <div class="scry-cucco__fg" style="--ac:{{ $accent | safeCSS }}">
     <span class="scry-cucco__fgframe" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></span>
     <div class="scry-cucco__fgbody">
       <div class="scry-cucco__fgnm"><span class="scry-cucco__fgdot" aria-hidden="true"></span>{{ $name }}</div>
@@ -53,7 +53,7 @@
 </figure>
 {{- else -}}
 <figure class="scry-cucco" aria-label="{{ $alt }}, says: {{ $quip }}">
-  <div class="scry-cucco__wrap" style="--ac:{{ $accent }}">
+  <div class="scry-cucco__wrap" style="--ac:{{ $accent | safeCSS }}">
     <div class="scry-cucco__sprite" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__bubble">
       <span class="scry-cucco__name">{{ $name }}</span>
