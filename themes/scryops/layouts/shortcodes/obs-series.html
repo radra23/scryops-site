@@ -1,0 +1,164 @@
+{{- /* layouts/shortcodes/obs-series.html · TEMPLATE 03b
+     Time series with a threshold rule and marked events.
+
+     THREE channels change together per series, never one alone:
+       stroke width   3 -> 2 -> 2.4 -> 1.8
+       dash           solid -> 9 5 -> 1 6 (round cap) -> 4 3
+       marker         filled disc -> filled square -> open ring -> diamond
+     Series are labelled at their right-hand line END. No legend anywhere.
+
+     THRESHOLD is a dashed rule labelled in place — never a tinted band above
+     or below the line. That band is what every hand-built version reached for,
+     and it is a hue encoding.
+
+     EVENTS are marks ON the series, separated by SILHOUETTE (the ScatterPlot
+     set), so a miss, a false alarm and a real breach are told apart by shape:
+       miss    ✕ cross
+       false   hollow square
+       breach  filled square
+
+     Ramp steps are referenced directly; --cyan / --danger collapse to the
+     same value under html.pref-mono.
+
+     Pass the series the reader came for FIRST — it gets the heaviest solid
+     line. Axis starts at zero.
+
+       {{< obs-series title="p99 latency vs alert threshold" units="milliseconds"
+                      max="700" caption="Fig. — latency crossed the line at h4." >}}
+       {
+         "labels": ["h0","h2","h4","h6","h8","h10"],
+         "threshold": {"value": 500, "label": "alert threshold"},
+         "series": [
+           {"label":"p99","values":[180,240,330,430,520,640]},
+           {"label":"p50","values":[90,110,120,140,150,160]}
+         ],
+         "events": [
+           {"at":2,"kind":"false","label":"false alarm"},
+           {"at":4,"kind":"breach","label":"breach"},
+           {"at":5,"kind":"miss","label":"users impacted"}
+         ]
+       }
+       {{< /obs-series >}}                                                    */ -}}
+
+{{- $d := dict -}}
+{{- with trim .Inner " \n\r\t" }}{{ $d = . | transform.Unmarshal }}{{ end -}}
+{{- $labels := index $d "labels" | default slice -}}
+{{- $series := first 4 (index $d "series" | default slice) -}}
+{{- $events := index $d "events" | default slice -}}
+{{- $thr := index $d "threshold" -}}
+
+{{- /* ── geometry: 640-unit viewBox, right gutter holds the end labels ── */ -}}
+{{- $W := 640 -}}{{- $H := 270 -}}
+{{- $pl := 52 -}}{{- $pr := 512 -}}{{- $pt := 22 -}}{{- $pb := 210 -}}
+{{- $ih := sub $pb $pt -}}
+{{- $n := len $labels -}}
+
+{{- /* scale maximum: explicit, else the largest value across all series */ -}}
+{{- $hi := 0.0 -}}
+{{- range $series }}{{ range (index . "values") }}{{ $v := . | float }}{{ if gt $v $hi }}{{ $hi = $v }}{{ end }}{{ end }}{{ end -}}
+{{- with .Get "max" }}{{ $hi = . | float }}{{ end -}}
+{{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
+{{- $ticks := int (.Get "ticks" | default "4") -}}
+
+{{- /* channel set, by series index — width, dash, cap, marker */ -}}
+{{- $chan := slice
+     (dict "w" "3"   "dash" ""    "cap" "butt"  "mark" "disc"   "step" "var(--mc-ramp-1)")
+     (dict "w" "2"   "dash" "9 5" "cap" "butt"  "mark" "square" "step" "var(--mc-ramp-2)")
+     (dict "w" "2.4" "dash" "1 6" "cap" "round" "mark" "ring"   "step" "var(--mc-ramp-1)")
+     (dict "w" "1.8" "dash" "4 3" "cap" "butt"  "mark" "diamond" "step" "var(--mc-ramp-3)") -}}
+
+{{- /* ── aria: names the channels and the shapes, never the colours ── */ -}}
+{{- $sd := slice -}}
+{{- range $i, $s := $series -}}
+  {{- $v := index $s "values" -}}
+  {{- $sd = $sd | append (printf "%s runs from %v to %v" (index $s "label" | default (printf "series %d" (add $i 1))) (index $v 0) (index $v (sub (len $v) 1))) -}}
+{{- end -}}
+{{- $ed := slice -}}
+{{- range $events -}}
+  {{- $w := index (dict "miss" "a cross marking a missed detection" "false" "a hollow square marking a false alarm" "breach" "a filled square marking a real breach") (index . "kind") -}}
+  {{- $ed = $ed | append (printf "%s at %s" $w (index $labels (index . "at" | int))) -}}
+{{- end -}}
+{{- $aria := printf "Line chart%s. %s. Lines differ by stroke weight, dash pattern and marker shape, not colour.%s%s"
+     (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "")
+     (delimit $sd "; ")
+     (cond $thr (printf " A dashed reference rule marks %s at %v." (index $thr "label" | default "the threshold") (index $thr "value")) "")
+     (cond (gt (len $ed) 0) (printf " Marked events: %s." (delimit $ed ", ")) "") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    {{- with .Get "title" }}<div class="obs-ser__hd">{{ . }}</div>{{ end }}
+    {{- with .Get "units" }}<div class="obs-ser__sub">{{ . }}</div>{{ end }}
+    <svg class="obs-ser" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+
+      {{- /* gridlines + y ticks */ -}}
+      {{- range $t := seq 0 $ticks }}
+      {{- $val := mul (div (float $hi) $ticks) $t -}}
+      {{- $y := sub $pb (mul (div $val $hi) $ih) }}
+      <line x1="{{ $pl }}" y1="{{ $y }}" x2="{{ $pr }}" y2="{{ $y }}" stroke="var(--mc-border)" stroke-width="1"/>
+      <text x="{{ sub $pl 10 }}" y="{{ add $y 4 }}" text-anchor="end" class="obs-ser__tick">{{ math.Round $val }}</text>
+      {{- end }}
+
+      {{- /* zero axis */ -}}
+      <line x1="{{ $pl }}" y1="{{ $pb }}" x2="{{ $pr }}" y2="{{ $pb }}" stroke="var(--mc-axis)" stroke-width="1.5"/>
+
+      {{- /* threshold: dashed rule, labelled in place — NOT a tinted band */ -}}
+      {{- with $thr }}
+      {{- $ty := sub $pb (mul (div (index . "value" | float) $hi) $ih) }}
+      <line x1="{{ $pl }}" y1="{{ $ty }}" x2="{{ $pr }}" y2="{{ $ty }}"
+            stroke="var(--mc-ramp-3)" stroke-width="1.6" stroke-dasharray="7 4"/>
+      <text x="{{ add $pl 6 }}" y="{{ sub $ty 7 }}" class="obs-ser__thr">{{ index . "label" | default "threshold" }} {{ index . "value" }}</text>
+      {{- end }}
+
+      {{- /* series: width + dash + marker change together */ -}}
+      {{- range $si, $s := $series }}
+      {{- $c := index $chan $si -}}
+      {{- $vals := index $s "values" -}}
+      {{- $pts := slice -}}
+      {{- range $i, $v := $vals -}}
+        {{- $x := cond (le $n 1) (div (add $pl $pr) 2) (add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl))) -}}
+        {{- $y := sub $pb (mul (div ($v | float) $hi) $ih) -}}
+        {{- $pts = $pts | append (printf "%.2f,%.2f" $x $y) -}}
+      {{- end }}
+      <polyline points="{{ delimit $pts " " }}" fill="none" stroke="{{ index $c "step" }}"
+        stroke-width="{{ index $c "w" }}"{{ with index $c "dash" }} stroke-dasharray="{{ . }}"{{ end }} stroke-linecap="{{ index $c "cap" }}"/>
+      {{- range $i, $v := $vals }}
+      {{- $x := cond (le $n 1) (div (add $pl $pr) 2) (add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl))) -}}
+      {{- $y := sub $pb (mul (div ($v | float) $hi) $ih) -}}
+      {{- $m := index $c "mark" -}}
+      {{- if eq $m "square" }}<rect x="{{ sub $x 3.5 }}" y="{{ sub $y 3.5 }}" width="7" height="7" fill="{{ index $c "step" }}"/>
+      {{- else if eq $m "ring" }}<circle cx="{{ $x }}" cy="{{ $y }}" r="4" fill="var(--surface)" stroke="{{ index $c "step" }}" stroke-width="2"/>
+      {{- else if eq $m "diamond" }}<polygon points="{{ $x }},{{ sub $y 4.5 }} {{ add $x 4.5 }},{{ $y }} {{ $x }},{{ add $y 4.5 }} {{ sub $x 4.5 }},{{ $y }}" fill="var(--mc-ramp-3)" stroke="{{ index $c "step" }}" stroke-width="1.4"/>
+      {{- else }}<circle cx="{{ $x }}" cy="{{ $y }}" r="4" fill="{{ index $c "step" }}"/>
+      {{- end }}
+      {{- end }}
+      {{- with index $s "label" }}
+      {{- $last := index $vals (sub (len $vals) 1) -}}
+      <text x="{{ add $pr 12 }}" y="{{ add (sub $pb (mul (div ($last | float) $hi) $ih)) 4 }}" class="obs-ser__end">{{ . }}</text>
+      {{- end }}
+      {{- end }}
+
+      {{- /* x labels */ -}}
+      {{- range $i, $l := $labels }}
+      {{- $x := cond (le $n 1) (div (add $pl $pr) 2) (add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl))) }}
+      <text x="{{ $x }}" y="{{ add $pb 24 }}" text-anchor="middle" class="obs-ser__xlab">{{ $l }}</text>
+      {{- end }}
+
+      {{- /* events: marks ON the series, separated by silhouette */ -}}
+      {{- range $events }}
+      {{- $at := index . "at" | int -}}
+      {{- $sIdx := index . "series" | default 0 | int -}}
+      {{- $sv := index (index $series $sIdx) "values" -}}
+      {{- $v := index . "value" | default (index $sv $at) -}}
+      {{- $x := cond (le $n 1) (div (add $pl $pr) 2) (add $pl (mul (div (float $at) (sub $n 1)) (sub $pr $pl))) -}}
+      {{- $y := sub $pb (mul (div ($v | float) $hi) $ih) -}}
+      {{- $k := index . "kind" }}
+      {{- if eq $k "miss" }}<path d="M{{ sub $x 5 }} {{ sub $y 5 }} l10 10 M{{ add $x 5 }} {{ sub $y 5 }} l-10 10" stroke="var(--mc-ink)" stroke-width="2.4" fill="none"/>
+      {{- else if eq $k "false" }}<rect x="{{ sub $x 6 }}" y="{{ sub $y 6 }}" width="12" height="12" fill="none" stroke="var(--mc-ink)" stroke-width="2"/>
+      {{- else }}<rect x="{{ sub $x 6 }}" y="{{ sub $y 6 }}" width="12" height="12" fill="var(--mc-ink)"/>
+      {{- end }}
+      {{- with index . "label" }}<text x="{{ $x }}" y="{{ sub $y 14 }}" text-anchor="middle" class="obs-ser__ev">{{ . }}</text>{{ end }}
+      {{- end }}
+    </svg>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

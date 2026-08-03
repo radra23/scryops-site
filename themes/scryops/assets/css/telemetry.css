@@ -959,6 +959,7 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
   --mc-ink-secondary:var(--text);
   --mc-ink-muted:var(--muted);
   --mc-border:var(--border);
+  --mc-axis:var(--mc-border);
 
   --mc-ramp-1:#ECE6D9;   /* highest */
   --mc-ramp-2:#BDB3A0;
@@ -1102,4 +1103,21 @@ html.calm {
 .obs-bars__val{font-size:13px;color:var(--mc-ink-secondary);white-space:nowrap}
 .obs-bars__row.on .obs-bars__fill{border-width:3.5px}
 .obs-bars__row.on .obs-bars__lab,.obs-bars__row.on .obs-bars__val{color:var(--mc-ink);font-weight:600}
+
+/* ---- series (template 03b): stroke weight + dash + marker, per series ----
+   Sizes are set here rather than as SVG attributes so they follow the type
+   floor. The chart's 640-unit viewBox renders at the card's content width, so
+   a declared size is multiplied by renderedWidth/640 — at a typical 636px card
+   that is 0.994, which pushed a declared 12px to 11.93px rendered, just under
+   the 11px floor's nearest step. Sizes carry a small margin for that: ticks
+   and captions 12.5px, x labels 13.5px, end labels 14.5px. Never lower them
+   without re-measuring RENDERED size (computedFontSize x scale). */
+.obs-ser{width:100%;height:auto;display:block;font-family:var(--font-code)}
+.obs-ser__hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px}
+.obs-ser__sub{font-family:var(--font-code);font-size:12.5px;color:var(--mc-ink-muted);margin-bottom:14px}
+.obs-ser__tick{font-size:12.5px;fill:var(--mc-ink-muted)}
+.obs-ser__xlab{font-family:var(--font-read);font-size:13.5px;fill:var(--mc-ink)}
+.obs-ser__end{font-family:var(--font-read);font-size:14.5px;font-weight:500;fill:var(--mc-ink)}
+.obs-ser__thr{font-size:12.5px;fill:var(--mc-ink-muted)}
+.obs-ser__ev{font-size:12.5px;fill:var(--mc-ink)}
 
