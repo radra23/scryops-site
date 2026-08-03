@@ -1254,6 +1254,27 @@ html.calm {
 .obs-col__lab.on{fill:var(--mc-ink)}
 .obs-col__cap{font-size:12.5px;fill:var(--mc-ink-muted)}
 
+/* ---- waterfall (template 08): span timeline, self-time vs waiting ----
+   Same viewBox-scaling note as obs-ser/obs-col above: tick/name/value text
+   (all SVG fill:, not HTML color:) stays at the measured-safe 12.5px
+   rather than canonical --mc-text-tick (12px). hd/sub are plain HTML divs
+   with no scaling risk, so those reference the tokens directly. */
+.obs-wf{width:100%;height:auto;display:block;font-family:var(--font-code)}
+.obs-wf__hd{font-family:var(--font-read);font-size:var(--mc-text-chart-title);font-weight:500;color:var(--mc-ink);margin-bottom:4px}
+.obs-wf__sub{font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:14px}
+.obs-wf__tick{font-size:12.5px;fill:var(--mc-ink-muted)}
+.obs-wf__nm{font-size:12.5px;fill:var(--mc-ink-secondary)}
+.obs-wf__nm.on{fill:var(--mc-ink);font-weight:600}
+.obs-wf__val{font-size:12.5px;fill:var(--mc-ink-muted)}
+.obs-wf__val.on{fill:var(--mc-ink);font-weight:600}
+.obs-wf__key{display:flex;gap:18px;flex-wrap:wrap;margin-top:13px;padding-top:11px;
+  border-top:1px solid var(--mc-border);font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted)}
+.obs-wf__key span{display:inline-flex;align-items:center;gap:6px}
+.obs-wf__sw{width:22px;height:11px;flex:none;border:1px solid var(--mc-ink)}
+.obs-wf__sw.solid{background:var(--mc-ramp-1)}
+.obs-wf__sw.hatch{background:repeating-linear-gradient(45deg,var(--mc-ink) 0 3px,var(--surface) 3px 9px)}
+.obs-wf__sw.heavy{background:var(--mc-ramp-1);border-width:3px}
+
 /* ---- state machine (template 07): glyph rank + entry border + return lane ---- */
 .obs-sm{font-family:var(--font-code);container-type:inline-size}
 .obs-sm__hd{font-family:'Press Start 2P',monospace;font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
