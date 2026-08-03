@@ -1025,11 +1025,16 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
    the ramp (brightest = highest rank) so ordering survives on a dark
    ground. */
 :root {
+  --mc-surface:var(--surface);
+  --mc-inverse:#ECE6D9;
+  --mc-on-inverse:#141210;
+
   --mc-ink:var(--heading);
   --mc-ink-secondary:var(--text);
   --mc-ink-muted:var(--muted);
   --mc-border:var(--border);
-  --mc-axis:var(--mc-border);
+  --mc-axis:var(--heading);
+  --mc-conditional:#8E8574;
 
   --mc-ramp-1:#ECE6D9;   /* highest */
   --mc-ramp-2:#BDB3A0;
@@ -1037,13 +1042,56 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
   --mc-ramp-4:#635C4F;
   --mc-ramp-5:#413B32;   /* lowest */
   --mc-tint:#2A251D;
+
+  /* stroke widths — theme-independent, identical everywhere */
+  --mc-stroke-axis:1.5px;
+  --mc-stroke-gridline:1px;
+  --mc-stroke-shape-outline:1px;   /* outline on EVERY filled/patterned mark */
+  --mc-stroke-node:1.6px;
+  --mc-stroke-node-primary:3.5px;  /* entry point */
+  --mc-stroke-edge:1.8px;
+  --mc-stroke-edge-conditional:1.6px;
+
+  /* type — theme-independent */
+  --mc-font-sans:var(--font-read);
+  --mc-font-mono:var(--font-code);
+  --mc-text-h2:26px;
+  --mc-text-chart-title:15px;      /* weight 500 */
+  --mc-text-node:15px;
+  --mc-text-body:14.5px;
+  --mc-text-label:14px;            /* axis category labels — HARD FLOOR on screen */
+  --mc-text-caption:13.5px;
+  --mc-text-value:13px;            /* mono, data values */
+  --mc-text-tick:12px;             /* mono, axis ticks */
+  --mc-text-eyebrow:11px;          /* mono, uppercase, tracking .14em */
+  --mc-text-node-caption:11px;
+
+  /* geometry — theme-independent */
+  --mc-radius-card:4px;
+  --mc-radius-chip:3px;
+  --mc-chart-max:100%;             /* charts fill their column (viewBox is 640 units) */
+  --mc-shadow:none;                /* the system uses no shadows */
+  --mc-gradient:none;              /* and no gradients, ever */
+  --mc-motion:none;                /* charts do not animate */
+
+  /* texture — theme-independent */
+  --mc-pattern-period:8px;         /* minimum tile — below this it shimmers */
+  --mc-pattern-hatch-width:3.4px;
+  --mc-pattern-dot-radius:2.4px;
+  --mc-pattern-grid-width:1.6px;
 }
 
 html.light {
+  --mc-surface:#FFFDF8;
+  --mc-inverse:#1F1E1B;
+  --mc-on-inverse:#F4F2EC;
+
   --mc-ink:#1F1E1B;
   --mc-ink-secondary:#3C3A35;
   --mc-ink-muted:#6E6A62;
   --mc-border:#DBD7CD;
+  --mc-axis:#1F1E1B;
+  --mc-conditional:#5C5850;
 
   --mc-ramp-1:#1F1E1B;   /* highest */
   --mc-ramp-2:#4F4C45;
@@ -1054,6 +1102,10 @@ html.light {
 }
 
 html.calm {
+  --mc-inverse:#F2EAD8;
+  --mc-on-inverse:#17140E;
+  --mc-conditional:#9C8F74;
+
   --mc-ramp-1:#F2EAD8;
   --mc-ramp-2:#C9BC9E;
   --mc-ramp-3:#9C8F74;
@@ -1112,28 +1164,32 @@ html.calm {
 /* ---- ranked rows: rail value + rail width + glyph ---- */
 .obs-rank{display:flex;flex-direction:column;gap:12px;font-family:var(--font-code)}
 .obs-rank__row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;
-  background:var(--surface);border:1px solid var(--mc-border);border-radius:3px;padding:13px 16px}
+  background:var(--surface);border:1px solid var(--mc-border);border-radius:var(--mc-radius-chip);padding:13px 16px}
+/* rank-ladder escalation (0.5px increments) has no canonical charts.css
+   equivalent — it's a 4-step severity scale, not a single named role like
+   --mc-stroke-node. Left literal on purpose rather than force one of the
+   four onto --mc-stroke-node-primary just because 3.5px happens to match. */
 .obs-rank__row[data-rank="0"]{border-left:1.5px solid var(--mc-ramp-3)}
 .obs-rank__row[data-rank="1"]{border-left:2.5px solid var(--mc-ramp-2)}
 .obs-rank__row[data-rank="2"]{border-left:3.5px solid var(--mc-ramp-1)}
 .obs-rank__row[data-rank="3"]{border-left:4px solid var(--mc-ramp-1)}
 .obs-rank__g{margin-top:3px}
-.obs-rank__head{font-size:13px;line-height:1.5;color:var(--mc-ink);font-weight:600}
-.obs-rank__act{font-family:var(--font-read);font-size:14px;line-height:1.55;color:var(--mc-ink-secondary);margin:4px 0 0}
+.obs-rank__head{font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);font-weight:600}
+.obs-rank__act{font-family:var(--font-read);font-size:var(--mc-text-label);line-height:1.55;color:var(--mc-ink-secondary);margin:4px 0 0}
 
 /* ---- decision stem ---- */
 .obs-dt{font-family:var(--font-code);container-type:inline-size}
-.obs-dt__hd{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
-.obs-dt__sub{font-size:12.5px;color:var(--mc-ink-muted);margin-bottom:20px}
+.obs-dt__hd{font-family:'Press Start 2P',monospace;font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
+.obs-dt__sub{font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:20px}
 .obs-dt__body{display:grid;grid-template-columns:minmax(0,178px) 56px minmax(0,1fr);align-items:center}
 .obs-dt__body.noStem{grid-template-columns:minmax(0,1fr)}
 .obs-dt__stem{display:flex;flex-direction:column}
-.obs-dt__node{background:var(--surface);border:1.6px solid var(--mc-ink);border-radius:3px;padding:11px 15px;text-align:center}
-.obs-dt__node.entry{border-width:3.5px}
+.obs-dt__node{background:var(--surface);border:var(--mc-stroke-node) solid var(--mc-ink);border-radius:var(--mc-radius-chip);padding:11px 15px;text-align:center}
+.obs-dt__node.entry{border-width:var(--mc-stroke-node-primary)}
 .obs-dt__node.tint{background:var(--mc-tint,var(--surface))}
-.obs-dt__nm{font-size:15px;line-height:1.35;color:var(--mc-ink)}
-.obs-dt__cap{display:block;font-size:11px;color:var(--mc-ink-muted);line-height:1.4;margin-top:4px}
-.obs-dt__link{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;color:var(--mc-ink);font-size:11px}
+.obs-dt__nm{font-size:var(--mc-text-node);line-height:1.35;color:var(--mc-ink)}
+.obs-dt__cap{display:block;font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted);line-height:1.4;margin-top:4px}
+.obs-dt__link{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;color:var(--mc-ink);font-size:var(--mc-text-node-caption)}
 .obs-dt__link span{color:var(--mc-ink-muted)}
 .obs-dt__fan{display:flex;align-items:center;justify-content:center;color:var(--mc-ink)}
 @container (max-width:520px){
@@ -1144,34 +1200,38 @@ html.calm {
 /* ---- gauge: extent + segmentation + state-on-the-spent-portion ---- */
 .obs-gauge{font-family:var(--font-code);display:block}
 .obs-gauge__top{display:flex;align-items:baseline;gap:10px;margin-bottom:7px}
-.obs-gauge__label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted)}
-.obs-gauge__val{margin-left:auto;font-size:13px;color:var(--mc-ink);font-weight:600;display:inline-flex;align-items:center;gap:7px}
-.obs-gauge__track{display:flex;gap:2px;padding:3px;border:1px solid var(--mc-border);background:var(--surface);position:relative}
+.obs-gauge__label{font-size:var(--mc-text-eyebrow);letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted)}
+.obs-gauge__val{margin-left:auto;font-size:var(--mc-text-value);color:var(--mc-ink);font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.obs-gauge__track{display:flex;gap:2px;padding:3px;border:var(--mc-stroke-shape-outline) solid var(--mc-border);background:var(--surface);position:relative}
+/* warn/critical border escalation is its own 2-step severity scale, same
+   reasoning as the rank-ladder above — 1.8px coincides with --mc-stroke-edge
+   but 2.5px (critical) has no canonical match, so both stay literal rather
+   than tokenize one step and not the other. */
 .obs-gauge__track[data-state="warn"]{border-width:1.8px}
 .obs-gauge__track[data-state="critical"]{border-width:2.5px}
 .obs-gauge__cell{flex:1;height:22px;min-width:3px;background:var(--mc-ramp-1)}
 /* filled cells stay SOLID — they are the value. State escalates on the spent
    portion, so every channel increases monotonically with severity. */
-.obs-gauge__cell.off{background:transparent;border:1px solid var(--mc-border)}
+.obs-gauge__cell.off{background:transparent;border:var(--mc-stroke-shape-outline) solid var(--mc-border)}
 .obs-gauge__track[data-state="warn"] .obs-gauge__cell.off{
   background-image:repeating-linear-gradient(45deg,var(--mc-ramp-4) 0 3px,transparent 3px 9px)}
 .obs-gauge__track[data-state="critical"] .obs-gauge__cell.off{
   background-image:repeating-linear-gradient(45deg,var(--mc-ramp-3) 0 4px,transparent 4px 9px)}
 .obs-gauge__tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--mc-ink)}
-.obs-gauge__note{font-size:11px;color:var(--mc-ink-muted);margin-top:7px;line-height:1.5}
+.obs-gauge__note{font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted);margin-top:7px;line-height:1.5}
 .obs-gauge__pips{display:inline-flex;gap:4px;align-items:center}
 .obs-gauge__pip{width:13px;height:13px;flex:none;background:var(--mc-ramp-1)}
-.obs-gauge__pip.off{background:transparent;border:1px solid var(--mc-border)}
-.obs-gauge__pipnum{font-size:11px;color:var(--mc-ink-muted);margin-left:6px}
+.obs-gauge__pip.off{background:transparent;border:var(--mc-stroke-shape-outline) solid var(--mc-border)}
+.obs-gauge__pipnum{font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted);margin-left:6px}
 
 /* ---- ranked bars (template 01): length + ramp value + printed figure ---- */
 .obs-bars{font-family:var(--font-code);display:flex;flex-direction:column;gap:10px}
 .obs-bars__row{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) auto;gap:12px;align-items:center}
-.obs-bars__lab{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);text-align:right}
+.obs-bars__lab{font-family:var(--font-read);font-size:var(--mc-text-label);color:var(--mc-ink);text-align:right}
 .obs-bars__track{height:30px;position:relative}
-.obs-bars__fill{height:100%;border:1px solid var(--mc-ink)}
-.obs-bars__val{font-size:13px;color:var(--mc-ink-secondary);white-space:nowrap}
-.obs-bars__row.on .obs-bars__fill{border-width:3.5px}
+.obs-bars__fill{height:100%;border:var(--mc-stroke-shape-outline) solid var(--mc-ink)}
+.obs-bars__val{font-size:var(--mc-text-value);color:var(--mc-ink-secondary);white-space:nowrap}
+.obs-bars__row.on .obs-bars__fill{border-width:var(--mc-stroke-node-primary)}
 .obs-bars__row.on .obs-bars__lab,.obs-bars__row.on .obs-bars__val{color:var(--mc-ink);font-weight:600}
 
 /* ---- series (template 03b): stroke weight + dash + marker, per series ----
@@ -1183,36 +1243,41 @@ html.calm {
    and captions 12.5px, x labels 13.5px, end labels 14.5px. Never lower them
    without re-measuring RENDERED size (computedFontSize x scale). */
 .obs-ser{width:100%;height:auto;display:block;font-family:var(--font-code)}
-.obs-ser__hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px}
-.obs-ser__sub{font-family:var(--font-code);font-size:12.5px;color:var(--mc-ink-muted);margin-bottom:14px}
+.obs-ser__hd{font-family:var(--font-read);font-size:var(--mc-text-chart-title);font-weight:500;color:var(--mc-ink);margin-bottom:4px}
+.obs-ser__sub{font-family:var(--font-code);font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:14px}
+/* tick/thr/ev are SVG text in this chart's 640-unit viewBox (see the
+   render-scaling comment above) — 12.5px was deliberately measured to
+   survive that scaling; canonical --mc-text-tick is 12px declared, which
+   would reopen the exact bug this session already fixed. Left literal
+   until the canonical token itself accounts for viewBox scaling. */
 .obs-ser__tick{font-size:12.5px;fill:var(--mc-ink-muted)}
-.obs-ser__xlab{font-family:var(--font-read);font-size:13.5px;fill:var(--mc-ink)}
-.obs-ser__end{font-family:var(--font-read);font-size:14.5px;font-weight:500;fill:var(--mc-ink)}
+.obs-ser__xlab{font-family:var(--font-read);font-size:var(--mc-text-caption);fill:var(--mc-ink)}
+.obs-ser__end{font-family:var(--font-read);font-size:var(--mc-text-body);font-weight:500;fill:var(--mc-ink)}
 .obs-ser__thr{font-size:12.5px;fill:var(--mc-ink-muted)}
 .obs-ser__ev{font-size:12.5px;fill:var(--mc-ink)}
 
 /* ---- state machine (template 07): glyph rank + entry border + return lane ---- */
 .obs-sm{font-family:var(--font-code);container-type:inline-size}
-.obs-sm__hd{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
-.obs-sm__sub{font-size:12.5px;color:var(--mc-ink-muted);margin-bottom:20px}
+.obs-sm__hd{font-family:'Press Start 2P',monospace;font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
+.obs-sm__sub{font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:20px}
 .obs-sm__row{display:flex;align-items:stretch;flex-wrap:nowrap}
 .obs-sm__st{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:7px;
-  background:var(--surface);border:1.6px solid var(--mc-ink);border-radius:3px;padding:14px 12px;text-align:center}
-.obs-sm__st.entry{border-width:3.5px}
+  background:var(--surface);border:var(--mc-stroke-node) solid var(--mc-ink);border-radius:var(--mc-radius-chip);padding:14px 12px;text-align:center}
+.obs-sm__st.entry{border-width:var(--mc-stroke-node-primary)}
 .obs-sm__st.tint{background:var(--mc-tint,var(--surface))}
-.obs-sm__nm{font-size:15px;line-height:1.3;color:var(--mc-ink)}
-.obs-sm__cap{font-size:11px;color:var(--mc-ink-muted);line-height:1.4}
+.obs-sm__nm{font-size:var(--mc-text-node);line-height:1.3;color:var(--mc-ink)}
+.obs-sm__cap{font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted);line-height:1.4}
 .obs-sm__edge{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   padding:0 11px;min-width:74px;color:var(--mc-ink)}
 .obs-sm__arrow{font-size:16px;line-height:1}
-.obs-sm__trig{font-size:11px;color:var(--mc-ink-muted);text-align:center;line-height:1.35}
+.obs-sm__trig{font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted);text-align:center;line-height:1.35}
 /* returns: a dashed lane, so the forward path stays readable instead of
    carrying crossing arrows back across the row */
 .obs-sm__returns{margin-top:16px;display:flex;flex-direction:column;gap:9px}
 .obs-sm__ret{display:grid;grid-template-columns:auto minmax(0,1fr);gap:11px;align-items:center;
   border-top:1px dashed var(--mc-border);padding-top:9px}
-.obs-sm__retg{font-size:14px;line-height:1;color:var(--mc-ink)}
-.obs-sm__rett{font-size:12.5px;color:var(--mc-ink-secondary);line-height:1.5}
+.obs-sm__retg{font-size:var(--mc-text-label);line-height:1;color:var(--mc-ink)}
+.obs-sm__rett{font-size:var(--mc-text-tick);color:var(--mc-ink-secondary);line-height:1.5}
 .obs-sm__rett b{color:var(--mc-ink);font-weight:600}
 @container (max-width:520px){
   .obs-sm__row{flex-direction:column}
