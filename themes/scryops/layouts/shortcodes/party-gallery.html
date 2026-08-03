@@ -1,13 +1,13 @@
 {{- $party := slice
-  (dict "cls" "Monk"      "name" "Master Pho"   "role" "keeper of the uptime"        "img" "monk"      "accent" "#4FD1C5" "quip" "I do not chase the outage. I sit. I breathe. I watch the green. ...the budget has four nines, and I will not spend one on panic.")
-  (dict "cls" "Paladin"   "name" "Sir Galahen"  "role" "guardian of the five nines"   "img" "paladin"   "accent" "#F5C542" "quip" "I swore an oath at 99.9 percent. Three nines. I will not break the fourth for your convenient deploy window. The budget is sacred.")
-  (dict "cls" "Sorcerer"  "name" "Cluckoo"      "role" "the cascade no one foresaw"    "img" "sorcerer"  "accent" "#E55DC8" "quip" "Threshold? Runbook? I have neither. I am the 3am surge from the edge case nobody imagined &#8212; the failure no alert was written for. You cannot ward against me; only build a system that answers questions you have not thought to ask yet.")
-  (dict "cls" "Warlock"   "name" "Beelzebawk"   "role" "bound to the on-call pact"     "img" "warlock"   "accent" "#8B6CEF" "quip" "I signed the pact for power: the pager never sleeps, so neither do I. It buzzes, I answer &#8212; 2am, 4am, my own wedding. The patron is the pager, and the pager is forever. ...you can have this power too.")
-  (dict "cls" "Artificer" "name" "Cluckwork"    "role" "builder of the pipeline"        "img" "artificer" "accent" "#D98A2B" "quip" "You export straight from the app? Barbaric. I built a pipeline &#8212; batched, retried, routed, sampled &#8212; so telemetry flows whether the backend is up or not. Change the backend? I rewire the Collector, not your code. ...held together with a wrench and spite. Never gone down.")
+  (dict "cls" "Monk"      "name" "Master Pho"   "role" "keeper of the uptime"        "img" "monk"      "accent" "var(--party-monk)" "quip" "I do not chase the outage. I sit. I breathe. I watch the green. ...the budget has four nines, and I will not spend one on panic.")
+  (dict "cls" "Paladin"   "name" "Sir Galahen"  "role" "guardian of the five nines"   "img" "paladin"   "accent" "var(--party-paladin)" "quip" "I swore an oath at 99.9 percent. Three nines. I will not break the fourth for your convenient deploy window. The budget is sacred.")
+  (dict "cls" "Sorcerer"  "name" "Cluckoo"      "role" "the cascade no one foresaw"    "img" "sorcerer"  "accent" "var(--party-sorcerer)" "quip" "Threshold? Runbook? I have neither. I am the 3am surge from the edge case nobody imagined &#8212; the failure no alert was written for. You cannot ward against me; only build a system that answers questions you have not thought to ask yet.")
+  (dict "cls" "Warlock"   "name" "Beelzebawk"   "role" "bound to the on-call pact"     "img" "warlock"   "accent" "var(--party-warlock)" "quip" "I signed the pact for power: the pager never sleeps, so neither do I. It buzzes, I answer &#8212; 2am, 4am, my own wedding. The patron is the pager, and the pager is forever. ...you can have this power too.")
+  (dict "cls" "Artificer" "name" "Cluckwork"    "role" "builder of the pipeline"        "img" "artificer" "accent" "var(--party-artificer)" "quip" "You export straight from the app? Barbaric. I built a pipeline &#8212; batched, retried, routed, sampled &#8212; so telemetry flows whether the backend is up or not. Change the backend? I rewire the Collector, not your code. ...held together with a wrench and spite. Never gone down.")
 -}}
 <div class="party-grid">
 {{- range $party -}}
-  <figure class="party-card" style="--ac:{{ .accent }};">
+  <figure class="party-card" style="--ac:{{ .accent | safeCSS }};">
     <div class="party-art">
       {{- if os.FileExists (printf "static/images/party/%s.png" .img) -}}
         <img src="{{ printf "/images/party/%s.png" .img | relURL }}" alt="{{ .name }}, the {{ .cls }}-class battle chicken" loading="lazy">
@@ -16,7 +16,7 @@
       {{- end -}}
     </div>
     <figcaption class="party-meta">
-      <span class="party-name" style="color:{{ .accent }};">{{ .name }}</span>
+      <span class="party-name" style="color:{{ .accent | safeCSS }};">{{ .name }}</span>
       <span class="party-cls">{{ .cls }} &#183; {{ .role }}</span>
       <p class="party-quip">&ldquo;{{ .quip }}&rdquo;</p>
     </figcaption>

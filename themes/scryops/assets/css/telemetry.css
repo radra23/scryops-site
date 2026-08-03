@@ -21,6 +21,15 @@
   --danger:#D98E80;         /* muted terracotta — reads as error, not alarm */
   --violet:#A79E8C;         /* OpenTelemetry topic accent — warm mid ink */
 
+  /* party-gallery.html fixed per-character identity accents (flavor, not
+     data — pref-mono already forces .party-card/.party-name/.party-ph-cls
+     to neutral ink regardless of these, see the pref-mono block below) */
+  --party-monk:#4FD1C5;
+  --party-paladin:#F5C542;
+  --party-sorcerer:#E55DC8;
+  --party-warlock:#8B6CEF;
+  --party-artificer:#D98A2B;
+
   /* inline code chip */
   --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:#241F18;
 
@@ -118,6 +127,14 @@ html.light {
   --danger:#A8483C;
   --violet:#5E5648;
 
+  /* darkened to clear 4.5:1 as text against the cream surface — the dark
+     hues at the top of this file read fine on charcoal but fail on cream */
+  --party-monk:#22827A;
+  --party-paladin:#956F08;
+  --party-sorcerer:#D222AD;
+  --party-warlock:#7D5AED;
+  --party-artificer:#A5671E;
+
   --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:#DED6C7;
 
   /* code well intentionally NOT overridden — stays dark */
@@ -155,6 +172,15 @@ html.calm {
   --warn:#C9AE7B;
   --danger:#DE9384;
   --violet:#B0A48C;
+
+  /* same as dark, except warlock nudged brighter — the original hue sits
+     at 4.48:1 against calm's slightly-lighter card surface, just under
+     the 4.5:1 text floor */
+  --party-monk:#4FD1C5;
+  --party-paladin:#F5C542;
+  --party-sorcerer:#E55DC8;
+  --party-warlock:#9078F2;
+  --party-artificer:#D98A2B;
 
   --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:#3A3324;
 
