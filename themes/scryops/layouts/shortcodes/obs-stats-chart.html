@@ -1,36 +1,3 @@
-<style>
-.obs-chart-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--warn);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
-.obs-chart-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;text-align:center;margin-bottom:1.2rem;}
-.obs-stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.6rem;}
-@media(max-width:640px){.obs-stat-grid{grid-template-columns:repeat(2,1fr);}}
-.obs-stat-card{background:var(--bg);border:1px solid var(--border);border-top:3px solid;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.3rem;padding:1rem .8rem .8rem;}
-.obs-stat-card svg.obs-stat-glyph{width:13px;height:13px;display:block;}
-.obs-stat-num{font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:-.02em;}
-.obs-stat-desc{font-size:.78rem;color:var(--muted);line-height:1.5;flex:1;}
-.obs-stat-src{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.04em;margin-top:.4rem;}
-.obs-mttd-hdr{font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.1em;margin-bottom:.5rem;}
-.obs-mttd-div{height:1px;background:var(--border);margin-bottom:1rem;}
-.obs-mttd-row{display:grid;grid-template-columns:160px 1fr auto;align-items:center;gap:.8rem;margin-bottom:.7rem;}
-@media(max-width:640px){.obs-mttd-row{grid-template-columns:90px 1fr auto;}}
-.obs-mttd-lbl{font-size:.8rem;color:var(--muted);text-align:right;word-break:break-word;line-height:1.4;}
-@media(max-width:640px){.obs-mttd-lbl{font-size:.7rem;}}
-.obs-mttd-track{background:var(--bg);border:1px solid var(--border);height:28px;position:relative;overflow:hidden;}
-.obs-mttd-bar{height:100%;width:0;transition:width .9s cubic-bezier(.25,.46,.45,.94);position:relative;display:flex;align-items:center;}
-/* Respect reduced motion preference */
-@media(prefers-reduced-motion:reduce){.obs-mttd-bar{transition:none;}}
-.obs-mttd-bar-fill{position:absolute;inset:0;opacity:.22;}
-.obs-mttd-bar-border{position:absolute;inset:0;border:1.5px solid;}
-.obs-mttd-val{font-size:.8rem;font-weight:700;white-space:nowrap;padding-left:.4rem;}
-.obs-mttd-badge{font-size:.8rem;font-weight:700;white-space:nowrap;text-align:right;min-width:80px;}
-.obs-mttd-badge small{display:block;font-size:.7rem;font-weight:400;color:var(--muted);}
-.obs-mttd-lbl svg.obs-mttd-glyph{width:11px;height:11px;flex:none;display:inline-block;vertical-align:-1.5px;margin-right:.4rem;}
-.obs-mttd-axis{display:flex;justify-content:space-between;padding:.3rem 0 0;margin-left:calc(160px + .8rem);font-size:.75rem;color:var(--muted);}
-@media(max-width:640px){.obs-mttd-axis{margin-left:calc(90px + .8rem);font-size:.7rem;}}
-.obs-src{margin-top:1.2rem;font-family:'Press Start 2P',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.04em;}
-figure.obs-fig{margin:2.5rem 0 2rem;}
-figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
-</style>
-
 <figure class="obs-fig"
   aria-label="Industry observability statistics 2023–2024, each figure marked with a distinct shape rather than a colour. Four key metrics: 58%, marked with a square, of incidents are reported by customers before internal teams know. 74%, marked with a triangle, of alerts are noise or false positives. 37%, marked with a diamond, of engineering capacity is lost to unplanned reactive work. Only 26%, marked with a circle, of teams can detect issues before users do. Mean time to detect, marked with the same square-versus-circle pairing: 45 minutes with threshold-only alerting versus 8 minutes with ML-assisted detection — a 5.6× improvement.">
   <div class="obs-chart-wrap">
