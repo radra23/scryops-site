@@ -7,7 +7,7 @@
 -}}
 <div class="party-grid">
 {{- range $party -}}
-  <figure class="party-card" style="--ac:{{ .accent | safeCSS }};">
+  <figure class="party-card" style="--ac:{{ .accent | safeCSS }};" aria-label="{{ .name }}, the {{ .cls }}-class battle chicken, says: {{ .quip }}">
     <div class="party-art">
       {{- if os.FileExists (printf "static/images/party/%s.png" .img) -}}
         <img src="{{ printf "/images/party/%s.png" .img | relURL }}" alt="{{ .name }}, the {{ .cls }}-class battle chicken" loading="lazy">
