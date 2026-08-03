@@ -492,14 +492,21 @@ public class ResilientLogProcessor
 
 The fallback sink should target something that cannot fail — stderr or a local file on disk. The circuit stays open for `recoveryTime`, then admits a probe; on success it closes. One caveat worth knowing: while half-open, the implementation above can let more than one probe through at once — in production you usually single-flight that probe (an `Interlocked` gate) so a sink that is only just recovering is not hit by a burst.
 
-{{< mermaid >}}
-stateDiagram-v2
-    [*] --> Closed
-    Closed --> Open: failure count >= threshold
-    Open --> HalfOpen: recoveryTime elapsed
-    HalfOpen --> Closed: probe succeeds
-    HalfOpen --> Open: probe fails
-{{< /mermaid >}}
+{{< obs-state-machine title="CIRCUIT BREAKER"
+      subtitle="// sink failure isolates the pipeline, then recovers"
+      caption="Fig. — The breaker trips on failure count, waits out recoveryTime, then risks exactly one probe. A failed probe re-opens it rather than retrying immediately." >}}
+{
+  "states": [
+    {"label":"Closed","caption":"logs flow normally","health":"healthy","entry":true},
+    {"label":"Open","caption":"fallback to stderr","health":"failed","trigger":"failure count ≥ threshold"},
+    {"label":"HalfOpen","caption":"one probe allowed","health":"probing","trigger":"recoveryTime elapsed"}
+  ],
+  "returns": [
+    {"from":"HalfOpen","to":"Closed","trigger":"probe succeeds — sink is back"},
+    {"from":"HalfOpen","to":"Open","trigger":"probe fails — wait another recoveryTime"}
+  ]
+}
+{{< /obs-state-machine >}}
 
 ## OTel Processor Pattern
 

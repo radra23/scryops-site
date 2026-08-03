@@ -1,0 +1,92 @@
+{{- /* layouts/shortcodes/obs-state-machine.html · TEMPLATE 07
+     States and transitions: circuit breakers, connection lifecycles, retry
+     ladders. Not a flow (one direction), not a fan-out (obs-decision-tree),
+     not a single cycle — it has ranked states, an entry point, and edges that
+     go BACKWARDS.
+
+     Four non-chromatic channels:
+       glyph    disc -> triangle -> square   health rank (the Callout set)
+       border   1.6px, 3.5px on the entry state
+       fill     paper vs --mc-tint (probing)
+       edge     solid forward, dashed return lane, each labelled with its trigger
+
+     Prefer this over a Mermaid stateDiagram-v2: mermaid gives every state
+     identical treatment, so health rank ends up carried by the label text
+     alone. Markup is HTML, not SVG, so font sizes are absolute — SVG text in a
+     fixed viewBox is multiplied by renderedWidth/viewBoxWidth and cannot hold
+     a type floor across viewports.
+
+       {{< obs-state-machine title="CIRCUIT BREAKER"
+             subtitle="// sink failure isolates the pipeline, then recovers"
+             caption="Fig. — The breaker trips on failure count, then risks one probe." >}}
+       {
+         "states": [
+           {"label":"Closed","caption":"logs flow normally","health":"healthy","entry":true},
+           {"label":"Open","caption":"fallback to stderr","health":"failed","trigger":"failure count ≥ threshold"},
+           {"label":"HalfOpen","caption":"one probe allowed","health":"probing","trigger":"recoveryTime elapsed"}
+         ],
+         "returns": [
+           {"from":"HalfOpen","to":"Closed","trigger":"probe succeeds — sink is back"},
+           {"from":"HalfOpen","to":"Open","trigger":"probe fails — wait another recoveryTime"}
+         ]
+       }
+       {{< /obs-state-machine >}}                                              */ -}}
+
+{{- $d := dict -}}
+{{- with trim .Inner " \n\r\t" }}{{ $d = . | transform.Unmarshal }}{{ end -}}
+{{- $states := index $d "states" | default slice -}}
+{{- $returns := index $d "returns" | default slice -}}
+{{- $rank := dict "healthy" 0 "probing" 1 "failed" 2 -}}
+{{- $word := dict "healthy" "healthy" "probing" "probing" "failed" "failed" -}}
+{{- $shape := dict "healthy" "circle" "probing" "triangle" "failed" "square" -}}
+
+{{- /* aria: names the shapes and the triggers, never a colour */ -}}
+{{- $sd := slice -}}
+{{- range $i, $s := $states -}}
+  {{- $h := index $s "health" | default "healthy" -}}
+  {{- $sd = $sd | append (printf "%s (%s, marked with a %s)%s"
+       (index $s "label") (index $word $h) (index $shape $h)
+       (cond (and (gt $i 0) (index $s "trigger")) (printf ", entered on %s" (index $s "trigger")) "")) -}}
+{{- end -}}
+{{- $rd := slice -}}
+{{- range $returns }}{{ $rd = $rd | append (printf "%s back to %s when %s" (index . "from") (index . "to") (index . "trigger")) }}{{ end -}}
+{{- $aria := printf "State machine%s. Forward path: %s.%s States are separated by marker shape and border weight, not colour."
+     (cond (.Get "title") (printf ", %s" (lower (.Get "title"))) "")
+     (delimit $sd ", then ")
+     (cond (gt (len $rd) 0) (printf " Return transitions: %s." (delimit $rd "; ")) "") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-sm" role="img" aria-label="{{ $aria }}">
+      {{- with .Get "title" }}<div class="obs-sm__hd">{{ . }}</div>{{ end }}
+      {{- with .Get "subtitle" }}<div class="obs-sm__sub">{{ . }}</div>{{ end }}
+      <div class="obs-sm__row">
+        {{- range $i, $s := $states }}
+        {{- $h := index $s "health" | default "healthy" }}
+        {{- if gt $i 0 }}
+        <span class="obs-sm__edge" aria-hidden="true">
+          <span class="obs-sm__arrow">&#8594;</span>
+          {{- with index $s "trigger" }}<span class="obs-sm__trig">{{ . }}</span>{{ end }}
+        </span>
+        {{- end }}
+        <span class="obs-sm__st{{ if index $s "entry" }} entry{{ end }}{{ if eq $h "probing" }} tint{{ end }}">
+          {{ partial "obs-glyph.html" (dict "rank" (index $rank $h) "fill" "var(--mc-ramp-1)") }}
+          <span class="obs-sm__nm">{{ index $s "label" }}</span>
+          {{- with index $s "caption" }}<span class="obs-sm__cap">{{ . }}</span>{{ end }}
+        </span>
+        {{- end }}
+      </div>
+      {{- if $returns }}
+      <div class="obs-sm__returns">
+        {{- range $returns }}
+        <div class="obs-sm__ret">
+          <span class="obs-sm__retg" aria-hidden="true">&#10554;</span>
+          <span class="obs-sm__rett"><b>{{ index . "from" }}</b> &#8594; <b>{{ index . "to" }}</b> &middot; {{ index . "trigger" }}</span>
+        </div>
+        {{- end }}
+      </div>
+      {{- end }}
+    </div>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>
