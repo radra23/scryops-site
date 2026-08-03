@@ -37,7 +37,21 @@ Burn rate alerts fire when your error budget drains faster than the baseline dep
 
 If you’re burning through your budget 14 times faster than the rate that would exhaust it over the full 30-day window, someone gets paged right away. If it’s 6 times faster — sustained across both a one-hour and a six-hour window — it’s urgent but not a fire drill. A burn rate below 2× means you have roughly two weeks of budget remaining at that rate; that earns a ticket for investigation during business hours, not a 3am page. The response matches how quickly you’re heading for trouble, not just whether a number jumped.
 
-{{< obs-burn-rate-triage >}}
+{{< obs-decision-tree title="BURN-RATE TRIAGE" subtitle="// two questions decide the response"
+                      caption="Fig. — Two questions — is the budget burning, and how fast — and the response picks itself." >}}
+{
+  "stem": [
+    {"label":"Incident detected","caption":"entry","entry":true},
+    {"label":"SLO budget burning?","caption":"no → monitor & log","kind":"tint"},
+    {"label":"How fast is it burning?","kind":"tint","edge":"yes"}
+  ],
+  "branches": [
+    {"head":"SLOW · under 2× · weeks of budget left","action":"Ticket / Slack — investigate this week"},
+    {"head":"MODERATE · ~6× · 1h + 6h windows","action":"Notify the team — escalate if on-call can't resolve"},
+    {"head":"FAST · 14× · 1h window","action":"Page on-call — major incident if users hit hard"}
+  ]
+}
+{{< /obs-decision-tree >}}
 
 Teams who move past static thresholds use multi-window, multi-burn-rate alerts. These catch the slow burns and creeping trends that old alerts miss.
 
