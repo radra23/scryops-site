@@ -1,3 +1,13 @@
+{{- /* layouts/shortcodes/obs-trace-log-correlation.html
+     Right panel's cyan highlighting (accent, header, trace_id/span_id
+     emphasis — 8 refs) previously shared --mc-ramp-1 with the left panel's
+     single --danger "search all services" label under html.pref-mono, so
+     the neutral "here's the correlated field" highlighting read as equally
+     alarming as the actual failure callout. Highlighting now sits on calmer
+     --mc-ramp-3/4 (trace_id brighter than span_id, matching their original
+     opacity hierarchy); --mc-ramp-1 is reserved for the two takeaway labels
+     (✗ / ✓), which never need to be distinguished from each other since
+     they're sequential panels, not compared side by side. */ -}}
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg"
@@ -15,51 +25,51 @@
             font-family="'Press Start 2P',monospace" letter-spacing="0.06em">WITHOUT TRACE ID</text>
 
       <rect x="24" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="56" fill="var(--muted)" font-size="10">[02:14:33] ERROR payment.process</text>
+      <text x="36" y="56" fill="var(--muted)" font-size="11">[02:14:33] ERROR payment.process</text>
 
       <rect x="24" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="90" fill="var(--muted)" font-size="10">msg="Payment failed: gateway timeout"</text>
+      <text x="36" y="90" fill="var(--muted)" font-size="11">msg="Payment failed: gateway timeout"</text>
 
       <rect x="24" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="124" fill="var(--muted)" font-size="10">order_id=ord_9f3b2a4c</text>
+      <text x="36" y="124" fill="var(--muted)" font-size="11">order_id=ord_9f3b2a4c</text>
 
       <!-- absent trace_id — dashed outline -->
       <rect x="24" y="140" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="158" fill="var(--border)" font-size="10" text-anchor="middle">trace_id — not present</text>
+      <text x="180" y="158" fill="var(--border)" font-size="11" text-anchor="middle">trace_id — not present</text>
 
       <!-- absent span_id — dashed outline -->
       <rect x="24" y="174" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="192" fill="var(--border)" font-size="10" text-anchor="middle">span_id — not present</text>
+      <text x="180" y="192" fill="var(--border)" font-size="11" text-anchor="middle">span_id — not present</text>
 
-      <text x="180" y="234" fill="var(--danger)" font-size="10" text-anchor="middle">&#10007; search all services by timestamp</text>
+      <text x="180" y="234" fill="var(--mc-ramp-1)" font-size="11" text-anchor="middle">&#10007; search all services by timestamp</text>
 
       <!-- ── CENTER GAP ARROW ──────────────────────────────────────────── -->
-      <text x="380" y="141" fill="var(--warn)" font-size="18" text-anchor="middle">&#8594;</text>
+      <text x="380" y="141" fill="var(--mc-ink-muted)" font-size="18" text-anchor="middle">&#8594;</text>
 
       <!-- ── RIGHT PANEL: with trace ID ───────────────────────────────── -->
       <rect x="408" y="8" width="344" height="254" fill="var(--fig-bg)" rx="1"/>
-      <rect x="408" y="8" width="344" height="2" fill="var(--cyan)" opacity="0.8"/>
-      <text x="580" y="27" fill="var(--cyan)" font-size="10" text-anchor="middle"
+      <rect x="408" y="8" width="344" height="2" fill="var(--mc-ramp-4)" opacity="0.8"/>
+      <text x="580" y="27" fill="var(--mc-ramp-4)" font-size="10" text-anchor="middle"
             font-family="'Press Start 2P',monospace" letter-spacing="0.06em">WITH TRACE ID</text>
 
       <rect x="424" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="56" fill="var(--text)" font-size="10">[02:14:33] ERROR payment.process</text>
+      <text x="436" y="56" fill="var(--text)" font-size="11">[02:14:33] ERROR payment.process</text>
 
       <rect x="424" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="90" fill="var(--text)" font-size="10">msg="Payment failed: gateway timeout"</text>
+      <text x="436" y="90" fill="var(--text)" font-size="11">msg="Payment failed: gateway timeout"</text>
 
       <rect x="424" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="124" fill="var(--text)" font-size="10">order_id=ord_9f3b2a4c</text>
+      <text x="436" y="124" fill="var(--text)" font-size="11">order_id=ord_9f3b2a4c</text>
 
-      <!-- trace_id — present, highlighted in blue -->
-      <rect x="424" y="140" width="312" height="28" fill="var(--cyan)" fill-opacity="0.14" stroke="var(--cyan)" stroke-width="1.5"/>
-      <text x="436" y="158" fill="var(--cyan)" font-size="10">trace_id=4bf92f3577b34da6&#8230;</text>
+      <!-- trace_id — present, highlighted (brighter of the two) -->
+      <rect x="424" y="140" width="312" height="28" fill="var(--mc-ramp-3)" fill-opacity="0.14" stroke="var(--mc-ramp-3)" stroke-width="1.5"/>
+      <text x="436" y="158" fill="var(--mc-ramp-3)" font-size="11">trace_id=4bf92f3577b34da6&#8230;</text>
 
-      <!-- span_id — present -->
-      <rect x="424" y="174" width="312" height="28" fill="var(--cyan)" fill-opacity="0.08" stroke="var(--cyan)" stroke-width="1"/>
-      <text x="436" y="192" fill="var(--cyan)" font-size="10">span_id=a2fb4a1d1a96d312</text>
+      <!-- span_id — present (secondary to trace_id) -->
+      <rect x="424" y="174" width="312" height="28" fill="var(--mc-ramp-4)" fill-opacity="0.08" stroke="var(--mc-ramp-4)" stroke-width="1"/>
+      <text x="436" y="192" fill="var(--mc-ramp-4)" font-size="11">span_id=a2fb4a1d1a96d312</text>
 
-      <text x="580" y="234" fill="var(--green)" font-size="10" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
+      <text x="580" y="234" fill="var(--mc-ramp-1)" font-size="11" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
 
     </svg>
   </div>
