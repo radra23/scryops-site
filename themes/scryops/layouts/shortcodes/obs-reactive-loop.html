@@ -1,29 +1,48 @@
+{{- /* layouts/shortcodes/obs-reactive-loop.html
+     Despite the filename, this isn't a cycle — it's two independent
+     one-direction flows stacked for comparison, so it's built on the
+     obs-flow vocabulary (template 05) rather than obs-state-machine's
+     return lane. Each row ends in a "terminal" node holding the outcome,
+     which is exactly what that kind is for: the end state of a flow.
+
+     Previously: .flow-box.breach (warn) vs .flow-box.prevent (green) —
+     opposite-valence steps that BOTH resolve to --mc-ramp-2 under
+     html.pref-mono, rendering identically. Same collision between
+     .flow-box.damage (danger) and .flow-box.pattern/.predict (cyan),
+     both --mc-ramp-1. Structure now carries the distinction: "human"
+     steps get the tint fill (a person has to act), everything else is
+     plain paper, and each row ends in an inverted terminal node — no
+     chromatic role needed at all. */ -}}
 <figure class="diagram" aria-label="Diagram comparing Observability 1.0 and 2.0 response models">
   <div class="diag-card">
-    <!-- OBS 1.0 row -->
-    <div class="flow-row" role="img" aria-label="Observability 1.0: threshold breach → alert fires → human paged → investigates → fix applied. Outcome: users already affected.">
-      <span class="flow-version v1" aria-hidden="true">OBS 1.0</span>
-      <div class="flow-box breach">threshold breach</div>
-      <span class="flow-arrow bad" aria-hidden="true">→</span>
-      <div class="flow-box damage">alert fires</div>
-      <span class="flow-arrow bad" aria-hidden="true">→</span>
-      <div class="flow-box human">human paged</div>
-      <span class="flow-arrow bad" aria-hidden="true">→</span>
-      <div class="flow-box human">investigates</div>
-      <span class="flow-arrow bad" aria-hidden="true">→</span>
-      <div class="flow-box human">fix applied</div>
-      <span class="flow-outcome bad">✗ users already affected</span>
+    <div class="obs-flow-wrap">
+      <div class="obs-flow__rowlabel">OBS 1.0</div>
+      <div class="obs-flow stack" role="img" aria-label="Observability 1.0: threshold breach, then alert fires, then human paged, then investigates, then fix applied. Outcome: users already affected.">
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Threshold breach</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Alert fires</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node tint"><span class="obs-flow__text"><span class="obs-flow__nm">Human paged</span><span class="obs-flow__cap">human</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node tint"><span class="obs-flow__text"><span class="obs-flow__nm">Investigates</span><span class="obs-flow__cap">human</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node tint"><span class="obs-flow__text"><span class="obs-flow__nm">Fix applied</span><span class="obs-flow__cap">human</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node terminal"><span class="obs-flow__text"><span class="obs-flow__nm">&#10007; users already affected</span></span></span>
+      </div>
     </div>
     <div class="flow-divider"></div>
-    <!-- OBS 2.0 row -->
-    <div class="flow-row" role="img" aria-label="Observability 2.0: anomaly pattern → prediction → auto-remediation. Outcome: users never notice.">
-      <span class="flow-version v2" aria-hidden="true">OBS 2.0</span>
-      <div class="flow-box pattern">anomaly pattern</div>
-      <span class="flow-arrow good" aria-hidden="true">→</span>
-      <div class="flow-box predict">prediction</div>
-      <span class="flow-arrow good" aria-hidden="true">→</span>
-      <div class="flow-box prevent">auto-remediation</div>
-      <span class="flow-outcome good">✓ users never notice</span>
+    <div class="obs-flow-wrap">
+      <div class="obs-flow__rowlabel">OBS 2.0</div>
+      <div class="obs-flow" role="img" aria-label="Observability 2.0: anomaly pattern, then prediction, then auto-remediation. Outcome: users never notice.">
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Anomaly pattern</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Prediction</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Auto-remediation</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node terminal"><span class="obs-flow__text"><span class="obs-flow__nm">&#10003; users never notice</span></span></span>
+      </div>
     </div>
   </div>
   <figcaption>Fig. 1 — In the reactive model, a human is always last in line. Observability 2.0 closes the loop before the page fires.</figcaption>

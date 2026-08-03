@@ -626,24 +626,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    body copy. Scoping this out lets mermaid render at scale 1.0. */
 .diag-card > svg:not([style*="max-width"]){min-width:636px}
 
-/* flow rows (reactive loop, before/after chains) */
-.flow-row{display:flex;align-items:center;gap:0;flex-wrap:wrap;row-gap:6px}
-.flow-version{font-family:var(--font-pixel);font-size:10px;letter-spacing:.08em;width:58px;flex-shrink:0;padding-top:1px}
-.flow-version.v1{color:var(--muted)}
-.flow-version.v2{color:var(--cyan)}
-.flow-box{font-family:var(--font-code);padding:6px 10px;font-size:12px;border:1px solid var(--border);background:var(--bg);white-space:nowrap}
-.flow-box.breach {border-color:var(--warn);  border-width:2px; color:var(--warn-lb); background:var(--warn-bg)}
-.flow-box.damage {border-color:var(--danger); color:var(--dgr-lb);  background:var(--dgr-bg)}
-.flow-box.human  {border-color:var(--border); color:var(--muted);   background:var(--surface)}
-.flow-box.pattern{border-color:var(--cyan);   border-width:2px; color:var(--cyan);    background:var(--surface)}
-.flow-box.predict{border-color:var(--cyan);   color:var(--cyan);    background:var(--surface)}
-.flow-box.prevent{border-color:var(--green);  color:var(--green);   background:var(--info-bg)}
-.flow-arrow{font-family:var(--font-code);font-size:14px;padding:0 4px;flex-shrink:0;color:var(--muted)}
-.flow-arrow.bad{color:var(--danger); font-weight:700}
-.flow-arrow.good{color:var(--green)}
-.flow-outcome{flex:1;text-align:right;font-family:var(--font-code);font-size:13px;font-weight:700;padding-left:13px;white-space:nowrap}
-.flow-outcome.bad{color:var(--danger)}
-.flow-outcome.good{color:var(--green)}
+/* divider between stacked comparison flows (obs-reactive-loop) */
 .flow-divider{height:1px;background:var(--border);margin:19px 0}
 
 /* comparison / two-version tables (obs-comparison-table, obs-monitoring-shifts) */
@@ -1292,6 +1275,11 @@ html.calm {
 .obs-flow-wrap{container-type:inline-size}
 .obs-flow__hd{font-family:'Press Start 2P',monospace;font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
 .obs-flow__sub{font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:20px}
+/* row label for stacked-comparison usage (obs-reactive-loop): a plain
+   mono tag, deliberately the SAME neutral tone for every row — the old
+   .flow-version.v2{color:var(--cyan)} split had no meaning to carry, it
+   just tinted the "new model" row for no reason other than novelty */
+.obs-flow__rowlabel{font-family:'Press Start 2P',monospace;font-size:10px;letter-spacing:.08em;color:var(--mc-ink-muted);margin-bottom:9px}
 .obs-flow{display:flex;align-items:stretch;flex-wrap:nowrap;overflow-x:auto;font-family:var(--mc-font-sans)}
 .obs-flow.stack{flex-direction:column;align-items:stretch;overflow-x:visible}
 .obs-flow__node{flex:1 1 0;min-width:86px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
