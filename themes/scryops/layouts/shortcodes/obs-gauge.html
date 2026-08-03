@@ -1,0 +1,50 @@
+{{- /* layouts/shortcodes/obs-gauge.html · TEMPLATE 06
+     Level and rating. The value rides on EXTENT and SEGMENTATION, which are
+     already non-chromatic — colour was never carrying it. State escalates on
+     the SPENT portion (hairline -> hatch -> denser hatch), the track border,
+     and a rank glyph. Never on the filled colour: solid ink is denser than a
+     hatch, so escalating the fill inverts and the calm state reads heaviest.
+
+       {{< obs-gauge label="Budget remaining" value="26.8" max="43.2"
+                     unit="min" state="warn" threshold="0.25"
+                     note="drains at 1x in 30 days" >}}
+       {{< obs-gauge variant="pips" value="5" max="5" state="critical" >}}   */ -}}
+
+{{- $value := (.Get "value" | default "0") | float -}}
+{{- $max := (.Get "max" | default "100") | float -}}
+{{- $state := .Get "state" | default "ok" -}}
+{{- $pips := eq (.Get "variant") "pips" -}}
+{{- $n := int (.Get "segments" | default (cond $pips "5" "24")) -}}
+{{- $unit := .Get "unit" -}}
+{{- $rank := cond (eq $state "critical") 2 (cond (eq $state "warn") 1 0) -}}
+{{- $pct := cond (gt $max 0.0) (div $value $max) 0.0 -}}
+{{- $pct = cond (gt $pct 1.0) 1.0 (cond (lt $pct 0.0) 0.0 $pct) -}}
+{{- $on := int (math.Round (mul $pct $n)) -}}
+{{- $word := index (dict "ok" "healthy" "warn" "warning" "critical" "critical") $state -}}
+{{- $shape := index (dict "ok" "circle" "warn" "triangle" "critical" "square") $state -}}
+{{- $aria := printf "%s: %v of %v%s, %d percent. %d of %d segments filled. State %s, shown by a %s marker and the spent portion's texture, not a colour."
+      (.Get "label" | default "Gauge") $value $max (cond $unit (printf " %s" $unit) "")
+      (int (mul $pct 100)) $on $n $word $shape -}}
+
+{{- if $pips -}}
+<span class="obs-gauge__pips" role="img" aria-label="{{ $aria }}">
+  {{ partial "obs-glyph.html" (dict "rank" $rank "fill" "var(--mc-ramp-1)") }}
+  {{- range seq $n }}<span class="obs-gauge__pip{{ if gt . $on }} off{{ end }}"></span>{{ end }}
+  <span class="obs-gauge__pipnum">{{ $on }}/{{ $n }}</span>
+</span>
+{{- else -}}
+<div class="obs-gauge" role="img" aria-label="{{ $aria }}">
+  <div class="obs-gauge__top">
+    {{- with .Get "label" }}<span class="obs-gauge__label">{{ . }}</span>{{ end }}
+    <span class="obs-gauge__val">
+      {{ partial "obs-glyph.html" (dict "rank" $rank "fill" "var(--mc-ramp-1)") }}
+      {{ $value }} / {{ $max }}{{ with $unit }} {{ . }}{{ end }} &middot; {{ int (mul $pct 100) }}%
+    </span>
+  </div>
+  <div class="obs-gauge__track" data-state="{{ $state }}">
+    {{- range seq $n }}<span class="obs-gauge__cell{{ if gt . $on }} off{{ end }}"></span>{{ end }}
+    {{- with .Get "threshold" }}<span class="obs-gauge__tick" style="left:calc({{ mul (float .) 100 }}% - 1px)"></span>{{ end }}
+  </div>
+  {{- with .Get "note" }}<div class="obs-gauge__note">{{ . | markdownify }}</div>{{ end }}
+</div>
+{{- end -}}

@@ -1,0 +1,13 @@
+{{- /* layouts/partials/obs-glyph.html
+     The Callout severity silhouette set, by rank. Rank 0 is least severe.
+     Square always means most severe; position in a list never decides shape.
+     Usage: {{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }} */ -}}
+{{- $r := .rank | default 0 -}}
+{{- $f := .fill | default "var(--mc-ink)" -}}
+<svg class="obs-g" viewBox="0 0 12 12" fill="{{ $f }}" aria-hidden="true" focusable="false">
+{{- if eq $r 0 }}<circle cx="6" cy="6" r="5"/>
+{{- else if eq $r 1 }}<polygon points="6,0.6 11.4,11.4 0.6,11.4"/>
+{{- else if eq $r 2 }}<rect x="1" y="1" width="10" height="10"/>
+{{- else }}<polygon points="6,0.5 11.5,6 6,11.5 0.5,6"/>
+{{- end -}}
+</svg>

@@ -1,0 +1,65 @@
+{{- /* layouts/shortcodes/obs-ranked-bars.html · TEMPLATE 01
+     Ranked quantities, one variable, ordered categories.
+
+     Bars step DOWN the sequential value ramp in rank order. Bar length is
+     the real signal; the printed figure is the redundant third channel; a
+     1px ink outline keeps the faintest step edged. No legend — categories
+     are named at the axis, which starts at zero.
+
+     Ramp steps are assigned BY RANK, computed here, so rows may be listed
+     in category order and the brightest step still lands on the largest.
+
+     `emphasis` singles out one row WITHOUT colour: outline 1px -> 3.5px and
+     the label to full ink at weight 600. Never tint a bar.
+
+       {{< obs-ranked-bars title="Support volume by channel"
+                           units="tickets, last 30 days" emphasis="0" >}}
+       [ {"label":"Email","value":4200},
+         {"label":"In-app","value":3100},
+         {"label":"Phone","value":2450} ]
+       {{< /obs-ranked-bars >}}                                            */ -}}
+
+{{- $rows := slice -}}
+{{- with trim .Inner " \n\r\t" }}{{ $rows = . | transform.Unmarshal }}{{ end -}}
+{{- $n := len $rows -}}
+{{- $emph := cond (ne (.Get "emphasis") nil) (int (.Get "emphasis" | default "-1")) -1 -}}
+{{- $unit := .Get "unit" | default "" -}}
+
+{{- /* scale maximum */ -}}
+{{- $hi := 0.0 -}}
+{{- range $rows }}{{ $v := index . "value" | float }}{{ if gt $v $hi }}{{ $hi = $v }}{{ end }}{{ end -}}
+{{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
+
+{{- /* rank order: brightest ramp step to the largest value, whatever the list order */ -}}
+{{- $sorted := sort $rows "value" "desc" -}}
+{{- $steps := slice "var(--mc-ramp-1)" "var(--mc-ramp-2)" "var(--mc-ramp-3)" "var(--mc-ramp-4)" "var(--mc-ramp-5)" -}}
+{{- $stepFor := dict -}}
+{{- $use := cond (le $n 4) 4 5 -}}
+{{- range $r, $row := $sorted -}}
+  {{- $stepFor = merge $stepFor (dict (index $row "label") (index $steps (cond (lt $r $use) $r (sub $use 1)))) -}}
+{{- end -}}
+
+{{- $desc := slice -}}
+{{- range $rows }}{{ $desc = $desc | append (printf "%s %v%s" (index . "label") (index . "value") $unit) }}{{ end -}}
+{{- $aria := printf "Bar chart%s. %s. Bars are shaded from strongest to faintest in rank order, with the value printed beside each."
+     (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "") (delimit $desc ", ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    {{- with .Get "title" }}<div class="obs-dt__hd" style="font-family:var(--font-read);font-size:15px;font-weight:500;margin-bottom:4px">{{ . }}</div>{{ end }}
+    {{- with .Get "units" }}<div class="obs-dt__sub" style="margin-bottom:16px">{{ . }}</div>{{ end }}
+    <div class="obs-bars" role="img" aria-label="{{ $aria }}">
+      {{- range $i, $row := $rows }}
+      {{- $v := index $row "value" | float -}}
+      <div class="obs-bars__row{{ if eq $i $emph }} on{{ end }}">
+        <span class="obs-bars__lab">{{ index $row "label" }}</span>
+        <span class="obs-bars__track">
+          <span class="obs-bars__fill" style="display:block;width:{{ math.Round (mul (div $v $hi) 100) }}%;background:{{ index $stepFor (index $row "label") | safeCSS }}"></span>
+        </span>
+        <span class="obs-bars__val">{{ index $row "value" }}{{ $unit }}</span>
+      </div>
+      {{- end }}
+    </div>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

@@ -1,0 +1,75 @@
+{{- /* layouts/shortcodes/obs-decision-tree.html · TEMPLATE 05b
+     A stem of decision nodes fanning out to severity-ranked outcomes, or
+     (omit "stem") a plain tier ladder of ordinal states.
+
+     Rank rides on FOUR channels, never hue: glyph silhouette, rail value,
+     rail width, and — in the fan — line style. Ramp steps are referenced
+     directly, because --cyan and --danger both collapse to --mc-ramp-1
+     under html.pref-mono.
+
+     Order branches LEAST severe first. Max 4.
+
+       {{< obs-decision-tree title="BURN-RATE TRIAGE" subtitle="// two questions" >}}
+       {
+         "stem": [
+           {"label":"Incident detected","caption":"entry","entry":true},
+           {"label":"SLO budget burning?","caption":"no → monitor & log","kind":"tint"},
+           {"label":"How fast is it burning?","kind":"tint","edge":"yes"}
+         ],
+         "branches": [
+           {"head":"SLOW · under 2×","action":"Ticket — investigate this week"},
+           {"head":"MODERATE · ~6×","action":"Notify the team"},
+           {"head":"FAST · 14×","action":"Page on-call"}
+         ]
+       }
+       {{< /obs-decision-tree >}}                                            */ -}}
+
+{{- $d := dict -}}
+{{- with trim .Inner " \n\r\t" }}{{ $d = . | transform.Unmarshal }}{{ end -}}
+{{- $stem := index $d "stem" | default slice -}}
+{{- $branches := first 4 (index $d "branches" | default slice) -}}
+{{- $ladder := eq (len $stem) 0 -}}
+{{- $steps := slice "var(--mc-ramp-3)" "var(--mc-ramp-2)" "var(--mc-ramp-1)" "var(--mc-ramp-1)" -}}
+{{- $shapes := slice "circle" "triangle" "square" "diamond" -}}
+
+{{- $desc := slice -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s marks %s — %s" (index $shapes $i) (index $b "head") (index $b "action" | default "")) }}{{ end -}}
+{{- $aria := printf "%s%s. Outcomes least to most severe: %s. Severity is carried by shape, rail weight and line style, not colour."
+     (cond $ladder "Ranked tiers" "Decision tree") (cond (.Get "title") (printf ", %s" (lower (.Get "title"))) "") (delimit $desc "; ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-dt" role="img" aria-label="{{ $aria }}">
+      {{- with .Get "title" }}<div class="obs-dt__hd">{{ . }}</div>{{ end }}
+      {{- with .Get "subtitle" }}<div class="obs-dt__sub">{{ . }}</div>{{ end }}
+      <div class="obs-dt__body{{ if $ladder }} noStem{{ end }}">
+        {{- if not $ladder }}
+        <div class="obs-dt__stem">
+          {{- range $i, $s := $stem }}
+          {{- if gt $i 0 }}
+          <span class="obs-dt__link" aria-hidden="true">&#8595;{{ with index $s "edge" }}<span>{{ . }}</span>{{ end }}</span>
+          {{- end }}
+          <span class="obs-dt__node{{ if index $s "entry" }} entry{{ end }}{{ if eq (index $s "kind" | default "") "tint" }} tint{{ end }}">
+            <span class="obs-dt__nm">{{ index $s "label" }}</span>
+            {{- with index $s "caption" }}<span class="obs-dt__cap">{{ . }}</span>{{ end }}
+          </span>
+          {{- end }}
+        </div>
+        <div class="obs-dt__fan" aria-hidden="true">&#8594;</div>
+        {{- end }}
+        <div class="obs-rank">
+          {{- range $i, $b := $branches }}
+          <div class="obs-rank__row" data-rank="{{ $i }}">
+            <span class="obs-rank__g">{{ partial "obs-glyph.html" (dict "rank" $i "fill" (index $steps $i)) }}</span>
+            <div>
+              <div class="obs-rank__head">{{ index $b "head" }}</div>
+              {{- with index $b "action" }}<p class="obs-rank__act">{{ . | markdownify }}</p>{{ end }}
+            </div>
+          </div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

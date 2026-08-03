@@ -1023,3 +1023,83 @@ html.calm {
     border-color: #999 !important; background: transparent !important; color: #111 !important;
   }
 }
+/* ============================================================
+   scryops — parameterised figure shortcodes
+   Append to themes/scryops/assets/css/telemetry.css.
+
+   The shortcodes emit MARKUP ONLY and read their styling from here, so a
+   page with six figures ships one copy of these rules instead of six.
+
+   Every rule below encodes rank on a non-colour channel. Nothing in this
+   block references --cyan / --warn / --danger / --green: those collapse
+   under html.pref-mono. Ramp steps are referenced directly.
+   ============================================================ */
+
+/* shared glyph — the Callout silhouette set, used by every figure */
+.obs-g{width:12px;height:12px;flex:none;display:block}
+
+/* ---- ranked rows: rail value + rail width + glyph ---- */
+.obs-rank{display:flex;flex-direction:column;gap:12px;font-family:var(--font-code)}
+.obs-rank__row{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:start;
+  background:var(--surface);border:1px solid var(--mc-border);border-radius:3px;padding:13px 16px}
+.obs-rank__row[data-rank="0"]{border-left:1.5px solid var(--mc-ramp-3)}
+.obs-rank__row[data-rank="1"]{border-left:2.5px solid var(--mc-ramp-2)}
+.obs-rank__row[data-rank="2"]{border-left:3.5px solid var(--mc-ramp-1)}
+.obs-rank__row[data-rank="3"]{border-left:4px solid var(--mc-ramp-1)}
+.obs-rank__g{margin-top:3px}
+.obs-rank__head{font-size:13px;line-height:1.5;color:var(--mc-ink);font-weight:600}
+.obs-rank__act{font-family:var(--font-read);font-size:14px;line-height:1.55;color:var(--mc-ink-secondary);margin:4px 0 0}
+
+/* ---- decision stem ---- */
+.obs-dt{font-family:var(--font-code);container-type:inline-size}
+.obs-dt__hd{font-family:'Press Start 2P',monospace;font-size:13px;line-height:1.5;color:var(--mc-ink);margin-bottom:9px}
+.obs-dt__sub{font-size:12.5px;color:var(--mc-ink-muted);margin-bottom:20px}
+.obs-dt__body{display:grid;grid-template-columns:minmax(0,178px) 56px minmax(0,1fr);align-items:center}
+.obs-dt__body.noStem{grid-template-columns:minmax(0,1fr)}
+.obs-dt__stem{display:flex;flex-direction:column}
+.obs-dt__node{background:var(--surface);border:1.6px solid var(--mc-ink);border-radius:3px;padding:11px 15px;text-align:center}
+.obs-dt__node.entry{border-width:3.5px}
+.obs-dt__node.tint{background:var(--mc-tint,var(--surface))}
+.obs-dt__nm{font-size:15px;line-height:1.35;color:var(--mc-ink)}
+.obs-dt__cap{display:block;font-size:11px;color:var(--mc-ink-muted);line-height:1.4;margin-top:4px}
+.obs-dt__link{display:flex;flex-direction:column;align-items:center;gap:2px;padding:7px 0;color:var(--mc-ink);font-size:11px}
+.obs-dt__link span{color:var(--mc-ink-muted)}
+.obs-dt__fan{display:flex;align-items:center;justify-content:center;color:var(--mc-ink)}
+@container (max-width:520px){
+  .obs-dt__body{grid-template-columns:1fr}
+  .obs-dt__fan{display:none}
+}
+
+/* ---- gauge: extent + segmentation + state-on-the-spent-portion ---- */
+.obs-gauge{font-family:var(--font-code);display:block}
+.obs-gauge__top{display:flex;align-items:baseline;gap:10px;margin-bottom:7px}
+.obs-gauge__label{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted)}
+.obs-gauge__val{margin-left:auto;font-size:13px;color:var(--mc-ink);font-weight:600;display:inline-flex;align-items:center;gap:7px}
+.obs-gauge__track{display:flex;gap:2px;padding:3px;border:1px solid var(--mc-border);background:var(--surface);position:relative}
+.obs-gauge__track[data-state="warn"]{border-width:1.8px}
+.obs-gauge__track[data-state="critical"]{border-width:2.5px}
+.obs-gauge__cell{flex:1;height:22px;min-width:3px;background:var(--mc-ramp-1)}
+/* filled cells stay SOLID — they are the value. State escalates on the spent
+   portion, so every channel increases monotonically with severity. */
+.obs-gauge__cell.off{background:transparent;border:1px solid var(--mc-border)}
+.obs-gauge__track[data-state="warn"] .obs-gauge__cell.off{
+  background-image:repeating-linear-gradient(45deg,var(--mc-ramp-4) 0 3px,transparent 3px 9px)}
+.obs-gauge__track[data-state="critical"] .obs-gauge__cell.off{
+  background-image:repeating-linear-gradient(45deg,var(--mc-ramp-3) 0 4px,transparent 4px 9px)}
+.obs-gauge__tick{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--mc-ink)}
+.obs-gauge__note{font-size:11px;color:var(--mc-ink-muted);margin-top:7px;line-height:1.5}
+.obs-gauge__pips{display:inline-flex;gap:4px;align-items:center}
+.obs-gauge__pip{width:13px;height:13px;flex:none;background:var(--mc-ramp-1)}
+.obs-gauge__pip.off{background:transparent;border:1px solid var(--mc-border)}
+.obs-gauge__pipnum{font-size:11px;color:var(--mc-ink-muted);margin-left:6px}
+
+/* ---- ranked bars (template 01): length + ramp value + printed figure ---- */
+.obs-bars{font-family:var(--font-code);display:flex;flex-direction:column;gap:10px}
+.obs-bars__row{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) auto;gap:12px;align-items:center}
+.obs-bars__lab{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);text-align:right}
+.obs-bars__track{height:30px;position:relative}
+.obs-bars__fill{height:100%;border:1px solid var(--mc-ink)}
+.obs-bars__val{font-size:13px;color:var(--mc-ink-secondary);white-space:nowrap}
+.obs-bars__row.on .obs-bars__fill{border-width:3.5px}
+.obs-bars__row.on .obs-bars__lab,.obs-bars__row.on .obs-bars__val{color:var(--mc-ink);font-weight:600}
+
