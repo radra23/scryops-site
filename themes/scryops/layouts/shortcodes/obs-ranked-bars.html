@@ -54,10 +54,17 @@
     <div class="obs-bars" role="img" aria-label="{{ $aria }}">
       {{- range $i, $row := $rows }}
       {{- $v := index $row "value" | float -}}
+      {{- /* computed into its own variable, not inlined into the style
+           attribute — a double-quoted map key nested inside a double-
+           quoted attribute reads as broken markup to a plain-text XML
+           parser (this repo's pre-commit well-formedness check included),
+           even though Hugo evaluates the expression fine before it ever
+           reaches an attribute value */ -}}
+      {{- $step := index $stepFor (index $row "label") -}}
       <div class="obs-bars__row{{ if eq $i $emph }} on{{ end }}">
         <span class="obs-bars__lab">{{ index $row "label" }}</span>
         <span class="obs-bars__track">
-          <span class="obs-bars__fill" style="display:block;width:{{ math.Round (mul (div $v $hi) 100) }}%;background:{{ index $stepFor (index $row "label") | safeCSS }}"></span>
+          <span class="obs-bars__fill" style="display:block;width:{{ math.Round (mul (div $v $hi) 100) }}%;background:{{ $step | safeCSS }}"></span>
         </span>
         <span class="obs-bars__val">{{ index $row "value" }}{{ $unit }}</span>
       </div>

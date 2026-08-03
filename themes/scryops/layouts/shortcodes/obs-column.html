@@ -82,9 +82,13 @@
 {{- $slot := div (sub $pr $pl) (float (cond (gt $n 0) $n 1)) -}}
 {{- $bw := cond (lt (mul $slot 0.54) 104.0) (mul $slot 0.54) 104.0 -}}
 
-{{- /* ── aria: names rank, value, emphasis — never colour ── */ -}}
+{{- /* ── aria: names rank, value, emphasis, and each caption detail — never colour ── */ -}}
 {{- $desc := slice -}}
-{{- range $data }}{{ $desc = $desc | append (printf "%s %v" (index . "label") (index . "value")) }}{{ end -}}
+{{- range $data -}}
+  {{- $cap := index . "caption" -}}
+  {{- $capTxt := cond $cap (printf " (%s)" (replace $cap "\n" ", ")) "" -}}
+  {{- $desc = $desc | append (printf "%s %v%s" (index . "label") (index . "value") $capTxt) -}}
+{{- end -}}
 {{- $aria := printf "Column chart%s%s. %s.%s Columns are shaded by rank, not by category colour."
      (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "")
      (cond $log ", logarithmic scale" "")
@@ -134,11 +138,22 @@
       {{- end -}}
       {{- $on := eq $i $emph -}}
       {{- $h := sub $pb $top -}}{{- $h = cond (gt $h 1.0) $h 1.0 -}}
+      {{- /* computed into its own variable, not inlined into the attribute —
+           a double-quoted map key nested inside a double-quoted XML
+           attribute reads as broken markup to a plain-text XML parser
+           (this repo's pre-commit well-formedness check included), even
+           though Hugo evaluates the expression fine before it ever
+           reaches an attribute value */ -}}
+      {{- $step := index $stepFor (index $d "label") -}}
       <rect x="{{ sub $cx (div $bw 2) }}" y="{{ $top }}" width="{{ $bw }}" height="{{ $h }}"
-            fill="{{ index $stepFor (index $d "label") | safeCSS }}" stroke="var(--mc-ink)"
+            fill="{{ $step | safeCSS }}" stroke="var(--mc-ink)"
             stroke-width="{{ if $on }}3.5{{ else }}1{{ end }}"/>
+      {{- /* Go's default float formatting switches to scientific notation
+           at 1e6 (e.g. 1500000 -> "1.5e+06") — SI-suffix it instead, same
+           as the tick formatter, so the printed value always matches what
+           the axis shows. */ -}}
       <text x="{{ $cx }}" y="{{ sub $top 12 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
-            class="obs-col__val{{ if $on }} on{{ end }}">{{ index $d "value" }}</text>
+            class="obs-col__val{{ if $on }} on{{ end }}">{{ if ge $v 1000000.0 }}{{ strings.TrimSuffix ".0" (printf "%.1f" (div $v 1000000.0)) }}M{{ else if ge $v 1000.0 }}{{ strings.TrimSuffix ".0" (printf "%.1f" (div $v 1000.0)) }}K{{ else }}{{ math.Round $v }}{{ end }}</text>
       <text x="{{ $cx }}" y="{{ add $pb 25 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
             class="obs-col__lab{{ if $on }} on{{ end }}">{{ index $d "label" }}</text>
       {{- with index $d "caption" }}
