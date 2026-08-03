@@ -1,0 +1,153 @@
+{{- /* layouts/shortcodes/obs-column.html · TEMPLATE 01b
+     Column chart — the vertical sibling of obs-ranked-bars, for magnitudes
+     spanning orders of magnitude. Supports a log scale (one gridline per
+     decade, SI-style ticks) and a two-line category caption under each bar.
+
+     EMPHASIS IS NOT A COLOUR. `emphasis` singles out one column by moving
+     three non-chromatic channels together: outline 1px -> 3.5px, value/
+     label ink secondary -> full ink at weight 600. Never tint a column.
+
+     Ramp steps are assigned BY RANK, computed here (same as obs-ranked-
+     bars) — so data may arrive in category order and the brightest step
+     still lands on the largest column, regardless of list order.
+
+       {{< obs-column title="Log volume vs. traffic" units="logs / second · log scale"
+                      scale="log" y-label="logs / second" emphasis="3" >}}
+       [
+         {"label":"SMALL","value":500,"caption":"100 rps · 4.3 GB/day"},
+         {"label":"MEDIUM","value":8000,"caption":"1K rps · 69 GB/day"},
+         {"label":"HIGH","value":120000,"caption":"10K rps · 1 TB/day"},
+         {"label":"INTERNET","value":1500000,"caption":"100K rps · 13 TB/day"}
+       ]
+       {{< /obs-column >}}                                                 */ -}}
+
+{{- $data := slice -}}
+{{- with trim .Inner " \n\r\t" }}{{ $data = . | transform.Unmarshal }}{{ end -}}
+{{- $n := len $data -}}
+{{- $log := eq (.Get "scale") "log" -}}
+{{- $emph := cond (ne (.Get "emphasis") nil) (int (.Get "emphasis" | default "-1")) -1 -}}
+{{- $yLabel := .Get "y-label" -}}
+
+{{- /* ── geometry: 640-unit viewBox. SVG text here is subject to the same
+     viewBox -> rendered-width scaling as obs-series, so tick-level text
+     stays at the same measured-safe 12.5px rather than the canonical
+     --mc-text-tick's 12px; value/label text (13/14px canonical) already
+     clears the floor with margin to spare at this scale, so those use the
+     tokens directly. ── */ -}}
+{{- $W := 640.0 -}}
+{{- $pl := cond $yLabel 92.0 62.0 -}}{{- $pr := 620.0 -}}
+{{- $pt := 40.0 -}}{{- $pb := 210.0 -}}
+{{- $ih := sub $pb $pt -}}
+
+{{- /* extra height for multi-line captions (split on \n) */ -}}
+{{- $maxCapLines := 0 -}}
+{{- range $data }}{{ with index . "caption" }}{{ $lines := split . "\n" }}{{ if gt (len $lines) $maxCapLines }}{{ $maxCapLines = len $lines }}{{ end }}{{ end }}{{ end -}}
+{{- $H := add 300.0 (mul (float $maxCapLines) 18.0) -}}
+
+{{- /* scale bounds */ -}}
+{{- $maxVal := 0.0 -}}{{- $minPos := 0.0 -}}
+{{- range $data -}}
+  {{- $v := index . "value" | float -}}
+  {{- if gt $v $maxVal }}{{ $maxVal = $v }}{{ end -}}
+  {{- if or (eq $minPos 0.0) (and (gt $v 0.0) (lt $v $minPos)) }}{{ $minPos = $v }}{{ end -}}
+{{- end -}}
+{{- $maxVal = cond (gt $maxVal 0.0) $maxVal 1.0 -}}
+{{- $minPos = cond (gt $minPos 0.0) $minPos 1.0 -}}
+{{- $log10 := 2.302585092994046 -}} {{- /* ln(10), for base conversion via math.Log */ -}}
+{{- $hi := .Get "max" | default "" -}}
+{{- $hi = cond (ne $hi "") (float $hi) (cond $log (math.Pow 10 (math.Ceil (div (math.Log $maxVal) $log10))) $maxVal) -}}
+{{- $lo := .Get "min" | default "" -}}
+{{- $lo = cond (ne $lo "") (float $lo) (cond $log (math.Pow 10 (math.Floor (div (math.Log $minPos) $log10))) 0.0) -}}
+{{- $hiLog := div (math.Log $hi) $log10 -}}
+{{- $loLog := div (math.Log $lo) $log10 -}}
+
+{{- /* y position for a value, log or linear */ -}}
+{{- $yTicks := int (.Get "y-ticks" | default "4") -}}
+{{- $decades := cond $log (add (int (math.Round (sub $hiLog $loLog))) 1) 0 -}}
+
+{{- /* SI tick formatter */ -}}
+{{- $siFmt := dict -}}
+
+{{- /* rank order: brightest ramp step to the largest value, list order
+     irrelevant. The leading dot in ".value" is load-bearing — sort
+     silently no-ops on a slice of maps without it. */ -}}
+{{- $sorted := sort $data ".value" "desc" -}}
+{{- $steps := slice "var(--mc-ramp-1)" "var(--mc-ramp-2)" "var(--mc-ramp-3)" "var(--mc-ramp-4)" "var(--mc-ramp-5)" -}}
+{{- $stepFor := dict -}}
+{{- $use := cond (le $n 4) 4 5 -}}
+{{- range $r, $row := $sorted -}}
+  {{- $stepFor = merge $stepFor (dict (index $row "label") (index $steps (cond (lt $r $use) $r (sub $use 1)))) -}}
+{{- end -}}
+
+{{- $slot := div (sub $pr $pl) (float (cond (gt $n 0) $n 1)) -}}
+{{- $bw := cond (lt (mul $slot 0.54) 104.0) (mul $slot 0.54) 104.0 -}}
+
+{{- /* ── aria: names rank, value, emphasis — never colour ── */ -}}
+{{- $desc := slice -}}
+{{- range $data }}{{ $desc = $desc | append (printf "%s %v" (index . "label") (index . "value")) }}{{ end -}}
+{{- $aria := printf "Column chart%s%s. %s.%s Columns are shaded by rank, not by category colour."
+     (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "")
+     (cond $log ", logarithmic scale" "")
+     (delimit $desc ", ")
+     (cond (and (ge $emph 0) (lt $emph $n)) (printf " %s is highlighted with a heavy outline." (index (index $data $emph) "label")) "") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    {{- with .Get "title" }}<div class="obs-col__hd">{{ . }}</div>{{ end }}
+    {{- with .Get "units" }}<div class="obs-col__sub">{{ . }}</div>{{ end }}
+    <svg class="obs-col" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+
+      {{- /* gridlines + y ticks */ -}}
+      {{- if $log -}}
+        {{- range $i := seq 0 (sub $decades 1) }}
+        {{- $tv := mul $lo (math.Pow 10 $i) -}}
+        {{- $y := sub $pb (mul (div (sub (div (math.Log $tv) $log10) $loLog) (sub $hiLog $loLog)) $ih) }}
+        <line x1="{{ $pl }}" y1="{{ $y }}" x2="{{ $pr }}" y2="{{ $y }}" stroke="var(--mc-border)" stroke-width="1"/>
+        <text x="{{ sub $pl 10 }}" y="{{ add $y 4 }}" text-anchor="end" class="obs-col__tick">{{ if ge $tv 1000000.0 }}{{ math.Round (div $tv 1000000.0) }}M{{ else if ge $tv 1000.0 }}{{ math.Round (div $tv 1000.0) }}K{{ else }}{{ math.Round $tv }}{{ end }}</text>
+        {{- end -}}
+      {{- else -}}
+        {{- range $i := seq 0 $yTicks }}
+        {{- $tv := div (mul $hi (float $i)) (float $yTicks) -}}
+        {{- $y := sub $pb (mul (div $tv $hi) $ih) }}
+        <line x1="{{ $pl }}" y1="{{ $y }}" x2="{{ $pr }}" y2="{{ $y }}" stroke="var(--mc-border)" stroke-width="1"/>
+        <text x="{{ sub $pl 10 }}" y="{{ add $y 4 }}" text-anchor="end" class="obs-col__tick">{{ if ge $tv 1000000.0 }}{{ math.Round (div $tv 1000000.0) }}M{{ else if ge $tv 1000.0 }}{{ math.Round (div $tv 1000.0) }}K{{ else }}{{ math.Round $tv }}{{ end }}</text>
+        {{- end -}}
+      {{- end }}
+
+      {{- with $yLabel }}
+      <text x="20" y="{{ div (add $pt $pb) 2 }}" transform="rotate(-90 20 {{ div (add $pt $pb) 2 }})"
+            text-anchor="middle" class="obs-col__tick">{{ . }}</text>
+      {{- end }}
+
+      {{- /* x axis */ -}}
+      <line x1="{{ $pl }}" y1="{{ $pb }}" x2="{{ $pr }}" y2="{{ $pb }}" stroke="var(--mc-axis)" stroke-width="1.5"/>
+
+      {{- range $i, $d := $data }}
+      {{- $v := index $d "value" | float -}}
+      {{- $cx := add $pl (add (mul $slot (float $i)) (div $slot 2)) -}}
+      {{- $top := 0.0 -}}
+      {{- if $log -}}
+        {{- $c := cond (gt $v $lo) $v $lo -}}
+        {{- $top = sub $pb (mul (div (sub (div (math.Log $c) $log10) $loLog) (sub $hiLog $loLog)) $ih) -}}
+      {{- else -}}
+        {{- $top = sub $pb (mul (div $v $hi) $ih) -}}
+      {{- end -}}
+      {{- $on := eq $i $emph -}}
+      {{- $h := sub $pb $top -}}{{- $h = cond (gt $h 1.0) $h 1.0 -}}
+      <rect x="{{ sub $cx (div $bw 2) }}" y="{{ $top }}" width="{{ $bw }}" height="{{ $h }}"
+            fill="{{ index $stepFor (index $d "label") | safeCSS }}" stroke="var(--mc-ink)"
+            stroke-width="{{ if $on }}3.5{{ else }}1{{ end }}"/>
+      <text x="{{ $cx }}" y="{{ sub $top 12 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
+            class="obs-col__val{{ if $on }} on{{ end }}">{{ index $d "value" }}</text>
+      <text x="{{ $cx }}" y="{{ add $pb 25 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
+            class="obs-col__lab{{ if $on }} on{{ end }}">{{ index $d "label" }}</text>
+      {{- with index $d "caption" }}
+      {{- range $li, $line := split . "\n" }}
+      <text x="{{ $cx }}" y="{{ add (add $pb 45) (mul (float $li) 17) }}" text-anchor="middle" class="obs-col__cap">{{ $line }}</text>
+      {{- end }}
+      {{- end }}
+      {{- end }}
+    </svg>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

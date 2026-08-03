@@ -1239,6 +1239,21 @@ html.calm {
 .obs-ser__thr{font-size:12.5px;fill:var(--mc-ink-muted)}
 .obs-ser__ev{font-size:12.5px;fill:var(--mc-ink)}
 
+/* ---- column (template 01b): vertical sibling of obs-ranked-bars, log scale ----
+   Same viewBox-scaling note as obs-ser above: tick/y-label text stays at
+   the measured-safe 12.5px rather than canonical --mc-text-tick (12px);
+   value/label text (13/14px canonical) already clears the floor with
+   margin at this scale, so those reference the tokens directly. */
+.obs-col{width:100%;height:auto;display:block;font-family:var(--font-code)}
+.obs-col__hd{font-family:var(--font-read);font-size:var(--mc-text-chart-title);font-weight:500;color:var(--mc-ink);margin-bottom:4px}
+.obs-col__sub{font-family:var(--font-code);font-size:var(--mc-text-tick);color:var(--mc-ink-muted);margin-bottom:14px}
+.obs-col__tick{font-size:12.5px;fill:var(--mc-ink-muted)}
+.obs-col__val{font-family:var(--font-code);font-size:var(--mc-text-value);fill:var(--mc-ink-secondary)}
+.obs-col__val.on{fill:var(--mc-ink)}
+.obs-col__lab{font-family:var(--font-code);font-size:var(--mc-text-label);fill:var(--mc-ink-secondary)}
+.obs-col__lab.on{fill:var(--mc-ink)}
+.obs-col__cap{font-size:12.5px;fill:var(--mc-ink-muted)}
+
 /* ---- state machine (template 07): glyph rank + entry border + return lane ---- */
 .obs-sm{font-family:var(--font-code);container-type:inline-size}
 .obs-sm__hd{font-family:'Press Start 2P',monospace;font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);margin-bottom:9px}

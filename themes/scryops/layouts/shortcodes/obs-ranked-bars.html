@@ -31,7 +31,10 @@
 {{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
 
 {{- /* rank order: brightest ramp step to the largest value, whatever the list order */ -}}
-{{- $sorted := sort $rows "value" "desc" -}}
+{{- /* NOTE: the leading dot in ".value" is load-bearing — sort silently
+     no-ops on a slice of maps without it (confirmed: "value"/"Value"
+     return the original, unsorted order; only ".value" actually sorts). */ -}}
+{{- $sorted := sort $rows ".value" "desc" -}}
 {{- $steps := slice "var(--mc-ramp-1)" "var(--mc-ramp-2)" "var(--mc-ramp-3)" "var(--mc-ramp-4)" "var(--mc-ramp-5)" -}}
 {{- $stepFor := dict -}}
 {{- $use := cond (le $n 4) 4 5 -}}
