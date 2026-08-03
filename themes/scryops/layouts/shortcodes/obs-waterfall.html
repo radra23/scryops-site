@@ -5,23 +5,31 @@
      don't reach: 01/01b share a baseline, 03b overlays series on one axis,
      07 has states with no duration.
 
-     Five non-chromatic channels:
+     Six non-chromatic channels:
        offset    bar start x            when it began
        duration  bar length             the measurement
        depth     left indent per level  parent/child structure
        self/wait solid vs hatched       WHERE the time actually went
        critical  3.5px outline          emphasis (never a tint)
+       kind      fill ramp + border weight + dash   auto / manual / error
 
      Set "self" on any span with children: the remainder renders hatched as
      waiting. That is what makes "which span owns the latency" answerable —
      bar length alone cannot, because a long parent is often just blocked.
 
+     "kind" (default "auto") answers a DIFFERENT question — how the span got
+     there, not where the time went — so it rides its own channels: fill
+     ramp (auto ramp-3 -> manual ramp-2 -> error ramp-1), border weight
+     (1 -> 2 -> 1.5px), and border style (solid -> solid -> dashed, plus a
+     ✕ appended to the name). critical still only ever adds weight (3.5px),
+     never a fill change, on top of whatever kind already set.
+
        {{< obs-waterfall title="POST /checkout" total="240" critical="3"
              units="milliseconds · solid = self time, hatched = waiting on children"
              caption="Fig. — db.query owns the latency." >}}
        [ {"name":"api-gateway","start":0,"duration":236,"self":45,"depth":0},
-         {"name":"auth.verify","start":12,"duration":18,"depth":1},
-         {"name":"db.query","start":58,"duration":152,"depth":2} ]
+         {"name":"auth.verify","start":12,"duration":18,"depth":1,"kind":"auto"},
+         {"name":"db.query","start":58,"duration":152,"depth":2,"kind":"manual"} ]
        {{< /obs-waterfall >}}                                                */ -}}
 
 {{- $spans := slice -}}
@@ -29,9 +37,10 @@
 {{- $n := len $spans -}}
 {{- $crit := cond (ne (.Get "critical") nil) (int (.Get "critical" | default "-1")) -1 -}}
 {{- $unit := .Get "unit" | default "ms" -}}
+{{- $showKind := .Get "showKind" | default true -}}
 {{- /* .Ordinal keeps the hatch pattern id unique if two waterfalls land on
-     one page — a fixed id would let the second instance's <defs> silently
-     shadow or be shadowed by the first's. */ -}}
+     one page — a fixed id would let the second instance's defs block
+     silently shadow or be shadowed by the first's. */ -}}
 {{- $hatchID := printf "obs-wf-hatch-%d" .Ordinal -}}
 
 {{- /* geometry — 700-unit viewBox; label gutter 172, value gutter 66 */ -}}
@@ -45,17 +54,19 @@
 {{- with .Get "total" }}{{ $hi = . | float }}{{ end -}}
 {{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
 
-{{- /* aria: names the shapes and the self/wait split, never a colour */ -}}
+{{- /* aria: names the shapes, the self/wait split, and the kind — never a colour */ -}}
+{{- $kindWord := dict "auto" "auto-instrumented" "manual" "manually instrumented" "error" "failed" -}}
 {{- $sd := slice -}}
 {{- range $spans -}}
   {{- $d := index . "duration" | float -}}
   {{- $self := index . "self" | default $d | float -}}
   {{- $wait := sub $d $self -}}
-  {{- $sd = $sd | append (printf "%s at depth %d starts at %v%s and runs %v%s%s"
-       (index . "name") (index . "depth" | default 0 | int) (index . "start") $unit $d $unit
+  {{- $k := index . "kind" | default "auto" -}}
+  {{- $sd = $sd | append (printf "%s (%s) at depth %d starts at %v%s and runs %v%s%s"
+       (index . "name") (index $kindWord $k) (index . "depth" | default 0 | int) (index . "start") $unit $d $unit
        (cond (gt $wait 0.01) (printf ", of which %v%s is its own work and %v%s is waiting on children" $self $unit $wait $unit) "")) -}}
 {{- end -}}
-{{- $aria := printf "Span waterfall%s, total %v%s. %s.%s Bars are separated by position and length; solid marks self time and hatching marks waiting, not colour."
+{{- $aria := printf "Span waterfall%s, total %v%s. %s.%s Bars are separated by position and length; solid marks self time and hatching marks waiting. Span kind (auto-instrumented, manual, or failed) is carried by border weight and dash style, and a ✕ on failed spans — never colour alone."
      (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "") $hi $unit (delimit $sd ". ")
      (cond (ge $crit 0) (printf " %s carries a heavy outline as the span owning the latency." (index (index $spans $crit) "name")) "") -}}
 
@@ -93,22 +104,37 @@
       {{- $wTot := mul (div $d $hi) $span -}}
       {{- $on := eq $i $crit -}}
       {{- $depth := index $s "depth" | default 0 | int -}}
-      {{- $nmX := add 4 (mul $depth 13) }}
+      {{- $nmX := add 4 (mul $depth 13) -}}
+      {{- /* kind: fill ramp + border weight + dash, orthogonal to self/wait
+           and to critical — critical only ever adds weight, never a fill
+           change, on top of whatever kind already set. */ -}}
+      {{- $kind := index $s "kind" | default "auto" -}}
+      {{- $fill := "var(--mc-ramp-3)" -}}
+      {{- $baseW := 1.0 -}}
+      {{- $dash := "" -}}
+      {{- $nmSuffix := "" -}}
+      {{- if eq $kind "manual" }}{{ $fill = "var(--mc-ramp-2)" }}{{ $baseW = 2.0 }}
+      {{- else if eq $kind "error" }}{{ $fill = "var(--mc-ramp-1)" }}{{ $baseW = 1.5 }}{{ $dash = "3 2" }}{{ $nmSuffix = " ✕" }}
+      {{- end -}}
+      {{- $selfSW := cond $on 3.5 $baseW }}
       <text x="{{ $nmX }}" y="{{ add $y (sub $bar 4) }}"
-            class="obs-wf__nm{{ if $on }} on{{ end }}">{{ index $s "name" }}</text>
+            class="obs-wf__nm{{ if $on }} on{{ end }}">{{ index $s "name" }}{{ $nmSuffix }}</text>
       {{- if gt $wTot (add $wSelf 0.5) }}
       <rect x="{{ add $x0 $wSelf }}" y="{{ $y }}" width="{{ sub $wTot $wSelf }}" height="{{ $bar }}"
             fill="url(#{{ $hatchID }})" stroke="var(--mc-ink)" stroke-width="1"/>
       {{- end }}
-      {{- $selfSW := cond $on 3.5 1.0 }}
       <rect x="{{ $x0 }}" y="{{ $y }}" width="{{ $wSelf }}" height="{{ $bar }}"
-            fill="var(--mc-ramp-1)" stroke="var(--mc-ink)" stroke-width="{{ $selfSW }}"/>
+            fill="{{ $fill }}" stroke="var(--mc-ink)" stroke-width="{{ $selfSW }}" stroke-dasharray="{{ $dash }}"/>
       <text x="{{ add (add $x0 $wTot) 8 }}" y="{{ add $y (sub $bar 4) }}"
             class="obs-wf__val{{ if $on }} on{{ end }}">{{ $d }}{{ $unit }}</text>
       {{- end }}
     </svg>
     <div class="obs-wf__key">
-      <span><i class="obs-wf__sw solid"></i>self time</span>
+      {{- if $showKind }}
+      <span><i class="obs-wf__sw auto"></i>auto-instrumented</span>
+      <span><i class="obs-wf__sw manual"></i>manual span</span>
+      <span><i class="obs-wf__sw err"></i>failed</span>
+      {{- end }}
       <span><i class="obs-wf__sw hatch"></i>waiting on children</span>
       <span><i class="obs-wf__sw heavy"></i>owns the latency</span>
     </div>

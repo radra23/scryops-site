@@ -188,7 +188,18 @@ Navigate to `http://localhost:16686`. The UI is built around four views:
 
 4. **Dependencies**: A service graph derived from span relationships in the stored traces, showing which services call which.
 
-{{< obs-trace-waterfall >}}
+{{< obs-waterfall title="TRACE WATERFALL" total="240" critical="4"
+      units="milliseconds · one request, GET /checkout · solid = self time, hatched = waiting on children"
+      caption="Fig. — A trace is one request's story told in spans. The thin-bordered spans come free from auto-instrumentation; the thick-bordered payment.process span is the one you added by hand — but most of its bar is hatched, because it's waiting on the outbound Stripe call nested beneath it, which is the span that actually owns the latency. The dashed span is where it broke." >}}
+[
+  {"name":"GET /checkout","start":0,"duration":240,"self":20,"depth":0,"kind":"auto"},
+  {"name":"auth.verify","start":8,"duration":16,"depth":1,"kind":"auto"},
+  {"name":"SELECT cart_items","start":26,"duration":32,"depth":1,"kind":"auto"},
+  {"name":"payment.process","start":62,"duration":152,"self":22,"depth":1,"kind":"manual"},
+  {"name":"POST stripe.com/charge","start":70,"duration":130,"depth":2,"kind":"auto"},
+  {"name":"UPDATE orders","start":216,"duration":20,"depth":1,"kind":"error"}
+]
+{{< /obs-waterfall >}}
 
 The Trace Detail view is where the work happens. You can see how long each operation took, where time was lost, and which service emitted an error tag — without grepping logs across five services.
 

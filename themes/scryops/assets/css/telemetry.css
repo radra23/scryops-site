@@ -1271,7 +1271,9 @@ html.calm {
   border-top:1px solid var(--mc-border);font-size:var(--mc-text-node-caption);color:var(--mc-ink-muted)}
 .obs-wf__key span{display:inline-flex;align-items:center;gap:6px}
 .obs-wf__sw{width:22px;height:11px;flex:none;border:1px solid var(--mc-ink)}
-.obs-wf__sw.solid{background:var(--mc-ramp-1)}
+.obs-wf__sw.auto{background:var(--mc-ramp-3)}
+.obs-wf__sw.manual{background:var(--mc-ramp-2);border-width:2px}
+.obs-wf__sw.err{background:var(--mc-ramp-1);border-style:dashed}
 .obs-wf__sw.hatch{background:repeating-linear-gradient(45deg,var(--mc-ink) 0 3px,var(--surface) 3px 9px)}
 .obs-wf__sw.heavy{background:var(--mc-ramp-1);border-width:3px}
 
