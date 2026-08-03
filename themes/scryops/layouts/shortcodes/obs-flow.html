@@ -1,0 +1,75 @@
+{{- /* layouts/shortcodes/obs-flow.html · TEMPLATE 05
+     One-direction flow: pipelines, lifecycles, request paths. Ported from
+     the "Accessible monochrome charting system" handoff's FlowDiagram
+     (.claude/skills/scryops-design/components/diagrams/FlowDiagram.jsx),
+     built from DOM boxes rather than SVG so it reflows, themes, and stays
+     directly editable.
+
+     ONE MEANING PER CHANNEL:
+       border weight   1.6px, 3.5px on the entry node          rank
+       fill             paper / tint / grid / terminal (inverted)  kind
+       dash             dashed border + open-headed inbound edge  conditional
+
+     Flow runs one direction only — left to right, then down. The row never
+     wraps; below ~520px of container width it re-flows to the vertical
+     arrangement automatically (arrows swap to ↓), so keep rows to ~4 nodes
+     and prefer direction="column" for longer flows. Every node gets a mono
+     caption naming its type; labels over the grid fill get a surface-
+     coloured band so no pattern lines run through the text.
+
+       {{< obs-flow title="TICKET LIFECYCLE" subtitle="// intake to close" caption="Fig. — ..." >}}
+       {
+         "nodes": [
+           {"label":"Intake","caption":"entry","entry":true},
+           {"label":"Triage","caption":"human","kind":"tint"},
+           {"label":"Specialist","caption":"human","kind":"tint","edgeLabel":"assigned"},
+           {"label":"Closed","caption":"terminal","kind":"terminal"}
+         ]
+       }
+       {{< /obs-flow >}}                                                    */ -}}
+
+{{- $d := dict -}}
+{{- with trim .Inner " \n\r\t" }}{{ $d = . | transform.Unmarshal }}{{ end -}}
+{{- $nodes := index $d "nodes" | default slice -}}
+{{- $stack := eq (.Get "direction") "column" -}}
+
+{{- /* aria: names kind/conditionality by word, never colour */ -}}
+{{- $parts := slice -}}
+{{- range $i, $n := $nodes -}}
+  {{- $lead := "" -}}
+  {{- if gt $i 0 -}}{{- $lead = cond (index $n "conditional") "conditionally to " "then " -}}{{- end -}}
+  {{- $parts = $parts | append (printf "%s%s" $lead (index $n "label")) -}}
+{{- end -}}
+{{- $aria := .Get "ariaLabel" | default (printf "Flow diagram%s: %s. Node kind is carried by fill and border weight, not colour."
+     (cond (.Get "title") (printf ", %s" (lower (.Get "title"))) "") (delimit $parts ", ")) -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-flow-wrap">
+      {{- with .Get "title" }}<div class="obs-flow__hd">{{ . }}</div>{{ end }}
+      {{- with .Get "subtitle" }}<div class="obs-flow__sub">{{ . }}</div>{{ end }}
+      <div class="obs-flow{{ if $stack }} stack{{ end }}" role="img" aria-label="{{ $aria }}">
+        {{- range $i, $n := $nodes }}
+        {{- $kind := index $n "kind" | default "paper" }}
+        {{- $cond := index $n "conditional" }}
+        {{- if gt $i 0 }}
+        <span class="obs-flow__edge{{ if $cond }} cond{{ end }}" aria-hidden="true">
+          <span class="obs-flow__arrow">
+            <span class="a-row">{{ if $cond }}&#10142;{{ else }}&#8594;{{ end }}</span>
+            <span class="a-col">{{ if $cond }}&#8663;{{ else }}&#8595;{{ end }}</span>
+          </span>
+          {{- with index $n "edgeLabel" }}<span class="obs-flow__elabel">{{ . }}</span>{{ end }}
+        </span>
+        {{- end }}
+        <span class="obs-flow__node{{ if index $n "entry" }} entry{{ end }}{{ if eq $kind "tint" }} tint{{ end }}{{ if eq $kind "grid" }} grid{{ end }}{{ if eq $kind "terminal" }} terminal{{ end }}{{ if $cond }} conditional{{ end }}">
+          <span class="obs-flow__text">
+            <span class="obs-flow__nm">{{ index $n "label" }}</span>
+            {{- with index $n "caption" }}<span class="obs-flow__cap">{{ . }}</span>{{ end }}
+          </span>
+        </span>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>
