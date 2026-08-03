@@ -10,7 +10,7 @@
 
       <!-- eyebrow -->
       <text x="78" y="30" fill="var(--warn)" font-family="'Press Start 2P',monospace" font-size="11" letter-spacing="0.04em">DATA VOLUME vs. SCALE</text>
-      <text x="78" y="47" fill="var(--muted)" font-size="11">// monitoring stays bounded &#8212; observability climbs with cardinality</text>
+      <text x="78" y="47" fill="var(--muted)" font-size="12.5">// monitoring stays bounded &#8212; observability climbs with cardinality</text>
 
       <!-- grid -->
       <g stroke="var(--fig-bg)" stroke-width="1">
@@ -21,8 +21,8 @@
       <!-- axes -->
       <line x1="78" y1="62" x2="78" y2="300" stroke="var(--border)" stroke-width="1"/>
       <line x1="78" y1="300" x2="730" y2="300" stroke="var(--border)" stroke-width="1"/>
-      <text x="22" y="180" fill="var(--muted)" font-size="11" transform="rotate(-90 22 180)" text-anchor="middle">telemetry volume &amp; cost &#8594;</text>
-      <text x="404" y="324" fill="var(--muted)" font-size="11" text-anchor="middle">scale &#8594; (traffic &#215; cardinality)</text>
+      <text x="22" y="180" fill="var(--muted)" font-size="12.5" transform="rotate(-90 22 180)" text-anchor="middle">telemetry volume &amp; cost &#8594;</text>
+      <text x="404" y="324" fill="var(--muted)" font-size="12.5" text-anchor="middle">scale &#8594; (traffic &#215; cardinality)</text>
 
       <!-- gap fill between the two curves -->
       <path d="M78,288 L160,280 240,268 330,248 430,213 540,162 640,108 730,72 L730,247 640,248 540,250 430,254 330,260 240,268 160,278 78,288 Z" fill="var(--warn)" fill-opacity="0.10"/>
@@ -37,13 +37,13 @@
       <circle cx="730" cy="72" r="4.5" fill="var(--warn)"/>
 
       <!-- curve labels (colour ties each label to its line) -->
-      <text x="306" y="108" fill="var(--warn)" font-size="11">observability</text>
-      <text x="306" y="122" fill="var(--muted)" font-size="11">raw events &#183; high-cardinality</text>
-      <text x="628" y="264" fill="var(--cyan)" font-size="11">monitoring</text>
-      <text x="628" y="276" fill="var(--muted)" font-size="11">bounded series</text>
+      <text x="306" y="108" fill="var(--warn)" font-size="12.5">observability</text>
+      <text x="306" y="122" fill="var(--muted)" font-size="12.5">raw events &#183; high-cardinality</text>
+      <text x="628" y="264" fill="var(--cyan)" font-size="12.5">monitoring</text>
+      <text x="628" y="276" fill="var(--muted)" font-size="12.5">bounded series</text>
 
       <!-- gap label -->
-      <text x="566" y="206" fill="var(--text)" font-size="11">the bill</text>
+      <text x="566" y="206" fill="var(--text)" font-size="12.5">the bill</text>
     </svg>
   </div>
   <figcaption>Fig. &#8212; Monitoring's data is bounded by the series you defined in advance; observability's grows with every new dimension you can ask about. That widening gap is the bill &#8212; and the reason sampling and retention tiers exist.</figcaption>
