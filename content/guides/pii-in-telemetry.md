@@ -14,7 +14,11 @@ Picture an engineer adding a helpful attribute to a `process_order` span: the cu
 
 Most teams don't put PII in spans intentionally. It ends up there because the instrumentation reaches for whatever context is available: the order object, the request body, the user session. The context that makes debugging easy and the context that identifies individuals are often the same thing. By the time anyone notices, there are months or years of personal data in a system that was never designed to be a personal data processor.
 
+{{< obs-pii-stats >}}
+
 GDPR enforcement has resulted in significant fines — multi-million euro penalties — for inadequate technical controls around personal data, with no leniency for unintentional collection. The "we didn't know it was there" defence has been explicitly rejected in DPA rulings across the EU. The data is there. You own it. You're responsible for it.
+
+{{< obs-pii-hall-of-shame >}}
 
 ## Where the Leaks Come From
 
@@ -26,16 +30,7 @@ The most common sources of PII in telemetry are also the most useful pieces of d
 
 **Baggage propagation** is the sneakier one. If your application propagates user identity through W3C baggage headers — which some authentication middlewares do automatically — every downstream span in the distributed trace will contain that baggage, including spans in services that have no business knowing the user's identity.
 
-{{< mermaid >}}
-flowchart LR
-    A[Instrumented request] --> B[Span attributes]
-    A --> C[Correlated log records]
-    A --> D[Baggage propagation]
-    D --> F[Downstream service spans]
-    B --> E[Trace backend indexed and searchable]
-    C --> E
-    F --> E
-{{< /mermaid >}}
+{{< obs-pii-leak-paths >}}
 
 Three different mechanisms, one destination. Baggage is the one worth remembering: it doesn't leak straight into the backend, it leaks into every downstream service's own spans first — spans owned by teams who never touched the field that put it there.
 
@@ -60,6 +55,8 @@ Here's what a real `process_order` span looks like before any PII handling:
   }
 }
 ```
+
+{{< obs-pii-redaction >}}
 
 And the same span after a properly configured OTel Collector transform pipeline:
 
@@ -88,6 +85,8 @@ The span is still useful for debugging. You can still correlate traces with orde
 
 Not all attributes need the same treatment. Applying maximum protection to everything is as much a problem as applying none — you'll lose diagnostic value you actually need. Here's how to think about each field type:
 
+{{< obs-pii-blindspot >}}
+
 | Signal Type | Example | Sensitivity | Action | Retention |
 |---|---|---|---|---|
 | System identifier | Service name, pod ID | None | Keep as-is | Long-term |
@@ -102,19 +101,7 @@ The "hash" treatment for business identifiers deserves explanation: you replace 
 
 One important caveat: this approach is safe for opaque business identifiers like order IDs or transaction IDs, where the value space is large and unpredictable. Do **not** apply unsalted SHA-256 to personal identifiers like email addresses — the value space of common email addresses is small enough to be exhausted by a pre-computed rainbow table in seconds. If you need a correlatable pseudonym for a user, use HMAC-SHA256 with a rotating secret key stored outside the telemetry system, or tokenise the value and discard the mapping from the pipeline entirely.
 
-{{< mermaid >}}
-flowchart TD
-    A[Attribute in Span] --> B{Required for<br/>operational debugging?}
-    B -->|Yes| C[System / Technical Data]
-    B -->|No| D{Does it identify<br/>an individual?}
-    C --> E[Keep as-is]
-    D -->|No| F{Does it describe<br/>business context?}
-    D -->|Yes| G{Can it be derived<br/>or anonymised?}
-    F -->|Yes| H[Keep as-is]
-    F -->|No| I[Remove]
-    G -->|Yes| J[Hash or coarsen]
-    G -->|No| K[Remove entirely]
-{{< /mermaid >}}
+{{< obs-pii-triage >}}
 
 Run every attribute in your instrumentation through this decision tree. The result is your PII handling policy — and it becomes your Collector transform configuration.
 
@@ -182,9 +169,13 @@ CCPA adds a right to deletion obligation: if a customer requests erasure, you ne
 
 HIPAA's minimum necessary standard applies the same logic to health data: use or disclose only the minimum amount of protected health information necessary. If you're instrumenting a healthcare application, any PHI in your telemetry is a potential HIPAA violation.
 
+{{< obs-pii-regimes >}}
+
 The Collector pipeline approach satisfies all three frameworks simultaneously: data that never enters the backend doesn't need to be deleted, minimised, or protected there.
 
 ## Where to Start
+
+{{< obs-pii-bingo >}}
 
 The migration from "PII everywhere" to "PII nowhere" doesn't require a big-bang effort. Start by auditing what's currently in your trace backend. Most backends support a simple attribute search — run queries for common field names (`email`, `phone`, `address`, `card`, `ssn`, `dob`) across a sample of recent traces. Build the list of fields that need treatment. Then implement the Collector transforms and verify the output against a known span.
 
