@@ -185,4 +185,13 @@ Every span attribute that never enters the backend is one field that can't be su
 
 For the specific transformation techniques — hashing, tokenisation, coarsening, and quality gates — see [Data Masking in Telemetry](/guides/data-masking-in-telemetry/).
 
+## See Also
+
+- [Protecting Privacy in Software Logs: What Should Be Anonymized?](https://arxiv.org/abs/2409.11313) — Aghili, Li & Khomh, PACMSE / FSE 2025. The peer-reviewed source behind the opener stats and the blind-spot chart: 25 public log datasets, 58 papers, 45 practitioners surveyed.
+- [DPC announces €91 million fine of Meta](https://www.dataprotection.ie/en/news-media/press-releases/DPC-announces-91-million-fine-of-Meta) — Irish Data Protection Commission, 27 September 2024. The decision behind the hall-of-shame figure's headline number.
+- [Facebook Stored Hundreds of Millions of User Passwords in Plain Text for Years](https://krebsonsecurity.com/2019/03/facebook-stored-hundreds-of-millions-of-user-passwords-in-plain-text-for-years/) — KrebsOnSecurity, 21 March 2019. The original reporting, five years ahead of the DPC's decision.
+- [American Hospital Assn. v. Becerra: Are Tracking Tools OK Again?](https://www.hklaw.com/en/insights/publications/2024/06/american-hospital-assn-v-becerra-are-tracking-tools-ok-again) — Holland & Knight, June 2024. Why this guide calls the HHS OCR tracking bulletin "contested" rather than live guidance.
+- [CJEU — C-582/14 — Breyer](https://gdprhub.eu/index.php?title=CJEU_-_C-582/14_-_Patrick_Breyer) — GDPRhub case summary. The ruling that put a dynamic IP address in scope as personal data.
+- [2025 Telemetry & Observability Report](https://www.sawmills.ai/observability-report-2025) — Sawmills, 2025. Vendor-run survey; source of the "13% of telemetry actively used" figure, labelled directional above.
+
 {{< obs-mascot class="cleric" tag="guardian of the redaction pipeline" quip="I have blessed this span and cast out its sins — the email, the card, the home address. Go forth, telemetry, and leak no more. ...the redaction belongs in the Collector, not in prayer. Configure it there." >}}
