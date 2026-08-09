@@ -26,6 +26,19 @@ The most common sources of PII in telemetry are also the most useful pieces of d
 
 **Baggage propagation** is the sneakier one. If your application propagates user identity through W3C baggage headers — which some authentication middlewares do automatically — every downstream span in the distributed trace will contain that baggage, including spans in services that have no business knowing the user's identity.
 
+{{< mermaid >}}
+flowchart LR
+    A[Instrumented request] --> B[Span attributes]
+    A --> C[Correlated log records]
+    A --> D[Baggage propagation]
+    D --> F[Downstream service spans]
+    B --> E[Trace backend indexed and searchable]
+    C --> E
+    F --> E
+{{< /mermaid >}}
+
+Three different mechanisms, one destination. Baggage is the one worth remembering: it doesn't leak straight into the backend, it leaks into every downstream service's own spans first — spans owned by teams who never touched the field that put it there.
+
 ## The Crime Scene and the Clean Version
 
 Here's what a real `process_order` span looks like before any PII handling:
