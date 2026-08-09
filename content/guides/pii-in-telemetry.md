@@ -2,7 +2,7 @@
 title: "Your Traces Are Leaking User Data"
 date: 2026-05-26
 draft: false
-excerpt: "Every OTel span that includes a customer email, shipping address, or payment token is a GDPR audit waiting to happen. The fix isn't application code — it's a Collector pipeline."
+excerpt: "Every OTel span that includes a customer email, shipping address, or payment token is a GDPR audit waiting to happen. The fix isn't application code; it's a Collector pipeline."
 readtime: 8
 tags: ["OpenTelemetry", "Privacy", "GDPR", "Security", "Observability", "Collector"]
 ---
@@ -10,29 +10,29 @@ tags: ["OpenTelemetry", "Privacy", "GDPR", "Security", "Observability", "Collect
 > "The data you collect to understand your system can, without care, become the data that defines your liability."
 > — A Developer, One Week Before the GDPR Audit
 
-Picture an engineer adding a helpful attribute to a `process_order` span: the customer's email, because it makes debugging so much easier. You can find all the traces for a given user. You can correlate a support ticket to a trace in seconds. It's genuinely useful. It's also, quietly, a GDPR violation — and it's been sitting in your trace backend, indexed and searchable, ever since.
+Imagine an engineer, eager to help, adding a customer's email to a `process_order` span. Debugging just got much easier: now you can find every trace for a user, match support tickets to traces in a snap, and generally feel like a troubleshooting wizard. Super handy. Also, quietly, a GDPR violation that's been lounging in your trace backend, indexed and ready for search, ever since.
 
-Most teams don't put PII in spans intentionally. It ends up there because the instrumentation reaches for whatever context is available: the order object, the request body, the user session. The context that makes debugging easy and the context that identifies individuals are often the same thing. By the time anyone notices, there are months or years of personal data in a system that was never designed to be a personal data processor.
+Most teams don't purposely put personal data in spans. It gets there because the tools grab whatever information is available: the order details, the request content, the user session. The info that helps with debugging and the info that identifies people are often the same. By the time anyone realizes, there are months or years of personal data in a system that was never meant to handle personal data.
 
 {{< obs-pii-stats >}}
 
-GDPR enforcement has resulted in significant fines — multi-million euro penalties — for inadequate technical controls around personal data, with no leniency for unintentional collection. The "we didn't know it was there" defence has been explicitly rejected in DPA rulings across the EU. The data is there. You own it. You're responsible for it.
+GDPR regulators have given out huge fines for careless handling of personal data. We’re talking multi-million euro penalties, and they don’t care if you collected it by mistake. The old 'we didn’t know it was there' excuse? That gets laughed out of DPA hearings across the EU. If the data is in your system, it’s officially your problem to own and protect.
 
 {{< obs-pii-hall-of-shame >}}
 
 ## Where the Leaks Come From
 
-The most common sources of PII in telemetry are also the most useful pieces of debugging context. That's not a coincidence.
+Here’s the main point: the most useful debugging details are exactly where personal data tends to sneak into your telemetry. This is not a coincidence.
 
-**Span attributes** are the most frequent leak point. Instrumentation libraries that automatically capture HTTP request parameters, gRPC request/response bodies, or database query arguments will include whatever was in those payloads — a `user.login` span with the email as the username attribute, a `payment.process` span with the card token, an `address.validate` span with the full shipping address.
+**Span attributes** are the most frequent leak point. Instrumentation libraries that automatically capture HTTP request parameters, gRPC request/response data, or database query info will include whatever was in those messages: a `user.login` span with the email as the username, a `payment.process` span with the card token, an `address.validate` span with the full shipping address.
 
-**Log records correlated to traces** carry the same risk. A structured log line that includes the user ID, email, or IP address, emitted within a traced request, will be exported alongside the trace with the same `trace_id`. Fixing the spans and ignoring the logs is only half a solution.
+**Log records linked to traces** have the same risk. A structured log entry that includes the user ID, email, or IP address, created during a traced request, will be sent along with the trace using the same `trace_id`. Fixing the spans but ignoring the logs only solves part of the problem.
 
-**Baggage propagation** is the sneakier one. If your application propagates user identity through W3C baggage headers — which some authentication middlewares do automatically — every downstream span in the distributed trace will contain that baggage, including spans in services that have no business knowing the user's identity.
+**Baggage propagation** is the trickiest. If your app passes user identity through W3C baggage headers (which some login middlewares do automatically), every later span in the trace will carry that baggage, even in services that shouldn't know the user's identity.
 
 {{< obs-pii-leak-paths >}}
 
-Three different mechanisms, one destination. Baggage is the one worth remembering: it doesn't leak straight into the backend, it leaks into every downstream service's own spans first — spans owned by teams who never touched the field that put it there.
+Three different routes, all ending in the same traffic jam. Baggage is the real troublemaker here. It doesn’t just drop PII into your backend; it spreads it across every downstream service’s spans, sometimes appearing in places that never even had the original data.
 
 ## The Crime Scene and the Clean Version
 
@@ -75,20 +75,20 @@ And the same span after a properly configured OTel Collector transform pipeline:
 }
 ```
 
-The span is still useful for debugging. You can still correlate traces with orders via the hashed ID. You can still see the payment provider was Visa. You can still see the cart was three items totalling ~$250. What you cannot do is identify the customer, expose their address, or leak their payment token. The diagnostic value survives. The personal data doesn't make it through.
+The span still pulls its weight for debugging. You can match traces to orders with the hashed ID, see that Visa handled the payment, and know the cart had three items worth about $250. What you can’t do is identify the customer, reveal their address, or let a payment token slip out. The useful details stay, and the personal data gets bounced at the door.
 
 {{< insight lightbulb >}}
-**The governing principle:** preserve *business observability* while removing *personal identifiability*. You can almost always replace PII with derived, non-identifying values that serve the same diagnostic purpose — a hashed order ID still lets you correlate; a raw email address never needed to be there.
+**The governing principle:** preserve *business observability* while removing *personal identification*. You can almost always swap personal data with created, non-identifying values that serve the same diagnostic purpose. A hashed order ID still lets you connect data; a raw email address was never necessary.
 {{< /insight >}}
 
 ## A Decision Framework for Every Field
 
-Not all attributes need the same treatment. Applying maximum protection to everything is as much a problem as applying none — you'll lose diagnostic value you actually need. Here's how to think about each field type:
+Not every attribute needs to be locked up like it’s the crown jewels. If you lock everything down, you lose the diagnostic gold that actually helps you fix things. Here’s a quick cheat sheet for sizing up each field:
 
 {{< obs-pii-blindspot >}}
 
 | Signal Type | Example | Sensitivity | Action | Retention |
-|---|---|---|---|---|
+| --- | --- | --- | --- | --- |
 | System identifier | Service name, pod ID | None | Keep as-is | Long-term |
 | Business identifier | Order ID, transaction ID | Medium | Hash (correlatable) | Medium-term |
 | Personal identifier | Email, phone, name | High | Remove or tokenise | Minimal |
@@ -97,19 +97,19 @@ Not all attributes need the same treatment. Applying maximum protection to every
 | Payment data | Card number, token | Critical | Remove entirely | None |
 | Technical data | Latency, status code | None | Keep as-is | Long-term |
 
-The "hash" treatment for business identifiers deserves explanation: you replace the raw value with a deterministic hash, which means you can still correlate across spans (all spans for `ORD-12345` share the same hash) without the hash being reversible to the original value. The order ID is useful for correlation; the actual number doesn't need to be stored.
+Let’s talk about hashing business identifiers. You trade the raw value for a deterministic hash, so every span for `ORD-12345` gets the same hash, but nobody can reverse-engineer the original order number. You can still link data, but the sensitive details stay hidden.
 
-One important caveat: this approach is safe for opaque business identifiers like order IDs or transaction IDs, where the value space is large and unpredictable. Do **not** apply unsalted SHA-256 to personal identifiers like email addresses — the value space of common email addresses is small enough to be exhausted by a pre-computed rainbow table in seconds. If you need a correlatable pseudonym for a user, use HMAC-SHA256 with a rotating secret key stored outside the telemetry system, or tokenise the value and discard the mapping from the pipeline entirely.
+One important caveat: this approach is safe for opaque business IDs like order or transaction IDs, where the possible values are many and hard to guess. Do **not** use plain SHA-256 on personal data like email addresses; common emails can be cracked quickly using pre-made tables. If you need a linkable fake ID for a user, use HMAC-SHA256 with a changing secret key stored outside the telemetry system, or tokenize the value and discard the mapping from the pipeline completely.
 
 {{< obs-pii-triage >}}
 
-Run every attribute in your instrumentation through this decision tree. The result is your PII handling policy — and it becomes your Collector transform configuration.
+Run every attribute in your instrumentation through this decision tree. That’s your PII policy, ready to plug straight into your Collector transform config.
 
 ## The Fix Lives in the Collector, Not the Application
 
-The right place to strip PII is the OTel Collector, not application code. Doing it in application code means every service team needs to remember to implement it correctly, consistently, and update it whenever new fields are added. One team forgets; you have a gap. One new service joins the platform; you have a gap.
+The best place to remove personal data is in the OTel Collector, not in your application code. Try to do it in the app, and suddenly every service team has to remember the rules, keep things consistent, and update every time a new field sneaks in. If one team forgets, you have a problem. If a new service joins, there’s a gap.
 
-The Collector's `transform` processor lets you define attribute-level operations that apply to all spans passing through the pipeline — regardless of which service emitted them. The `SHA256()` OTTL converter used below requires `otelcol-contrib` v0.96.0 or later.
+The Collector's `transform` processor lets you set up attribute-level rules that apply to every span moving through the pipeline, no matter which service sent it. The `SHA256()` OTTL converter in the example below needs `otelcol-contrib` v0.96.0 or later.
 
 ```yaml
 processors:
@@ -158,32 +158,32 @@ service:
 ```
 
 {{< insight bookmark >}}
-`error_mode: ignore` means the pipeline keeps processing even if a `delete_key` or `set` operation fails — for example, if a span doesn't have the expected attribute. Without it, a malformed span can block the entire pipeline. Always set it.
+`error_mode: ignore` tells the pipeline to keep working even if a `delete_key` or `set` action fails. For example, if a span is missing an expected attribute, the pipeline won’t stop. Without this setting, a single malformed span could block everything. Always enable it.
 {{< /insight >}}
 
 ## What the Regulations Actually Require
 
-GDPR's data minimisation principle (Article 5(1)(c)) requires that personal data be "adequate, relevant and limited to what is necessary." Telemetry data that includes customer emails, addresses, or payment tokens is almost never necessary for the purpose of system observability. A DPA audit that finds this data in your trace backend will find a violation regardless of your intent.
+GDPR's data minimization rule (Article 5(1)(c)) requires that personal data must be "adequate, relevant and limited to what is necessary." Telemetry data with customer emails, addresses, or payment tokens is rarely needed for system observability. A DPA audit that finds this data in your trace backend will see it as a violation no matter your intent.
 
-CCPA adds a right to deletion obligation: if a customer requests erasure, you need to be able to delete their data from all systems where it's stored. "All systems" includes your trace backend. If you hash at ingest and remove all other direct identifiers from the same spans, the mapping from customer identity to trace data doesn't exist in the backend — you've made the deletion problem disappear before it arrives. Any un-hashed PII field left in the same span — a shipping address alongside the hashed order ID, for example — would still require deletion handling.
+CCPA adds a right to deletion rule: if a customer asks to erase their data, you must delete it from all systems where it’s stored. "All systems" includes your trace backend. If you hash data when it enters and remove all other direct identifiers from the same spans, the link between customer identity and trace data doesn’t exist in the backend. You’ve solved the deletion problem before it starts. Any unhashed personal data left in the same span, like a shipping address with the hashed order ID, would still need deletion.
 
-HIPAA's minimum necessary standard applies the same logic to health data: use or disclose only the minimum amount of protected health information necessary. If you're instrumenting a healthcare application, any PHI in your telemetry is a potential HIPAA violation.
+HIPAA's minimum necessary standard applies the same logic to health data: use or share only the smallest amount of protected health information needed. If you’re monitoring a healthcare app, any PHI in your telemetry could be a HIPAA violation.
 
 {{< obs-pii-regimes >}}
 
-The Collector pipeline approach satisfies all three frameworks simultaneously: data that never enters the backend doesn't need to be deleted, minimised, or protected there.
+The Collector pipeline approach checks all three boxes at once. Data that never enters the backend doesn't need to be deleted, minimized, or guarded there.
 
 ## Where to Start
 
 {{< obs-pii-bingo >}}
 
-The migration from "PII everywhere" to "PII nowhere" doesn't require a big-bang effort. Start by auditing what's currently in your trace backend. Most backends support a simple attribute search — run queries for common field names (`email`, `phone`, `address`, `card`, `ssn`, `dob`) across a sample of recent traces. Build the list of fields that need treatment. Then implement the Collector transforms and verify the output against a known span.
+Moving from 'PII everywhere' to 'PII nowhere' doesn’t have to be a massive project. Start by looking through your trace backend. Most backends let you search for attributes, so run a few quick searches for the usual suspects: `email`, `phone`, `address`, `card`, `ssn`, or `dob` in recent traces. Make a list of fields to fix. Then apply the Collector transforms and check the results against a known span.
 
-The pipeline fix takes an afternoon. The regulatory exposure it removes has been known to take considerably longer.
+The pipeline fix is an afternoon’s work. The regulatory headaches it saves you from will last for years.
 
-Every span attribute that never enters the backend is one field that can't be subpoenaed, breached, or surfaced in a DPA audit.
+Every span attribute you keep out of the backend is one less field that can be subpoenaed, breached, or flagged in a DPA audit. That’s peace of mind you can actually count.
 
-For the specific transformation techniques — hashing, tokenisation, coarsening, and quality gates — see [Data Masking in Telemetry](/guides/data-masking-in-telemetry/).
+For the specific transformation techniques — hashing, tokenization, coarsening, and quality gates — see [Data Masking in Telemetry](/guides/data-masking-in-telemetry/).
 
 ## See Also
 
@@ -192,6 +192,6 @@ For the specific transformation techniques — hashing, tokenisation, coarsening
 - [Facebook Stored Hundreds of Millions of User Passwords in Plain Text for Years](https://krebsonsecurity.com/2019/03/facebook-stored-hundreds-of-millions-of-user-passwords-in-plain-text-for-years/) — KrebsOnSecurity, 21 March 2019. The original reporting, five years ahead of the DPC's decision.
 - [American Hospital Assn. v. Becerra: Are Tracking Tools OK Again?](https://www.hklaw.com/en/insights/publications/2024/06/american-hospital-assn-v-becerra-are-tracking-tools-ok-again) — Holland & Knight, June 2024. Why this guide calls the HHS OCR tracking bulletin "contested" rather than live guidance.
 - [CJEU — C-582/14 — Breyer](https://gdprhub.eu/index.php?title=CJEU_-_C-582/14_-_Patrick_Breyer) — GDPRhub case summary. The ruling that put a dynamic IP address in scope as personal data.
-- [2025 Telemetry & Observability Report](https://www.sawmills.ai/observability-report-2025) — Sawmills, 2025. Vendor-run survey; source of the "13% of telemetry actively used" figure, labelled directional above.
+- [2025 Telemetry & Observability Report](https://www.sawmills.ai/observability-report-2025) — Sawmills, 2025. Vendor-run survey; source of the "13% of telemetry actively used" figure, labeled directional above.
 
 {{< obs-mascot class="cleric" tag="guardian of the redaction pipeline" quip="I have blessed this span and cast out its sins — the email, the card, the home address. Go forth, telemetry, and leak no more. ...the redaction belongs in the Collector, not in prayer. Configure it there." >}}

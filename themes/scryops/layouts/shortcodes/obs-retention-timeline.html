@@ -1,0 +1,102 @@
+{{- /* layouts/shortcodes/obs-retention-timeline.html · TEMPLATE 08b
+     Retention timeline: a shared-time-axis variant of obs-waterfall (08)
+     stripped of depth/kind/nesting. Rows are data classes, not spans; each
+     bar runs from day 0 to its deletion day, solid for the active/queryable
+     window and hatched for cold archive, with a small marker at the end
+     where the data is permanently erased. Reuses .obs-wf__* CSS as-is —
+     those classes were already generic (hd/sub/tick/nm/val/key/sw), so no
+     new telemetry.css rules were needed for this variant.
+
+     Two non-chromatic channels:
+       length     bar length on the shared day axis   how long data survives
+       solid/hatch  self (active) vs remainder (archive)  WHERE it sits: hot or cold
+       marker     "x" glyph at bar end                 permanent deletion point
+
+       {{< obs-retention-timeline title="Retention by data class"
+             units="days · solid = active window, hatched = archive, x = deletion"
+             caption="Fig. — ..." >}}
+       [ {"label":"Personal Data","self":30,"duration":30},
+         {"label":"Business Data","self":90,"duration":455},
+         {"label":"Technical Data","self":90,"duration":820} ]
+       {{< /obs-retention-timeline >}}                                      */ -}}
+
+{{- $rows := slice -}}
+{{- with trim .Inner " \n\r\t" }}{{ $rows = . | transform.Unmarshal }}{{ end -}}
+{{- $n := len $rows -}}
+{{- $unit := .Get "unit" | default "d" -}}
+{{- $hatchID := printf "obs-rt-hatch-%d" .Ordinal -}}
+
+{{- /* geometry — matches obs-waterfall's 700-unit viewBox and gutters */ -}}
+{{- $W := 700 -}}{{- $pl := 172 -}}{{- $pr := 634 -}}
+{{- $row := 34 -}}{{- $bar := 17 -}}
+{{- $H := add 56 (mul $n $row) -}}
+{{- $span := sub $pr $pl -}}
+
+{{- $hi := 0.0 -}}
+{{- range $rows }}{{ $d := index . "duration" | float }}{{ if gt $d $hi }}{{ $hi = $d }}{{ end }}{{ end -}}
+{{- with .Get "total" }}{{ $hi = . | float }}{{ end -}}
+{{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
+
+{{- /* fixed calendar ticks rather than even quarters — 0 / 90d / 1y / 2y read
+     as real deadlines; even divisions of an arbitrary max would not */ -}}
+{{- $ticks := slice (dict "t" 0 "lab" "0d") (dict "t" 90 "lab" "90d") (dict "t" 365 "lab" "1y") (dict "t" 730 "lab" "2y") -}}
+
+{{- $desc := slice -}}
+{{- range $rows -}}
+  {{- $self := index . "self" | float -}}
+  {{- $dur := index . "duration" | float -}}
+  {{- $arc := sub $dur $self -}}
+  {{- $desc = $desc | append (cond (gt $arc 0.5)
+       (printf "%s: active %v%s, then archived %v%s more, deleted at day %v" (index . "label") $self $unit $arc $unit $dur)
+       (printf "%s: active %v%s, deleted at day %v with no archive" (index . "label") $self $unit $dur)) -}}
+{{- end -}}
+{{- $aria := printf "Retention timeline%s. %s. Bars run left to right from collection to deletion; solid is the active window, hatching is cold archive, and a small x marks the deletion point."
+     (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "") (delimit $desc ". ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    {{- with .Get "title" }}<div class="obs-wf__hd">{{ . }}</div>{{ end }}
+    {{- with .Get "units" }}<div class="obs-wf__sub">{{ . }}</div>{{ end }}
+    <svg class="obs-wf" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+      <defs>
+        <pattern id="{{ $hatchID }}" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <rect x="-4" y="-4" width="17" height="17" fill="var(--surface)"/>
+          <line x1="0" y1="-4" x2="0" y2="13" stroke="var(--mc-ink)" stroke-width="3"/>
+        </pattern>
+      </defs>
+
+      {{- range $tk := $ticks }}
+      {{- $t := index $tk "t" | float -}}
+      {{- if le $t $hi }}
+      {{- $x := add $pl (mul (div $t $hi) $span) -}}
+      {{- $anchor := cond (eq $t 0.0) "start" "middle" }}
+      <line x1="{{ $x }}" y1="24" x2="{{ $x }}" y2="{{ add 26 (mul $n $row) }}" stroke="var(--mc-border)" stroke-width="1"/>
+      <text x="{{ $x }}" y="16" text-anchor="{{ $anchor }}" class="obs-wf__tick">{{ index $tk "lab" }}</text>
+      {{- end }}
+      {{- end }}
+
+      {{- range $i, $r := $rows }}
+      {{- $y := add 30 (mul $i $row) -}}
+      {{- $self := index $r "self" | float -}}
+      {{- $dur := index $r "duration" | float -}}
+      {{- $wSelf := mul (div $self $hi) $span -}}
+      {{- $wTot := mul (div $dur $hi) $span -}}
+      <text x="4" y="{{ add $y (sub $bar 4) }}" class="obs-wf__nm">{{ index $r "label" }}</text>
+      {{- if gt $wTot (add $wSelf 0.5) }}
+      <rect x="{{ add $pl $wSelf }}" y="{{ $y }}" width="{{ sub $wTot $wSelf }}" height="{{ $bar }}"
+            fill="url(#{{ $hatchID }})" stroke="var(--mc-ink)" stroke-width="1"/>
+      {{- end }}
+      <rect x="{{ $pl }}" y="{{ $y }}" width="{{ $wSelf }}" height="{{ $bar }}"
+            fill="var(--mc-ramp-3)" stroke="var(--mc-ink)" stroke-width="1"/>
+      <text x="{{ add $pl $wTot }}" y="{{ add $y (sub $bar 3) }}" text-anchor="middle" class="obs-wf__nm on">&#10005;</text>
+      <text x="{{ add (add $pl $wTot) 10 }}" y="{{ add $y (sub $bar 4) }}" class="obs-wf__val">{{ $dur }}{{ $unit }}</text>
+      {{- end }}
+    </svg>
+    <div class="obs-wf__key">
+      <span><i class="obs-wf__sw auto"></i>active window</span>
+      <span><i class="obs-wf__sw hatch"></i>archive</span>
+      <span>&#10005; permanent deletion</span>
+    </div>
+  </div>
+  {{- with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
+</figure>

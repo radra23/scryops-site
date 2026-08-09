@@ -93,6 +93,14 @@ graph TD
 
 The specific periods depend on your legal basis and the operational purpose of the data. A reasonable starting point for telemetry containing any personal attributes:
 
+{{< obs-retention-timeline title="Retention by data class"
+      units="days · solid = active window, hatched = archive, x = deletion"
+      caption="Fig. — Personal data's retention window is a rounding error next to business and technical data, by design: the shortest possible active window and no archive tier at all." >}}
+[ {"label":"Personal Data","self":30,"duration":30},
+  {"label":"Business Data","self":90,"duration":455},
+  {"label":"Technical Data","self":90,"duration":820} ]
+{{< /obs-retention-timeline >}}
+
 | Data Class | Active Retention | Archive | Deletion |
 |---|---|---|---|
 | Personal Data | 7–30 days | None (no archival of PII) | At end of active period |
