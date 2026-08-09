@@ -1,0 +1,63 @@
+{{- /* layouts/shortcodes/obs-pii-hall-of-shame.html
+     Three publicly disclosed cases of personal data reaching a store that
+     was never designed to hold it. Named only because each company
+     published it themselves; rail weight ranks regulatory consequence.
+
+     SOURCES
+       Meta      — Irish DPC final decision, inquiry into Meta Platforms
+                   Ireland Ltd, adopted 26 Sept 2024. Self-notified
+                   21 Mar 2019; inquiry opened 24 Apr 2019; reprimand plus
+                   three fines totalling EUR 91m (Art 33(1) 8m,
+                   Art 33(5) 8m, Arts 5(1)(f)+32(1) 75m).
+       Facebook  — KrebsOnSecurity, 21 Mar 2019, and Facebook's own post.
+                   200-600m users; archives dating to 2012.
+       GitHub /  — company disclosures, 2018. Same defect class, smaller
+       Twitter     blast radius; both found it themselves.                */ -}}
+
+{{- $rows := slice
+  (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2
+        "who" "Meta &middot; 2019&ndash;2024" "src" "Irish DPC decision"
+        "what" "Passwords <b>inadvertently logged</b> in plaintext on internal systems. Never exposed externally. Self-reported to the regulator."
+        "tag" "&euro;91M" "sub" "5&frac12; yr inquiry")
+  (dict "rail" "2.5px" "step" "var(--mc-ramp-2)" "rank" 1
+        "who" "Facebook &middot; 2019" "src" "Krebs / company post"
+        "what" "Between <b>200M and 600M</b> users&rsquo; passwords readable in internal archives dating to 2012, searchable by thousands of staff."
+        "tag" "7 yrs" "sub" "before discovery")
+  (dict "rail" "1.5px" "step" "var(--mc-ramp-3)" "rank" 0
+        "who" "GitHub &middot; Twitter &middot; 2018" "src" "company disclosures"
+        "what" "Same class of defect, smaller blast radius: credentials written to internal logs before hashing. Both found it themselves and forced resets."
+        "tag" "2 firms" "sub" "same quarter")
+-}}
+
+<figure class="obs-fig pii-hos" aria-label="Three publicly disclosed cases in which personal data reached an internal store by accident. Meta was fined 91 million euro after self-reporting plaintext passwords, marked with a square and the heaviest rail. Facebook had between 200 and 600 million passwords readable for seven years, marked with a triangle. GitHub and Twitter disclosed the same class of defect in 2018 at smaller scale, marked with a circle.">
+  <style>
+    .pii-hos .hos-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .pii-hos .hos-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .pii-hos .hos-lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 158px 1fr 116px;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
+    @media(max-width:640px){.pii-hos .hos-lane{grid-template-columns:24px 1fr;}}
+    .pii-hos svg.obs-g{width:13px;height:13px;display:block;}
+    .pii-hos .hos-who{font-size:.84rem;color:var(--mc-ink);line-height:1.5;}
+    .pii-hos .hos-src{display:block;font-size:.7rem;color:var(--mc-ink-muted);margin-top:.2rem;}
+    .pii-hos .hos-what{font-size:.84rem;color:var(--mc-ink-secondary);line-height:1.5;}
+    .pii-hos .hos-what b{color:var(--mc-ink);}
+    .pii-hos .hos-tag{justify-self:end;text-align:right;font-size:.84rem;color:var(--mc-ink);line-height:1.5;}
+    @media(max-width:640px){.pii-hos .hos-tag{justify-self:start;text-align:left;grid-column:2;}}
+    .pii-hos .hos-tag small{display:block;font-size:.7rem;color:var(--mc-ink-muted);}
+    .pii-hos .hos-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;color:var(--mc-ink-muted);line-height:1.55;}
+    .pii-hos .hos-foot b{color:var(--mc-ink);}
+    .pii-hos figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="hos-wrap">
+    <div class="hos-hdr">PUBLICLY DISCLOSED &nbsp;&middot;&nbsp; ALL SELF-REPORTED</div>
+    {{- range $rows }}
+    <div class="hos-lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+      <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+      <div class="hos-who">{{ .who | safeHTML }}<small class="hos-src">{{ .src }}</small></div>
+      <div class="hos-what">{{ .what | safeHTML }}</div>
+      <div class="hos-tag">{{ .tag | safeHTML }}<small>{{ .sub | safeHTML }}</small></div>
+    </div>
+    {{- end }}
+    <div class="hos-foot">Every entry was found by the company that caused it, during routine review. <b>The regulator did not need a whistleblower.</b> Rail weight ranks regulatory consequence, not embarrassment.</div>
+  </div>
+  <figcaption>Fig. &mdash; Nobody on this board meant to collect anything.</figcaption>
+</figure>

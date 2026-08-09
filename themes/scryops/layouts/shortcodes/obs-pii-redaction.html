@@ -1,0 +1,55 @@
+{{- /* layouts/shortcodes/obs-pii-redaction.html
+     Sits between the two JSON blocks in "The Crime Scene and the Clean
+     Version" and does the diff the reader would otherwise do by eye.
+
+     Four treatments, four silhouettes: remove (square), coarsen (triangle),
+     derive (diamond), hash (disc) — the Callout vocabulary, so the same
+     shapes mean the same things everywhere on the site. Fields and values
+     are lifted verbatim from the guide's own before/after spans.          */ -}}
+
+{{- $rows := slice
+  (dict "rank" 0     "step" "var(--mc-ramp-4)" "act" "hash"    "before" "order.id \"ORD-12345\""            "after" "order.id \"b3d9f1a2c4e5\"")
+  (dict "rank" 2   "step" "var(--mc-ramp-1)" "act" "delete"  "before" "customer.email"                    "after" "&mdash; gone &mdash;")
+  (dict "rank" 1 "step" "var(--mc-ramp-2)" "act" "coarsen" "before" "shipping.address (full)"           "after" "customer.region \"US-WEST\"")
+  (dict "rank" 2   "step" "var(--mc-ramp-1)" "act" "delete"  "before" "payment.token \"tok_visa_4242&hellip;\"" "after" "payment.provider \"visa\"")
+  (dict "rank" 3  "step" "var(--mc-ramp-3)" "act" "derive"  "before" "cart.items[]"                      "after" "cart.item_count 3 &middot; total 249.98")
+-}}
+
+<figure class="diagram pii-red" aria-label="Field-by-field disposition of one process_order span. The order ID is hashed and stays correlatable, marked with a circle. The customer email and payment token are deleted, marked with squares. The shipping address is coarsened to a region, marked with a triangle. The cart items array is replaced by a derived count and total, marked with a diamond.">
+  <style>
+    .pii-red .diag-card{padding:1.1rem 1.1rem .95rem;}
+    .pii-red .red-grid{font-family:var(--font-code);font-size:.8rem;}
+    .pii-red .red-r{display:grid;grid-template-columns:22px 1fr 92px 1fr;gap:.8rem;align-items:center;padding:.65rem 0;border-bottom:1px solid var(--border);}
+    @media(max-width:640px){.pii-red .red-r{grid-template-columns:22px 1fr;row-gap:.35rem;}.pii-red .red-r span:nth-child(3),.pii-red .red-r span:nth-child(4){grid-column:2;}}
+    .pii-red .red-hd{display:grid;grid-template-columns:22px 1fr 92px 1fr;gap:.8rem;padding-bottom:.55rem;border-bottom:1px solid var(--border);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted);}
+    @media(max-width:640px){.pii-red .red-hd{display:none;}}
+    .pii-red .red-b{color:var(--mc-ink-muted);word-break:break-word;}
+    .pii-red .red-a{color:var(--mc-ink);word-break:break-word;}
+    .pii-red .red-act{color:var(--mc-ink);}
+    .pii-red svg.obs-g{width:13px;height:13px;display:block;flex:none;}
+    .pii-red .red-key{display:flex;gap:1.3rem;flex-wrap:wrap;margin-top:.9rem;padding-top:.85rem;border-top:1px solid var(--border);font-family:var(--font-code);font-size:.72rem;color:var(--mc-ink-muted);}
+    .pii-red .red-key span{display:inline-flex;align-items:center;gap:.45rem;}
+    .pii-red .red-note{margin-top:.7rem;font-family:var(--font-code);font-size:.72rem;color:var(--mc-ink-muted);line-height:1.6;}
+  </style>
+  <div class="diag-card">
+    <div class="red-grid">
+      <div class="red-hd"><span></span><span>before</span><span>action</span><span>after</span></div>
+      {{- range $rows }}
+      <div class="red-r">
+        <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+        <span class="red-b">{{ .before | safeHTML }}</span>
+        <span class="red-act">{{ .act }}</span>
+        <span class="red-a">{{ .after | safeHTML }}</span>
+      </div>
+      {{- end }}
+    </div>
+    <div class="red-key">
+      <span>{{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }}removed entirely</span>
+      <span>{{ partial "obs-glyph.html" (dict "rank" 1 "fill" "var(--mc-ramp-2)") }}coarsened</span>
+      <span>{{ partial "obs-glyph.html" (dict "rank" 3 "fill" "var(--mc-ramp-3)") }}derived</span>
+      <span>{{ partial "obs-glyph.html" (dict "rank" 0 "fill" "var(--mc-ramp-4)") }}hashed, still correlatable</span>
+    </div>
+    <div class="red-note">Hashing here is the <code>transform</code> processor&rsquo;s <code>SHA256()</code> converter, which needs otelcol-contrib v0.96 or later &mdash; and is safe for opaque business identifiers only.</div>
+  </div>
+  <figcaption>Fig. &mdash; Five fields, four treatments. The span still answers every question you asked it.</figcaption>
+</figure>

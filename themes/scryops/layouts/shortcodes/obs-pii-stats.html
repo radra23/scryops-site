@@ -1,0 +1,48 @@
+{{- /* layouts/shortcodes/obs-pii-stats.html
+     Opener stat panel for /guides/pii-in-telemetry/.
+     Four measured figures, each on its own glyph so the panel survives
+     greyscale, monochrome mode and colour-vision deficiency. Numbers are
+     edited here, at the top, and nowhere else.
+
+     SOURCES
+       100 / 80 / 72 — Aghili, Li & Khomh, "Protecting Privacy in Software
+                       Logs: What Should Be Anonymized?", PACMSE (FSE 2025),
+                       analysis of 25 public log datasets.
+       13            — Sawmills, 2025 Telemetry & Observability Report.
+                       Vendor-run survey: directional, not a measurement.   */ -}}
+
+{{- $stats := slice
+  (dict "n" "100%" "rank" 2   "step" "var(--mc-ramp-1)" "l1" "of log datasets"      "l2" "carry timestamps")
+  (dict "n" "80%"  "rank" 1 "step" "var(--mc-ramp-2)" "l1" "carry IP addresses"   "l2" "&mdash; personal data in the EU")
+  (dict "n" "72%"  "rank" 3  "step" "var(--mc-ramp-3)" "l1" "carry file paths"     "l2" "and raw identifiers")
+  (dict "n" "13%"  "rank" 0     "step" "var(--mc-ramp-4)" "l1" "of collected telemetry" "l2" "is ever actively used")
+-}}
+
+<figure class="obs-fig pii-stats" aria-label="Four measured figures about personal data in telemetry, each marked with a distinct shape rather than a colour. Timestamps appear in 100 percent of 25 analysed log datasets, marked with a square. IP addresses appear in 80 percent, marked with a triangle. File paths and raw identifiers appear in 72 percent, marked with a diamond. Only 13 percent of collected telemetry is ever actively used, marked with a circle.">
+  <style>
+    .pii-stats .pii-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .pii-stats .pii-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .pii-stats .pii-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+    @media(max-width:640px){.pii-stats .pii-grid{grid-template-columns:repeat(2,1fr);}}
+    .pii-stats .pii-card{background:var(--bg);border:1px solid var(--border);border-top:3px solid;display:flex;flex-direction:column;align-items:center;text-align:center;gap:.3rem;padding:1rem .8rem .85rem;}
+    .pii-stats svg.obs-g{width:13px;height:13px;display:block;margin-bottom:.15rem;}
+    .pii-stats .pii-num{font-size:2.1rem;font-weight:700;line-height:1;letter-spacing:-.02em;}
+    .pii-stats .pii-desc{font-size:.8rem;color:var(--mc-ink-muted);line-height:1.5;}
+    .pii-stats .pii-src{margin-top:1.1rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
+    .pii-stats figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="pii-wrap">
+    <div class="pii-hdr">WHAT IS ALREADY IN THERE</div>
+    <div class="pii-grid">
+      {{- range $stats }}
+      <div class="pii-card" style="border-top-color:{{ .step | safeCSS }}">
+        <span style="color:{{ .step | safeCSS }}">{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+        <div class="pii-num" style="color:{{ .step | safeCSS }}">{{ .n }}</div>
+        <div class="pii-desc">{{ .l1 | safeHTML }}<br>{{ .l2 | safeHTML }}</div>
+      </div>
+      {{- end }}
+    </div>
+    <div class="pii-src">SOURCES: AGHILI ET AL., FSE 2025 (25 LOG DATASETS) &nbsp;&middot;&nbsp; SAWMILLS 2025 (VENDOR SURVEY, DIRECTIONAL)</div>
+  </div>
+  <figcaption>Fig. &mdash; Nobody instrumented for this. It arrived with the defaults.</figcaption>
+</figure>

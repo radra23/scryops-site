@@ -1,0 +1,67 @@
+{{- /* layouts/shortcodes/obs-pii-blindspot.html · TEMPLATE 02, texture set
+     The marquee figure. Three perspectives on the same six attributes:
+     how often the attribute is actually present in logs, how often
+     practitioners call it sensitive, and how often the research literature
+     studies it. The gap between column two and column three is why
+     anonymisation tooling handles IP addresses beautifully and file paths
+     not at all.
+
+     Series are told apart by TEXTURE (solid, 45-degree hatch, dot), never
+     by hue, and all three share one ramp step so no series reads as
+     "stronger" than another. Drawn in HTML rather than SVG so label sizes
+     are literal: an SVG with a fixed viewBox would scale 14px labels down
+     with the column.
+
+     SOURCE (all three series): Aghili, Li & Khomh, "Protecting Privacy in
+     Software Logs: What Should Be Anonymized?", PACMSE (FSE 2025) —
+     25 public log datasets, 58 reviewed papers, 45 surveyed practitioners. */ -}}
+
+{{- $groups := slice
+  (dict "label" "IP address"      "logs" 80 "industry" 86 "papers" 59)
+  (dict "label" "File path"       "logs" 72 "industry" 52 "papers"  7)
+  (dict "label" "IDs"             "logs" 72 "industry" 43 "papers" 17)
+  (dict "label" "Hostname"        "logs" 44 "industry" 59 "papers"  5)
+  (dict "label" "Config details"  "logs" 36 "industry" 18 "papers"  9)
+  (dict "label" "Username"        "logs"  8 "industry" 20 "papers" 14)
+-}}
+
+<figure class="obs-fig pii-bs" aria-label="Grouped bar chart comparing six log attributes across three perspectives, told apart by texture rather than colour. Solid bars are how often the attribute is present in 25 analysed log datasets; hatched bars are how often 45 practitioners call it sensitive; dotted bars are how often 58 reviewed papers study it. IP address: 80, 86, 59 percent. File path: 72, 52, 7. IDs: 72, 43, 17. Hostname: 44, 59, 5. Config details: 36, 18, 9. Username: 8, 20, 14. The literature consistently trails the other two on everything except IP addresses.">
+  <style>
+    .pii-bs .bs-wrap{background:var(--fig-bg);background-image:var(--fig-grid);background-size:26px 26px;border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .pii-bs .bs-hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .pii-bs .bs-sub{font-size:var(--mc-text-tick,12px);color:var(--mc-ink-muted);margin-bottom:1.2rem;}
+    .pii-bs .bs-grp{margin-bottom:1.05rem;}
+    .pii-bs .bs-gl{font-family:var(--font-read);font-size:var(--mc-text-label,14px);color:var(--mc-ink);margin-bottom:.35rem;}
+    .pii-bs .bs-row{display:grid;grid-template-columns:1fr 38px;gap:.6rem;align-items:center;margin-bottom:3px;}
+    .pii-bs .bs-track{height:15px;position:relative;}
+    .pii-bs .bs-bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;}
+    .pii-bs .s1{background:var(--mc-ramp-3);}
+    .pii-bs .s2{background:repeating-linear-gradient(45deg,var(--mc-ramp-3) 0 3.4px,transparent 3.4px 8px);}
+    .pii-bs .s3{background:radial-gradient(var(--mc-ramp-3) 2.4px,transparent 2.5px) 0 0/8px 8px;}
+    .pii-bs .bs-v{font-size:var(--mc-text-value,12px);color:var(--mc-ink-secondary);text-align:right;}
+    .pii-bs .bs-legend{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;margin-top:.4rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--mc-ink-muted);}
+    .pii-bs .bs-legend span{display:inline-flex;align-items:center;gap:.5rem;}
+    .pii-bs .bs-sw{width:22px;height:12px;border:1px solid var(--mc-ink);display:inline-block;box-sizing:border-box;}
+    .pii-bs .bs-src{margin-top:.9rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
+    .pii-bs figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="bs-wrap">
+    <div class="bs-hd">Attribute treatment, three perspectives</div>
+    <div class="bs-sub">percent &middot; axis starts at zero, scale 0&ndash;100</div>
+    {{- range $groups }}
+    <div class="bs-grp">
+      <div class="bs-gl">{{ .label }}</div>
+      <div class="bs-row"><span class="bs-track"><span class="bs-bar s1" style="display:block;width:{{ .logs }}%"></span></span><span class="bs-v">{{ .logs }}</span></div>
+      <div class="bs-row"><span class="bs-track"><span class="bs-bar s2" style="display:block;width:{{ .industry }}%"></span></span><span class="bs-v">{{ .industry }}</span></div>
+      <div class="bs-row"><span class="bs-track"><span class="bs-bar s3" style="display:block;width:{{ .papers }}%"></span></span><span class="bs-v">{{ .papers }}</span></div>
+    </div>
+    {{- end }}
+    <div class="bs-legend">
+      <span><i class="bs-sw s1"></i>Solid = present in real logs</span>
+      <span><i class="bs-sw s2"></i>Hatch = practitioners call it sensitive</span>
+      <span><i class="bs-sw s3"></i>Dots = the research literature studies it</span>
+    </div>
+    <div class="bs-src">SOURCE: AGHILI, LI &amp; KHOMH, PACMSE / FSE 2025 &nbsp;&middot;&nbsp; 25 DATASETS, 58 PAPERS, 45 PRACTITIONERS</div>
+  </div>
+  <figcaption>Fig. &mdash; File paths are in 72% of logs and 7% of the papers. Tooling follows the papers.</figcaption>
+</figure>

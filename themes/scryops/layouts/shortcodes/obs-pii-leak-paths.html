@@ -1,0 +1,71 @@
+{{- /* layouts/shortcodes/obs-pii-leak-paths.html
+     Replaces the first mermaid flowchart in the PII guide.
+
+     The point the flat graph loses: baggage is a different SHAPE of leak.
+     Span attributes and correlated logs travel straight to the backend;
+     baggage travels into every downstream service's own spans first, in
+     services whose teams never touched the field that put it there.
+
+     Rank rides on BORDER WEIGHT (FlowDiagram's law: border = rank) and on
+     connector weight. Dashed = a boundary the data crosses uninvited.
+     Nothing is hue-bearing. viewBox is 680 units to track the 680px prose
+     measure, but .diag-card's own 1rem padding shrinks the actual render
+     area to ~0.95x that — measured, not assumed — so .c/.k are declared
+     12.5px rather than the 11.5/11px an unpadded 1:1 mapping would allow,
+     to keep the rendered floor at ~11px+.                                */ -}}
+
+<figure class="diagram pii-paths">
+  <style>
+    .pii-paths .diag-card{padding:1rem;overflow:hidden;}
+    .pii-paths svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .pii-paths .n{font-size:13px;fill:var(--mc-ink);}
+    .pii-paths .c{font-size:12.5px;fill:var(--mc-ink-muted);}
+    .pii-paths .k{font-size:12.5px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 300" role="img" aria-label="Three mechanisms carry personal data into a trace backend. Span attributes and correlated log records travel there directly, drawn with hairline borders and thin connectors. Baggage propagation, drawn with the heaviest border, travels first into every downstream service's own spans and only then to the backend." style="width:100%;height:auto;display:block;font-family:var(--font-code)">
+      <defs>
+        <marker id="pii-arw-sc" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-3)"></path></marker>
+        <marker id="pii-arwh-sc" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-1)"></path></marker>
+      </defs>
+      <g fill="none" stroke-linejoin="miter" stroke-linecap="butt">
+        <path d="M130 150 H155" stroke="var(--mc-ramp-3)" stroke-width="1.5"></path>
+        <path d="M155 150 V62 H180" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#pii-arw-sc)"></path>
+        <path d="M155 150 H180" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#pii-arw-sc)"></path>
+        <path d="M155 150 V238 H180" stroke="var(--mc-ramp-1)" stroke-width="3" marker-end="url(#pii-arwh-sc)"></path>
+        <path d="M330 62 H480 V135 H520" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#pii-arw-sc)"></path>
+        <path d="M330 150 H520" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#pii-arw-sc)"></path>
+        <path d="M330 238 H372" stroke="var(--mc-ramp-1)" stroke-width="3" marker-end="url(#pii-arwh-sc)"></path>
+        <path d="M484 238 H500 V165 H520" stroke="var(--mc-ramp-1)" stroke-width="3" marker-end="url(#pii-arwh-sc)"></path>
+      </g>
+
+      <rect x="8" y="126" width="122" height="48" fill="none" stroke="var(--mc-ramp-3)" stroke-width="3.5" rx="3"></rect>
+      <text class="n" x="69" y="146" text-anchor="middle">instrumented</text>
+      <text class="n" x="69" y="163" text-anchor="middle">request</text>
+
+      <rect x="180" y="38" width="150" height="48" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"></rect>
+      <text class="n" x="255" y="58" text-anchor="middle">span attributes</text>
+      <text class="c" x="255" y="75" text-anchor="middle">auto-captured params</text>
+
+      <rect x="180" y="126" width="150" height="48" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"></rect>
+      <text class="n" x="255" y="146" text-anchor="middle">log records</text>
+      <text class="c" x="255" y="163" text-anchor="middle">same trace_id</text>
+
+      <rect x="180" y="214" width="150" height="48" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3.5" rx="3"></rect>
+      <text class="n" x="255" y="234" text-anchor="middle">baggage</text>
+      <text class="c" x="255" y="251" text-anchor="middle">W3C headers</text>
+
+      <rect x="372" y="202" width="112" height="72" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"></rect>
+      <text class="n" x="428" y="226" text-anchor="middle">every</text>
+      <text class="n" x="428" y="243" text-anchor="middle">downstream</text>
+      <text class="n" x="428" y="260" text-anchor="middle">service span</text>
+
+      <rect x="520" y="120" width="152" height="60" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"></rect>
+      <text class="n" x="596" y="144" text-anchor="middle">trace backend</text>
+      <text class="c" x="596" y="163" text-anchor="middle">indexed &middot; searchable</text>
+
+      <text class="k" x="8" y="294">border weight = reach &nbsp;&middot;&nbsp; dashed = a team boundary the data crosses uninvited</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &mdash; Two paths end at the backend. Baggage ends at everyone else's spans first.</figcaption>
+</figure>

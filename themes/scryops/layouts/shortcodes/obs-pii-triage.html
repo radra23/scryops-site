@@ -1,0 +1,92 @@
+{{- /* layouts/shortcodes/obs-pii-triage.html
+     Replaces the second mermaid flowchart in the PII guide.
+
+     A stem of two questions fanning out to four severity-ranked outcomes.
+     Rank rides on four non-chromatic channels: glyph silhouette (the
+     Callout set), rail value, rail weight, and connector weight — never
+     hue. Order is positional: least severe first.
+
+     This is a sibling of the theme's obs-decision-tree rather than a call
+     to it, for one reason: the fan. obs-decision-tree draws it as a single
+     "→" glyph; this figure draws the same fan as stepped orthogonal
+     connectors with an arrowhead per outcome, matching obs-pii-leak-paths
+     so the guide speaks one diagram language. Branch rows are fixed at
+     68px so the SVG spine lines up with them without measurement.        */ -}}
+
+{{- $branches := slice
+  (dict "rank" 0 "step" "var(--mc-ramp-3)" "rail" "1.5px" "head" "SYSTEM &middot; service, pod, latency"    "act" "Keep as-is. Long-term retention.")
+  (dict "rank" 1 "step" "var(--mc-ramp-2)" "rail" "2.5px" "head" "BUSINESS &middot; order ID, txn ID"        "act" "Hash it. Still correlatable, no longer readable.")
+  (dict "rank" 2 "step" "var(--mc-ramp-1)" "rail" "3.5px" "head" "PERSONAL &middot; email, phone, address"   "act" "Remove, or tokenise outside the pipeline.")
+  (dict "rank" 3 "step" "var(--mc-ramp-1)" "rail" "4px"   "head" "PAYMENT &middot; card number, token"       "act" "Remove entirely. No retention, no exceptions.")
+-}}
+
+<figure class="diagram pii-tri" aria-label="Decision tree for one span attribute. Two questions — is it needed for operational debugging, and does it identify an individual — fan out to four outcomes ordered least to most severe: system data marked with a circle is kept as-is; business identifiers marked with a triangle are hashed; personal identifiers marked with a square are removed or tokenised; payment data marked with a diamond is removed entirely. Severity is carried by shape, rail weight and connector weight, not colour.">
+  <style>
+    .pii-tri .diag-card{padding:1.2rem;}
+    .pii-tri .tri-hd{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;letter-spacing:.1em;color:var(--mc-ink-muted);margin-bottom:.4rem;}
+    .pii-tri .tri-sub{font-family:var(--font-code);font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.25rem;}
+    .pii-tri .tri-body{display:grid;grid-template-columns:210px 64px minmax(0,1fr);align-items:start;font-family:var(--font-code);}
+    @media(max-width:700px){.pii-tri .tri-body{grid-template-columns:1fr;}.pii-tri .tri-fan{display:none;}.pii-tri .tri-stem{margin-bottom:1rem;}}
+    .pii-tri .tri-stem{display:flex;flex-direction:column;}
+    .pii-tri .tri-node{border:1.5px solid var(--mc-ramp-3);border-radius:3px;padding:0 12px;background:color-mix(in srgb,var(--mc-ramp-3) 6%,transparent);box-sizing:border-box;display:flex;flex-direction:column;justify-content:center;}
+    /* Node heights are FIXED, and the fan's entry stub (M0 231) is derived from
+       them: 68 + 26 + 80 + 26 + 31 = 231, the vertical centre of the last node.
+       Change a height here and the stub y changes with it, or the fan leaves the
+       wrong question. The two columns are top-aligned for the same reason. */
+    .pii-tri .tri-node.n1{height:68px;}
+    .pii-tri .tri-node.n2{height:80px;}
+    .pii-tri .tri-node.n3{height:62px;}
+    @media(max-width:700px){.pii-tri .tri-node{height:auto;padding:10px 12px;}}
+    .pii-tri .tri-node.entry{border-width:3.5px;background:var(--bg);}
+    .pii-tri .tri-nm{display:block;font-size:12.5px;line-height:1.4;color:var(--mc-ink);}
+    .pii-tri .tri-cap{display:block;font-size:11px;color:var(--mc-ink-muted);margin-top:3px;}
+    .pii-tri .tri-link{align-self:center;overflow:visible;}
+    .pii-tri .tri-fan{width:64px;height:299px;display:block;}
+    .pii-tri .tri-rows{display:flex;flex-direction:column;gap:9px;}
+    .pii-tri .tri-row{display:grid;grid-template-columns:22px minmax(0,1fr);gap:12px;align-items:start;height:68px;box-sizing:border-box;border-left-style:solid;border-left-color:var(--border);padding:9px 0 0 12px;}
+    @media(max-width:700px){.pii-tri .tri-row{height:auto;padding-bottom:9px;}}
+    .pii-tri .tri-row svg.obs-g{width:13px;height:13px;display:block;}
+    .pii-tri .tri-head{font-size:12.5px;color:var(--mc-ink);}
+    .pii-tri .tri-act{font-family:var(--font-read);font-size:13.5px;line-height:1.5;color:var(--mc-ink-secondary);margin:4px 0 0;}
+    .pii-tri figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="diag-card">
+    <div class="tri-hd">ATTRIBUTE TRIAGE</div>
+    <div class="tri-sub">// run every attribute in your instrumentation through this</div>
+    <div class="tri-body">
+      <div class="tri-stem">
+        <span class="tri-node entry n1"><span class="tri-nm">One attribute on a span</span><span class="tri-cap">start here</span></span>
+        <svg class="tri-link" viewBox="0 0 12 26" width="12" height="26" aria-hidden="true"><path d="M6 0 V26" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#pii-tri-a)"/></svg>
+        <span class="tri-node n2"><span class="tri-nm">Needed for operational debugging?</span><span class="tri-cap">no &rarr; keep reading</span></span>
+        <svg class="tri-link" viewBox="0 0 12 26" width="12" height="26" aria-hidden="true"><path d="M6 0 V26" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#pii-tri-a)"/></svg>
+        <span class="tri-node n3"><span class="tri-nm">Does it identify an individual?</span></span>
+      </div>
+
+      <svg class="tri-fan" viewBox="0 0 64 299" role="presentation" aria-hidden="true">
+        <defs>
+          <marker id="pii-tri-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-3)"/></marker>
+          <marker id="pii-tri-b" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-2)"/></marker>
+          <marker id="pii-tri-c" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-1)"/></marker>
+        </defs>
+        <g fill="none" stroke-linejoin="miter" stroke-linecap="butt">
+          <path d="M0 231 H26" stroke="var(--mc-ramp-3)" stroke-width="1.5"/>
+          <path d="M26 34 V265"  stroke="var(--mc-ramp-3)" stroke-width="1.5"/>
+          <path d="M26 34 H62"   stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#pii-tri-a)"/>
+          <path d="M26 111 H62"  stroke="var(--mc-ramp-2)" stroke-width="2"   marker-end="url(#pii-tri-b)"/>
+          <path d="M26 188 H62"  stroke="var(--mc-ramp-1)" stroke-width="2.6" marker-end="url(#pii-tri-c)"/>
+          <path d="M26 265 H62"  stroke="var(--mc-ramp-1)" stroke-width="3.4" marker-end="url(#pii-tri-c)"/>
+        </g>
+      </svg>
+
+      <div class="tri-rows">
+        {{- range $branches }}
+        <div class="tri-row" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+          <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+          <div><div class="tri-head">{{ .head | safeHTML }}</div><p class="tri-act">{{ .act }}</p></div>
+        </div>
+        {{- end }}
+      </div>
+    </div>
+  </div>
+  <figcaption>Fig. &mdash; Rank is positional, and carried by four channels at once. <b>Do not SHA-256 an email</b> &mdash; the value space is small enough to exhaust with a rainbow table.</figcaption>
+</figure>

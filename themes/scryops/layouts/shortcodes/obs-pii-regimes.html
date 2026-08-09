@@ -1,0 +1,63 @@
+{{- /* layouts/shortcodes/obs-pii-regimes.html
+     Goes in "What the Regulations Actually Require". Three regimes, what
+     each asks of a span, and what that means for the pipeline.
+
+     Rail weight ranks how settled the duty is, not how severe the regime
+     is — GDPR heaviest because it has a decided case with a number on it,
+     HIPAA lightest because the tracking-technologies bulletin that most
+     people cite was vacated. Saying so is the honest version.
+
+     SOURCES  GDPR Art 5(1)(c) and 32 · CJEU C-582/14 Breyer (dynamic IPs)
+              Irish DPC decision, Meta Platforms Ireland, 26 Sept 2024
+              CCPA/CPRA right to deletion · 45-day response window
+              HIPAA 18 identifiers · HHS OCR online tracking bulletin
+              (Dec 2022, updated 18 Mar 2024), vacated N.D. Tex. 20 Jun 2024 */ -}}
+
+{{- $lanes := slice
+  (dict "rail" "4px" "step" "var(--mc-ramp-1)"
+        "name" "GDPR / UK GDPR" "cite" "Art. 5(1)(c), 32"
+        "asks" "Personal data must be <b>adequate, relevant and limited to what is necessary</b>. IP addresses count wherever they can be linked to a person."
+        "means" "A raw email in a span fails minimisation on its own terms &mdash; the purpose is diagnosis, and diagnosis never needed it."
+        "tag" "ENFORCED" "sub" "&euro;91M &middot; 2024")
+  (dict "rail" "2.5px" "step" "var(--mc-ramp-2)"
+        "name" "CCPA / CPRA" "cite" "right to deletion"
+        "asks" "On request, delete the consumer&rsquo;s data from <b>all systems where it is stored</b>. The trace backend is one of them."
+        "means" "Hash at ingest and drop the direct identifiers, and the mapping never exists downstream. The deletion problem disappears before it arrives."
+        "tag" "45-DAY" "sub" "CLOCK")
+  (dict "rail" "1.5px" "step" "var(--mc-ramp-3)"
+        "name" "HIPAA" "cite" "18 identifiers"
+        "asks" "Minimum necessary. The <b>18 enumerated identifiers</b> include dates, IP addresses, device IDs and URLs &mdash; four things every span already has."
+        "means" "OCR&rsquo;s 2022 tracking bulletin was <b>vacated in June 2024</b>. The underlying duty was never at issue and is unchanged."
+        "tag" "CONTESTED" "sub" "GUIDANCE")
+-}}
+
+<figure class="obs-fig pii-reg" aria-label="Three regulatory regimes and what each asks of a span. GDPR requires data minimisation and is the most settled, carrying the heaviest rail and a decided 91 million euro case. CCPA and CPRA require deletion from all systems within 45 days. HIPAA's minimum necessary standard covers 18 identifiers, several of which appear in every span; the 2022 tracking-technologies bulletin was vacated in June 2024, so it carries the lightest rail.">
+  <style>
+    .pii-reg .reg-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .pii-reg .reg-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .pii-reg .reg-lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:136px 1fr 1fr 118px;gap:.9rem;align-items:center;padding:.95rem .8rem;margin-bottom:.7rem;}
+    @media(max-width:760px){.pii-reg .reg-lane{grid-template-columns:1fr;gap:.5rem;}}
+    .pii-reg .reg-nm{font-size:.84rem;color:var(--mc-ink);line-height:1.5;}
+    .pii-reg .reg-nm small{display:block;font-size:.7rem;color:var(--mc-ink-muted);margin-top:.2rem;}
+    .pii-reg .reg-c{font-size:.82rem;color:var(--mc-ink-secondary);line-height:1.5;}
+    .pii-reg .reg-c b{color:var(--mc-ink);}
+    .pii-reg .reg-tag{justify-self:end;font-family:var(--font-pixel);font-size:.65rem;line-height:1.7;letter-spacing:.04em;padding:.45rem .5rem;border:1px solid;text-align:center;color:var(--mc-ink);}
+    @media(max-width:760px){.pii-reg .reg-tag{justify-self:start;}}
+    .pii-reg .reg-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;color:var(--mc-ink-muted);line-height:1.55;}
+    .pii-reg .reg-foot b{color:var(--mc-ink);}
+    .pii-reg figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="reg-wrap">
+    <div class="reg-hdr">WHAT EACH REGIME ASKS OF A SPAN</div>
+    {{- range $lanes }}
+    <div class="reg-lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+      <div class="reg-nm">{{ .name }}<small>{{ .cite }}</small></div>
+      <div class="reg-c">{{ .asks | safeHTML }}</div>
+      <div class="reg-c">{{ .means | safeHTML }}</div>
+      <div class="reg-tag" style="border-color:{{ .step | safeCSS }}">{{ .tag }}<br>{{ .sub | safeHTML }}</div>
+    </div>
+    {{- end }}
+    <div class="reg-foot">Rail weight ranks how settled the duty is, not how severe the regime is. <b>One Collector pipeline satisfies all three</b> &mdash; data that never enters the backend cannot be minimised, deleted or disclosed there.</div>
+  </div>
+  <figcaption>Fig. &mdash; Three regimes, three vocabularies, one place to fix it.</figcaption>
+</figure>

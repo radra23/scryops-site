@@ -1,0 +1,76 @@
+{{- /* layouts/shortcodes/obs-pii-bingo.html
+     Opens "Where to Start". A joke with a real payload: sixteen attribute
+     keys worth grepping your backend for, each labelled with the treatment
+     it needs. The middle band is the blind spot from the FSE 2025 study —
+     file paths, hostnames and MAC addresses are in 8-72% of logs and 5-9%
+     of the research, so no tool will flag them for you.
+
+     The terminal readout is the site's one sanctioned motion: a blinking
+     cursor, killed by Reduce motion and prefers-reduced-motion. The
+     commands are deliberately generic — every backend spells them
+     differently, and inventing an API would be worse than saying so.     */ -}}
+
+{{- $cells := slice
+  (dict "k" "customer.email"    "n" "remove")
+  (dict "k" "user.ip_address"   "n" "remove")
+  (dict "k" "shipping.address"  "n" "coarsen")
+  (dict "k" "payment.token"     "n" "remove")
+  (dict "k" "db.statement"      "n" "inspect")
+  (dict "k" "http.request.body" "n" "inspect")
+  (dict "k" "file.path"         "n" "blind spot")
+  (dict "k" "host.name"         "n" "blind spot")
+  (dict "k" "enduser.id"        "n" "hash")
+  (dict "k" "session.id"        "n" "hash")
+  (dict "k" "phone_number"      "n" "remove")
+  (dict "k" "date_of_birth"     "n" "remove")
+  (dict "k" "url.full"          "n" "inspect")
+  (dict "k" "baggage.*"         "n" "the sneaky one")
+  (dict "k" "net.host.mac"      "n" "blind spot")
+  (dict "k" "timestamp"         "n" "free space")
+-}}
+
+<figure class="obs-fig pii-bingo" aria-label="A sixteen-square audit card of attribute keys to search your telemetry backend for, each labelled with the treatment it needs: remove, coarsen, hash, inspect, or blind spot. Followed by a three-step terminal readout: list every attribute key the backend has seen, grep it against this list, and treat whatever prints as your transform configuration.">
+  <style>
+    .pii-bingo .bg-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .pii-bingo .bg-top{display:flex;justify-content:space-between;align-items:baseline;gap:.9rem;flex-wrap:wrap;margin-bottom:1.2rem;}
+    .pii-bingo .bg-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;}
+    .pii-bingo .bg-dek{font-size:.78rem;color:var(--mc-ink-muted);}
+    .pii-bingo .bg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;}
+    @media(max-width:640px){.pii-bingo .bg-grid{grid-template-columns:repeat(2,1fr);}}
+    .pii-bingo .bg-cell{background:var(--bg);border:1px solid var(--border);padding:.7rem .55rem;min-height:62px;display:flex;flex-direction:column;justify-content:space-between;gap:.45rem;}
+    .pii-bingo .bg-k{font-size:.74rem;line-height:1.4;color:var(--mc-ink);word-break:break-all;}
+    .pii-bingo .bg-n{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mc-ink-muted);}
+    .pii-bingo .bg-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;color:var(--mc-ink-muted);line-height:1.55;}
+    .pii-bingo .bg-foot b{color:var(--mc-ink);}
+    .pii-bingo .bg-term{margin-top:1rem;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:.85rem 1rem;font-size:.78rem;line-height:1.85;color:var(--code-text);overflow-x:auto;}
+    .pii-bingo .bg-term .lbl{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--code-muted);margin-bottom:.5rem;}
+    .pii-bingo .bg-term .p{color:var(--code-muted);}
+    .pii-bingo .bg-cur{display:inline-block;width:8px;background:var(--code-text);color:transparent;animation:scry-cursor 1.1s step-end infinite;}
+    @keyframes scry-cursor{0%,100%{opacity:1}50%{opacity:0}}
+    html.pref-reduce .pii-bingo .bg-cur{animation:none;}
+    @media(prefers-reduced-motion:reduce){.pii-bingo .bg-cur{animation:none;}}
+    .pii-bingo figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="bg-wrap">
+    <div class="bg-top">
+      <span class="bg-hdr">ATTRIBUTE-KEY BINGO</span>
+      <span class="bg-dek">grep your backend&rsquo;s key list. a line is a bad afternoon.</span>
+    </div>
+    <div class="bg-grid">
+      {{- range $cells }}
+      <div class="bg-cell"><span class="bg-k">{{ .k }}</span><span class="bg-n">{{ .n }}</span></div>
+      {{- end }}
+    </div>
+    <div class="bg-foot">Every key here has been documented in real telemetry, by this guide&rsquo;s own field list or by the FSE 2025 dataset survey. <b>The blind-spot row is the one nobody checks</b> &mdash; file paths, hostnames and MAC addresses sit in 8&ndash;72% of logs and 5&ndash;9% of the research.</div>
+    <div class="bg-term">
+      <div class="lbl">Pseudocode &middot; every backend spells these differently</div>
+      <div class="p">scry@ops:~$ # 1 &mdash; ask the backend for every attribute key it has seen</div>
+      <div>scry@ops:~$ trace-api attribute-keys --since 24h &gt; keys.txt</div>
+      <div class="p">scry@ops:~$ # 2 &mdash; run the bingo card against it</div>
+      <div>scry@ops:~$ grep -Ei 'email|phone|addr|card|ssn|dob|token|ip|user|path' keys.txt</div>
+      <div class="p">scry@ops:~$ # 3 &mdash; whatever prints is your transform config. that is the whole audit.</div>
+      <div>scry@ops:~$ <span class="bg-cur">_</span></div>
+    </div>
+  </div>
+  <figcaption>Fig. &mdash; Free space is a lie. Everyone has timestamps.</figcaption>
+</figure>
