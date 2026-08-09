@@ -7,25 +7,25 @@ readtime: 8
 tags: ["Privacy", "GDPR", "Compliance", "Observability", "Security"]
 ---
 
-Removing PII from spans is the first step, not the last one. GDPR creates ongoing operational obligations: data subjects can request access to their data, demand erasure, or ask for a portable copy. Retention periods must be set, enforced, and auditable. Access to sensitive telemetry must be restricted by role and data classification. This guide covers those obligations. For the identification and transformation steps that come first, see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) and [Data Masking in Telemetry](/guides/data-masking-in-telemetry/).
+Removing PII from spans is step one, not the finish line. GDPR keeps going after that: data subjects can request access to their data, demand erasure, or ask for a portable copy. Retention periods need to be set, enforced, and auditable. Access to sensitive telemetry needs to be restricted by role and data classification. That's what this guide covers. For the identification and transformation steps that come first, see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) and [Data Masking in Telemetry](/guides/data-masking-in-telemetry/).
 
 ## The Governing Principles
 
-GDPR Article 5 sets out six principles for personal data processing — lawfulness/fairness/transparency, purpose limitation, minimisation, accuracy, storage limitation, and integrity/confidentiality — plus an accountability obligation in Article 5(2). The ones with direct consequences for a telemetry pipeline:
+GDPR Article 5 sets out six principles for personal data processing: lawfulness/fairness/transparency, purpose limitation, minimisation, accuracy, storage limitation, and integrity/confidentiality. Article 5(2) adds an accountability obligation on top. Here's the subset with direct consequences for a telemetry pipeline:
 
-**Lawfulness & fairness** — collection must have a documented legal basis: consent, contract fulfilment, legitimate interest, or one of the Article 6 alternatives. "It's useful for debugging" is not a legal basis, and a basis that's technically defensible but not what a reasonable user would expect fails the fairness test regardless.
+**Lawfulness & fairness**: collection needs a documented legal basis: consent, contract fulfilment, legitimate interest, or one of the Article 6 alternatives. "It's useful for debugging" is not a legal basis, and a basis that's technically defensible but doesn't match what a reasonable user would expect still fails the fairness test.
 
-**Transparency** — data subjects must be informed of what is collected, why, and where it goes. If your telemetry pipeline processes personal data, that must be disclosed in your privacy notice.
+**Transparency**: data subjects need to know what's collected, why, and where it goes. If your telemetry pipeline processes personal data, your privacy notice has to say so.
 
-**Purpose limitation** — data collected for one purpose (debugging, say) can't quietly be repurposed for another (marketing analytics) without a new legal basis. Being able to state that purpose per attribute is also what the Implementation Checklist, below, asks of you.
+**Purpose limitation**: data collected for one purpose (debugging, say) can't quietly get repurposed for another (marketing analytics) without a new legal basis. Being able to state that purpose per attribute is exactly what the Implementation Checklist, below, asks of you.
 
-**Minimisation** — collect only what is necessary for the stated purpose. Each attribute in a span should have an explicit reason to exist. If you can't state the purpose, the field shouldn't be there.
+**Minimisation**: collect only what the stated purpose actually needs. Every attribute in a span should have an explicit reason to exist. Can't state the purpose? The field shouldn't be there.
 
-**Storage limitation** — personal data can't be kept longer than the purpose requires. See Retention Lifecycle, below, for how that becomes a per-class retention schedule.
+**Storage limitation**: personal data can't stick around longer than the purpose requires. See Retention Lifecycle, below, for how that becomes a per-class retention schedule.
 
-**Security** (integrity and confidentiality) — apply appropriate technical measures: access controls, encryption in transit and at rest, audit logging on access to sensitive data. "Appropriate" is calibrated to risk, not to convenience.
+**Security** (integrity and confidentiality): apply technical measures that match the risk. Think access controls, encryption in transit and at rest, and audit logging on sensitive data access. "Appropriate" is calibrated to risk, not convenience.
 
-Accuracy and accountability round out the six-plus-one. This guide addresses them elsewhere rather than as standalone principles here: accuracy via Rectification (below), accountability via the Collection Notice Metadata register.
+Accuracy and accountability round out the six-plus-one. This guide doesn't give them their own section: accuracy shows up under Rectification (below), accountability lives in the Collection Notice Metadata register.
 
 ## Data Classification
 
@@ -47,15 +47,15 @@ graph TD
     D --> D3[Business Events]
 {{< /mermaid >}}
 
-**Personal Data** can identify an individual directly or indirectly. It requires the strongest protection: strip or hash before export, shortest retention, most restrictive access.
+**Personal Data** can identify a person directly or indirectly, and it gets the strongest protection there is: strip or hash before export, shortest retention, most restrictive access.
 
-**Technical Data** — metrics, traces, and logs about system behaviour — is typically not personal unless it carries user-identifying attributes. Handle with care: confirm no PII is embedded before treating it as non-personal.
+**Technical Data** (metrics, traces, and logs about system behaviour) is typically not personal, unless it carries user-identifying attributes. Handle with care: confirm no PII is hiding in there before you call it non-personal.
 
-**Business Data** — transaction IDs, feature usage, conversion events — powers analytics without identifying individuals, provided business IDs are hashed and not cross-referenced to personal data in the same system.
+**Business Data** (transaction IDs, feature usage, conversion events) powers analytics without identifying individuals, as long as business IDs are hashed and never cross-referenced to personal data in the same system.
 
 ## Data Rights Management
 
-GDPR Articles 15–20 define six data subject rights over personal data. Four map cleanly onto telemetry pipeline mechanics — access, erasure, portability, and rectification — and your pipeline must be able to respond to all of them. The other two apply less often to telemetry specifically, but shouldn't be ignored: restriction of processing and a third-party notification obligation, both covered below.
+GDPR Articles 15–20 define six data subject rights over personal data. Four map cleanly onto telemetry pipeline mechanics: access, erasure, portability, and rectification. Your pipeline needs to be able to respond to all four. The other two matter less often for telemetry specifically, but don't ignore them: restriction of processing and a third-party notification obligation, both covered below.
 
 {{< mermaid >}}
 graph LR
@@ -71,17 +71,17 @@ graph LR
     H --> I
 {{< /mermaid >}}
 
-**Access (Article 15)** — the subject can request a copy of their personal data and information about how it's processed. Your telemetry backend must be queryable by a user-linked token or hashed identifier so you can retrieve relevant spans and logs.
+**Access (Article 15)**: the subject can request a copy of their personal data, plus information about how it's processed. Your telemetry backend needs to be queryable by a user-linked token or hashed identifier, so you can pull the relevant spans and logs.
 
-**Erasure (Article 17)** — the "right to be forgotten." Any personal data in your telemetry that wasn't anonymised at ingest must be locatable and deletable on request, unless one of Article 17(3)'s exemptions applies — among them a legal retention obligation, public-interest archiving or research, and defence of legal claims. These are rare for telemetry specifically, but worth confirming with legal before assuming erasure is always unconditional. This is why hashing at the Collector and purging all direct identifiers is strongly preferable to trying to find and delete them later: if no direct identifier ever enters the backend, there's nothing to erase.
+**Erasure (Article 17)**: the "right to be forgotten." Any personal data in your telemetry that wasn't anonymised at ingest needs to be locatable and deletable on request, unless one of Article 17(3)'s exemptions applies. Those exemptions (a legal retention obligation, public-interest archiving or research, defence of legal claims) are rare for telemetry specifically, but check with legal before assuming erasure is always unconditional. This is exactly why hashing at the Collector and purging all direct identifiers beats trying to find and delete them later: if no direct identifier ever reaches the backend, there's nothing to erase.
 
-**Portability (Article 20)** — where processing is based on consent or contract, subjects can request their data in a structured, machine-readable format. Telemetry data is rarely the subject of portability requests, but if it is, you need an export path.
+**Portability (Article 20)**: where processing is based on consent or contract, subjects can request their data in a structured, machine-readable format. Telemetry data rarely shows up in a portability request, but if it does, you need an export path ready.
 
-**Rectification (Article 16)** — inaccurate data must be correctable. For most telemetry this is moot (historical spans are immutable), but for any user preference or consent data stored alongside telemetry, you need an update path.
+**Rectification (Article 16)**: inaccurate data has to be correctable. For most telemetry this is moot (historical spans are immutable), but for any user preference or consent data stored alongside telemetry, you need an update path.
 
-**Restriction (Article 18)** — where a subject disputes the accuracy of their data or objects to processing pending resolution, you must suppress it from active use without deleting it. For telemetry this usually means flagging the record, or its hashed identifier, so normal query paths exclude it while retention and audit paths still retain it — a soft delete, not the hard delete erasure requires.
+**Restriction (Article 18)**: where a subject disputes the accuracy of their data, or objects to processing pending resolution, you need to suppress it from active use without deleting it. For telemetry this usually means flagging the record (or its hashed identifier) so normal query paths exclude it while retention and audit paths still keep it. Call it a soft delete, not the hard delete erasure requires.
 
-**Third-party notification (Article 19)** — if you've shared telemetry containing personal data with a downstream processor (an analytics vendor, an external SRE contractor), any rectification, erasure, or restriction you apply must be communicated to them too, unless that's impossible or disproportionate effort.
+**Third-party notification (Article 19)**: if you've shared telemetry containing personal data with a downstream processor (an analytics vendor, an external SRE contractor), any rectification, erasure, or restriction you apply needs to reach them too, unless that's impossible or disproportionate effort.
 
 {{< insight >}}
 Retention period enforcement is your best tool for limiting erasure exposure. Data that has already been deleted on schedule cannot be the subject of an erasure request.
@@ -101,7 +101,7 @@ graph TD
     D --> G[Permanent erasure]
 {{< /mermaid >}}
 
-Not every class passes through every stage — Personal Data skips Archive entirely, moving straight from Active Use to Deletion. The specific periods depend on your legal basis and the operational purpose of the data. A reasonable starting point for telemetry containing any personal attributes:
+Not every class passes through every stage. Personal Data skips Archive entirely, moving straight from Active Use to Deletion. The specific periods depend on your legal basis and the operational purpose of the data. Here's a reasonable starting point for telemetry containing any personal attributes:
 
 {{< obs-retention-timeline title="Retention by data class"
       units="days · solid = active window, hatched = archive, x = deletion"
@@ -117,7 +117,7 @@ Not every class passes through every stage — Personal Data skips Archive entir
 | Business Data | 90 days | 1 year | At end of archive period |
 | Technical Data | 90 days | 1–2 years | At end of archive period |
 
-Retention policies are meaningless without automated enforcement. Most observability backends support per-index or per-stream retention rules; configure them explicitly. Do not rely on manual deletion.
+Retention policies are meaningless without automated enforcement. Most observability backends support per-index or per-stream retention rules, so configure them explicitly. Don't rely on manual deletion.
 
 ## Access Patterns
 
@@ -136,11 +136,11 @@ graph TB
     D --> D2[Audit logs]
 {{< /mermaid >}}
 
-**Public** — aggregate metrics on system health and availability, exposed to all internal users. No personal data, no access control required beyond standard authentication.
+**Public**: aggregate metrics on system health and availability, exposed to all internal users. No personal data, so no access control needed beyond standard authentication.
 
-**Restricted** — distributed traces and error logs, which may contain business identifiers and operational context. Engineering and SRE access; not accessible to marketing or non-technical roles.
+**Restricted**: distributed traces and error logs, which may carry business identifiers and operational context. Engineering and SRE get access; marketing and non-technical roles don't.
 
-**Sensitive** — any telemetry that still contains personal data during its retention window, plus audit logs of who accessed what. Accessible only to a data protection officer or designated data steward role; access events are themselves logged.
+**Sensitive**: any telemetry that still contains personal data during its retention window, plus audit logs of who accessed what. Only a data protection officer or designated data steward role gets in, and even those access events get logged.
 
 ## Implementation Checklist
 
@@ -158,7 +158,7 @@ Before considering a telemetry pipeline GDPR-compliant, verify each of the follo
 
 ## Collection Notice Metadata
 
-For each telemetry data collection point that handles personal data, maintain machine-readable metadata documenting the governance context. This is not embedded in spans — it's maintained in a data processing register alongside the pipeline definition:
+For each telemetry data collection point that handles personal data, maintain machine-readable metadata documenting the governance context. This doesn't live in spans; it lives in a data processing register alongside the pipeline definition:
 
 ```json
 {
@@ -174,7 +174,7 @@ For each telemetry data collection point that handles personal data, maintain ma
 }
 ```
 
-`pii_present: false` should only be set after confirming the masking pipeline has run. If the Collector transform configuration changes, this register entry must be updated in the same change.
+`pii_present: false` should only get set after you've confirmed the masking pipeline actually ran. If the Collector transform configuration changes, update this register entry in the same change.
 
 <!-- TODO: Add DPIA (Data Protection Impact Assessment) trigger criteria — when is a DPIA required for telemetry changes? -->
 <!-- TODO: Add guidance on consent propagation — how user consent state flows from application to telemetry pipeline -->
