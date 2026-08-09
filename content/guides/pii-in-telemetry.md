@@ -1,7 +1,7 @@
 ---
 title: "Your Traces Are Leaking User Data"
 date: 2026-05-26
-draft: true
+draft: false
 excerpt: "Every OTel span that includes a customer email, shipping address, or payment token is a GDPR audit waiting to happen. The fix isn't application code — it's a Collector pipeline."
 readtime: 8
 tags: ["OpenTelemetry", "Privacy", "GDPR", "Security", "Observability", "Collector"]
@@ -125,7 +125,7 @@ processors:
           - delete_key(attributes, "payment.token")
           - delete_key(attributes, "payment.card_number")
 
-          # Hash medium-sensitivity business IDs (SHA-256, truncated)
+          # Hash medium-sensitivity business IDs (SHA-256)
           - set(attributes["order.id"], SHA256(attributes["order.id"])) where attributes["order.id"] != nil
           - set(attributes["customer.id"], SHA256(attributes["customer.id"])) where attributes["customer.id"] != nil
 
