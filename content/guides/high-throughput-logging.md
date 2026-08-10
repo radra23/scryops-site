@@ -1013,6 +1013,3 @@ Measure the CPU cost before enabling it everywhere. On a service already CPU-bou
 
 The right sampling and pipeline design keeps your logs useful at 13TB/day — the wrong defaults make them either incomplete or cost-prohibitive.
 
-- [Your Sampling Strategy Is Lying to You](/guides/sampling-strategy/) — why tail-based sampling is the right model for high-volume systems
-- [Distributed Logging](/guides/distributed-logging/) — how logs flow and correlate across service boundaries
-- [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — the foundational format decisions that make high-throughput pipelines tractable
