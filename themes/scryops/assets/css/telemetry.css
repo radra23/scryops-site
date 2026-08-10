@@ -445,7 +445,7 @@ pre,.highlight pre,.chroma{
   background:var(--code-bg);color:var(--code-text);
   border:1px solid var(--code-bd);border-radius:var(--radius);
   padding:16px 18px;font-size:var(--fs-code);line-height:var(--lh-code);
-  overflow-x:auto;
+  overflow-x:auto;tab-size:4;
 }
 pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 /* Evidence gets more vertical air than the paragraph rhythm (34px vs
@@ -453,15 +453,21 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
    scoped to a direct child of .prose, which is where .Content actually
    renders, so a code block inside a card isn't double-margined. */
 .prose > .highlight{margin:34px 0}
-/* Plain (non-langswitch) code blocks: strip the block's own left/right
-   border and horizontal padding, keep the top/bottom border, and move
-   padding + horizontal scrolling onto the inner <code> element instead —
-   so code text sits flush with the 720px prose measure's edges rather
-   than inset, per the DS reading-page template. Scoped through a direct
-   .prose child on purpose: langswitch's Chroma output lives several DOM
-   levels inside .langswitch .ls-panels, never as a direct .prose child,
-   so these selectors cannot reach it — no langswitch-specific override
-   needed. Two selector forms cover both cases Hugo actually renders: a
+/* Plain (non-langswitch) code blocks: the well BLEEDS 19px past its own
+   720px-capped parent on each side (width = measure + 38px, centered via
+   a negative-ish margin-inline) rather than deleting the inset — so code
+   TEXT still lands flush with the 720px prose measure, but 18px of
+   padding survives and scrolling stays on this <pre>, the element with
+   the visible border/background users actually grab. max-width:none
+   defeats the generic `.layout .prose > *{max-width:720px}` rule, which
+   would otherwise re-clamp the bare-fence case below (that one IS a
+   direct .prose child) and silently cancel the bleed. Scoped narrower
+   than langswitch on purpose: its Chroma output lives several DOM levels
+   inside .langswitch .ls-panels, in its own nested context with its own
+   chrome, so this measure-relative bleed formula doesn't apply there —
+   langswitch already scrolls on its own <pre> correctly via the generic
+   rule above; only tab-size needed to be shared, not this width math.
+   Two selector forms cover both cases Hugo actually renders: a
    Chroma-highlighted fence is .prose > .highlight > pre.chroma > code
    (the border/padding being overridden here lives on that inner pre, not
    on .highlight itself — .highlight carries no box-model styling of its
@@ -470,15 +476,19 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
    wrapper or Chroma classes at all and renders as .prose > pre > code
    directly. */
 .prose > .highlight pre,.prose > pre{
-  border-left:none;border-right:none;padding:0;overflow:hidden;
+  width:calc(min(100%,720px) + 38px);max-width:none;
+  margin-inline:calc(max(0px,(100% - 720px)/2) - 19px) auto;
+  border-left:none;border-right:none;padding:16px 18px;overflow-x:auto;
+  position:relative; /* anchors .code-copy-btn to this <pre>, not .highlight,
+    which carries no box-model styling of its own and would leave the button
+    ~19px short of the well's true (bled) edge */
 }
 .prose > .highlight pre > code,.prose > pre > code{
-  display:block;padding:16px 0;overflow-x:auto;
+  display:block;padding:0;overflow:visible;
 }
-/* copy-to-clipboard button, injected by code-copy.js onto .prose > .highlight
-   and .prose > pre (plain fenced blocks) — langswitch panels are never a
-   direct .prose child (see comment above), so this never doubles up there. */
-.prose > .highlight,.prose > pre{position:relative}
+/* copy-to-clipboard button, injected by code-copy.js onto the <pre> above
+   (plain fenced blocks only — langswitch panels are never a direct .prose
+   child, see comment above, so this never doubles up there). */
 .code-copy-btn{
   position:absolute;top:8px;right:8px;z-index:1;
   font-family:var(--font-code);font-size:11px;letter-spacing:.08em;text-transform:uppercase;

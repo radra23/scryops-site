@@ -4,10 +4,14 @@
    previously had no copy affordance at all. Progressive enhancement —
    the code renders and reads fine with this script absent. */
 (function () {
-  function wire(container) {
-    var code = container.querySelector("code");
+  // Button is appended to the actual <pre>, not the outer .highlight
+  // wrapper — telemetry.css bleeds <pre> 19px past .highlight on each side
+  // (the measure-relative code-well fix), and .highlight itself carries no
+  // box-model styling, so anchoring position:relative there would leave
+  // the button short of the well's true edge.
+  function wire(pre) {
+    var code = pre.querySelector("code");
     if (!code) return;
-    container.style.position = "relative";
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "code-copy-btn";
@@ -22,10 +26,13 @@
         btn.textContent = "Copy";
       }, 1500);
     });
-    container.appendChild(btn);
+    pre.appendChild(btn);
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".prose > .highlight, .prose > pre").forEach(wire);
+    document.querySelectorAll(".prose > .highlight, .prose > pre").forEach(function (container) {
+      var pre = container.matches("pre") ? container : container.querySelector("pre");
+      if (pre) wire(pre);
+    });
   });
 })();
