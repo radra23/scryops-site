@@ -52,50 +52,35 @@ graph TD
 Each signal type covers ground the others can't. Logs don't replace metrics or traces — they make them actionable.
 
 1. **Logs and Event Data**
-   - Logs: Detailed event records with context
-   - Events: Real-time system occurrences
-   - Together: Comprehensive event understanding
+   - Logs — narrate what happened and why, with full context attached to a single occurrence
+   - Events — mark that something specific occurred, often without the surrounding narrative
+   - Together — a log gives an event its "why," turning a bare occurrence into an explained one
 
 2. **Logs and Time Series Data**
-   - Logs: Individual event records
-   - Metrics: Aggregated measurements
-   - Together: Metrics show trends, logs explain why
+   - Logs — one record per occurrence, rich in context, expensive to store at volume
+   - Metrics — aggregated numbers over time, cheap to store, blind to individual causes
+   - Together — a metric tells you error rate spiked at 10:03; the logs from that window tell you why
 
 3. **Logs and Request Data**
-   - Logs: Event details
-   - Traces: Request flows
-   - Together: Complete request understanding
+   - Logs — what happened at each step, including values and outcomes
+   - Traces — the shape of a request as it moves across services, with timing
+   - Together — a trace shows which span was slow; the log attached to that span shows what it was doing
 
 4. **Logs and State Data**
-   - Logs: State changes
-   - Configurations: Current state
-   - Together: State transition tracking
+   - Logs — a record of the transition: what changed, from what, to what
+   - Configuration and state stores — the system's current state, with no history of how it got there
+   - Together — state data shows where the system is now; logs show the sequence of transitions that got it there
 
 5. **Logs and Business Data**
-   - Logs: Business events
-   - Transactions: Business operations
-   - Together: Business process visibility
+   - Logs — the technical event: which order, which payment, which failure
+   - Business data (transactions, revenue records) — the business meaning of that event
+   - Together — connecting the two turns "payment gateway returned an error" into "this outage cost $4,200 in failed premium-tier checkouts"
 
 ## Logging Philosophy
 
 ### Context Is What Separates a Log From a Line of Text
 
 An uncontextualized log entry answers nothing. "Payment failed" tells you a failure occurred. It doesn't tell you which user, which payment method, which downstream dependency, or whether this is the first failure or the third retry. Every log must carry enough context that it can be read in isolation — without cross-referencing a separate system — and still convey what happened and to whom.
-
-1. **Context is King**
-   - Every log should tell a story
-   - Include relevant business context
-   - Maintain request context across services
-
-2. **Structured Over Unstructured**
-   - Use structured logging formats
-   - Enable better search and analysis
-   - Support automated processing
-
-3. **Quality Over Quantity**
-   - Log meaningful events
-   - Include actionable information
-   - Avoid log spam
 
 ### The Maturity Progression: From Noise to Signal
 
@@ -181,42 +166,10 @@ Logging is not just an operational tool. A well-structured log stream is also a 
 
 ### Beyond Debugging
 
-1. **Business Intelligence**
-   - Customer behavior analysis
-   - Feature usage patterns
-   - Business process optimization
-
-2. **Compliance & Audit**
-   - Regulatory requirements
-   - Security auditing
-   - Change tracking
-
-3. **Performance Optimization**
-   - Bottleneck identification
-   - Resource utilization
-   - Cost optimization
-
-4. **Customer Experience**
-   - Error pattern analysis
-   - User journey tracking
-   - Proactive issue detection
-
-### ROI of Good Logging
-
-1. **Cost Reduction**
-   - Faster problem resolution
-   - Reduced downtime
-   - Optimized resource usage
-
-2. **Revenue Protection**
-   - Early issue detection
-   - Better customer experience
-   - Reduced business impact
-
-3. **Operational Efficiency**
-   - Automated analysis
-   - Proactive monitoring
-   - Better decision making
+- **Business intelligence** — which features get used, in what sequence, by which customer segment. The same event stream that helps you debug also answers what your product actually does in the field.
+- **Compliance and audit** — a queryable record of who accessed what and when, which is exactly what auditors and regulators ask for after the fact, not before.
+- **Performance optimization** — logs pinpoint which specific code path or dependency is slow, where a metric only tells you that something got slower.
+- **Customer experience** — a support ticket plus the matching log trail turns "the user says it broke" into "here's exactly what broke, for this user, at this timestamp."
 
 ## Integration with Observability Stack
 
@@ -248,25 +201,10 @@ graph LR
 
 ### Key Integration Points
 
-1. **Data Collection**
-   - Log aggregation
-   - Context propagation
-   - Sampling strategies
-
-2. **Processing & Enrichment**
-   - Log parsing
-   - Context enrichment
-   - Correlation
-
-3. **Storage & Retention**
-   - Cost-effective storage
-   - Retention policies
-   - Data lifecycle
-
-4. **Analysis & Visualization**
-   - Log search
-   - Pattern analysis
-   - Business insights
+- **Data collection** — aggregate from every host and container into one pipeline, propagate trace and request context along with the log line, and sample the high-volume, low-value paths rather than storing every entry at full fidelity.
+- **Processing and enrichment** — parse unstructured lines into fields, attach context that wasn't available at emission time (service version, deployment ID), and correlate entries that belong to the same request or trace.
+- **Storage and retention** — hot storage for what's actively queried, cold storage for what's kept for compliance, and a retention schedule tied to how long each data class is actually useful.
+- **Analysis and visualization** — full-text and field-level search, pattern detection across large volumes, and dashboards that turn raw entries into business-readable signal.
 
 ## Log at the Point of Consequence, Not at Every Entry and Exit
 
@@ -275,10 +213,10 @@ The most common logging mistake is wrapping every function in entry/exit logs. T
 ### What to Log
 
 1. **What to Log**
-   - Business events
-   - State changes
-   - Error conditions
-   - Performance data
+   - Business events — the things a product manager would recognize: an order placed, a subscription cancelled, a payment retried
+   - State changes — a resource moving from one state to another, not the fact that a function was called
+   - Error conditions — anything that required a decision (retry, fallback, give up), not just anything that returned non-200
+   - Performance data — the numbers you'd actually reach for during an incident: latency, queue depth, retry counts
 
 2. **How to Log**
    - Use structured format — free-text logs collapse under any serious query load
@@ -291,23 +229,6 @@ The most common logging mistake is wrapping every function in entry/exit logs. T
    - With the severity level that reflects actual impact
    - With enough detail that the log is actionable without a follow-up investigation
    - With awareness of cost — debug-level logs in production at high throughput add up fast
-
-### Moving from Basic to Advanced
-
-1. **Getting Started**
-   - Basic error logging
-   - Simple context
-   - Manual analysis
-
-2. **Growing Maturity**
-   - Structured logging
-   - Automated analysis
-   - Basic correlation
-
-3. **Advanced Implementation**
-   - Full observability
-   - Business context
-   - Predictive analysis
 
 Good logs are an investment in your own future incident response. The fields you skip today are the fields you'll wish existed at 2am next month. Start structured, keep context close to the event, and tie every log to the trace it belongs to.
 

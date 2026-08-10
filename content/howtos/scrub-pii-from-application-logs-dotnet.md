@@ -11,6 +11,8 @@ The primary control for PII in telemetry is the OTel Collector — see [Your Tra
 
 Application-level scrubbing handles two categories the Collector cannot easily catch: PII embedded in log message strings (not structured attributes), and PII in exception messages that propagate through the stack. Neither belongs in telemetry. Neither is easy to strip with OTTL transforms after the fact.
 
+The sections below are a reference set of independent patterns, not a strict step-by-step sequence — pick the ones that match your PII categories and skip the rest.
+
 ## PII Categories in Application Logs
 
 The most common sources in a typical .NET service:

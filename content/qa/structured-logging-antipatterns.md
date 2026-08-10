@@ -90,4 +90,6 @@ event_type = "payment.failed" AND order.id = "ord-9f2a" AND order.amount > 500
 
 The second query is O(log n) on an index. The first is O(n) full-text scan. At production log volumes, the difference between the two is the difference between a sub-second query and one that times out.
 
+For a full walkthrough beyond these three patterns, see [How to Implement Structured Logging in .NET](/howtos/implement-structured-logging-dotnet/) and [Structured Logging: Making Logs Machine-Readable](/guides/structured-logging-machine-readable/).
+
 <!-- TODO: Add Go and Python equivalents for the same anti-patterns -->

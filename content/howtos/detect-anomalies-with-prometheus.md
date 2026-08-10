@@ -105,6 +105,9 @@ A **short window with a long horizon** is highly sensitive to recent spikes and 
 
 If your metric is noisy, smooth it before passing to `predict_linear`. A rate over a longer window (e.g. `rate(...[15m])` instead of `rate(...[5m])`) reduces variance at the cost of some recency.
 
+- [How to Create Your First Observability Dashboard](/howtos/create-your-first-dashboard/) — build the panel these queries plug into
+- [What's the difference between AIOps and traditional threshold-based alerting?](/qa/aiops-vs-traditional-alerting/) — where prediction-based detection like this fits versus static thresholds
+
 <!-- TODO: Add Approach 2 — Z-score anomaly detection with PromQL recording rules -->
 <!-- TODO: Add Approach 3 — Grafana ML plugin (machine-learning-powered seasonal baselines) -->
 <!-- TODO: Add section on evaluating detector quality: false positive and false negative rates -->

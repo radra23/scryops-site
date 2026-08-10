@@ -66,6 +66,9 @@ Not every line of code. Not every function call. The signal-to-noise ratio matte
 
 The heuristic: instrument everywhere a request can succeed or fail for a different reason. An HTTP handler. A database query. A payment provider call. A cache miss that triggers a fallback. These are the events that, when something goes wrong, you will wish you had.
 
+- [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — turning the "logs that failed to be structured" case above into real structured events
+- [OTel Semantic Conventions](/guides/otel-semantic-conventions/) — the shared attribute vocabulary that makes structured events queryable across services
+- [Cardinality Management](/guides/cardinality-management/) — what happens when the attributes that make events valuable also become metric labels
+
 <!-- TODO: Add section on Honeycomb-style wide events vs narrow spans — the tradeoff -->
 <!-- TODO: Add section on how OTel bridges the three pillars into one pipeline -->
-<!-- TODO: Cross-reference to structured-logging-machine-readable.md and otel-semantic-conventions.md -->

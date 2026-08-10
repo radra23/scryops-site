@@ -43,7 +43,7 @@ OpenTelemetry exists to solve this. A shared data format, a shared collection pi
 
 Traditional monitoring is not obsolete. It remains the right tool for known failure modes with clear operational thresholds. Disk usage at 90% should page someone. Certificate expiry within 30 days should alert. These are binary checks on well-understood conditions.
 
-The mistake is treating this kind of monitoring as the whole of the problem. Known failure modes are a subset of all possible failure modes — a shrinking subset as systems grow more complex.
+The mistake is treating this kind of monitoring as the whole of the problem. Known failure modes are a subset of all possible failure modes — a shrinking subset as systems grow more complex. [Certificate expiry monitoring](/guides/certificate-monitoring/) is exactly this kind of binary check done well — it's just not the whole picture.
 
 The argument for observability is not that thresholds are wrong. It is that thresholds alone leave you blind to the majority of what can go wrong in a distributed system. Traditional monitoring is the floor. Observability is the ceiling.
 
@@ -55,6 +55,7 @@ Traditional monitoring instruments services individually, for specific known sig
 
 The result is a system where the question "what is happening right now and why" has an answer that does not require escalating to the engineer who knows the code.
 
+For the sharper definitional line between the two, see [Observability vs. Monitoring: Why the Distinction Matters](/articles/observability-vs-monitoring/). For what happens when alerts built on this model go unmaintained, see [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/).
+
 <!-- TODO: Add concrete before/after scenario: same incident, traditional monitoring vs observability approach -->
 <!-- TODO: Add section on the cost of traditional monitoring at scale: alert fatigue, false positives, coverage gaps -->
-<!-- TODO: Cross-reference to observability-vs-monitoring.md for the definitional distinction -->

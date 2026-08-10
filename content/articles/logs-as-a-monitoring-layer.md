@@ -68,3 +68,7 @@ A query-ready log store. Real-time alerting requires low-latency queries against
 Volume control for high-frequency services. Log everything in development. In production, high-frequency `INFO` events on hot paths — health check responses, per-request debug traces — can make field-level queries cost-prohibitive before they add monitoring value. A filtering or sampling strategy for high-volume, low-signal events keeps the log store focused on what matters. Errors and warnings at full fidelity; verbose debug events sampled or dropped at the collector.
 
 Start with what you already investigate manually. If there is a dashboard you open after every deployment, the conditions you check on that dashboard are the right place to wire your first log-based alert. The log fields that would tell you immediately what you currently discover by clicking around — those are the fields to alert on. Automate the manual check.
+
+- [How to Set Up Log-Based Alerting](/howtos/set-up-log-based-alerting/) — the walkthrough for wiring up the alerts this piece argues for
+- [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — the structured-vs-free-text distinction, in depth
+- [Log Context Enrichment](/guides/log-context-enrichment/) — where the canonical fields this piece assumes actually come from

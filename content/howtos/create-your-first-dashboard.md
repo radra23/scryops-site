@@ -152,7 +152,7 @@ Arrange panels with this hierarchy so the dashboard communicates in five seconds
 In Grafana, panels are dragged by their title bar and resized from the bottom-right corner. The grid is 24 units wide. Three stat panels at 8 units each fills the top row neatly.
 
 {{< insight bookmark >}}
-**The dashboard answers three on-call questions.** Is something wrong right now — error rate stat. When did it start — request rate and latency trends. What changed at that moment — deployment annotations. Every panel beyond those three questions adds noise until you have encountered a question the dashboard cannot answer. Add panels as questions arise, not in advance.
+**The dashboard answers three on-call questions.** Is something wrong right now — error rate stat. When did it start — request rate and latency trends. What changed at that moment — deployment annotations.
 {{< /insight >}}
 
 {{< obs-mascot class="barbarian" quip="BEFORE THE DASHBOARD: Conan reads ten thousand log lines BY HAND. Uphill. In the snow. AFTER THE DASHBOARD: three panels. Red means bad. Conan is free now. Conan is also, quietly, a little sad about it. Conan is NOT going back." caption="Conan the Bawkbarian would lay down his life for your error-rate stat panel." >}}

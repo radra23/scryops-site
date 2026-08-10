@@ -152,3 +152,7 @@ Instead of making engineers predict every failure mode and write a threshold for
 Not every degradation is equally urgent. A latency spike during checkout costs revenue. The same spike during a background sync can wait. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise by consequence, not just severity.
 
 The infrastructure for arbitrary-query observability exists. The gap now is not tooling — it is the organizational habit of building systems that emit enough context to be questioned at all.
+
+- [OpenTelemetry Overview](/guides/opentelemetry-overview/) — the shared foundation described above, in practical detail
+- [eBPF-Powered Tracing and Continuous Profiling](/guides/ebpf-powered-tracing-continuous-profiling/) — the fourth signal, covered in depth
+- [What's the difference between AIOps and traditional threshold-based alerting?](/qa/aiops-vs-traditional-alerting/) — where threshold-free anomaly detection fits today

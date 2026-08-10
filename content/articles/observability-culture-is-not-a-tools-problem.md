@@ -73,6 +73,7 @@ Teams that treat on-call as a punishment to be endured get nothing from it. Team
 
 The goal is not a perfect dashboard. The goal is a culture where every engineer, when they ship a change, knows what signal they would look for if it broke — and has already instrumented it.
 
+For the people/process dimension of this in more depth, see [Observability Maturity Model](/guides/observability-maturity-model/). For what the on-call feedback loop looks like when it's broken, see [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/).
+
 <!-- TODO: Add section on measuring culture change (observability adoption metrics, on-call load trend) -->
 <!-- TODO: Add section on the community of practice model: guilds, working groups, Slack channels -->
-<!-- TODO: Cross-reference to observability-maturity-model.md for the people/process dimension -->

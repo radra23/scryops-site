@@ -75,6 +75,8 @@ If you’re trying to close the gap between “we have good observability” and
 
 The crystal ball is just a metaphor. Signal correlation is real.
 
+The reactive model shows up in more than dashboards — it's baked into how most teams alert, too. See [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/) for the same "the model is wrong, not the thresholds" argument applied to on-call.
+
 {{< insight bookmark >}}
 **Where to start.**
 Pick one service with a known recurring incident. Pull its telemetry for the 30 minutes before each occurrence — spans, error rates, upstream and downstream latency. Look for the signal that precedes the problem. Build even a simple rule that fires on it early. That first experiment is where the model stops being abstract.

@@ -93,3 +93,7 @@ Most production systems land somewhere in the middle — monitoring and alerting
 "APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, Lightstep, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
 
 In practice, most modern APM tools have expanded toward observability, and most observability platforms now include APM-style code-level features. The spectrum matters more than the label: the question to ask of any tool is not "is it APM or observability?" but "does it let me answer questions I did not anticipate before the incident?"
+
+- [Cardinality Management](/guides/cardinality-management/) — the practical side of the cost dimension above
+- [OTel Context Propagation](/guides/otel-context-propagation/) — how requirement 3, context propagation, actually works
+- [OTel Semantic Conventions](/guides/otel-semantic-conventions/) — the shared vocabulary behind requirement 2, consistent naming
