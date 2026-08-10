@@ -6,7 +6,14 @@
 {{- $method := .methodHref | default "/colophon/#method" -}}
 <div class="scry-fp" data-footprint data-fp-budget="{{ $budget }}">
   <div><span class="scry-fp__pr">scry@ops</span>:<span class="scry-fp__ar">~</span>$ du -h --footprint thispage</div>
-  <div><span class="scry-fp__hi" data-fp-size>…</span> transferred · <span class="scry-fp__eco" data-fp-co2>…</span> / visit · <span class="scry-fp__status" data-fp-status>measuring…</span></div>
+  <div><span class="scry-fp__hi" data-fp-size>measuring…</span> transferred · <span class="scry-fp__eco" data-fp-co2>measuring…</span> / visit · <span class="scry-fp__status" data-fp-status>measuring…</span></div>
   <div class="scry-fp__bar"><div class="scry-fp__fill" data-fp-fill></div></div>
-  <span class="scry-fp__note" data-fp-note>…</span> · <a class="scry-fp__method" href="{{ $method | relURL }}">method ↗</a>
+  <span class="scry-fp__note" data-fp-note>measuring…</span> · <a class="scry-fp__method" href="{{ $method | relURL }}">method ↗</a>
 </div>
+{{- /* .scry-fp itself is display:none under html:not(.js) (telemetry.css)
+     since its numbers are JS-measured and would otherwise sit frozen on
+     "measuring…" forever. This sibling is native-noscript-gated (browsers
+     already skip its content whenever JS runs, no class toggle needed) so
+     no-JS readers get an honest explanation instead of a silently missing
+     badge. */ -}}
+<noscript><p class="scry-fp__noscript">Page-weight and CO&#8322; measurement needs JavaScript (it reads the browser's Performance API, which isn't available at build time) &mdash; see <a href="{{ $method | relURL }}">method ↗</a>.</p></noscript>

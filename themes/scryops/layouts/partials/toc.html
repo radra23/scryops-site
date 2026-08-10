@@ -1,14 +1,22 @@
 {{- /* layouts/partials/toc.html
      Telemetry table of contents. Hugo builds .TableOfContents
      from the markup.tableOfContents config; the scrollspy
-     'active' state is added by the small script below. */ -}}
+     'active' state is added by the small script below.
+
+     Emitted before <article> in single.html so DOM order matches reading
+     order on the stacked mobile layout (and for assistive tech at every
+     width) instead of relying on grid placement alone. The scrollspy
+     script queries '.article h2[id]' for headings that don't exist yet at
+     that point in the parse, so it's wrapped in DOMContentLoaded — by the
+     time that fires the whole document, including <article>, is parsed,
+     regardless of where this partial sits in the source. */ -}}
 {{ if .Params.toc | default true }}
 <aside class="toc">
   <div class="toc-label">On this page</div>
   {{ .TableOfContents }}
 </aside>
 <script>
-  (function () {
+  document.addEventListener('DOMContentLoaded', function () {
     var links = document.querySelectorAll('.toc a');
     if (!links.length) return;
     var map = {};
@@ -26,6 +34,6 @@
       });
     }, { rootMargin: '-10% 0px -80% 0px' });
     document.querySelectorAll('.article h2[id], .article h3[id]').forEach(function (h) { obs.observe(h); });
-  })();
+  });
 </script>
 {{ end }}

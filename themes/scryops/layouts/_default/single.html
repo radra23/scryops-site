@@ -1,6 +1,7 @@
 {{ define "main" }}
 {{ $hasToc := ge (len (findRE "(?i)<h2" .Content)) 4 }}
 <div class="layout{{ if $hasToc }} has-toc{{ end }}">
+  {{ if $hasToc }}{{ partial "toc.html" . }}{{ end }}
   <article class="article">
     <div class="single-header">
       <div class="scry-artcard__meta">
@@ -68,7 +69,5 @@
     </aside>
     {{ end }}
   </article>
-
-  {{ if $hasToc }}{{ partial "toc.html" . }}{{ end }}
 </div>
 {{ end }}

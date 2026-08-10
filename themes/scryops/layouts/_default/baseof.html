@@ -39,5 +39,8 @@
   {{/* permacomputing · Phase 2 — measures this page's transfer weight, fills the footprint badge */}}
   {{ $footprint := resources.Get "js/footprint.js" | fingerprint }}
   <script src="{{ $footprint.RelPermalink }}" integrity="{{ $footprint.Data.Integrity }}" crossorigin="anonymous" defer></script>
+  {{/* copy-to-clipboard button on plain code blocks — langswitch panels have their own */}}
+  {{ $codeCopy := resources.Get "js/code-copy.js" | fingerprint }}
+  <script src="{{ $codeCopy.RelPermalink }}" integrity="{{ $codeCopy.Data.Integrity }}" crossorigin="anonymous" defer></script>
 </body>
 </html>
