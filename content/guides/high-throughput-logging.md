@@ -26,16 +26,7 @@ At 1M+ log events per minute, standard synchronous logging exhausts I/O budgets 
 | High-traffic service | 10,000 | 12 | 120,000 | 10.4B | 1 TB |
 | Internet scale | 100,000 | 15 | 1,500,000 | 130B | 13 TB |
 
-{{< obs-column title="LOG VOLUME vs. TRAFFIC" units="// 1000× the traffic, 3000× the logs — and 13 TB/day to store"
-              scale="log" y-label="logs / second" emphasis="3"
-              caption="Fig. — Traffic rises 1000× from a small service to internet scale, but log volume rises ~3000× — because requests/second and log-lines/request both climb. The punchline is the daily storage above each bar: 4.3 GB becomes 13 TB." >}}
-[
-  {"label":"SMALL","value":500,"caption":"100 rps\n4.3 GB/day"},
-  {"label":"MEDIUM","value":8000,"caption":"1K rps\n69 GB/day"},
-  {"label":"HIGH","value":120000,"caption":"10K rps\n1 TB/day"},
-  {"label":"INTERNET","value":1500000,"caption":"100K rps\n13 TB/day"}
-]
-{{< /obs-column >}}
+{{< obs-throughput-volume >}}
 
 ## Building on Async Foundations: The Performance Multiplier
 

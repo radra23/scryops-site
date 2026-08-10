@@ -17,6 +17,8 @@ OTel defines three telemetry signal types. Each answers a different class of que
 
 **Traces** answer "what happened to this request?" A trace is a directed acyclic graph of spans — one span per unit of work — recording when each operation started, how long it took, whether it succeeded, and what attributes it carried. Distributed tracing links spans across service boundaries using propagated context headers, so a single trace can span an API gateway, three microservices, a message queue consumer, and a database call. Traces are the signal for understanding request paths and diagnosing latency.
 
+{{< obs-trace-waterfall >}}
+
 **Metrics** answer "how is the system behaving right now?" Metrics are numeric measurements aggregated over time: counters that only increase, gauges that represent a current value, and histograms that record distributions. Where a trace tells you that one request took 800ms, a metric tells you that p95 latency has been above 600ms for the last five minutes. Metrics are the signal for alerting and capacity planning.
 
 **Logs** answer "what happened and in what context?" Logs are time-stamped records of discrete events. When correlated with traces via a shared `trace_id`, they provide the narrative detail — error messages, business context, state transitions — that explains what a trace reveals about timing. Logs are the signal for root cause analysis.

@@ -63,14 +63,7 @@ Standard thresholds for a 30-day SLO (from Google SRE):
 
 At 14.4× burn, the budget exhausts in 30 ÷ 14.4 ≈ 2.1 days. The 1-hour window is short enough to catch fast-moving incidents early; the 6-hour window catches sustained moderate burns that the 1-hour window misses.
 
-{{< mermaid >}}
-graph LR
-    A[Alert fires] --> B[Monitor-only notice]
-    B --> C[Ticket created]
-    C --> D[Team alert]
-    D --> E[Page on-call]
-    E --> F[Escalate]
-{{< /mermaid >}}
+{{< obs-burn-rate-triage >}}
 
 {{< insight >}}
 At 14.4× burn rate, you exhaust a 30-day budget in ~51 hours — not 2 hours. The common misreading of burn rate is treating the multiplier as a time divisor applied to the window length. The correct formula is: days to exhaustion = window_days ÷ burn_rate.
