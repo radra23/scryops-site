@@ -1,4 +1,11 @@
-<div class="about-sections">
+{{- /* Wrapped in a nav element with an aria-label of "Content sections",
+     rather than an aria-label on a plain div. Each card already carries
+     visible tag, title and description text, so a label on the container
+     would only duplicate what a screen reader reads anyway. What was
+     genuinely missing is the LANDMARK: four navigation links with no role
+     meant the group could not be skipped or jumped to. Do not add
+     aria-label to the cards themselves. */ -}}
+<nav class="about-sections" aria-label="Content sections">
 
   <a href="/articles/" class="about-sec-card about-sec-article">
     <span class="about-sec-tag">Article</span>
@@ -28,4 +35,4 @@
     <span class="about-sec-cta">Browse &rarr;</span>
   </a>
 
-</div>
+</nav>
