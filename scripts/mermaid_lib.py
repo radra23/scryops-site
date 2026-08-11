@@ -92,7 +92,7 @@ PALETTE = {
     "#ffcc99": "var(--warn)",
 }
 
-_BLOCK = re.compile(r"{{<\s*mermaid\s*>}}(.*?){{<\s*/\s*mermaid\s*>}}", re.S)
+_BLOCK = re.compile(r"{{<\s*mermaid\b[^>]*>}}(.*?){{<\s*/\s*mermaid\s*>}}", re.S)
 _HEX = re.compile(r"#[0-9a-fA-F]{6}\b|#[0-9a-fA-F]{3}\b")
 # mermaid's stylesheet helper (`ne`/rgba-from-hex) renders some
 # themeVariables -- e.g. edgeLabelBackground for the (unused, since we set
