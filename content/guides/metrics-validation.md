@@ -155,7 +155,7 @@ Alert on `prometheus_tsdb_head_series` growth rate, not just absolute count. A P
 
 Before a metric ships, it should pass three distinct validation concerns:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Metric testing has three independent gates: accuracy, reliability, and performance. A metric can pass one and still fail the others." >}}
 graph TD
     A[Metric Testing] --> B[Accuracy]
     A --> C[Reliability]
@@ -189,7 +189,7 @@ Enforce these structural invariants as part of any metric registration or review
 
 Each stage assumes the previous one has passed. Failing any stage sends the metric back to the author before it reaches production:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Each stage assumes the previous one passed, and a failure at any stage sends the metric back to the author instead of letting it ship." >}}
 graph TD
     A[New Metric] --> B[Unit Tests]
     B --> C[Integration Tests]

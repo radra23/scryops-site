@@ -31,7 +31,7 @@ Accuracy and accountability round out the six-plus-one. This guide doesn't give 
 
 Telemetry data falls into three broad classes, each requiring different handling:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Telemetry splits into three classes with different handling: personal data gets the strongest protection, technical data needs a PII check before it counts as safe, and business data stays useful only if its IDs are hashed and kept apart from personal data." >}}
 graph TD
     A[Telemetry Data] --> B[Personal Data]
     A --> C[Technical Data]
@@ -57,7 +57,7 @@ graph TD
 
 GDPR Articles 15–20 define six data subject rights over personal data. Four map cleanly onto telemetry pipeline mechanics: access, erasure, portability, and rectification. Your pipeline needs to be able to respond to all four. The other two matter less often for telemetry specifically, but don't ignore them: restriction of processing and a third-party notification obligation, both covered below.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Access, erasure, and portability requests each resolve through a different pipeline mechanic, lookup, removal, or export, but all three converge on the same response step." >}}
 graph LR
     A[Data Subject Request] --> B{Request Type}
     B --> C[Access]
@@ -91,7 +91,7 @@ Retention period enforcement is your best tool for limiting erasure exposure. Da
 
 GDPR's storage limitation principle (Article 5(1)(e)) requires that personal data be kept no longer than necessary. Telemetry retention should be tiered by data classification:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Data normally moves through collection, active use, and archive before deletion, but personal data skips the archive stage entirely and goes straight from active use to deletion." >}}
 graph TD
     A[Data Collection] --> B[Active Use]
     B --> C[Archive]
@@ -123,7 +123,7 @@ Retention policies are meaningless without automated enforcement. Most observabi
 
 Access to telemetry should be role-restricted by data classification:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Telemetry access is tiered by classification: public metrics are open to all, traces and error logs are restricted to engineering, and personal data plus audit logs are sensitive, open only to a data steward role." >}}
 graph TB
     A[Data Access] --> B[Public]
     A --> C[Restricted]

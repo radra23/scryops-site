@@ -12,7 +12,7 @@ It's 3am, the pager just went off, and you're scrolling a wall of logs where a r
 ## RFC 5424: The Numeric Severity Scale
 RFC 5424 (the IETF syslog standard) defines eight severity levels, numbered 0–7, with 0 being most severe. Most application frameworks map to a subset of these, typically collapsing the top three into FATAL or CRITICAL.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — RFC 5424 defines eight numbered severity levels, 0 (Emergency) as most severe down to 7 (Debug), each mapped to what it means for the system." >}}
 graph TD
     A[RFC 5424 Severity Levels] --> B[0 - Emergency]
     A --> C[1 - Alert] 
@@ -32,10 +32,10 @@ graph TD
     H --> P[Informational Messages]
     I --> Q[Debug-level Messages]
     
-    style A fill:#4ecdc4
-    style E fill:#ff6b6b
-    style F fill:#ffa726
-    style H fill:#66bb6a
+    style A fill:#4ecdc4,stroke-width:1.5px,stroke-dasharray:2 2
+    style E fill:#ff6b6b,stroke-width:3px
+    style F fill:#ffa726,stroke-width:2.5px,stroke-dasharray:5 3
+    style H fill:#66bb6a,stroke-width:1.5px
 {{< /mermaid >}}
 
 | Level | Name | Use Case | Example Scenario |
@@ -217,7 +217,7 @@ TRACE records method-level execution: entry and exit points, loop iterations, gr
 
 You rarely need every level in the same place at the same cost. DEBUG and TRACE are usually the bulk of raw log lines, so routing them to local-only — or dropping them in production — removes most of your shipped volume before it ever reaches central storage. Route what is left by how fast you will actually read it:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Routing log volume by level sends ERROR to hot real-time storage, WARN to a one-hour warm tier, INFO to daily cold batches, and DEBUG/TRACE nowhere past the local environment." >}}
 graph TD
     A[Original Log Volume] --> B{Criticality-Based Routing}
     
@@ -231,10 +231,10 @@ graph TD
     E --> I[Historical reports]
     F --> J[Dev environment only]
     
-    style A fill:#ff6b6b
-    style C fill:#ff9999
-    style D fill:#ffcc99
-    style E fill:#99ccff
+    style A fill:#ff6b6b,stroke-width:3px
+    style C fill:#ff9999,stroke-width:3px
+    style D fill:#ffcc99,stroke-width:2.5px,stroke-dasharray:5 3
+    style E fill:#99ccff,stroke-width:1.5px,stroke-dasharray:2 2
     style F fill:#cccccc
 {{< /mermaid >}}
 
@@ -247,7 +247,7 @@ graph TD
 ## Performance Impact
 Verbosity has a cost. The relative processing overhead increases sharply as you move to more verbose levels — debug and trace logging can add substantial overhead in tight loops:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Overhead falls as levels get less verbose: TRACE costs the most, ERROR costs the least." >}}
 graph LR
     A[TRACE] --> B[Highest Overhead]
     C[DEBUG] --> D[High Overhead]
@@ -255,11 +255,11 @@ graph LR
     G[WARN] --> H[Low Overhead]
     I[ERROR] --> J[Minimal Overhead]
     
-    style A fill:#ff6b6b
-    style C fill:#ff9999
-    style E fill:#ffcc99
-    style G fill:#99ccff
-    style I fill:#66bb6a
+    style A fill:#ff6b6b,stroke-width:3px
+    style C fill:#ff9999,stroke-width:3px
+    style E fill:#ffcc99,stroke-width:2.5px,stroke-dasharray:5 3
+    style G fill:#99ccff,stroke-width:1.5px,stroke-dasharray:2 2
+    style I fill:#66bb6a,stroke-width:1.5px
 {{< /mermaid >}}
 
 The fix is cheap and worth making a habit: gate verbose calls behind a level check — `if (logger.IsEnabled(LogLevel.Debug))` — so the string formatting and allocation never run when the level is off. In a tight loop, that one guard is the difference between free and expensive.

@@ -19,7 +19,7 @@ Yes — with caveats.
 
 ## Three things to check before you deploy
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Kernel BTF support and capability grants are the two gates that decide whether eBPF deploys cleanly. Clear them and profiling or networking are safe starting points; app tracing still lags behind what an SDK captures." >}}
 flowchart TD
     start["Deploy eBPF for observability?"]
     kernel{"Linux kernel ≥ 5.8<br/>BTF support?"}
@@ -38,11 +38,11 @@ flowchart TD
     usecase -->|profiling| profiling
     usecase -->|network| network
     usecase -->|app tracing| tracing
-    style profiling fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style network fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style tracing fill:#2A1A0A,stroke:#D4820A,color:#F5A623
-    style upgrade fill:#2A0A0A,stroke:#CC4444,color:#FF6060
-    style policy fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+    style profiling fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style network fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style tracing fill:#2A1A0A,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
+    style upgrade fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
+    style policy fill:#2A1A0A,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
 {{< /mermaid >}}
 
 ### BTF requires kernel 5.8+ — audit your fleet first

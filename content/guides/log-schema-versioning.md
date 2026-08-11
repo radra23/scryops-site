@@ -145,7 +145,7 @@ The call site does not repeat field names, does not pass raw strings, and cannot
 
 When the schema changes, the version changes with it. The convention to follow:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — The version bump follows the change type: adding an optional field is a safe patch, removing a field is a minor bump, and adding a required field, renaming, or retyping is always a breaking major bump requiring dual-emit." >}}
 flowchart TD
     change["Schema change"]
     type{"Change type?"}
@@ -163,9 +163,9 @@ flowchart TD
     type --> add_req --> major
     type --> rename --> major
     type --> retype --> major
-    style patch fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style fwd fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
-    style major fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style patch fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style fwd fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style major fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
 {{< /mermaid >}}
 
 | Change type | Version bump | Compatibility |

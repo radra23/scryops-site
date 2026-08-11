@@ -317,7 +317,7 @@ Wrap it at the application root or around any subtree that should be isolated:
 
 ## What This Instrumentation Covers
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — This instrumentation splits into three categories: performance, user interactions, and errors, each fed by its own auto or manual span source." >}}
 flowchart TD
     A[Frontend Telemetry] --> B[Performance]
     A --> C[User Interactions]

@@ -68,7 +68,7 @@ If you're still shipping logs through a separate pipeline from your traces, that
 
 The case for structured logging isn't abstract. Here's what schema-consistent logs actually unlock that unstructured logs never could.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A trace_id turns a burn rate alert into a straight line to root cause; without it, the same alert forces a manual, uncertain search across services." >}}
 flowchart LR
     A["🔔 Burn rate alert fires"] --> B["📊 Metric spike<br/>(error rate)"]
     B --> C["🔍 Correlated trace<br/>(via trace_id)"]
@@ -80,10 +80,10 @@ flowchart LR
     C2 --> D2["📋 Maybe the right logs?<br/>(timestamp guess)"]
     D2 --> E2["❓ Root cause<br/>possibly identified"]
 
-    style A fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style A2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623
-    style E2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623
+    style A fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style A2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
+    style E2 fill:#2A1A0A,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
 {{< /mermaid >}}
 
 **Automated anomaly detection.** ML models can learn what "normal" log patterns look like for a service — which event types fire, at what rates, with what distribution of outcomes — and flag deviations before they manifest as metric changes. This requires consistent `event_type` classification. An AI-assisted triage tool can reason over well-structured context; it can do nothing useful with wall-of-text log lines.

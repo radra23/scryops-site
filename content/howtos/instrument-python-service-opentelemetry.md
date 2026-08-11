@@ -14,7 +14,7 @@ Before instrumentation, your service is a sealed room. Requests go in, responses
 
 The steps below are the same in every language — give the service an identity, let the framework instrument itself, name the work that matters, and connect logs to traces. The code differs; the shape doesn't. Each step shows the equivalent in **.NET**, **Go**, and **Python** — pick your tab.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Framework spans, manual spans, and logs all funnel through the same batch processor and Collector before fanning out to separate trace, metric, and log backends." >}}
 flowchart LR
     subgraph app["Your Service"]
         fw["Web framework<br/>(auto-instrumented)"]
@@ -35,8 +35,8 @@ flowchart LR
     col --> be2
     col --> be3
 
-    style sdk fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style col fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+    style sdk fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style col fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
 {{< /mermaid >}}
 
 The instrumentation covers resource attributes, auto-instrumented HTTP and database spans, and log records that carry `trace_id` and `span_id` — all flowing through an OTel Collector to your backend of choice.

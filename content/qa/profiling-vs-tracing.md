@@ -29,7 +29,7 @@ A trace might show that `service-B` took 800ms to respond. But it won't tell you
 
 Profiling fills that gap. When you can link a trace span to a CPU profile for the same time window, you get the complete picture: the request path *and* the code-level bottleneck.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A slow trace span links via trace context to a CPU profile for the same window, turning where time went into why it went there." >}}
 flowchart TD
     req["Incoming request"]
     sA["service-A span<br/>(10ms)"]
@@ -42,9 +42,9 @@ flowchart TD
     sB -.->|"link via<br/>trace context"| prof
     prof --> rc
 
-    style sB fill:#2A1A1A,stroke:#CC4444,color:#FF6060
-    style prof fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style rc fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style sB fill:#2A1A1A,stroke:#CC4444,color:#FF6060,stroke-width:3px
+    style prof fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style rc fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
 {{< /mermaid >}}
 
 ## Tools that link trace spans to CPU profiles

@@ -27,7 +27,7 @@ The three signals are complementary. An alert fires on a metric; the metric poin
 
 ## How the Pieces Fit Together
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — The SDK's three providers emit OTLP to the Collector, which processes it through receivers, processors, and exporters before routing each signal to its own backend." >}}
 flowchart TD
     subgraph app ["Your Application"]
         TP[TracerProvider]

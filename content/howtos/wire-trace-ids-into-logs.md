@@ -11,7 +11,7 @@ tags: ["OpenTelemetry", "Logs", "Tracing", "Python", "How-to"]
 
 When a burn rate alert fires, the ideal path from alert to root cause looks like this: alert → trace → the log lines that explain why. That last jump — from a span to the log lines emitted during that span — only works if your logs carry the trace ID. Without it, you're doing a time-based search across the logs of multiple services — no guarantee you'll find the relevant lines, and no way to limit the search to a single request.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Trace IDs in logs turn root-causing from a manual timestamp search across every service into a single click from trace to log lines." >}}
 flowchart LR
     subgraph With["With trace IDs in logs"]
         A1[Alert fires] --> B1[Open trace]
@@ -29,13 +29,13 @@ flowchart LR
 
 Two approaches cover the common cases in every language: let the SDK inject trace context automatically, or extract it from the active span yourself. Which one fits depends on a single question — do your logs already flow through the OpenTelemetry pipeline, or are they plain lines on stdout that an agent scrapes?
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Default to automatic SDK injection; only fall back to manual trace-context extraction when logs bypass OTLP and you need selective control or an unsupported logger forces it." >}}
 flowchart TD
     A{Logs exported through<br/>the OTel pipeline / OTLP?} -->|yes| E[Automatic injection — start here]
     A -->|no — plain stdout / JSON| C{Need selective control<br/>or an unsupported logger?}
     C -->|no| E
     C -->|yes| D[Manual extraction]
-    style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style E fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
 {{< /mermaid >}}
 
 ## What you'll need

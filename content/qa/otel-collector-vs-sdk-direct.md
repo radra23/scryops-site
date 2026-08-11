@@ -27,7 +27,7 @@ The OTel Collector sits between your application and your backend. This gives yo
 
 ## Two-tier topology: agent per node, gateway per cluster
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Telemetry flows from app to a local agent to a centralized gateway to the backends, so either layer can change without touching application code." >}}
 flowchart LR
     app["App<br/>(OTel SDK)"]
     agent["Collector<br/>agent — per node"]
@@ -36,7 +36,7 @@ flowchart LR
 
     app --> agent --> gateway --> be
 
-    style gateway fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+    style gateway fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
 {{< /mermaid >}}
 
 The agent handles local buffering and failure isolation; the gateway handles routing, sampling, and auth. You change either layer without touching application code.

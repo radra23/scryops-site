@@ -11,16 +11,16 @@ Metrics alert on rates. Logs alert on specifics. If you need to fire when a part
 
 The result is a Grafana alert rule backed by a LogQL query, routing to PagerDuty or Slack based on severity labels, with a tested notification payload that includes a runbook link.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A LogQL threshold rule in Grafana routes critical errors to PagerDuty and warnings to Slack, based on severity labels set at alert-rule time." >}}
 flowchart LR
     app["Service logs<br/>(structured JSON)"] --> agent["Alloy<br/>(log shipper)"]
     agent --> loki[("Loki")]
     loki --> rule["Grafana alert rule<br/>LogQL + threshold"]
     rule -->|severity=critical| pd["PagerDuty (P1)"]
     rule -->|severity=warning| slack["Slack"]
-    style rule fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
-    style pd fill:#2A1414,stroke:#CD384B,color:#FF6060
-    style slack fill:#2A2410,stroke:#D4820A,color:#F5A623
+    style rule fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style pd fill:#2A1414,stroke:#CD384B,color:#FF6060,stroke-width:3px
+    style slack fill:#2A2410,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
 {{< /mermaid >}}
 
 ## Prerequisites

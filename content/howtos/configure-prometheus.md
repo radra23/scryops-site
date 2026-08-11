@@ -10,7 +10,7 @@ tags: ["Prometheus", "Metrics", "How-to", "OpenTelemetry"]
 > "A metric that nobody queries is just noise with a retention policy."
 > — Anonymous
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Prometheus scrapes your service once, then recording rules pre-compute the expensive queries so Grafana panels and Alertmanager alerts both read cheap, ready-made series." >}}
 flowchart LR
     svc[".NET Service<br/>/metrics endpoint"]
     prom["Prometheus<br/>scrape_configs"]
@@ -24,8 +24,8 @@ flowchart LR
     rules --> graf
     graf --> am
 
-    style prom fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
-    style rules fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style prom fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style rules fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
 {{< /mermaid >}}
 
 ## Step 1: Wire Up the Prometheus Exporter in .NET

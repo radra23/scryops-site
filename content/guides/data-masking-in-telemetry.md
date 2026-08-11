@@ -13,7 +13,7 @@ This guide covers transformation techniques. For PII risk, compliance obligation
 
 Masking order matters: each stage assumes the previous one has already run, and skipping a step exposes fields the later stages depend on being clean:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Raw telemetry either passes through untouched or gets transformed and quality-checked before export; anything that fails the quality check gets adjusted and re-run rather than shipped as-is." >}}
 graph TD
     A[Raw Telemetry] --> B{Need Masking?}
     B -->|Yes| C[Transform]
@@ -27,9 +27,9 @@ graph TD
     C --> C3[Truncate]
     C --> C4[Aggregate]
     
-    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF
-    style F fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style G fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style F fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style G fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
 {{< /mermaid >}}
 
 1. **Raw Telemetry**: The raw, sensitive data as it's initially collected. It contains PII that, if exported unchanged, lands in your trace backend indexed and searchable — a GDPR audit waiting to happen.
@@ -81,7 +81,7 @@ After transformation:
 ## Transformation Patterns
 
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Each data type gets its own transformation: identifiers are hashed, locations are generalized, metrics are rounded, and timestamps are bucketed." >}}
 graph LR
     A[/"Data input"/] --> B(Identifiers)
     A --> C(Locations)
@@ -93,8 +93,8 @@ graph LR
     D --> D1[Round]
     E --> E1[Bucket]
     
-    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF
-    classDef second fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    classDef second fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
     classDef third fill:#1C1C1C,stroke:#2A2A2A,color:#A8A8A0
 
     class B,C,D,E second;
@@ -105,13 +105,13 @@ graph LR
 
 Each gate validates a structural property of the transformed data before it reaches the exporter:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Format, pattern, and value checks run in parallel and join before a single pass or fail decision, so one bad field fails the whole record instead of shipping partially masked." >}}
 
 stateDiagram-v2
     direction LR
 
-    classDef pass fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    classDef fail fill:#2A0A0A,stroke:#CC4444,color:#FF6060
+    classDef pass fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    classDef fail fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
    data_quality: Quality Gates
    State2: Format Check
    State3: Pattern Check
@@ -158,7 +158,7 @@ stateDiagram-v2
 
 The transformation must preserve the relationships between fields — statistical distributions, cross-span correlations, and time-series patterns — or the data loses its diagnostic value:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A transformation has to preserve three kinds of structure at once: statistical distributions, relationships between fields, and temporal sequence, or the masked data loses its diagnostic value." >}}
 
 graph TB
     A[Data Value] --> B[Statistical]

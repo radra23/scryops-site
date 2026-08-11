@@ -13,13 +13,13 @@ A distributed trace records the path a single request takes across multiple serv
 
 Running Jaeger locally gives you a trace store you control. You can instrument a service, send spans to the local instance, and inspect real trace data without touching a shared environment or signing up for anything.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Spans travel over OTLP the whole way: from the instrumented service through the Collector to Jaeger's native receiver, then into the UI." >}}
 flowchart LR
     app["Instrumented service<br/>(OTel SDK)"] -->|OTLP :4317| col["OTel Collector"]
     col -->|OTLP :4317| jaeger["Jaeger v2<br/>(receive + store)"]
     jaeger --> ui["Jaeger UI<br/>:16686"]
-    style col fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
-    style jaeger fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
+    style col fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style jaeger fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
 {{< /mermaid >}}
 
 ## Running Jaeger with Docker Compose

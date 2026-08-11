@@ -16,7 +16,7 @@ Most teams test their log *volume* informally — they check that things were lo
 
 The same patterns apply to NUnit or MSTest.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — An in-memory Serilog sink captures the real pipeline output, so tests assert on the properties, PII absence, and levels that actually get written, not what the code intends to write." >}}
 flowchart LR
     subgraph sut["Code Under Test"]
         svc["PaymentService<br/>OrderService<br/>UserLookupService"]
@@ -35,8 +35,8 @@ flowchart LR
     snk --> prp
     snk --> pii
     snk --> lvl
-    style snk fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41
-    style chk fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF
+    style snk fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
+    style chk fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
 {{< /mermaid >}}
 
 ## The Test Sink

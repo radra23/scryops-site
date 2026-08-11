@@ -63,7 +63,7 @@ The goal of instrumentation is to reach the second state. Not just for incidents
 
 The monitoring-to-observability spectrum is easier to navigate with a concrete self-assessment. This decision tree is not a score — it is a map that shows which capability you currently have and what the adjacent gap looks like.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Each yes answer moves you one rung up the monitoring-to-observability ladder: metrics, alerting, investigable unknowns, distributed tracing, then full-stack APM." >}}
 flowchart TD
     A["Do you track predefined metrics?"]
     A -->|Yes| B["You have: Monitoring"]

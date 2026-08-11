@@ -13,7 +13,7 @@ Without a disciplined logging foundation, your observability stack is a collecti
 
 Logs sit alongside metrics, traces, and state data in the observability stack, but they carry something the others can't: event-level narrative. A metric tells you that error rate spiked at 10:03. A log tells you which customer, which order, which downstream call failed, and why it failed at the application level. That distinction matters when you're trying to correlate a symptom to a cause across service boundaries.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Observability data splits into five types: event, time series, request, state, and business. Logs are one branch under event data, not the whole picture." >}}
 graph TD
     A[Observability] --> B[Event Data]
     A --> C[Time Series Data]
@@ -41,12 +41,12 @@ graph TD
     F --> F2[User Actions]
     F --> F3[Business Metrics]
     
-    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623
-    style B fill:#161616,stroke:#3A6FAF,color:#5B8DEF
-    style C fill:#161616,stroke:#3A6FAF,color:#5B8DEF
-    style D fill:#161616,stroke:#3A6FAF,color:#5B8DEF
-    style E fill:#161616,stroke:#3A6FAF,color:#5B8DEF
-    style F fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
+    style B fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style C fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style D fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style E fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+    style F fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
 {{< /mermaid >}}
 
 Each signal type covers ground the others can't. Logs don't replace metrics or traces — they make them actionable.
@@ -175,7 +175,7 @@ Logging is not just an operational tool. A well-structured log stream is also a 
 
 Logs don't deliver value sitting in a file on a single host. They need to flow through a collection layer, get enriched and correlated, and land somewhere queryable. The architecture below shows how logs connect to the broader observability platform — and where correlation with traces and metrics happens.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Logs and the other signal types flow from the application through a shared collection and enrichment layer before reaching the platform, where they feed analysis, alerting, and business intelligence." >}}
 graph LR
     A[Application] --> B[Event Data]
     A --> C[Time Series Data]
@@ -195,8 +195,8 @@ graph LR
     H --> J[Alerting]
     H --> K[Business Intelligence]
     
-    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623
-    style H fill:#161616,stroke:#3A6FAF,color:#5B8DEF
+    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
+    style H fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
 {{< /mermaid >}}
 
 ### Key Integration Points

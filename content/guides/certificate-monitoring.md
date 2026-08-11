@@ -11,7 +11,7 @@ tags: ["Security", "Observability", "Monitoring"]
 
 Effective certificate monitoring requires purpose-built tools for this specific observability domain.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Certificate monitoring splits into three approaches: dedicated tools, infrastructure-based validation, and automation-first prevention." >}}
 graph TD
     A[Certificate Monitoring Approaches] --> B[Dedicated Tools]
     A --> C[Infrastructure-Based]
@@ -27,7 +27,7 @@ graph TD
 
 ## Stop Checking Every Minute
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Swapping a minute-by-minute synthetic loop for a daily certificate-tool check into your observability backend cuts check volume without losing lead time." >}}
 graph TB
     subgraph "Synthetic Monitor Approach"
     A[Synthetic Monitor] -->|Every minute| B[Check Certificate]
@@ -73,7 +73,7 @@ Modern proxies and load balancers already validate certificates as part of their
 - **HAProxy**: Health check mechanisms with certificate validation capabilities
 - **F5 BIG-IP**: Certificate monitoring with SNMP and REST API access
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Certificate status flows from the load balancer's ongoing validation through a status API into the observability platform, which alerts the response team only at set thresholds." >}}
 sequenceDiagram
     participant LB as Load Balancer
     participant Cert as Certificates

@@ -19,7 +19,7 @@ Service Level Objectives (SLOs) translate reliability from a vague aspiration in
 
 **Burn Rate** — the rate at which the error budget is being consumed relative to the pace that would exhaust it exactly at the end of the window. A burn rate of 1× means you'll exhaust the budget in exactly 30 days. A burn rate of 14.4× means you'll exhaust it in about 2.1 days.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — An SLI feeds an SLO target, which defines the error budget; burn rate tracks how fast that budget is spent and triggers alerts and actions." >}}
 graph LR
     A[SLI] -->|measured against| B[SLO target]
     B -->|defines| C[Error Budget]
@@ -39,7 +39,7 @@ For a 99.95% SLO over 28 days:
 - Error budget = 0.05%
 - Allowed downtime = 0.0005 × 28 × 24 × 60 = **20.2 minutes**
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A 99.9% target over a 30-day window leaves just 43.2 of the window's 43,157 minutes as allowed downtime." >}}
 graph TD
     A[30-day window] --> B[99.9% uptime target]
     A --> C[0.1% error budget]
@@ -73,7 +73,7 @@ At 14.4× burn rate, you exhaust a 30-day budget in ~51 hours — not 2 hours. T
 
 An SLI that doesn't reflect user experience produces an SLO that doesn't protect users. Good SLIs share four properties:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A good SLI satisfies four properties at once: it reflects user experience, your team can affect it, it is consistently collectable, and it correlates with business outcomes." >}}
 graph LR
     A[Good SLI] --> B[User-focused]
     A --> C[Controllable]
@@ -93,7 +93,7 @@ Prefer SLIs measured at the edge of the system (from the user's perspective) ove
 
 Set initial targets from observed performance, not aspirational performance:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — Set the initial SLO below observed performance, then tighten it on a quarterly review cycle as the service's real variance becomes clear." >}}
 graph LR
     A[Measure current performance] --> B[Set target below current level]
     B --> C[Monitor 2-3 months]
@@ -108,7 +108,7 @@ Setting the initial SLO below current performance gives you a buffer while you l
 
 The error budget only works as a decision-making tool if the policy around it is written down and enforced. Three areas need explicit policy:
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — A usable error budget policy defines three things in advance: what counts as consumption, when the budget resets, and what action each threshold requires." >}}
 graph TD
     A[Error Budget Policy] --> B[Consumption rules]
     A --> C[Reset policy]
@@ -129,7 +129,7 @@ graph TD
 
 ## Integration with Business Processes
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — The error budget feeds three business processes directly: deploy go/no-go decisions, capacity investment timing, and the feature-versus-reliability tradeoff." >}}
 graph TD
     A[SLO / Error Budget] --> B[Change management]
     A --> C[Capacity planning]

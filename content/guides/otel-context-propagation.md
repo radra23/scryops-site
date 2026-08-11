@@ -13,7 +13,7 @@ If that string stops being passed, the trace breaks. The spans still exist, but 
 
 Context propagation is the mechanism that keeps the trace together.
 
-{{< mermaid >}}
+{{< mermaid caption="Fig. — The traceparent header carries one trace-id hop by hop, so spans created by every service in the chain assemble into a single trace instead of orphaned fragments." >}}
 sequenceDiagram
     participant LB as Load Balancer
     participant A as Service A
