@@ -630,8 +630,19 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    third track is a flexible minmax(0,1fr) that absorbs all surplus width
    instead. The TOC partial now renders before <article> in single.html
    (both for this grid placement and, at the stacked breakpoint below, so
-   DOM order matches reading order for assistive tech too). */
-.layout.has-toc{max-width:none;grid-template-columns:200px minmax(0,720px) minmax(0,1fr)}
+   DOM order matches reading order for assistive tech too).
+
+   The article track is 758px, not 720: the article width is not a
+   reading-width decision, it's the 720px measure PLUS whatever evidence
+   is allowed to bleed past it. A code well is deliberately 758px
+   (720 + 2x19 — see .code-well below), and with the track at exactly
+   720 there was no slack for that bleed, so every code block rendered
+   19px outside its own article on each side — confirmed by measuring
+   .article at 282-1002 (720px) against a code well at 263-1021 (758px)
+   at 1400px viewport. Widening the track to match doesn't change the
+   measure itself: `.layout .prose > *{max-width:720px}` still caps
+   prose content at 720 regardless of how wide .article's own box is. */
+.layout.has-toc{max-width:none;grid-template-columns:200px minmax(0,758px) minmax(0,1fr)}
 .layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:start;width:200px;max-width:100%}
 .layout.has-toc > .article{grid-column:2;grid-row:1;min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page */
 /* Reading column: prose holds the 720px measure (centered). Evidence
