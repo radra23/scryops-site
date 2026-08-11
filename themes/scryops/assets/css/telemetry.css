@@ -444,53 +444,78 @@ pre,.highlight pre,.chroma{
   font-family:var(--font-code);
   background:var(--code-bg);color:var(--code-text);
   border:1px solid var(--code-bd);border-radius:var(--radius);
-  padding:16px 18px;font-size:var(--fs-code);line-height:var(--lh-code);
+  padding:16px 18px 22px;font-size:var(--fs-code);line-height:var(--lh-code);
   overflow-x:auto;tab-size:4;
 }
 pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 /* Evidence gets more vertical air than the paragraph rhythm (34px vs
    --sp-4's 22px — deliberately off the 4px scale, per the DS readme) —
    scoped to a direct child of .prose, which is where .Content actually
-   renders, so a code block inside a card isn't double-margined. */
+   renders, so a code block inside a card isn't double-margined. Bare
+   fences (no language tag) get no .highlight wrapper from Hugo, so they
+   need the same margin repeated, or they read as tighter to the
+   surrounding text than a labeled block right above or below them.
+   Targets BOTH .prose > pre (the no-JS/pre-hydration shape, where <pre>
+   is still the direct .prose child) and .prose > .code-well (the
+   with-JS shape below, where code-copy.js has moved <pre> one level
+   deeper and .code-well has taken its place as the direct child) —
+   whichever one is actually the direct child at render time is the one
+   that needs the margin; the other selector is simply inert. `.layout`
+   on both bare-fence branches isn't decorative: see the specificity
+   note below. */
 .prose > .highlight{margin:34px 0}
-/* Plain (non-langswitch) code blocks: the well BLEEDS 19px past its own
-   720px-capped parent on each side (width = measure + 38px, centered via
-   a negative-ish margin-inline) rather than deleting the inset — so code
-   TEXT still lands flush with the 720px prose measure, but 18px of
-   padding survives and scrolling stays on this <pre>, the element with
-   the visible border/background users actually grab. max-width:none
-   defeats the generic `.layout .prose > *{max-width:720px}` rule, which
-   would otherwise re-clamp the bare-fence case below (that one IS a
-   direct .prose child) and silently cancel the bleed. Scoped narrower
-   than langswitch on purpose: its Chroma output lives several DOM levels
-   inside .langswitch .ls-panels, in its own nested context with its own
-   chrome, so this measure-relative bleed formula doesn't apply there —
-   langswitch already scrolls on its own <pre> correctly via the generic
-   rule above; only tab-size needed to be shared, not this width math.
-   Two selector forms cover both cases Hugo actually renders: a
-   Chroma-highlighted fence is .prose > .highlight > pre.chroma > code
-   (the border/padding being overridden here lives on that inner pre, not
-   on .highlight itself — .highlight carries no box-model styling of its
-   own); a bare fence with no language tag (e.g.
-   content/guides/building-observability-standards.md) has no .highlight
-   wrapper or Chroma classes at all and renders as .prose > pre > code
-   directly. */
-.prose > .highlight pre,.prose > pre{
+.layout .prose > pre,
+.layout .prose > .code-well{margin:34px 0}
+/* code-copy.js wraps every fenced block's <pre> — labeled or bare — in a
+   <div class="code-well">, which is what actually bleeds 19px past its
+   own 720px-capped ancestor on each side (width = measure + 38px,
+   centred via a negative-ish margin-inline), not <pre> itself. <pre>
+   just fills that wrapper at 100% and keeps its own overflow-x:auto for
+   scrolling.
+
+   That split matters: an earlier version bled and scrolled the SAME
+   element, so the copy button (anchored to it for correct edge
+   alignment) scrolled away with the code on any line wider than the
+   well — unreachable on exactly the lines worth copying — and, with no
+   reserved gutter, sat on top of line 1. .code-well doesn't scroll, so
+   the button anchored to it (position:relative here) stays put and
+   reachable regardless of horizontal scroll position; padding-top:44px
+   on <pre> below reserves the room instead of overlapping.
+
+   max-width:none defeats the generic `.layout .prose > *{max-width:720px}`
+   rule, which would otherwise re-clamp the bare-fence branch (.code-well
+   sits as a direct .prose child there) back down and silently cancel the
+   bleed — confirmed happening in an earlier version, where a bare fence
+   measured margin-left:0 and maxWidth:720px against a labeled fence's
+   correct -19px/none. The `.layout` prefix on that branch is what wins
+   the specificity fight (0,2,1 vs the generic rule's 0,2,0); without it
+   max-width:none is present in the rule but loses the cascade anyway.
+
+   Scoped narrower than langswitch on purpose: its Chroma output lives
+   several DOM levels inside .langswitch .ls-panels, in its own nested
+   context with its own chrome, so this measure-relative bleed formula
+   doesn't apply there — langswitch already scrolls on its own <pre>
+   correctly via the generic rule above; only tab-size/margin needed to
+   be shared, not this width math. */
+.prose > .highlight .code-well,
+.layout .prose > .code-well{
   width:calc(min(100%,720px) + 38px);max-width:none;
   margin-inline:calc(max(0px,(100% - 720px)/2) - 19px) auto;
-  border-left:none;border-right:none;padding:16px 18px;overflow-x:auto;
-  position:relative; /* anchors .code-copy-btn to this <pre>, not .highlight,
-    which carries no box-model styling of its own and would leave the button
-    ~19px short of the well's true (bled) edge */
+  position:relative;
 }
-.prose > .highlight pre > code,.prose > pre > code{
+.prose > .highlight .code-well > pre,
+.layout .prose > .code-well > pre{
+  width:100%;margin-inline:0;
+  border-left:none;border-right:none;
+  padding:44px 18px 22px; /* top clears the button; bottom clears the
+    horizontal scrollbar, which paints inside the padding box */
+}
+.prose > .highlight .code-well > pre > code,
+.layout .prose > .code-well > pre > code{
   display:block;padding:0;overflow:visible;
 }
-/* copy-to-clipboard button, injected by code-copy.js onto the <pre> above
-   (plain fenced blocks only — langswitch panels are never a direct .prose
-   child, see comment above, so this never doubles up there). */
 .code-copy-btn{
-  position:absolute;top:8px;right:8px;z-index:1;
+  position:absolute;top:10px;right:12px;z-index:1;
   font-family:var(--font-code);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
   color:var(--code-muted);background:var(--code-bg);border:1px solid var(--code-bd);
   padding:5px 11px;cursor:pointer;border-radius:0;
