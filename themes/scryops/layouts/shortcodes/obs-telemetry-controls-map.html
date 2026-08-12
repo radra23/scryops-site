@@ -13,11 +13,11 @@
 
 {{- $here := .Get "here" | default "" -}}
 {{- $stages := slice
-  (dict "key" "app"       "x" 4   "t" "application"  "s" "scrub before the SDK" "g" "/howtos/scrub-pii-from-application-logs-dotnet/")
-  (dict "key" "sdk"       "x" 138 "t" "OTel SDK"     "s" "spans + log records"  "g" "")
-  (dict "key" "collector" "x" 272 "t" "Collector"    "s" "the primary control"  "g" "/guides/pii-in-telemetry/")
-  (dict "key" "backend"   "x" 406 "t" "backend"      "s" "residency + retention" "g" "/guides/data-sovereignty-and-residency/")
-  (dict "key" "access"    "x" 540 "t" "who queries"  "s" "audit trail"          "g" "/guides/audit-trail-implementation/")
+  (dict "key" "app"       "x" 4   "t" "application"  "s" "scrub before SDK" "g" "/howtos/scrub-pii-from-application-logs-dotnet/")
+  (dict "key" "sdk"       "x" 138 "t" "OTel SDK"     "s" "spans + logs"     "g" "")
+  (dict "key" "collector" "x" 272 "t" "Collector"    "s" "primary control"  "g" "/guides/pii-in-telemetry/")
+  (dict "key" "backend"   "x" 406 "t" "backend"      "s" "residency + TTL"  "g" "/guides/data-sovereignty-and-residency/")
+  (dict "key" "access"    "x" 540 "t" "who queries"  "s" "audit trail"      "g" "/guides/audit-trail-implementation/")
 -}}
 
 <figure class="diagram tcm" aria-label="A five-stage map of where privacy controls sit in a telemetry pipeline: the application, the OpenTelemetry SDK, the Collector, the backend, and the people who query it. The stage this guide covers is drawn with a heavy border; the rest are hairlines.">
