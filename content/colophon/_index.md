@@ -89,6 +89,13 @@ way you'd treat a sampled trace rather than a billing record.
   global-average energy intensities and grid carbon — not your actual device,
   network, or the grid where the page was served. It's a rigorous industry
   estimate, not a per-request measurement.
+- **`hugo server` reads high.** The local dev server doesn't gzip its
+  responses; production hosting does. The badge measures real `transferSize`,
+  so testing it against localhost compares raw, uncompressed bytes to a budget
+  sized for compressed transfer — a page can show "over budget" in dev while
+  sitting well under it once deployed. `scripts/footprint-report.py` measures
+  gzip and matches production; trust that number over a localhost reading if
+  the two disagree.
 
 The point isn't a precise gram count. It's the habit: a publication about
 seeing your systems clearly should be able to see itself.
