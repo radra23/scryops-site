@@ -13,6 +13,8 @@ Application-level scrubbing handles two categories the Collector cannot easily c
 
 The sections below are a reference set of independent patterns, not a strict step-by-step sequence — pick the ones that match your PII categories and skip the rest.
 
+{{< obs-telemetry-controls-map here="app" >}}
+
 ## PII Categories in Application Logs
 
 The most common sources in a typical .NET service:
@@ -90,11 +92,21 @@ if (analyzer.ShouldProtectCombination(logFields.Keys))
 }
 ```
 
+Run every combination through it once and the pattern practically draws itself:
+
+{{< obs-quasi-id-risk >}}
+
 Generalisation strategy: replace specific values with ranges or prefixes — `"94107"` → `"94"` (postal district), `"1985-03-22"` → `"1980s"`, `"male"` → omit or use only for aggregate statistics. This preserves diagnostic signal while raising the bar for re-identification.
 
 ## Detection
 
 `PIIDetector` scans text for known PII patterns using compiled regex. Compiled regexes are safe for concurrent use across threads.
+
+Before you write one, it's worth knowing what a bad pattern costs. A PII detector runs against every log line in production, and that's about the worst place you could pick to meet a pathological input:
+
+{{< obs-regex-shame >}}
+
+Two defences, both cheap. Bound your quantifiers instead of trusting greedy matching, and give `Regex` construction a `matchTimeout` so a pathological input takes down one log line, not your whole thread pool.
 
 ```csharp
 public class PIIDetector

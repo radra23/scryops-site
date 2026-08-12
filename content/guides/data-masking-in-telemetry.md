@@ -7,38 +7,29 @@ readtime: 8
 tags: ["Privacy", "OpenTelemetry", "Security", "Observability", "Collector"]
 ---
 
-This guide covers transformation techniques. For PII risk, compliance obligations, and which fields to target, start with [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
+This guide sticks to the transformation techniques themselves. For PII risk, compliance obligations, and which fields to target, start with [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
+
+{{< obs-telemetry-controls-map here="collector" >}}
 
 ## The Data Transformation Pipeline
 
-Masking order matters: each stage assumes the previous one has already run, and skipping a step exposes fields the later stages depend on being clean:
+Masking order matters. Each stage assumes the one before it already ran. Skip a step, and you expose fields the later stages depend on being clean:
 
-{{< mermaid caption="Fig. — Raw telemetry either passes through untouched or gets transformed and quality-checked before export; anything that fails the quality check gets adjusted and re-run rather than shipped as-is." >}}
-graph TD
-    A[Raw Telemetry] --> B{Need Masking?}
-    B -->|Yes| C[Transform]
-    B -->|No| D[Pass Through]
-    C --> E[Quality Check]
-    E -->|Pass| F[Export]
-    E -->|Fail| G[Adjust]
+{{< obs-mask-pipeline >}}
 
-    C --> C1[Hash]
-    C --> C2[Tokenize]
-    C --> C3[Truncate]
-    C --> C4[Aggregate]
-    
-    style A fill:#1C1C1C,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style F fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
-    style G fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
-{{< /mermaid >}}
+1. **Raw Telemetry**: The raw, sensitive data as it's initially collected. It contains PII, and if you export it unchanged, it lands in your trace backend indexed and searchable: a GDPR audit waiting to happen.
 
-1. **Raw Telemetry**: The raw, sensitive data as it's initially collected. It contains PII that, if exported unchanged, lands in your trace backend indexed and searchable — a GDPR audit waiting to happen.
+2. **Masking Decision**: This is where you sort which fields need redaction and which can pass straight through. System metrics and anonymous usage statistics carry no personal identifiers, so they pass through unchanged.
 
-2. **Masking Decision**: Identifies which fields require redaction and which can pass through. System metrics and anonymous usage statistics contain no personal identifiers and pass through unchanged.
+3. **Transformation**: This is where the actual masking happens, matched to each field's type and sensitivity:
+   - **Hashing**: Run sensitive data, like user IDs or email addresses, through a one-way function and you get a fixed-length, irreversible representation. The original data is unrecoverable, but the hash still lets you analyze and correlate.
+   - **Tokenization**: Swap the sensitive data for a random, unique token instead, and keep a secure lookup table that maps tokens back to original values. Only authorised systems that need re-identification get access to that table.
 
-3. **Transformation**: This is where we actually apply various masking techniques to the data based on its type and sensitivity:
-   - **Hashing**: Hashing transforms sensitive data, like user IDs or email addresses, into a fixed-length, irreversible representation. The original data is unrecoverable, but the hash allows for analytics and correlation.
-   - **Tokenization**: Tokenization replaces sensitive data with a random, unique token. A secure lookup table maps tokens back to original values — only accessible to authorised systems that need re-identification.
+Which of the two you reach for is decided by the field, not by preference, and getting it wrong is the most common failure in this whole area:
+
+{{< obs-hash-danger >}}
+
+Hashing works when the input space is large enough that an attacker can't enumerate it. An opaque order ID with a secret salt qualifies. An email address doesn't: there are only so many email addresses in the world, and a single GPU walks the entire list in under a second. Personal identifiers get deleted or tokenised; business identifiers get hashed.
 
 ## Transformation Examples
 
@@ -103,47 +94,9 @@ graph LR
 
 ## Quality Control Gates
 
-Each gate validates a structural property of the transformed data before it reaches the exporter:
+Each gate checks a structural property of the transformed data before it reaches the exporter:
 
-{{< mermaid caption="Fig. — Format, pattern, and value checks run in parallel and join before a single pass or fail decision, so one bad field fails the whole record instead of shipping partially masked." >}}
-
-stateDiagram-v2
-    direction LR
-
-    classDef pass fill:#1C2A1C,stroke:#1C7A2E,color:#28CA41,stroke-width:1.5px
-    classDef fail fill:#2A0A0A,stroke:#CC4444,color:#FF6060,stroke-width:3px
-   data_quality: Quality Gates
-   State2: Format Check
-   State3: Pattern Check
-   State4: Value Check
-   State21: Valid Structure
-   State31: Expected Pattern
-   State41: Value Range
-
-    state fork_state <<fork>>
-      [*] --> data_quality
-      data_quality --> fork_state
-      fork_state --> State2
-      fork_state --> State3
-      fork_state --> State4
-      State3 --> State31
-      State2 --> State21
-      State4 --> State41
-  
-      state join_state <<join>>
-      State21 --> join_state
-      State31 --> join_state
-      State41 --> join_state
-
-      state if_state <<choice>>
-        join_state --> if_state
-        if_state --> Pass: if valid data
-        if_state --> Fail : if invalid data
-
-    Fail:::fail --> [*]
-    Pass:::pass --> [*]
-
-{{< /mermaid >}}
+{{< obs-mask-gates >}}
 
 ## Transformation Matrix
 
@@ -156,7 +109,7 @@ stateDiagram-v2
 
 ## Data Utility Preservation
 
-The transformation must preserve the relationships between fields — statistical distributions, cross-span correlations, and time-series patterns — or the data loses its diagnostic value:
+The transformation has to preserve the relationships between fields: statistical distributions, cross-span correlations, time-series patterns. Lose those, and the data loses its diagnostic value:
 
 {{< mermaid caption="Fig. — A transformation has to preserve three kinds of structure at once: statistical distributions, relationships between fields, and temporal sequence, or the masked data loses its diagnostic value." >}}
 
@@ -178,7 +131,7 @@ graph TB
 
 ## Common Pitfalls and Solutions
 
-These are the two failures that break pipelines in practice:
+These are the two failures that break pipelines in practice, over and over:
 
 1. **Inconsistent Masking**
 
