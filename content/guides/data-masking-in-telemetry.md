@@ -1,7 +1,7 @@
 ---
 title: "Data Masking in Telemetry: The Art of Safe Transformation"
 date: 2026-06-07
-draft: true
+draft: false
 excerpt: "Telemetry data is just as risky for PII as any database. Here's how to turn sensitive fields into safe, useful signals: hashing, tokenising, coarsening, and picking the right tool for the job."
 readtime: 8
 tags: ["Privacy", "OpenTelemetry", "Security", "Observability", "Collector"]
