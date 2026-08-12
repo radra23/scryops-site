@@ -1,0 +1,73 @@
+{{- /* layouts/shortcodes/obs-mask-pipeline.html
+     Replaces the first mermaid graph in the data-masking guide.
+
+     Two things the mermaid version could not say. The four transformation
+     techniques are alternatives applied PER FIELD, not four stages every
+     record passes through — the original drew them hanging off Transform
+     with no indication which. And the Adjust path returns to Transform
+     rather than terminating, which is what makes the quality gate a gate
+     rather than a report.
+
+     Orthogonal connectors, each owning its own elbow. The return edge is
+     dashed because it is conditional, per the diagram-frame template.    */ -}}
+
+<figure class="diagram mpl" aria-label="A telemetry masking pipeline. Raw telemetry reaches a decision: records needing no masking pass straight through to export, while the rest go to transformation. Transformation applies one of four techniques per field — hash, tokenise, truncate, or aggregate — chosen by field type rather than applied in sequence. Transformed records then meet a quality gate; those that pass are exported, and those that fail return to transformation for adjustment rather than being shipped partially masked.">
+  <style>
+    .mpl .diag-card{padding:1rem 1rem .85rem;}
+    .mpl svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .mpl .t{font-size:12.5px;fill:var(--mc-ink);}
+    .mpl .c{font-size:11px;fill:var(--mc-ink-muted);}
+    .mpl .k{font-size:11px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 296" role="img" aria-label="Masking pipeline: raw telemetry, a masking decision, four per-field transformation techniques, a quality gate, and either export or a return path for adjustment.">
+      <defs>
+        <marker id="mpl-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-3)"/></marker>
+        <marker id="mpl-b" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-1)"/></marker>
+      </defs>
+
+      <rect x="0" y="76" width="104" height="44" fill="none" stroke="var(--mc-ramp-3)" stroke-width="3.5" rx="3"/>
+      <text class="t" x="52" y="94" text-anchor="middle">raw</text>
+      <text class="t" x="52" y="110" text-anchor="middle">telemetry</text>
+
+      <path d="M104 98 H132" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#mpl-a)"/>
+
+      <rect x="142" y="76" width="106" height="44" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="195" y="94" text-anchor="middle">needs</text>
+      <text class="t" x="195" y="110" text-anchor="middle">masking?</text>
+
+      <path d="M248 88 H272 V34 H300" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#mpl-a)"/>
+      <text class="c" x="256" y="30">no</text>
+      <path d="M248 108 H284 V162 H300" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#mpl-b)"/>
+      <text class="c" x="256" y="158">yes</text>
+
+      <rect x="308" y="16" width="112" height="36" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" stroke-dasharray="5 4" rx="3"/>
+      <text class="t" x="364" y="39" text-anchor="middle">pass through</text>
+
+      <rect x="308" y="140" width="112" height="44" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" rx="3"/>
+      <text class="t" x="364" y="158" text-anchor="middle">transform</text>
+      <text class="c" x="364" y="174" text-anchor="middle">one per field</text>
+
+      <rect x="308" y="204" width="240" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="1.5" rx="3"/>
+      <text class="c" x="320" y="224">hash &nbsp;&middot;&nbsp; tokenise &nbsp;&middot;&nbsp; truncate &nbsp;&middot;&nbsp; aggregate</text>
+      <text class="c" x="320" y="242">alternatives, chosen by field type &mdash; not stages</text>
+      <path d="M364 184 V196" stroke="var(--mc-ramp-2)" stroke-width="1.5" fill="none"/>
+
+      <path d="M420 162 H448" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#mpl-b)"/>
+
+      <rect x="458" y="140" width="102" height="44" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" rx="3"/>
+      <text class="t" x="509" y="158" text-anchor="middle">quality</text>
+      <text class="t" x="509" y="174" text-anchor="middle">gate</text>
+
+      <path d="M560 152 H584 V34 H608" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#mpl-a)"/>
+      <text class="c" x="566" y="30">pass</text>
+      <rect x="616" y="16" width="64" height="36" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="648" y="39" text-anchor="middle">export</text>
+
+      <path d="M509 184 V272 H364 V192" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" fill="none" marker-end="url(#mpl-b)"/>
+      <text class="c" x="518" y="196">fail</text>
+      <text class="k" x="0" y="290">dashed return = the failed record goes back to transform, never forward. a gate, not a report.</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &mdash; The four techniques are a menu, not a queue. Each field picks one.</figcaption>
+</figure>

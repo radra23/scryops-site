@@ -1,0 +1,42 @@
+{{- /* layouts/shortcodes/obs-audit-vs-log.html
+     The distinction the whole guide rests on. Two columns, one row per
+     property, because the differences are paired rather than ranked —
+     this is a comparison, not a ranking, so no rail weights.             */ -}}
+
+{{- $rows := slice
+  (dict "p" "purpose"        "l" "debugging aid"                   "a" "evidence")
+  (dict "p" "loss tolerance" "l" "lossy by design &mdash; sampled, rate-limited, rotated" "a" "<b>a lost record is a control failure</b>")
+  (dict "p" "threat model"   "l" "confusion"                       "a" "<b>an insider with legitimate access</b>")
+  (dict "p" "write path"     "l" "same store, same credentials"    "a" "separate store, separate credentials")
+  (dict "p" "mutability"     "l" "whatever the database allows"    "a" "append-only, enforced at the storage layer")
+  (dict "p" "ordering"       "l" "wall-clock, best effort"         "a" "sequence number or hash chain per writer")
+  (dict "p" "retention"      "l" "days to weeks"                   "a" "12 months to 6 years, by mandate")
+  (dict "p" "sampling"       "l" "expected"                        "a" "<b>disqualifying</b>")
+-}}
+
+<figure class="obs-fig avl" aria-label="A property-by-property comparison of application logs and audit trails. Logs are a debugging aid, lossy by design, defending against confusion, written to the same store with the same credentials, mutable, ordered by wall clock, retained for days or weeks, and routinely sampled. Audit trails are evidence, cannot tolerate loss, defend against an insider with legitimate access, use a separate store and credentials, are append-only at the storage layer, ordered by sequence number or hash chain, retained for one to six years by mandate, and must never be sampled.">
+  <style>
+    .avl .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .avl .r{display:grid;grid-template-columns:126px 1fr 1fr;gap:.9rem;padding:.6rem 0;border-bottom:1px solid var(--border);align-items:baseline;}
+    @media(max-width:640px){.avl .r{grid-template-columns:1fr;gap:.2rem;}}
+    .avl .hh{display:grid;grid-template-columns:126px 1fr 1fr;gap:.9rem;padding-bottom:.55rem;border-bottom:1px solid var(--border);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted);}
+    @media(max-width:640px){.avl .hh{display:none;}}
+    .avl .hh span:nth-child(3){color:var(--mc-ink);}
+    .avl .p{font-size:.8rem;color:var(--mc-ink-muted);}
+    .avl .l{font-size:.84rem;color:var(--mc-ink-muted);line-height:1.5;}
+    .avl .a{font-size:.84rem;color:var(--mc-ink-secondary);line-height:1.5;border-left:3px solid var(--mc-ramp-1);padding-left:.7rem;}
+    @media(max-width:640px){.avl .a{margin-top:.2rem;}}
+    .avl .a b{color:var(--mc-ink);}
+    .avl .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .avl .foot b{color:var(--mc-ink);}
+    .avl figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hh"><span></span><span>application log</span><span>audit trail</span></div>
+    {{- range $rows }}
+    <div class="r"><span class="p">{{ .p }}</span><span class="l">{{ .l | safeHTML }}</span><span class="a">{{ .a | safeHTML }}</span></div>
+    {{- end }}
+    <div class="foot">One difference drives all the others: an application log defends against <b>confusion</b>, an audit trail defends against a <b>person</b>. Everything in the right-hand column follows from assuming that person already has your database credentials.</div>
+  </div>
+  <figcaption>Fig. &mdash; If the same code writes both, you have one of them. It is not the audit trail.</figcaption>
+</figure>

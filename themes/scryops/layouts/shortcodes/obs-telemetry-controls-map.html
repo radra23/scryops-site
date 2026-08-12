@@ -1,0 +1,51 @@
+{{- /* layouts/shortcodes/obs-telemetry-controls-map.html
+     The series map. Appears in all five privacy/compliance guides so a
+     reader landing on any one of them can see which layer it covers and
+     where the others sit. Pass the current guide's key as `here` and that
+     stage takes the heavy border; everything else stays hairline.
+
+       {{< obs-telemetry-controls-map here="collector" >}}
+
+     Keys: app · sdk · collector · backend · access
+     Border weight = rank (FlowDiagram's law). Nothing is hue-bearing.
+     viewBox authored in real CSS px at the 680px measure, so the declared
+     12.5px labels render at 12.5px.                                      */ -}}
+
+{{- $here := .Get "here" | default "" -}}
+{{- $stages := slice
+  (dict "key" "app"       "x" 4   "t" "application"  "s" "scrub before the SDK" "g" "/howtos/scrub-pii-from-application-logs-dotnet/")
+  (dict "key" "sdk"       "x" 138 "t" "OTel SDK"     "s" "spans + log records"  "g" "")
+  (dict "key" "collector" "x" 272 "t" "Collector"    "s" "the primary control"  "g" "/guides/pii-in-telemetry/")
+  (dict "key" "backend"   "x" 406 "t" "backend"      "s" "residency + retention" "g" "/guides/data-sovereignty-and-residency/")
+  (dict "key" "access"    "x" 540 "t" "who queries"  "s" "audit trail"          "g" "/guides/audit-trail-implementation/")
+-}}
+
+<figure class="diagram tcm" aria-label="A five-stage map of where privacy controls sit in a telemetry pipeline: the application, the OpenTelemetry SDK, the Collector, the backend, and the people who query it. The stage this guide covers is drawn with a heavy border; the rest are hairlines.">
+  <style>
+    .tcm .diag-card{padding:1rem 1rem .85rem;}
+    .tcm svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .tcm .t{font-size:12.5px;fill:var(--mc-ink);}
+    .tcm .s{font-size:11px;fill:var(--mc-ink-muted);}
+    .tcm .k{font-size:11px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 104" role="img" aria-label="Telemetry privacy control points, left to right: application, OTel SDK, Collector, backend, and query access.">
+      <defs>
+        <marker id="tcm-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto">
+          <path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-3)"/>
+        </marker>
+      </defs>
+      {{- range $stages }}
+      <rect x="{{ .x }}" y="18" width="122" height="46" fill="none" rx="3"
+            stroke="{{ if eq $here .key }}var(--mc-ramp-1){{ else }}var(--mc-ramp-3){{ end }}"
+            stroke-width="{{ if eq $here .key }}3.5{{ else }}1.5{{ end }}"/>
+      <text class="t" x="{{ add .x 61 }}" y="38" text-anchor="middle">{{ .t }}</text>
+      <text class="s" x="{{ add .x 61 }}" y="54" text-anchor="middle">{{ .s }}</text>
+      {{- if lt .x 540 }}
+      <path d="M{{ add .x 122 }} 41 H{{ add .x 132 }}" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#tcm-a)"/>
+      {{- end }}
+      {{- end }}
+      <text class="k" x="4" y="94">heavy border = the stage this guide covers</text>
+    </svg>
+  </div>
+</figure>

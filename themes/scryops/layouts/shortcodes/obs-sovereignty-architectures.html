@@ -1,0 +1,70 @@
+{{- /* layouts/shortcodes/obs-sovereignty-architectures.html
+     Three regional telemetry architectures, drawn rather than listed,
+     because the difference between them is topological.
+
+     Connectors are ORTHOGONAL — out, one right-angle step, in — per the
+     house rule. Each edge owns its own run and elbow so no two are
+     collinear; a shared elbow would let the heavy stroke overpaint the
+     light ones and destroy what the weights encode. viewBox is real CSS
+     px at the 680 measure.                                               */ -}}
+
+<figure class="diagram sva" aria-label="Three architectures for regional telemetry. One global backend: every region ships to a single store, which is simple and depends entirely on a transfer mechanism. Regional isolation: each region has its own Collector and backend with no cross-region forwarding, which is compliant but splits traces across stores. Regional isolation with an aggregate tier: full telemetry stays regional while a deliberately thin stream of anonymised aggregates flows to a global tier for cross-region visibility.">
+  <style>
+    .sva .diag-card{padding:1rem 1rem .85rem;}
+    .sva svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .sva .t{font-size:12px;fill:var(--mc-ink);}
+    .sva .c{font-size:11px;fill:var(--mc-ink-muted);}
+    .sva .h{font-size:12.5px;fill:var(--mc-ink);}
+    .sva .k{font-size:11px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 372" role="img" aria-label="Three regional telemetry architectures compared: one global backend, regional isolation, and regional isolation with a global aggregate tier.">
+      <defs>
+        <marker id="sva-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-3)"/></marker>
+        <marker id="sva-b" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-1)"/></marker>
+      </defs>
+
+      <text class="h" x="0" y="12">1 &middot; one global backend</text>
+      <text class="k" x="0" y="28">simplest &middot; every flow depends on the transfer mechanism</text>
+      <rect x="0" y="40" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="46" y="59" text-anchor="middle">EU region</text>
+      <rect x="0" y="78" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="46" y="97" text-anchor="middle">US region</text>
+      <path d="M92 55 H150 V86 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <path d="M92 93 H168 V90 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <rect x="204" y="60" width="132" height="46" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="270" y="79" text-anchor="middle">one backend</text>
+      <text class="c" x="270" y="95" text-anchor="middle">one jurisdiction</text>
+
+      <text class="h" x="0" y="152">2 &middot; regional isolation</text>
+      <text class="k" x="0" y="168">compliant &middot; no single query sees a whole cross-region trace</text>
+      <rect x="0" y="180" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="46" y="199" text-anchor="middle">EU region</text>
+      <rect x="0" y="218" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="46" y="237" text-anchor="middle">US region</text>
+      <path d="M92 195 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <path d="M92 233 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <rect x="204" y="180" width="132" height="30" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="270" y="199" text-anchor="middle">EU backend</text>
+      <rect x="204" y="218" width="132" height="30" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="270" y="237" text-anchor="middle">US backend</text>
+      <path d="M352 214 H388" stroke="var(--mc-ramp-1)" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+      <text class="c" x="396" y="211">no forwarding</text>
+      <text class="c" x="396" y="226">between them</text>
+
+      <text class="h" x="0" y="282">3 &middot; regional isolation + aggregate tier</text>
+      <text class="k" x="0" y="298">where most large systems land</text>
+      <rect x="0" y="310" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="46" y="329" text-anchor="middle">EU region</text>
+      <path d="M92 325 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <rect x="204" y="310" width="132" height="30" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="270" y="329" text-anchor="middle">EU backend</text>
+      <path d="M336 325 H372 V352 H408" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#sva-b)"/>
+      <rect x="416" y="336" width="152" height="32" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
+      <text class="t" x="492" y="356" text-anchor="middle">allowlisted aggregates</text>
+      <text class="c" x="576" y="356">&rarr; global tier</text>
+      <text class="k" x="0" y="366">heavy dashed = the only thing that may cross a border, defined as an allowlist</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &mdash; The third pattern is the first two admitting they both had a point.</figcaption>
+</figure>

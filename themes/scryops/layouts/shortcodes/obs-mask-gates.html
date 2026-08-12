@@ -1,0 +1,49 @@
+{{- /* layouts/shortcodes/obs-mask-gates.html
+     Replaces the stateDiagram-v2 quality-gates mermaid in the masking
+     guide. Same logic — three checks fan out, join, and produce one
+     verdict — but stated as what each check actually rejects, which the
+     original left abstract.
+
+     The AND is the whole point and the original buried it: one failing
+     check fails the record. Orthogonal fan, each edge on its own row.    */ -}}
+
+{{- $gates := slice
+  (dict "n" "format check"  "q" "is the field still the type the schema promises?" "r" "an int coarsened into <code>&quot;US-WEST&quot;</code> breaks every downstream aggregation")
+  (dict "n" "pattern check" "q" "does anything still match a PII regex?"           "r" "the check that catches an email that arrived inside a free-text field")
+  (dict "n" "value check"   "q" "is the value inside the range the transform promised?" "r" "a hash that came back empty, a bucket that landed outside its own boundaries")
+-}}
+
+<figure class="obs-fig mgt" aria-label="Three quality checks run over every transformed record before export: a format check that the field still matches its schema type, a pattern check that nothing still matches a PII regex, and a value check that the result is inside the range the transform promised. All three must pass. One failing check fails the whole record, which returns for adjustment rather than being exported partially masked.">
+  <style>
+    .mgt .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .mgt .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .mgt .g{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--mc-ramp-2);padding:.9rem .85rem;margin-bottom:.6rem;}
+    .mgt .n{font-size:.85rem;color:var(--mc-ink);margin-bottom:.3rem;}
+    .mgt .v svg.obs-g{width:13px;height:13px;display:block;flex:none;}
+    .mgt .q{font-size:.84rem;color:var(--mc-ink-secondary);line-height:1.55;}
+    .mgt .r{font-size:.8rem;color:var(--mc-ink-muted);line-height:1.55;margin-top:.3rem;}
+    .mgt .r code{font-size:.76rem;}
+    .mgt .join{display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.9rem;}
+    @media(max-width:560px){.mgt .join{grid-template-columns:1fr;}}
+    .mgt .v{border:1px solid var(--border);border-top:3px solid;padding:.85rem;display:flex;align-items:center;gap:.6rem;font-size:.84rem;color:var(--mc-ink);}
+    .mgt .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .mgt .foot b{color:var(--mc-ink);}
+    .mgt figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hdr">THREE CHECKS &nbsp;&middot;&nbsp; ALL MUST PASS &nbsp;&middot;&nbsp; PER RECORD</div>
+    {{- range $gates }}
+    <div class="g">
+      <div class="n">{{ .n }}</div>
+      <div class="q">{{ .q | safeHTML }}</div>
+      <div class="r">{{ .r | safeHTML }}</div>
+    </div>
+    {{- end }}
+    <div class="join">
+      <div class="v" style="border-top-color:var(--mc-ramp-3)">{{ partial "obs-glyph.html" (dict "rank" 0 "fill" "var(--mc-ramp-3)") }}all three pass &rarr; export</div>
+      <div class="v" style="border-top-color:var(--mc-ramp-1)">{{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }}any one fails &rarr; back to transform</div>
+    </div>
+    <div class="foot">The join is an <b>AND</b>, and that is the design decision worth naming: one bad field fails the whole record. <b>Partially masked telemetry is worse than none</b> &mdash; it looks clean, so nobody checks it again.</div>
+  </div>
+  <figcaption>Fig. &mdash; A gate that lets a record through on two out of three is a suggestion.</figcaption>
+</figure>

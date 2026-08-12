@@ -1,0 +1,72 @@
+{{- /* layouts/shortcodes/obs-hash-chain.html
+     How tamper-evidence actually works, in four entries.
+
+     Orthogonal connectors only; each hash edge owns its own run so the
+     chain reads left to right without any two edges going collinear.
+     The tampered entry is marked by GLYPH and BORDER WEIGHT, not by a
+     colour — that is the whole redundant-encoding law, and a figure about
+     detecting tampering would be a poor place to break it.
+
+     Anchoring is drawn because a chain stored only inside the system it
+     protects proves nothing against someone who can rewrite the store.   */ -}}
+
+<figure class="diagram hch" aria-label="A hash chain over four audit entries. Each entry's hash is computed over its own fields plus the hash of the entry before it, so altering entry three invalidates the hash stored in entry four and every entry after it. The tampered entry is marked with a heavy border and a square glyph rather than a colour. A daily root hash is anchored outside the system, because a chain stored only where an attacker can reach it proves nothing.">
+  <style>
+    .hch .diag-card{padding:1rem 1rem .85rem;}
+    .hch svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .hch .t{font-size:12px;fill:var(--mc-ink);}
+    .hch .c{font-size:11px;fill:var(--mc-ink-muted);}
+    .hch .k{font-size:11px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 246" role="img" aria-label="Four chained audit entries, one of them altered, with the break in the chain marked and a daily root hash anchored outside the system.">
+      <defs>
+        <marker id="hch-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-3)"/></marker>
+        <marker id="hch-b" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-1)"/></marker>
+      </defs>
+
+      <text class="k" x="0" y="12">each entry commits to the one before it</text>
+
+      <rect x="0" y="26" width="140" height="58" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="t" x="12" y="46">entry 401</text>
+      <text class="c" x="12" y="62">prev 9f2c…</text>
+      <text class="c" x="12" y="76">hash a17b…</text>
+
+      <path d="M140 55 H166" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#hch-a)"/>
+
+      <rect x="176" y="26" width="140" height="58" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3.5" rx="3"/>
+      <text class="t" x="188" y="46">entry 402</text>
+      <text class="c" x="188" y="62">prev a17b…</text>
+      <text class="c" x="188" y="76">hash 4d80…</text>
+      <g transform="translate(292,34)">{{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }}</g>
+
+      <path d="M316 55 H342" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#hch-b)"/>
+
+      <rect x="352" y="26" width="140" height="58" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
+      <text class="t" x="364" y="46">entry 403</text>
+      <text class="c" x="364" y="62">prev 4d80…</text>
+      <text class="c" x="364" y="76">&#9888; mismatch</text>
+
+      <path d="M492 55 H518" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" fill="none" marker-end="url(#hch-b)"/>
+
+      <rect x="528" y="26" width="140" height="58" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
+      <text class="t" x="540" y="46">entry 404…n</text>
+      <text class="c" x="540" y="62">every one after</text>
+      <text class="c" x="540" y="76">also invalid</text>
+
+      <text class="k" x="0" y="112">entry 402 was edited &middot; its recomputed hash no longer matches what 403 stored &middot; the break propagates forward</text>
+
+      <rect x="0" y="132" width="330" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="12" y="152">hash = H(ts ‖ actor ‖ action ‖ resource ‖ outcome ‖ prev)</text>
+      <text class="c" x="12" y="170">four lines of code, computed at write time</text>
+
+      <path d="M330 158 H360 V206 H392" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#hch-b)"/>
+
+      <rect x="400" y="188" width="268" height="36" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" rx="3"/>
+      <text class="t" x="412" y="211">daily root, anchored OUTSIDE the system</text>
+
+      <text class="k" x="0" y="240">without the anchor, an attacker who can rewrite the store can rewrite the chain</text>
+    </svg>
+  </div>
+  <figcaption>Fig. &mdash; Tamper-evident, not tamper-proof. The claim you can actually defend.</figcaption>
+</figure>

@@ -1,0 +1,79 @@
+{{- /* layouts/shortcodes/obs-quasi-id-risk.html
+     Runs this how-to's own QuasiIdentifierRiskAnalyzer and plots what it
+     actually outputs. Every value below is computed from the code as
+     written — sum of base scores × 1.3^(n-1), clamped to 1.0 — not
+     estimated:
+
+       zip                       0.35            × 1     = 0.35
+       birth_date                0.40            × 1     = 0.40
+       gender + education        0.15+0.20=0.35  × 1.3   = 0.455
+       zip + gender              0.35+0.15=0.50  × 1.3   = 0.650
+       job_title + income        0.25+0.30=0.55  × 1.3   = 0.715
+       zip + birth_date          0.35+0.40=0.75  × 1.3   = 0.975
+       zip + birth_date + gender 0.90            × 1.69  = 1.521 → 1.0
+
+     The useful finding is what that shape means: no single field crosses
+     the 0.6 threshold and most PAIRS do. The analyzer is, in practice, a
+     "two or more quasi-identifiers" rule with arithmetic attached — which
+     is a defensible rule, and better stated plainly than implied by a
+     magic number. The code's own docstring says the scores are
+     illustrative; this figure agrees with it.
+
+     Grounding: Sweeney (2002) found ZIP + date of birth + sex uniquely
+     identified 87% of the 1990 US population; Golle (2006) recomputed
+     against 2000 census data and got 63%. Both are cited, because citing
+     only the larger one would be the easy dishonesty here.               */ -}}
+
+{{- $rows := slice
+  (dict "l" "zip_code"                        "v" 0.350 "n" "0.35"  "over" false)
+  (dict "l" "birth_date"                      "v" 0.400 "n" "0.40"  "over" false)
+  (dict "l" "gender + education_level"        "v" 0.455 "n" "0.46"  "over" false)
+  (dict "l" "zip_code + gender"               "v" 0.650 "n" "0.65"  "over" true)
+  (dict "l" "job_title + income_range"        "v" 0.715 "n" "0.72"  "over" true)
+  (dict "l" "zip_code + birth_date"           "v" 0.975 "n" "0.98"  "over" true)
+  (dict "l" "zip_code + birth_date + gender"  "v" 1.000 "n" "1.00*" "over" true)
+-}}
+
+<figure class="obs-fig qir" aria-label="The risk scores this guide's own quasi-identifier analyzer produces for seven field combinations, against its 0.6 protection threshold. Single fields score below the threshold: zip code 0.35, birth date 0.40. Most pairs cross it: zip code plus gender 0.65, job title plus income range 0.72, zip code plus birth date 0.98. The three-field combination of zip code, birth date and gender computes to 1.52 and is clamped to 1.0. In practice the analyzer behaves as a rule that flags any two quasi-identifiers logged together.">
+  <style>
+    .qir .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);background-image:var(--fig-grid);background-size:26px 26px;}
+    .qir .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .qir .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .qir .plot{position:relative;}
+    .qir .thr{position:absolute;top:0;bottom:18px;left:60%;border-left:2px dashed var(--mc-ramp-1);}
+    .qir .lb svg.obs-g{width:13px;height:13px;display:block;flex:none;}
+    .qir .thrl{position:absolute;bottom:0;left:calc(60% + 8px);font-size:12px;color:var(--mc-ink);white-space:nowrap;}
+    .qir .row{display:grid;grid-template-columns:236px minmax(0,1fr) 46px;gap:.7rem;align-items:center;margin-bottom:.5rem;}
+    @media(max-width:640px){.qir .row{grid-template-columns:1fr;gap:.15rem;}.qir .thr,.qir .thrl{display:none;}}
+    .qir .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink-secondary);display:flex;align-items:center;gap:.5rem;}
+    .qir .lb.o{color:var(--mc-ink);font-weight:600;}
+    .qir .tr{height:16px;}
+    .qir .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;background:var(--mc-ramp-3);}
+    .qir .bar.o{border-width:3.5px;background:var(--mc-ramp-1);}
+    .qir .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
+    .qir .pad{height:24px;}
+    .qir .foot{margin-top:.6rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .qir .foot b{color:var(--mc-ink);}
+    .qir .src{margin-top:.9rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
+    .qir figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hd">What the analyzer above actually returns</div>
+    <div class="sub">computed from the code as written &middot; scale 0&ndash;1 &middot; heavy outline = crosses the 0.6 threshold</div>
+    <div class="plot">
+      {{- range $rows }}
+      <div class="row">
+        <span class="lb{{ if .over }} o{{ end }}">{{ partial "obs-glyph.html" (dict "rank" (cond .over 2 0) "fill" (cond .over "var(--mc-ramp-1)" "var(--mc-ramp-3)")) }}{{ .l }}</span>
+        <span class="tr"><span class="bar{{ if .over }} o{{ end }}" style="width:{{ mul .v 100.0 }}%"></span></span>
+        <span class="vl">{{ .n }}</span>
+      </div>
+      {{- end }}
+      <div class="pad"></div>
+      <span class="thr"></span>
+      <span class="thrl">0.6 &mdash; ShouldProtectCombination() returns true &rarr;</span>
+    </div>
+    <div class="foot">* three fields compute to <b>1.52</b> and are clamped to 1.0 by <code>Math.Min</code>. The shape worth noticing: <b>no single field crosses the threshold and most pairs do</b>, so in practice this is a &ldquo;two or more quasi-identifiers&rdquo; rule with arithmetic attached. That is a defensible rule &mdash; just state it as one, and calibrate the scores to your own data before anyone treats the output as a compliance decision.</div>
+    <div class="src">GROUNDING: SWEENEY 2002 FOUND ZIP + DOB + SEX UNIQUELY IDENTIFIED 87% OF THE 1990 US POPULATION &nbsp;&middot;&nbsp; GOLLE 2006 RECOMPUTED AGAINST 2000 CENSUS DATA AND GOT 63%</div>
+  </div>
+  <figcaption>Fig. &mdash; The threshold is doing less work than the number of fields is.</figcaption>
+</figure>

@@ -1,0 +1,62 @@
+{{- /* layouts/shortcodes/obs-proof-size.html · TEMPLATE 01b, LOG SCALE
+     Why a flat hash chain stops working at audit scale. Proving one
+     record's membership by walking a flat chain is O(n); over a Merkle
+     history tree it is O(log n).
+
+     The axis is LOGARITHMIC and says so in the subtitle, because the
+     values span six orders of magnitude and a linear axis would render
+     every Merkle bar as a zero-width sliver — which understates the
+     result rather than dramatising it. Values are printed on every bar
+     so the encoding never has to be read off the axis alone.
+
+     Numbers are exact, not estimated: log2(n), rounded up.
+     SOURCE: Crosby & Wallach, "Efficient Data Structures for
+     Tamper-Evident Logging", USENIX Security 2009. Same construction as
+     RFC 6962 Certificate Transparency.                                   */ -}}
+
+{{- $rows := slice
+  (dict "n" "1,000 entries"     "flat" 1000     "fl" "1,000"     "mk" 10 "ml" "10")
+  (dict "n" "100,000 entries"   "flat" 100000   "fl" "100,000"   "mk" 17 "ml" "17")
+  (dict "n" "10,000,000 entries" "flat" 10000000 "fl" "10,000,000" "mk" 24 "ml" "24")
+-}}
+
+<figure class="obs-fig prf" aria-label="Steps required to prove that a single record belongs to an audit log, comparing a flat hash chain with a Merkle history tree, on a logarithmic scale. At one thousand entries the flat chain needs one thousand steps and the tree needs ten. At one hundred thousand entries, one hundred thousand steps against seventeen. At ten million entries, ten million steps against twenty-four. The flat chain grows linearly with the log; the tree grows logarithmically.">
+  <style>
+    .prf .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);background-image:var(--fig-grid);background-size:26px 26px;}
+    .prf .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .prf .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .prf .grp{margin-bottom:1.05rem;}
+    .prf .gl{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);margin-bottom:.35rem;}
+    .prf .row{display:grid;grid-template-columns:1fr 92px;gap:.6rem;align-items:center;margin-bottom:4px;}
+    .prf .tr{height:16px;}
+    .prf .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;min-width:3px;}
+    .prf .s1{background:var(--mc-ramp-3);}
+    .prf .s2{background:repeating-linear-gradient(45deg,var(--mc-ramp-3) 0 3.4px,transparent 3.4px 8px);}
+    .prf .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
+    .prf .lg{display:flex;flex-wrap:wrap;gap:.4rem 1.4rem;margin-top:.3rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--mc-ink-muted);}
+    .prf .lg span{display:inline-flex;align-items:center;gap:.5rem;}
+    .prf .sw{width:22px;height:12px;border:1px solid var(--mc-ink);display:inline-block;box-sizing:border-box;}
+    .prf .foot{margin-top:.9rem;font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .prf .foot b{color:var(--mc-ink);}
+    .prf .src{margin-top:.9rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
+    .prf figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hd">Steps to prove one record is in the log</div>
+    <div class="sub">LOGARITHMIC scale &mdash; the values span six orders of magnitude &middot; every value is printed, so the axis is never load-bearing</div>
+    {{- range $rows }}
+    <div class="grp">
+      <div class="gl">{{ .n }}</div>
+      <div class="row"><span class="tr"><span class="bar s1" style="width:{{ div (mul (math.Log .flat) 100.0) (math.Log 10000000.0) }}%"></span></span><span class="vl">{{ .fl }}</span></div>
+      <div class="row"><span class="tr"><span class="bar s2" style="width:{{ div (mul (math.Log .mk) 100.0) (math.Log 10000000.0) }}%"></span></span><span class="vl">{{ .ml }}</span></div>
+    </div>
+    {{- end }}
+    <div class="lg">
+      <span><i class="sw s1"></i>Solid = flat hash chain, O(n)</span>
+      <span><i class="sw s2"></i>Hatch = Merkle history tree, O(log n)</span>
+    </div>
+    <div class="foot">For most teams a flat chain plus daily anchoring is enough, and that is where to start. <b>Reach for the tree when you need to hand an auditor a proof about one record without handing them the entire log.</b></div>
+    <div class="src">SOURCE: CROSBY &amp; WALLACH, USENIX SECURITY 2009 &nbsp;&middot;&nbsp; SAME CONSTRUCTION AS RFC 6962 CERTIFICATE TRANSPARENCY</div>
+  </div>
+  <figcaption>Fig. &mdash; Ten million steps, or twenty-four. The maths is not close.</figcaption>
+</figure>

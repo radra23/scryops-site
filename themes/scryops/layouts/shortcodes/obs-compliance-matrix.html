@@ -1,0 +1,57 @@
+{{- /* layouts/shortcodes/obs-compliance-matrix.html
+     The marquee figure of the compliance guide: four frameworks, what
+     each demands of a telemetry pipeline, and the citation to point an
+     auditor at. Rail weight ranks how PRESCRIPTIVE the framework is about
+     telemetry specifically — PCI names the fields, GDPR names principles —
+     not how severe it is. That is stated in the footer so nobody reads it
+     as a severity ranking.                                               */ -}}
+
+{{- $rows := slice
+  (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2
+        "n" "PCI DSS" "c" "Req. 3.2, 3.4, 10"
+        "d" "No full PAN in retrievable form; <b>no CVV after authorisation, ever</b>. Logs retained 12 months, 3 immediately available."
+        "t" "PRESCRIPTIVE" "s" "names the fields")
+  (dict "rail" "3px"   "step" "var(--mc-ramp-2)" "rank" 1
+        "n" "HIPAA" "c" "§164.312(b), §164.514"
+        "d" "Audit controls over ePHI systems; minimum necessary. <b>4 of the 18 identifiers</b> &mdash; dates, IP, device ID, URL &mdash; are in every span by default."
+        "t" "6-YEAR" "s" "documentation")
+  (dict "rail" "2px"   "step" "var(--mc-ramp-3)" "rank" 0
+        "n" "GDPR" "c" "Art. 5, 6, 17, 25"
+        "d" "Lawful basis for collection; minimisation; erasure within a month; <b>protection by design</b>, which a quarterly cleanup script is not."
+        "t" "CEILING" "s" "not a floor")
+  (dict "rail" "1.5px" "step" "var(--mc-ramp-3)" "rank" 0
+        "n" "SOC 2" "c" "CC6.1&ndash;6.8, CC7.2&ndash;7.3"
+        "d" "Controls <b>you</b> define, tested for the whole period. Failures are administrative: the review that happened twice instead of four times."
+        "t" "EVIDENCE" "s" "not architecture")
+-}}
+
+<figure class="obs-fig cmx" aria-label="Four compliance frameworks and what each demands of a telemetry pipeline. PCI DSS is the most prescriptive about telemetry, drawn with the heaviest rail: no full card number in retrievable form, no CVV after authorisation, twelve months of log retention. HIPAA requires audit controls over systems holding health data and treats four of its eighteen identifiers as present in every span by default. GDPR requires a lawful basis, minimisation, erasure within a month, and protection by design. SOC 2 tests controls you define yourself, and its failures are usually administrative rather than technical.">
+  <style>
+    .cmx .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .cmx .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .cmx .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 150px 1fr 122px;gap:.9rem;align-items:center;padding:.95rem .8rem;margin-bottom:.7rem;}
+    @media(max-width:760px){.cmx .lane{grid-template-columns:24px 1fr;}}
+    .cmx .nm{font-size:.86rem;color:var(--mc-ink);line-height:1.5;}
+    .cmx .nm small{display:block;font-size:.7rem;color:var(--mc-ink-muted);margin-top:.2rem;}
+    .cmx .d{font-size:.83rem;color:var(--mc-ink-secondary);line-height:1.55;}
+    .cmx .d b{color:var(--mc-ink);}
+    .cmx .tag{justify-self:end;font-family:var(--font-pixel);font-size:.65rem;line-height:1.7;letter-spacing:.04em;padding:.45rem .5rem;border:1px solid;text-align:center;color:var(--mc-ink);}
+    @media(max-width:760px){.cmx .tag{justify-self:start;grid-column:2;}}
+    .cmx .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .cmx .foot b{color:var(--mc-ink);}
+    .cmx figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hdr">WHAT EACH FRAMEWORK ASKS OF A TELEMETRY PIPELINE</div>
+    {{- range $rows }}
+    <div class="lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+      <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+      <div class="nm">{{ .n }}<small>{{ .c | safeHTML }}</small></div>
+      <div class="d">{{ .d | safeHTML }}</div>
+      <div class="tag" style="border-color:{{ .step | safeCSS }}">{{ .t }}<br>{{ .s }}</div>
+    </div>
+    {{- end }}
+    <div class="foot">Rail weight ranks how <b>prescriptive</b> each framework is about telemetry specifically, not how severe it is. All four converge on one decision: <b>strip identity at the Collector, before export</b>. GDPR gets minimisation by design, HIPAA gets minimum necessary, PCI gets scope reduction, SOC 2 gets a control you can point at.</div>
+  </div>
+  <figcaption>Fig. &mdash; Four vocabularies. One place to satisfy all of them.</figcaption>
+</figure>

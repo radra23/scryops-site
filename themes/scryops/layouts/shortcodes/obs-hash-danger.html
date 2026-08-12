@@ -1,0 +1,69 @@
+{{- /* layouts/shortcodes/obs-hash-danger.html
+     The most-repeated bad instinct in telemetry redaction: "we hashed it,
+     so it is anonymous." A hash is only as strong as the SEARCH SPACE of
+     its input, and an email address has a small one.
+
+     ARITHMETIC — shown in the figure so a reader can check it rather than
+     take it on trust:
+       ~4.6e9 email accounts worldwide (widely reported estimate, 2025)
+       a single modern GPU does SHA-256 in the tens of GH/s
+       4.6e9 / 2e10 per second  →  well under one second to exhaust
+     versus a random 128-bit token: 2^128 ≈ 3.4e38 candidates.
+     The ratio is ~29 orders of magnitude, which is why the bars carry
+     printed exponents rather than lengths alone.
+
+     Deliberately NOT claimed: a specific GPU model or hashrate. The
+     order of magnitude is the argument; a precise number would be a
+     vendor benchmark dressed up as a fact.                              */ -}}
+
+<figure class="obs-fig hdg" aria-label="Why hashing an email address does not anonymise it. The strength of a hash depends on the search space of its input. There are roughly four point six billion email accounts worldwide, about ten to the ninth power, which a single modern GPU can exhaust in well under a second. A random 128-bit token has about ten to the thirty-eighth possible values, roughly twenty-nine orders of magnitude more. An opaque business identifier sits between the two and is the case where hashing genuinely works.">
+  <style>
+    .hdg .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .hdg .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .hdg .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .hdg .row{margin-bottom:.95rem;}
+    .hdg .rt{display:flex;justify-content:space-between;align-items:baseline;gap:.7rem;flex-wrap:wrap;margin-bottom:.3rem;}
+    .hdg .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);display:flex;align-items:center;gap:.5rem;}
+    .hdg .vl{font-size:12px;color:var(--mc-ink-secondary);}
+    .hdg .bar{height:16px;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;}
+    .hdg .verdict{font-size:.82rem;color:var(--mc-ink-muted);line-height:1.55;margin-top:.3rem;}
+    .hdg .verdict b{color:var(--mc-ink);}
+    .hdg .calc{margin-top:1rem;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:.85rem 1rem;font-size:.78rem;line-height:1.9;color:var(--code-text);overflow-x:auto;}
+    .hdg .calc .p{color:var(--code-muted);}
+    .hdg .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .hdg .foot b{color:var(--mc-ink);}
+    .hdg figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hd">A hash is only as strong as its input's search space</div>
+    <div class="sub">bar length = log&#8321;&#8320; of the candidate count &middot; the exponent is printed because the ratio does not fit on a page</div>
+
+    <div class="row">
+      <div class="rt"><span class="lb">{{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }}email address</span><span class="vl">&asymp; 10&#8313; &middot; 4.6 billion accounts</span></div>
+      <span class="bar" style="width:25.1%;background:var(--mc-ramp-1)"></span>
+      <div class="verdict"><b>Exhaustible in under a second</b> on one GPU. Hashing an email produces a pseudonym anyone can reverse with a wordlist. Delete it instead.</div>
+    </div>
+
+    <div class="row">
+      <div class="rt"><span class="lb">{{ partial "obs-glyph.html" (dict "rank" 1 "fill" "var(--mc-ramp-2)") }}opaque business ID + salt</span><span class="vl">&asymp; 10&sup2;&#8304; with a secret salt</span></div>
+      <span class="bar" style="width:52.6%;background:var(--mc-ramp-2)"></span>
+      <div class="verdict">The case where hashing genuinely works &mdash; <b>provided the salt is secret and rotated</b>. Order IDs and transaction IDs live here.</div>
+    </div>
+
+    <div class="row">
+      <div class="rt"><span class="lb">{{ partial "obs-glyph.html" (dict "rank" 0 "fill" "var(--mc-ramp-3)") }}random 128-bit token</span><span class="vl">&asymp; 10&sup3;&#8312; &middot; 2&#185;&sup2;&#8312;</span></div>
+      <span class="bar" style="width:100%;background:var(--mc-ramp-3)"></span>
+      <div class="verdict">Tokenisation, not hashing. The mapping lives in a separate store you control, and nothing in the telemetry can reverse it.</div>
+    </div>
+
+    <div class="calc">
+      <div class="p"># the whole argument, in three lines</div>
+      <div>candidates(email)  &asymp; 4.6e9      <span class="p"># every email account on earth</span></div>
+      <div>gpu_sha256_per_sec &asymp; 2e10       <span class="p"># order of magnitude, one card</span></div>
+      <div>time_to_exhaust    &asymp; 0.23 s     <span class="p"># 4.6e9 / 2e10</span></div>
+    </div>
+
+    <div class="foot"><b>SHA-256 is not the weak part. The email is.</b> The same hash over a 128-bit random token is unbreakable, over an email address it is a lookup. This is why the field-level decision comes before the algorithm choice, every time.</div>
+  </div>
+  <figcaption>Fig. &mdash; &ldquo;We hashed it&rdquo; is an answer to the wrong question.</figcaption>
+</figure>

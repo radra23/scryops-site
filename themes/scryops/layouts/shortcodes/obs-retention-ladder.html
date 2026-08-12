@@ -1,0 +1,58 @@
+{{- /* layouts/shortcodes/obs-retention-ladder.html · TEMPLATE 03b
+     Retention mandates against the GDPR erasure deadline. The scale is
+     LINEAR and starts at zero on purpose: a log scale would flatter the
+     one-month deadline into looking comparable to a six-year mandate,
+     and the whole point of the figure is that it is not.
+
+     SOURCES
+       PCI DSS Req. 10.7 — 12 months total, 3 months immediately available
+       HIPAA 45 CFR §164.316(b)(2)(i) — 6 years documentation retention
+       SOX — 7 years for covered financial records
+       GDPR Art. 12(3) — one month to respond to an Art. 17 erasure request
+       GDPR Art. 5(1)(e) — storage limitation: a CEILING, not a floor      */ -}}
+
+{{- $max := 84.0 -}}
+{{- $rows := slice
+  (dict "l" "SOX, financial records"      "m" 84 "n" "7 years"   "step" "var(--mc-ramp-1)" "rank" 2)
+  (dict "l" "HIPAA documentation"         "m" 72 "n" "6 years"   "step" "var(--mc-ramp-1)" "rank" 2)
+  (dict "l" "PCI DSS 10.7, total"         "m" 12 "n" "12 months" "step" "var(--mc-ramp-2)" "rank" 1)
+  (dict "l" "PCI DSS 10.7, hot"           "m"  3 "n" "3 months"  "step" "var(--mc-ramp-3)" "rank" 0)
+-}}
+
+<figure class="obs-fig rl" aria-label="Retention mandates measured in months against the GDPR erasure deadline. SOX requires 84 months, HIPAA 72, PCI DSS 12 with the most recent 3 immediately available. The GDPR deadline for responding to an erasure request is one month, drawn as a dashed reference rule near the zero end of the axis. Every mandate is far longer than the deadline, which is the tension the figure exists to show.">
+  <style>
+    .rl .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);background-image:var(--fig-grid);background-size:26px 26px;}
+    .rl .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .rl .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .rl .lb svg.obs-g{width:13px;height:13px;display:block;flex:none;}
+    .rl .row{display:grid;grid-template-columns:186px minmax(0,1fr) 76px;gap:.7rem;align-items:center;margin-bottom:.55rem;}
+    @media(max-width:640px){.rl .row{grid-template-columns:1fr;gap:.2rem;}}
+    .rl .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);display:flex;align-items:center;gap:.5rem;}
+    .rl .tr{position:relative;height:17px;}
+    .rl .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;}
+    .rl .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
+    .rl .rule{position:relative;height:34px;margin-top:.2rem;}
+    .rl .rline{position:absolute;top:0;bottom:14px;border-left:2px dashed var(--mc-ramp-1);}
+    .rl .rlab{position:absolute;bottom:0;font-size:12px;color:var(--mc-ink);white-space:nowrap;}
+    .rl .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .rl .foot b{color:var(--mc-ink);}
+    .rl figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hd">Retention mandates vs the erasure deadline</div>
+    <div class="sub">months &middot; linear scale from zero &middot; longest mandate = 84</div>
+    {{- range $rows }}
+    <div class="row">
+      <span class="lb">{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}{{ .l }}</span>
+      <span class="tr"><span class="bar" style="width:{{ div (mul .m 100.0) $max }}%;background:{{ .step | safeCSS }}"></span></span>
+      <span class="vl">{{ .n }}</span>
+    </div>
+    {{- end }}
+    <div class="rule">
+      <span class="rline" style="left:{{ div (mul 1.0 100.0) $max }}%"></span>
+      <span class="rlab" style="left:calc({{ div (mul 1.0 100.0) $max }}% + 8px)">&larr; GDPR Art. 12(3): one month to erase</span>
+    </div>
+    <div class="foot">GDPR sets no retention floor at all &mdash; Art. 5(1)(e) sets a <b>ceiling</b>. A single policy cannot satisfy a six-year mandate and a minimisation ceiling at once, <b>unless the six-year data carries no personal data</b>. That is the whole trick.</div>
+  </div>
+  <figcaption>Fig. &mdash; Four mandates, one deadline, and a gap you cannot close with a retention setting.</figcaption>
+</figure>

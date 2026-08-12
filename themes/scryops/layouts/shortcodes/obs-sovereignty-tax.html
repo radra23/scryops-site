@@ -1,0 +1,71 @@
+{{- /* layouts/shortcodes/obs-sovereignty-tax.html
+     The bill for regional isolation, in two currencies.
+
+     MONEY: published 2026 entry list rates, per GB, first tier.
+       AWS internet egress $0.09 · Azure $0.087 · GCP Premium $0.12
+       cross-region ~$0.02 · Cloudflare R2 $0.00
+     Shipping telemetry to a third-party SaaS backend IS internet egress,
+     which is the point of putting the two scales side by side.
+
+     TIME: a DERIVED floor, not a measurement, and shown with its own
+     arithmetic so a reader can check it. Light in single-mode fibre
+     ~200,000 km/s (c divided by a refractive index of about 1.47).
+     Dublin→N. Virginia ≈ 5,500 km great-circle; round trip 11,000 km;
+     11,000 / 200,000 = 55 ms. Real paths exceed great-circle and real
+     networks add switching, queueing and TLS, so measured RTT is higher.
+     Never present this as an observed figure.                            */ -}}
+
+<figure class="obs-fig stx" aria-label="The cost of regional telemetry isolation in two currencies. Money: published 2026 egress rates per gigabyte, where Google Cloud Premium Tier is 12 cents, AWS 9 cents, Azure 8.7 cents, cross-region transfer about 2 cents, and Cloudflare R2 zero. Time: a derived latency floor of about 55 milliseconds round trip between Dublin and northern Virginia, calculated from the speed of light in fibre over the great-circle distance, which no vendor can negotiate down.">
+  <style>
+    .stx .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .stx .g{display:grid;grid-template-columns:1fr 1fr;gap:1.4rem;}
+    @media(max-width:700px){.stx .g{grid-template-columns:1fr;}}
+    .stx .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:3px;}
+    .stx .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1rem;}
+    .stx .row{display:grid;grid-template-columns:1fr 58px;gap:.6rem;align-items:center;margin-bottom:.45rem;}
+    .stx .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);}
+    .stx .tr{height:15px;grid-column:1/-1;}
+    .stx .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;background:var(--mc-ramp-3);}
+    .stx .bar.em{border-width:3.5px;background:var(--mc-ramp-1);}
+    .stx .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
+    .stx .calc{font-size:.8rem;line-height:2;color:var(--mc-ink-secondary);border-left:2px solid var(--mc-ramp-2);padding-left:.8rem;}
+    .stx .calc b{color:var(--mc-ink);}
+    .stx .big{font-size:2rem;font-weight:700;line-height:1;color:var(--mc-ramp-1);margin:.5rem 0 .2rem;}
+    .stx .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .stx .foot b{color:var(--mc-ink);}
+    .stx figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="g">
+      <div>
+        <div class="hd">Paid in money</div>
+        <div class="sub">USD per GB &middot; published 2026 entry rates &middot; scale 0&ndash;0.12</div>
+        {{- range slice
+          (dict "l" "GCP Premium Tier &rarr; internet" "v" 0.12  "n" "$0.12"  "em" true)
+          (dict "l" "AWS &rarr; internet"              "v" 0.09  "n" "$0.09"  "em" true)
+          (dict "l" "Azure &rarr; internet"            "v" 0.087 "n" "$0.087" "em" true)
+          (dict "l" "cross-region, same cloud"         "v" 0.02  "n" "$0.02"  "em" false)
+          (dict "l" "Cloudflare R2 &rarr; internet"    "v" 0.0   "n" "$0.00"  "em" false) }}
+        <div class="row"><span class="lb">{{ .l | safeHTML }}</span><span class="vl">{{ .n }}</span>
+          <span class="tr"><span class="bar{{ if .em }} em{{ end }}" style="width:{{ div (mul .v 100.0) 0.12 }}%"></span></span>
+        </div>
+        {{- end }}
+        <div class="sub" style="margin:.8rem 0 0">Heavy outline = what shipping telemetry to a third-party backend actually costs. That is internet egress, not cross-region.</div>
+      </div>
+      <div>
+        <div class="hd">Paid in milliseconds</div>
+        <div class="sub">Dublin &harr; N. Virginia &middot; derived floor, not a measurement</div>
+        <div class="calc">
+          light in fibre &nbsp;<b>&asymp; 200,000 km/s</b><br>
+          great-circle &nbsp;<b>&asymp; 5,500 km</b><br>
+          round trip &nbsp;<b>= 11,000 km</b><br>
+          11,000 &divide; 200,000 &nbsp;<b>= 55 ms</b>
+        </div>
+        <div class="big">55 ms</div>
+        <div class="sub">before switching, queueing, routing or TLS &mdash; and before the path exceeds great-circle, which it always does</div>
+      </div>
+    </div>
+    <div class="foot">The money is negotiable and the milliseconds are not. <b>For telemetry export &mdash; asynchronous, batched, off the request path &mdash; 55 ms matters far less than teams fear.</b> For a query that fans out to three regional backends and waits for all three, it matters a great deal.</div>
+  </div>
+  <figcaption>Fig. &mdash; You can move a datacentre. You cannot renegotiate the refractive index of glass.</figcaption>
+</figure>

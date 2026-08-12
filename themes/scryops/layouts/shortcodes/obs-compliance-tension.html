@@ -1,0 +1,39 @@
+{{- /* layouts/shortcodes/obs-compliance-tension.html
+     The contradiction at the top of the compliance guide, stated as two
+     opposing columns and one resolution. Not a data encoding — no
+     quantity is represented — but it keeps the figure vocabulary so it
+     does not read as a pull quote.                                       */ -}}
+
+<figure class="obs-fig ctn" aria-label="Two opposing pressures on a telemetry pipeline. Debugging pushes toward keeping more data for longer at higher cardinality. Compliance pushes toward collecting less, keeping it briefly, and deleting on request. The resolution is that diagnostic value lives in structure while compliance risk lives in identity, and the two can be separated at ingest.">
+  <style>
+    .ctn .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .ctn .g{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    @media(max-width:640px){.ctn .g{grid-template-columns:1fr;}}
+    .ctn .col{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--mc-ramp-2);padding:1rem .9rem;}
+    .ctn .col.b{border-top-color:var(--mc-ramp-1);}
+    .ctn .h{font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted);margin-bottom:.7rem;}
+    .ctn ul{margin:0;padding-left:1.05rem;}
+    .ctn li{font-size:.84rem;line-height:1.65;color:var(--mc-ink-secondary);}
+    .ctn .res{margin-top:.7rem;background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--mc-ramp-1);padding:1rem .9rem;font-size:.84rem;line-height:1.6;color:var(--mc-ink-secondary);}
+    .ctn .res b{color:var(--mc-ink);}
+    .ctn figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="g">
+      <div class="col"><div class="h">debugging wants</div><ul>
+        <li>more attributes per span</li>
+        <li>longer retention windows</li>
+        <li>high cardinality, unsampled</li>
+        <li>one place to query it all</li>
+      </ul></div>
+      <div class="col b"><div class="h">compliance wants</div><ul>
+        <li>the minimum necessary</li>
+        <li>no longer than necessary</li>
+        <li>deletable on request, in 30 days</li>
+        <li>inside the right jurisdiction</li>
+      </ul></div>
+    </div>
+    <div class="res">Both are right, and they act on <b>different parts of the same span</b>. Diagnostic value lives in structure &mdash; which service called which, how long it took, what failed. Compliance risk lives in identity. Separate them at ingest and nothing downstream has to choose.</div>
+  </div>
+  <figcaption>Fig. &mdash; The argument is not data versus privacy. It is structure versus identity.</figcaption>
+</figure>

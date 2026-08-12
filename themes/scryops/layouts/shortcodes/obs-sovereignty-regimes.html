@@ -1,0 +1,47 @@
+{{- /* layouts/shortcodes/obs-sovereignty-regimes.html
+     Residency regimes grouped by SHAPE rather than by severity, because
+     the shape is what changes your architecture. A transfer restriction
+     lets data leave under a mechanism; a storage restriction does not let
+     it leave at all. Rail weight ranks how hard the constraint binds.    */ -}}
+
+{{- $rows := slice
+  (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2 "n" "China &middot; PIPL"
+        "k" "STORAGE" "d" "Certain personal data must be held domestically. Export is a <b>separate approval</b> on top, not an alternative to it.")
+  (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2 "n" "Russia &middot; 242-FZ"
+        "k" "STORAGE" "d" "Personal data of citizens must be recorded and stored in databases <b>located in-country</b>.")
+  (dict "rail" "2.5px" "step" "var(--mc-ramp-2)" "rank" 1 "n" "EU / EEA &middot; GDPR Ch. V"
+        "k" "TRANSFER" "d" "Data may leave, but only under an adequacy decision, SCCs, or another Art. 46 mechanism &mdash; each of which can be withdrawn.")
+  (dict "rail" "2px"   "step" "var(--mc-ramp-2)" "rank" 1 "n" "Germany &middot; BSI"
+        "k" "SECTOR" "d" "Additional handling requirements for critical infrastructure operators, layered <b>on top of</b> GDPR rather than instead of it.")
+  (dict "rail" "1.5px" "step" "var(--mc-ramp-3)" "rank" 0 "n" "Public-sector procurement"
+        "k" "CONTRACT" "d" "Residency imposed by contract rather than statute. Legally weaker, <b>operationally identical</b> &mdash; and it still fails the bid.")
+-}}
+
+<figure class="obs-fig svr" aria-label="Data residency regimes grouped by the shape of the constraint rather than by severity. China's PIPL and Russia's localisation law are storage restrictions: data must be held domestically and export is a separate approval. The GDPR is a transfer restriction: data may leave under an approved mechanism. Germany's BSI rules add sector requirements on top of GDPR. Public-sector procurement imposes residency by contract, which is legally weaker but operationally identical.">
+  <style>
+    .svr .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .svr .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .svr .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 176px 96px 1fr;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
+    @media(max-width:760px){.svr .lane{grid-template-columns:24px 1fr;}}
+    .svr .n{font-size:.85rem;color:var(--mc-ink);line-height:1.5;}
+    .svr .k{font-family:var(--font-pixel);font-size:.65rem;letter-spacing:.04em;color:var(--mc-ink);border:1px solid;padding:.4rem .35rem;text-align:center;}
+    .svr .d{font-size:.83rem;color:var(--mc-ink-secondary);line-height:1.55;}
+    .svr .d b{color:var(--mc-ink);}
+    .svr .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .svr .foot b{color:var(--mc-ink);}
+    .svr figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hdr">RESIDENCY REGIMES, BY SHAPE OF CONSTRAINT</div>
+    {{- range $rows }}
+    <div class="lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+      <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+      <div class="n">{{ .n | safeHTML }}</div>
+      <div class="k" style="border-color:{{ .step | safeCSS }}">{{ .k }}</div>
+      <div class="d">{{ .d | safeHTML }}</div>
+    </div>
+    {{- end }}
+    <div class="foot"><b>Storage restrictions and transfer restrictions are different architectures, not different strictnesses.</b> A transfer regime can be satisfied by a mechanism and a contract. A storage regime can only be satisfied by a server in the right country.</div>
+  </div>
+  <figcaption>Fig. &mdash; Ask which shape applies before asking how strict it is.</figcaption>
+</figure>

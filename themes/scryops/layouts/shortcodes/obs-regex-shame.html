@@ -1,0 +1,75 @@
+{{- /* layouts/shortcodes/obs-regex-shame.html
+     Four regexes. The first two took real services down and both
+     companies published the post-mortem themselves. The second two are in
+     this how-to's own detector and are included deliberately — a figure
+     that only indicts other people's code is a worse figure.
+
+     SOURCES
+       Cloudflare, 2 Jul 2019 — a regex containing .*.*=.* in a WAF rule
+         caused catastrophic backtracking, CPU exhaustion across the
+         global network, and roughly 27 minutes of failed traffic.
+         Published post-mortem.
+       Stack Overflow, 20 Jul 2016 — a trim regex met a post with ~20,000
+         consecutive whitespace characters; backtracking took the site
+         down for about 34 minutes. Published post-mortem.
+       [A-Z|a-z] — already flagged in this guide's own code comment.
+       The IP pattern is this guide's, unmodified.
+
+     Rail weight ranks blast radius, not embarrassment.                   */ -}}
+
+{{- $rows := slice
+  (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2
+        "who" "Cloudflare &middot; 2 Jul 2019" "src" "published post-mortem"
+        "rx" ".*.*=.*"
+        "d" "Catastrophic backtracking in a WAF rule. CPU exhaustion across the <b>global</b> network; roughly 27 minutes of failed traffic."
+        "tag" "GLOBAL")
+  (dict "rail" "3px"   "step" "var(--mc-ramp-1)" "rank" 2
+        "who" "Stack Overflow &middot; 20 Jul 2016" "src" "published post-mortem"
+        "rx" "^[\\s\\u200c]+|[\\s\\u200c]+$"
+        "d" "A trim regex met a post with about <b>20,000 consecutive whitespace characters</b>. The site was down for around 34 minutes."
+        "tag" "34 MIN")
+  (dict "rail" "2px"   "step" "var(--mc-ramp-2)" "rank" 1
+        "who" "this guide, earlier draft" "src" "fixed in the code above"
+        "rx" "[A-Z|a-z]"
+        "d" "Inside a character class the pipe is a <b>literal character</b>, not alternation. This matched letters and also the <code>|</code> symbol."
+        "tag" "SILENT")
+  (dict "rail" "1.5px" "step" "var(--mc-ramp-3)" "rank" 0
+        "who" "this guide, still shipping" "src" "the IP detector above"
+        "rx" "\\b(?:[0-9]{1,3}\\.){3}[0-9]{1,3}\\b"
+        "d" "Matches <code>999.999.999.999</code>, and matches the version string <code>1.2.3.4</code> in your own log lines. <b>Over-matching is the safe failure</b> here &mdash; but know that it does."
+        "tag" "NOISY")
+-}}
+
+<figure class="obs-fig rxs" aria-label="Four regular expressions and what they did. Cloudflare's 2019 outage came from catastrophic backtracking in a WAF rule containing dot-star dot-star equals dot-star, exhausting CPU across their global network for about 27 minutes. Stack Overflow's 2016 outage came from a trim regex meeting a post with twenty thousand consecutive whitespace characters, taking the site down for 34 minutes. Two patterns from this guide's own detector are also listed: a character class where a pipe was a literal rather than alternation, and an IP address pattern that also matches version strings and impossible addresses.">
+  <style>
+    .rxs .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .rxs .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
+    .rxs .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 168px 1fr 78px;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
+    @media(max-width:760px){.rxs .lane{grid-template-columns:24px 1fr;}}
+    .rxs .lane svg.obs-g{width:13px;height:13px;display:block;}
+    .rxs .who{font-size:.83rem;color:var(--mc-ink);line-height:1.5;}
+    .rxs .who small{display:block;font-size:.7rem;color:var(--mc-ink-muted);margin-top:.2rem;}
+    .rxs .rx{display:block;font-size:.78rem;color:var(--code-text);background:var(--code-bg);border:1px solid var(--code-bd);border-radius:3px;padding:.3rem .45rem;margin-bottom:.4rem;word-break:break-all;}
+    .rxs .d{font-size:.82rem;color:var(--mc-ink-secondary);line-height:1.55;}
+    .rxs .d b{color:var(--mc-ink);}
+    .rxs .d code{font-size:.76rem;}
+    .rxs .tag{justify-self:end;font-family:var(--font-pixel);font-size:.65rem;letter-spacing:.04em;color:var(--mc-ink);border:1px solid;padding:.4rem .35rem;text-align:center;}
+    @media(max-width:760px){.rxs .tag{justify-self:start;grid-column:2;}}
+    .rxs .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .rxs .foot b{color:var(--mc-ink);}
+    .rxs figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hdr">REGEX HALL OF SHAME &nbsp;&middot;&nbsp; TWO OF THESE ARE OURS</div>
+    {{- range $rows }}
+    <div class="lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
+      <span>{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
+      <div class="who">{{ .who | safeHTML }}<small>{{ .src }}</small></div>
+      <div><code class="rx">{{ .rx }}</code><span class="d">{{ .d | safeHTML }}</span></div>
+      <div class="tag" style="border-color:{{ .step | safeCSS }}">{{ .tag }}</div>
+    </div>
+    {{- end }}
+    <div class="foot">Rail weight ranks blast radius. The lesson is not &ldquo;avoid regex&rdquo; &mdash; it is that a PII detector runs on <b>every log line in production</b>, which is the worst possible place to discover a pathological input. Bound your quantifiers, set a match timeout, and fuzz the detector before you trust it.</div>
+  </div>
+  <figcaption>Fig. &mdash; The pattern was fine in the test file. The test file was 40 characters long.</figcaption>
+</figure>

@@ -1,0 +1,68 @@
+{{- /* layouts/shortcodes/obs-transfer-timeline.html
+     The marquee figure of the sovereignty guide, and the one with the
+     strongest claim in the whole series: two EU-US transfer frameworks
+     have already been struck down, and the third is under appeal.
+
+     Everything here is a dated primary event. Verified Aug 2026:
+       Safe Harbour     2000-07-26 → invalidated 2015-10-06, C-362/14 (Schrems I)
+       Privacy Shield   2016-07-12 → annulled     2020-07-16, C-311/18 (Schrems II)
+       DPF              2023-07-10 → IN FORCE. Latombe T-553/23 dismissed
+                        2025-09-03; appealed C-703/25 P on 2025-10-31, pending.
+       Pressure         PCLOB lost quorum Jan 2025; Trump v. Slaughter
+                        (No. 25-332) decided 2026-06-29, 6-3, holding removal
+                        protections for FTC Commissioners unconstitutional;
+                        EDPB Chair wrote to the Commission 2026-07-31.
+
+     The DPF row is DASHED — dash = conditionality, per the diagram-frame
+     template. It is not drawn as dead, because it is not dead.
+     UPDATE THIS FIGURE when C-703/25 P is decided.                       */ -}}
+
+{{- $t0 := 2000.0 -}}{{- $t1 := 2027.0 -}}
+{{- $rows := slice
+  (dict "n" "Safe Harbour" "s" 2000.6 "e" 2015.8 "rank" 2 "step" "var(--mc-ramp-1)"
+        "k" "STRUCK DOWN" "d" "Invalidated by the CJEU in <i>Schrems I</i>, C-362/14, 6 Oct 2015." "dash" "")
+  (dict "n" "Privacy Shield" "s" 2016.5 "e" 2020.5 "rank" 2 "step" "var(--mc-ramp-1)"
+        "k" "STRUCK DOWN" "d" "Annulled by the CJEU in <i>Schrems II</i>, C-311/18, 16 Jul 2020." "dash" "")
+  (dict "n" "Data Privacy Framework" "s" 2023.5 "e" 2027.0 "rank" 1 "step" "var(--mc-ramp-2)"
+        "k" "IN FORCE" "d" "Decision (EU) 2023/1795. Latombe challenge dismissed Sept 2025; <b>appeal C-703/25&nbsp;P pending</b>." "dash" "5 4")
+-}}
+
+<figure class="obs-fig txt" aria-label="A timeline of the three EU-US personal data transfer frameworks. Safe Harbour ran from 2000 until the Court of Justice invalidated it in Schrems One in October 2015. Privacy Shield ran from 2016 until the same court annulled it in Schrems Two in July 2020. The Data Privacy Framework has been in force since July 2023 and is drawn with a dashed edge because its status is conditional: a challenge was dismissed in September 2025 and the appeal is pending. Two frameworks have been struck down; the third has not been tested to conclusion.">
+  <style>
+    .txt .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
+    .txt .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
+    .txt .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .txt .n svg.obs-g{width:13px;height:13px;display:block;flex:none;}
+    .txt .row{margin-bottom:1rem;}
+    .txt .rt{display:flex;justify-content:space-between;align-items:baseline;gap:.7rem;margin-bottom:.3rem;flex-wrap:wrap;}
+    .txt .n{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);display:flex;align-items:center;gap:.5rem;}
+    .txt .k{font-family:var(--font-pixel);font-size:.65rem;letter-spacing:.04em;color:var(--mc-ink);}
+    .txt .track{position:relative;height:20px;background:linear-gradient(to right,var(--border),var(--border)) no-repeat center/100% 1px;}
+    .txt .span{position:absolute;top:0;height:20px;box-sizing:border-box;border:1px solid var(--mc-ink);}
+    .txt .d{font-size:.82rem;color:var(--mc-ink-muted);line-height:1.55;margin-top:.3rem;}
+    .txt .d b{color:var(--mc-ink);}
+    .txt .axis{display:flex;justify-content:space-between;font-size:11px;color:var(--mc-ink-muted);border-top:1px solid var(--border);padding-top:.4rem;margin-top:.2rem;}
+    .txt .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .txt .foot b{color:var(--mc-ink);}
+    .txt figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+  </style>
+  <div class="w">
+    <div class="hd">EU&ndash;US transfer frameworks, 2000&ndash;2026</div>
+    <div class="sub">solid edge = decided &middot; dashed edge = in force but under challenge</div>
+    {{- range $rows }}
+    <div class="row">
+      <div class="rt">
+        <span class="n">{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}{{ .n }}</span>
+        <span class="k">{{ .k }}</span>
+      </div>
+      <div class="track">
+        <span class="span" style="left:{{ div (mul (sub .s $t0) 100.0) (sub $t1 $t0) }}%;width:{{ div (mul (sub .e .s) 100.0) (sub $t1 $t0) }}%;background:{{ .step | safeCSS }};{{ if .dash }}border-style:dashed;border-width:2px;background:none;{{ end }}"></span>
+      </div>
+      <div class="d">{{ .d | safeHTML }}</div>
+    </div>
+    {{- end }}
+    <div class="axis"><span>2000</span><span>2010</span><span>2020</span><span>2026</span></div>
+    <div class="foot">Neither annulment came with a grace period. <b>The engineering conclusion is not to panic &mdash; it is to avoid making the transfer mechanism load-bearing.</b> Telemetry stripped of personal data has no transfer question to answer, whichever way the appeal goes.</div>
+  </div>
+  <figcaption>Fig. &mdash; Two struck down, one pending. Design for the pattern, not the current answer.</figcaption>
+</figure>
