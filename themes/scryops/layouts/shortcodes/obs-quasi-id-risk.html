@@ -40,12 +40,18 @@
     .qir .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
     .qir .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
     .qir .plot{position:relative;}
-    .qir .thr{position:absolute;top:0;bottom:18px;left:60%;border-left:2px dashed var(--mc-ramp-1);}
-    .qir .lb svg.obs-g{width:13px;height:13px;display:block;flex:none;}
-    .qir .thrl{position:absolute;bottom:0;left:calc(60% + 8px);font-size:12px;color:var(--mc-ink);white-space:nowrap;}
+    /* The rule draws at 60% of the TRACK, as a background on the bar's own
+       container — not at 60% of the row. Positioned against the row it landed
+       left of the real 0.6, and the 0.46 bar appeared to cross a threshold it
+       does not cross. */
+    .qir .tr{background:linear-gradient(to right,transparent calc(60% - 1px),var(--mc-ramp-1) calc(60% - 1px),var(--mc-ramp-1) calc(60% + 1px),transparent calc(60% + 1px));}
+    .qir .thrl{font-family:var(--font-code);font-size:var(--mc-text-tick,12px);color:var(--mc-ink);white-space:nowrap;padding-left:60%;margin-left:-4px;}
+    .qir .thrrow{display:grid;grid-template-columns:236px minmax(0,1fr) 46px;gap:.7rem;margin-top:.15rem;}
+    @media(max-width:640px){.qir .thrrow{grid-template-columns:1fr;}.qir .thrl{padding-left:0;margin-left:0;}}
     .qir .row{display:grid;grid-template-columns:236px minmax(0,1fr) 46px;gap:.7rem;align-items:center;margin-bottom:.5rem;}
     @media(max-width:640px){.qir .row{grid-template-columns:1fr;gap:.15rem;}.qir .thr,.qir .thrl{display:none;}}
     .qir .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink-secondary);display:flex;align-items:center;gap:.5rem;}
+    .qir .lb svg.obs-g{width:13px;height:13px;display:block;flex:none;}
     .qir .lb.o{color:var(--mc-ink);font-weight:600;}
     .qir .tr{height:16px;}
     .qir .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;background:var(--mc-ramp-3);}
@@ -56,6 +62,7 @@
     .qir .foot b{color:var(--mc-ink);}
     .qir .src{margin-top:.9rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
     .qir figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+    .qir code{font-size:max(11px,.85em);}
   </style>
   <div class="w">
     <div class="hd">What the analyzer above actually returns</div>
@@ -63,14 +70,14 @@
     <div class="plot">
       {{- range $rows }}
       <div class="row">
-        <span class="lb{{ if .over }} o{{ end }}">{{ partial "obs-glyph.html" (dict "rank" (cond .over 2 0) "fill" (cond .over "var(--mc-ramp-1)" "var(--mc-ramp-3)")) }}{{ .l }}</span>
+        {{- $rank := 0 }}{{ $fill := "var(--mc-ramp-3)" }}{{ if .over }}{{ $rank = 2 }}{{ $fill = "var(--mc-ramp-1)" }}{{ end }}
+        <span class="lb{{ if .over }} o{{ end }}">{{ partial "obs-glyph.html" (dict "rank" $rank "fill" $fill) }}{{ .l }}</span>
         <span class="tr"><span class="bar{{ if .over }} o{{ end }}" style="width:{{ mul .v 100.0 }}%"></span></span>
         <span class="vl">{{ .n }}</span>
       </div>
       {{- end }}
       <div class="pad"></div>
-      <span class="thr"></span>
-      <span class="thrl">0.6 &mdash; ShouldProtectCombination() returns true &rarr;</span>
+      <div class="thrrow"><span></span><span class="thrl">&uarr; 0.6 &mdash; ShouldProtectCombination() returns true</span></div>
     </div>
     <div class="foot">* three fields compute to <b>1.52</b> and are clamped to 1.0 by <code>Math.Min</code>. The shape worth noticing: <b>no single field crosses the threshold and most pairs do</b>, so in practice this is a &ldquo;two or more quasi-identifiers&rdquo; rule with arithmetic attached. That is a defensible rule &mdash; just state it as one, and calibrate the scores to your own data before anyone treats the output as a compliance decision.</div>
     <div class="src">GROUNDING: SWEENEY 2002 FOUND ZIP + DOB + SEX UNIQUELY IDENTIFIED 87% OF THE 1990 US POPULATION &nbsp;&middot;&nbsp; GOLLE 2006 RECOMPUTED AGAINST 2000 CENSUS DATA AND GOT 63%</div>

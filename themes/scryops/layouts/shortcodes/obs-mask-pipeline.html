@@ -9,7 +9,16 @@
      rather than a report.
 
      Orthogonal connectors, each owning its own elbow. The return edge is
-     dashed because it is conditional, per the diagram-frame template.    */ -}}
+     dashed because it is conditional, per the diagram-frame template.
+
+     Layout, learned the hard way. The techniques box sat at x 308–548 and
+     the fail-return riser ran down x=509 straight through it, while the
+     box's own second line ran past its right border. The box now sits at
+     x 140–408 and the riser at x=414 — still inside the transform box's
+     span (308–420) so it lands where it should, and clear of everything
+     else. When moving any node here, check BOTH that no connector crosses
+     a container and that every label fits its box: SVG text does not wrap.
+     Roughly 6.6px per character at 11px mono.                            */ -}}
 
 <figure class="diagram mpl" aria-label="A telemetry masking pipeline. Raw telemetry reaches a decision: records needing no masking pass straight through to export, while the rest go to transformation. Transformation applies one of four techniques per field — hash, tokenise, truncate, or aggregate — chosen by field type rather than applied in sequence. Transformed records then meet a quality gate; those that pass are exported, and those that fail return to transformation for adjustment rather than being shipped partially masked.">
   <style>
@@ -48,10 +57,10 @@
       <text class="t" x="364" y="158" text-anchor="middle">transform</text>
       <text class="c" x="364" y="174" text-anchor="middle">one per field</text>
 
-      <rect x="308" y="204" width="240" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="1.5" rx="3"/>
-      <text class="c" x="320" y="226">hash &middot; tokenise</text>
-      <text class="c" x="320" y="242">truncate &middot; aggregate</text>
-      <path d="M364 184 V196" stroke="var(--mc-ramp-2)" stroke-width="1.5" fill="none"/>
+      <rect x="140" y="204" width="268" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="1.5" rx="3"/>
+      <text class="c" x="152" y="226">hash &middot; tokenise</text>
+      <text class="c" x="152" y="242">truncate &middot; aggregate</text>
+      <path d="M364 184 V204" stroke="var(--mc-ramp-2)" stroke-width="1.5" fill="none"/>
 
       <path d="M420 162 H448" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#mpl-b)"/>
 
@@ -64,7 +73,7 @@
       <rect x="616" y="16" width="64" height="36" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
       <text class="t" x="648" y="39" text-anchor="middle">export</text>
 
-      <path d="M509 184 V272 H364 V192" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" fill="none" marker-end="url(#mpl-b)"/>
+      <path d="M509 184 V272 H414 V192" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" fill="none" marker-end="url(#mpl-b)"/>
       <text class="c" x="518" y="196">fail</text>
       <text class="k" x="0" y="290">dashed return = the failed record goes back to transform, never forward. a gate, not a report.</text>
     </svg>

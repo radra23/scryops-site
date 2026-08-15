@@ -14,7 +14,7 @@
      12.5px rather than the 11.5/11px an unpadded 1:1 mapping would allow,
      to keep the rendered floor at ~11px+.                                */ -}}
 
-<figure class="diagram pii-paths">
+<figure class="diagram pii-paths" aria-label="Three mechanisms carry personal data into a trace backend. Span attributes and correlated log records travel there directly, drawn with hairline borders. Baggage propagation, drawn with the heaviest border, travels first into every downstream service's own spans and only then to the backend.">
   <style>
     .pii-paths .diag-card{padding:1rem;overflow:hidden;}
     .pii-paths svg{width:100%;height:auto;display:block;font-family:var(--font-code);}

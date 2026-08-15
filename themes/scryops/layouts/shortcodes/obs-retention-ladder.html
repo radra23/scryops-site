@@ -1,58 +1,71 @@
-{{- /* layouts/shortcodes/obs-retention-ladder.html · TEMPLATE 03b
-     Retention mandates against the GDPR erasure deadline. The scale is
-     LINEAR and starts at zero on purpose: a log scale would flatter the
-     one-month deadline into looking comparable to a six-year mandate,
-     and the whole point of the figure is that it is not.
+{{- /* layouts/shortcodes/obs-retention-ladder.html · TEMPLATE 01, value ramp
+     Retention mandates against the GDPR erasure deadline.
+
+     Template 01 as written: bars ranked descending, ramp stepping down by
+     POSITION, a 1px outline on every bar, the value printed in mono, and a
+     zero-anchored axis. Emphasis moves three non-chromatic channels together
+     (outline 1px -> 3.5px, label ink secondary -> full, weight 400 -> 600)
+     and lands on GDPR, which is the only ceiling in a list of floors.
+
+     Two earlier mistakes, recorded so they do not come back. Severity glyphs
+     were on every row: the disc/triangle/square set is the Callout severity
+     vocabulary, and a retention duration is not a severity. And the one-month
+     deadline was a floating dashed rule at 1.19% of the axis, which put it on
+     top of the bars' own origin; it is a duration in months like the others,
+     so it is a bar in the same ranked set.
+
+     Scale is linear and starts at zero. A log axis would flatter one month
+     into looking comparable to eighty-four, which is the opposite of the point.
 
      SOURCES
-       PCI DSS Req. 10.7 — 12 months total, 3 months immediately available
-       HIPAA 45 CFR §164.316(b)(2)(i) — 6 years documentation retention
-       SOX — 7 years for covered financial records
-       GDPR Art. 12(3) — one month to respond to an Art. 17 erasure request
-       GDPR Art. 5(1)(e) — storage limitation: a CEILING, not a floor      */ -}}
+       SOX                    — 7 years, covered financial records
+       HIPAA 45 CFR 164.316   — 6 years documentation retention
+       PCI DSS Req. 10.7      — 12 months total, 3 immediately available
+       GDPR Art. 12(3)        — one month to answer an Art. 17 erasure request
+       GDPR Art. 5(1)(e)      — storage limitation: a CEILING, not a floor    */ -}}
 
 {{- $max := 84.0 -}}
 {{- $rows := slice
-  (dict "l" "SOX, financial records"      "m" 84 "n" "7 years"   "step" "var(--mc-ramp-1)" "rank" 2)
-  (dict "l" "HIPAA documentation"         "m" 72 "n" "6 years"   "step" "var(--mc-ramp-1)" "rank" 2)
-  (dict "l" "PCI DSS 10.7, total"         "m" 12 "n" "12 months" "step" "var(--mc-ramp-2)" "rank" 1)
-  (dict "l" "PCI DSS 10.7, hot"           "m"  3 "n" "3 months"  "step" "var(--mc-ramp-3)" "rank" 0)
+  (dict "l" "SOX, financial records"              "m" 84 "n" "84 mo" "step" "var(--mc-ramp-1)" "em" false)
+  (dict "l" "HIPAA documentation"                 "m" 72 "n" "72 mo" "step" "var(--mc-ramp-2)" "em" false)
+  (dict "l" "PCI DSS 10.7, total"                 "m" 12 "n" "12 mo" "step" "var(--mc-ramp-3)" "em" false)
+  (dict "l" "PCI DSS 10.7, immediately available" "m"  3 "n" "3 mo"  "step" "var(--mc-ramp-4)" "em" false)
+  (dict "l" "GDPR erasure deadline"               "m"  1 "n" "1 mo"  "step" "var(--mc-ramp-1)" "em" true)
 -}}
 
-<figure class="obs-fig rl" aria-label="Retention mandates measured in months against the GDPR erasure deadline. SOX requires 84 months, HIPAA 72, PCI DSS 12 with the most recent 3 immediately available. The GDPR deadline for responding to an erasure request is one month, drawn as a dashed reference rule near the zero end of the axis. Every mandate is far longer than the deadline, which is the tension the figure exists to show.">
+<figure class="obs-fig rl" aria-label="Retention mandates measured in months, ranked descending on a linear axis starting at zero. SOX requires 84 months, HIPAA 72, PCI DSS 12 with the most recent 3 immediately available. The GDPR erasure deadline is one month and carries the emphasis treatment because it is the only ceiling in a list of floors; at this scale it renders as a sliver, which is the comparison the figure exists to make.">
   <style>
     .rl .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);background-image:var(--fig-grid);background-size:26px 26px;}
     .rl .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
-    .rl .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
-    .rl .lb svg.obs-g{width:13px;height:13px;display:block;flex:none;}
-    .rl .row{display:grid;grid-template-columns:186px minmax(0,1fr) 76px;gap:.7rem;align-items:center;margin-bottom:.55rem;}
-    @media(max-width:640px){.rl .row{grid-template-columns:1fr;gap:.2rem;}}
-    .rl .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);display:flex;align-items:center;gap:.5rem;}
-    .rl .tr{position:relative;height:17px;}
-    .rl .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;}
-    .rl .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
-    .rl .rule{position:relative;height:34px;margin-top:.2rem;}
-    .rl .rline{position:absolute;top:0;bottom:14px;border-left:2px dashed var(--mc-ramp-1);}
-    .rl .rlab{position:absolute;bottom:0;font-size:12px;color:var(--mc-ink);white-space:nowrap;}
-    .rl .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
+    .rl .sub{font-size:var(--mc-text-tick,12px);color:var(--mc-ink-muted);margin-bottom:1.3rem;}
+    .rl .row{display:grid;grid-template-columns:196px minmax(0,1fr) 84px;gap:.75rem;align-items:center;margin-bottom:.6rem;}
+    @media(max-width:640px){.rl .row{grid-template-columns:1fr 84px;}.rl .row .tr{grid-column:1/-1;}}
+    .rl .lb{font-family:var(--font-read);font-size:var(--mc-text-label,14px);line-height:1.35;color:var(--mc-ink-secondary);}
+    .rl .lb.em{color:var(--mc-ink);font-weight:600;}
+    .rl .tr{height:18px;}
+    /* min-width keeps the 1-month bar renderable: below ~7px a 3.5px outline
+       has no interior left and the bar disappears into its own border. */
+    .rl .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;min-width:7px;}
+    .rl .bar.em{border-width:3.5px;}
+    .rl .vl{font-size:var(--mc-text-value,12px);color:var(--mc-ink-secondary);text-align:right;}
+    .rl .vl.em{color:var(--mc-ink);font-weight:600;}
+    .rl .axis{display:flex;justify-content:space-between;font-size:var(--mc-text-tick,12px);color:var(--mc-ink-muted);border-top:1px solid var(--border);margin-top:.9rem;padding-top:.4rem;}
+    .rl .foot{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.84rem;line-height:1.6;color:var(--mc-ink-muted);}
     .rl .foot b{color:var(--mc-ink);}
     .rl figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
   <div class="w">
     <div class="hd">Retention mandates vs the erasure deadline</div>
-    <div class="sub">months &middot; linear scale from zero &middot; longest mandate = 84</div>
+    <div class="sub">months &middot; linear, axis starts at zero &middot; ramp steps down by rank &middot; heavy outline = the odd one out</div>
     {{- range $rows }}
     <div class="row">
-      <span class="lb">{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}{{ .l }}</span>
-      <span class="tr"><span class="bar" style="width:{{ div (mul .m 100.0) $max }}%;background:{{ .step | safeCSS }}"></span></span>
-      <span class="vl">{{ .n }}</span>
+      <span class="lb{{ if .em }} em{{ end }}">{{ .l }}</span>
+      <span class="tr"><span class="bar{{ if .em }} em{{ end }}" style="width:{{ div (mul .m 100.0) $max }}%;background:{{ .step | safeCSS }}"></span></span>
+      <span class="vl{{ if .em }} em{{ end }}">{{ .n }}</span>
     </div>
     {{- end }}
-    <div class="rule">
-      <span class="rline" style="left:{{ div (mul 1.0 100.0) $max }}%"></span>
-      <span class="rlab" style="left:calc({{ div (mul 1.0 100.0) $max }}% + 8px)">&larr; GDPR Art. 12(3): one month to erase</span>
-    </div>
-    <div class="foot">GDPR sets no retention floor at all &mdash; Art. 5(1)(e) sets a <b>ceiling</b>. A single policy cannot satisfy a six-year mandate and a minimisation ceiling at once, <b>unless the six-year data carries no personal data</b>. That is the whole trick.</div>
+    <div class="axis"><span>0</span><span>21</span><span>42</span><span>63</span><span>84 mo</span></div>
+    <div class="foot">GDPR is the emphasised bar because it is the only one that is not a floor &mdash; Art. 5(1)(e) sets a <b>ceiling</b> and Art. 12(3) gives you a month to act on it. A single policy cannot satisfy a six-year mandate and a minimisation ceiling at once, <b>unless the six-year data carries no personal data</b>.</div>
   </div>
   <figcaption>Fig. &mdash; Four mandates, one deadline, and a gap you cannot close with a retention setting.</figcaption>
 </figure>

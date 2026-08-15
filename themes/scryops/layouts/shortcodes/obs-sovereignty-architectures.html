@@ -6,7 +6,17 @@
      house rule. Each edge owns its own run and elbow so no two are
      collinear; a shared elbow would let the heavy stroke overpaint the
      light ones and destroy what the weights encode. viewBox is real CSS
-     px at the 680 measure.                                               */ -}}
+     px at the 680 measure.
+
+     Two collisions fixed after a render review. In panel 1 the two feed
+     edges arrived at y 86 and 90 — 4px apart with 9px arrowheads, so the
+     heads overlapped; they now arrive at 76 and 96, both still inside the
+     backend rect (y 60–106). In panel 3 the footer caption at y 366 ran
+     underneath the dashed aggregate box, and the "global tier" note began
+     at x 576 against a box ending at 568. The box moved up to y 328, its
+     labels sit on a 348 baseline inside it, and the caption dropped to 370
+     and lost four words. Re-check both whenever a label changes length —
+     SVG text does not wrap, it just runs on.                             */ -}}
 
 <figure class="diagram sva" aria-label="Three architectures for regional telemetry. One global backend: every region ships to a single store, which is simple and depends entirely on a transfer mechanism. Regional isolation: each region has its own Collector and backend with no cross-region forwarding, which is compliant but splits traces across stores. Regional isolation with an aggregate tier: full telemetry stays regional while a deliberately thin stream of anonymised aggregates flows to a global tier for cross-region visibility.">
   <style>
@@ -30,8 +40,8 @@
       <text class="t" x="46" y="59" text-anchor="middle">EU region</text>
       <rect x="0" y="78" width="92" height="30" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
       <text class="t" x="46" y="97" text-anchor="middle">US region</text>
-      <path d="M92 55 H150 V86 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
-      <path d="M92 93 H168 V90 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <path d="M92 55 H150 V76 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
+      <path d="M92 93 H168 V96 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
       <rect x="204" y="60" width="132" height="46" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
       <text class="t" x="270" y="79" text-anchor="middle">one backend</text>
       <text class="c" x="270" y="95" text-anchor="middle">one jurisdiction</text>
@@ -59,11 +69,11 @@
       <path d="M92 325 H196" stroke="var(--mc-ramp-3)" stroke-width="1.5" fill="none" marker-end="url(#sva-a)"/>
       <rect x="204" y="310" width="132" height="30" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
       <text class="t" x="270" y="329" text-anchor="middle">EU backend</text>
-      <path d="M336 325 H372 V352 H408" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#sva-b)"/>
-      <rect x="416" y="336" width="152" height="32" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
-      <text class="t" x="492" y="356" text-anchor="middle">allowlisted aggregates</text>
-      <text class="c" x="576" y="356">&rarr; global tier</text>
-      <text class="k" x="0" y="366">heavy dashed = the only thing that may cross a border, defined as an allowlist</text>
+      <path d="M336 325 H372 V343 H398" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#sva-b)"/>
+      <rect x="406" y="326" width="180" height="34" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
+      <text class="t" x="496" y="347" text-anchor="middle">allowlisted aggregates</text>
+      <text class="c" x="594" y="347">&rarr; global tier</text>
+      <text class="k" x="0" y="366">heavy dashed = the only thing that may cross a border</text>
     </svg>
   </div>
   <figcaption>Fig. &mdash; The third pattern is the first two admitting they both had a point.</figcaption>

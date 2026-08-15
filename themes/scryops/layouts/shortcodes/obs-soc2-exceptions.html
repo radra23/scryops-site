@@ -9,13 +9,17 @@
      Emphasis moves three non-chromatic channels at once (outline weight,
      label ink, label weight) per the charting rules — never a tint.      */ -}}
 
+{{- /* Template 01 requires the value printed in mono next to every bar. An
+     indexed axis is unreadable without it — "how much is 71" has no answer
+     unless the number is on the page. The ramp also steps down by rank; two
+     values doing duty for six bars is not a value ramp. */ -}}
 {{- $rows := slice
-  (dict "l" "CC6.8 &middot; terminated access not removed in time" "v" 100 "em" true)
-  (dict "l" "CC6.3 &middot; periodic access review skipped a cycle" "v" 88 "em" true)
-  (dict "l" "CC7.2 &middot; monitoring configured, review unevidenced" "v" 71 "em" false)
-  (dict "l" "CC6.1 &middot; over-broad production access" "v" 63 "em" false)
-  (dict "l" "A1.2 &middot; backup restoration never tested" "v" 47 "em" false)
-  (dict "l" "CC9.2 &middot; vendor review not performed" "v" 39 "em" false)
+  (dict "l" "CC6.8 &middot; terminated access not removed in time" "v" 100 "n" "100" "step" "var(--mc-ramp-1)" "em" true)
+  (dict "l" "CC6.3 &middot; periodic access review skipped a cycle" "v" 88 "n" "88" "step" "var(--mc-ramp-1)" "em" true)
+  (dict "l" "CC7.2 &middot; monitoring configured, review unevidenced" "v" 71 "n" "71" "step" "var(--mc-ramp-2)" "em" false)
+  (dict "l" "CC6.1 &middot; over-broad production access" "v" 63 "n" "63" "step" "var(--mc-ramp-2)" "em" false)
+  (dict "l" "A1.2 &middot; backup restoration never tested" "v" 47 "n" "47" "step" "var(--mc-ramp-3)" "em" false)
+  (dict "l" "CC9.2 &middot; vendor review not performed" "v" 39 "n" "39" "step" "var(--mc-ramp-4)" "em" false)
 -}}
 
 <figure class="obs-fig s2x" aria-label="Control families where SOC 2 audit exceptions are most often reported, ranked. Access control dominates: terminated access not removed in time, and periodic access reviews that skipped a cycle, are the two most frequently reported. Below them come monitoring that was configured but whose review left no evidence, over-broad production access, untested backup restoration, and vendor reviews that were not performed. The ranking is practitioner-reported rather than measured, because SOC 2 reports are private.">
@@ -23,24 +27,29 @@
     .s2x .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);background-image:var(--fig-grid);background-size:26px 26px;}
     .s2x .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
     .s2x .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.3rem;}
-    .s2x .row{margin-bottom:.75rem;}
-    .s2x .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink-secondary);margin-bottom:.28rem;}
+    .s2x .row{display:grid;grid-template-columns:minmax(0,1fr) 42px;gap:.75rem;align-items:center;margin-bottom:.75rem;}
+    .s2x .vl{font-size:var(--mc-text-value,12px);color:var(--mc-ink-secondary);text-align:right;}
+    .s2x .vl.em{color:var(--mc-ink);font-weight:600;}
+    .s2x .axis{display:flex;justify-content:space-between;font-size:var(--mc-text-tick,12px);color:var(--mc-ink-muted);border-top:1px solid var(--border);padding-top:.4rem;}
+    .s2x .lb{font-family:var(--font-read);font-size:var(--mc-text-label,14px);color:var(--mc-ink-secondary);margin-bottom:-.2rem;grid-column:1/-1;}
     .s2x .lb.em{color:var(--mc-ink);font-weight:600;}
-    .s2x .bar{height:16px;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;background:var(--mc-ramp-3);}
-    .s2x .bar.em{border-width:3.5px;background:var(--mc-ramp-1);}
+    .s2x .bar{height:17px;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;}
+    .s2x .bar.em{border-width:3.5px;}
     .s2x .foot{margin-top:.9rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
     .s2x .foot b{color:var(--mc-ink);}
     .s2x figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
   <div class="w">
     <div class="hd">Where SOC 2 audits actually fail</div>
-    <div class="sub">relative reporting frequency, indexed to the most-reported &middot; heavy outline = access control</div>
+    <div class="sub">indexed to the most-reported = 100 &middot; axis starts at zero &middot; ramp steps down by rank &middot; heavy outline = access control</div>
     {{- range $rows }}
     <div class="row">
       <div class="lb{{ if .em }} em{{ end }}">{{ .l | safeHTML }}</div>
-      <span class="bar{{ if .em }} em{{ end }}" style="width:{{ .v }}%"></span>
+      <span class="bar{{ if .em }} em{{ end }}" style="width:{{ .v }}%;background:{{ .step | safeCSS }}"></span>
+      <span class="vl{{ if .em }} em{{ end }}">{{ .n }}</span>
     </div>
     {{- end }}
+    <div class="axis"><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div>
     <div class="foot"><b>The criteria are primary; the ranking is not.</b> SOC 2 reports are private, so no public dataset of exception rates exists &mdash; the order reflects practitioner consensus, and the bars are indexed rather than absolute. The pattern it shows is worth the caveat: <b>the failures are administrative, not technical</b>. An auditor cannot test a habit, only an artefact with a date and a name on it.</div>
   </div>
   <figcaption>Fig. &mdash; Nobody fails SOC 2 for lacking telemetry. They fail for not evidencing that anyone read it.</figcaption>

@@ -15,7 +15,13 @@
        [A-Z|a-z] — already flagged in this guide's own code comment.
        The IP pattern is this guide's, unmodified.
 
-     Rail weight ranks blast radius, not embarrassment.                   */ -}}
+     Rail weight ranks blast radius, not embarrassment.
+
+     Escaping. These patterns live in a Hugo dict, and Go templates do NOT
+     process backslash escapes inside a quoted string the way a JS literal
+     does — a doubled \\ renders as two visible characters. Write the pattern
+     exactly as the reader should see it. An earlier draft carried JS-style
+     quadrupled backslashes and printed \\s to the page.                    */ -}}
 
 {{- $rows := slice
   (dict "rail" "4px"   "step" "var(--mc-ramp-1)" "rank" 2
@@ -45,8 +51,8 @@
     .rxs .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .rxs .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .rxs .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 168px 1fr 78px;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
-    @media(max-width:760px){.rxs .lane{grid-template-columns:24px 1fr;}}
     .rxs .lane svg.obs-g{width:13px;height:13px;display:block;}
+    @media(max-width:760px){.rxs .lane{grid-template-columns:24px 1fr;}}
     .rxs .who{font-size:.83rem;color:var(--mc-ink);line-height:1.5;}
     .rxs .who small{display:block;font-size:.7rem;color:var(--mc-ink-muted);margin-top:.2rem;}
     .rxs .rx{display:block;font-size:.78rem;color:var(--code-text);background:var(--code-bg);border:1px solid var(--code-bd);border-radius:3px;padding:.3rem .45rem;margin-bottom:.4rem;word-break:break-all;}
@@ -58,6 +64,7 @@
     .rxs .foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.82rem;line-height:1.6;color:var(--mc-ink-muted);}
     .rxs .foot b{color:var(--mc-ink);}
     .rxs figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
+    .rxs code{font-size:max(11px,.85em);}
   </style>
   <div class="w">
     <div class="hdr">REGEX HALL OF SHAME &nbsp;&middot;&nbsp; TWO OF THESE ARE OURS</div>

@@ -24,7 +24,10 @@
     .stx .sub{font-size:12px;color:var(--mc-ink-muted);margin-bottom:1rem;}
     .stx .row{display:grid;grid-template-columns:1fr 58px;gap:.6rem;align-items:center;margin-bottom:.45rem;}
     .stx .lb{font-family:var(--font-read);font-size:14px;color:var(--mc-ink);}
-    .stx .tr{height:15px;grid-column:1/-1;}
+    /* A zero-length bar is indistinguishable from one that failed to render,
+       so the absence is printed in words beside it. */
+    .stx .tr{height:15px;grid-column:1/-1;display:flex;align-items:center;gap:.5rem;}
+    .stx .zl{font-family:var(--font-code);font-size:11px;color:var(--mc-ink-muted);white-space:nowrap;}
     .stx .bar{height:100%;border:1px solid var(--mc-ink);box-sizing:border-box;display:block;background:var(--mc-ramp-3);}
     .stx .bar.em{border-width:3.5px;background:var(--mc-ramp-1);}
     .stx .vl{font-size:12px;color:var(--mc-ink-secondary);text-align:right;}
@@ -45,9 +48,9 @@
           (dict "l" "AWS &rarr; internet"              "v" 0.09  "n" "$0.09"  "em" true)
           (dict "l" "Azure &rarr; internet"            "v" 0.087 "n" "$0.087" "em" true)
           (dict "l" "cross-region, same cloud"         "v" 0.02  "n" "$0.02"  "em" false)
-          (dict "l" "Cloudflare R2 &rarr; internet"    "v" 0.0   "n" "$0.00"  "em" false) }}
+          (dict "l" "Cloudflare R2 &rarr; internet"    "v" 0.0   "n" "$0.00"  "em" false "zero" "no egress charge") }}
         <div class="row"><span class="lb">{{ .l | safeHTML }}</span><span class="vl">{{ .n }}</span>
-          <span class="tr"><span class="bar{{ if .em }} em{{ end }}" style="width:{{ div (mul .v 100.0) 0.12 }}%"></span></span>
+          <span class="tr"><span class="bar{{ if .em }} em{{ end }}" style="width:{{ div (mul .v 100.0) 0.12 }}%"></span>{{ with .zero }}<span class="zl">{{ . }}</span>{{ end }}</span>
         </div>
         {{- end }}
         <div class="sub" style="margin:.8rem 0 0">Heavy outline = what shipping telemetry to a third-party backend actually costs. That is internet egress, not cross-region.</div>

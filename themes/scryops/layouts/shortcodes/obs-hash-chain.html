@@ -8,7 +8,18 @@
      detecting tampering would be a poor place to break it.
 
      Anchoring is drawn because a chain stored only inside the system it
-     protects proves nothing against someone who can rewrite the store.   */ -}}
+     protects proves nothing against someone who can rewrite the store.
+
+     Two fixes after a render review. The tamper marker was a call to
+     obs-glyph.html wrapped in a group tag with a translate transform — the
+     partial emits its own width/height, and a nested SVG element inside a
+     group does not position predictably across renderers; it is a plain
+     rect element at the same coordinates now. And three strings ran past their own
+     borders: SVG text does not wrap, so a label longer than its box just
+     keeps going. The formula box widened to 366 and dropped a term, the
+     anchor box narrowed to 412–668 and its label shortened, and the
+     connector re-routed to meet the new edges. Re-measure whenever a
+     label changes: roughly 7.2px per character at 12px mono.            */ -}}
 
 <figure class="diagram hch" aria-label="A hash chain over four audit entries. Each entry's hash is computed over its own fields plus the hash of the entry before it, so altering entry three invalidates the hash stored in entry four and every entry after it. The tampered entry is marked with a heavy border and a square glyph rather than a colour. A daily root hash is anchored outside the system, because a chain stored only where an attacker can reach it proves nothing.">
   <style>
@@ -38,7 +49,7 @@
       <text class="t" x="188" y="46">entry 402</text>
       <text class="c" x="188" y="62">prev a17b…</text>
       <text class="c" x="188" y="76">hash 4d80…</text>
-      <g transform="translate(292,34)">{{ partial "obs-glyph.html" (dict "rank" 2 "fill" "var(--mc-ramp-1)") }}</g>
+      <rect x="292" y="34" width="11" height="11" fill="var(--mc-ramp-1)"/>
 
       <path d="M316 55 H342" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#hch-b)"/>
 
@@ -54,16 +65,16 @@
       <text class="c" x="540" y="62">every one after</text>
       <text class="c" x="540" y="76">also invalid</text>
 
-      <text class="k" x="0" y="112">entry 402 was edited &middot; its recomputed hash no longer matches what 403 stored &middot; the break propagates forward</text>
+      <text class="k" x="0" y="112">entry 402 was edited &middot; its recomputed hash no longer matches what 403 stored</text>
 
-      <rect x="0" y="132" width="330" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
-      <text class="t" x="12" y="152">hash = H(ts ‖ actor ‖ action ‖ resource ‖ outcome ‖ prev)</text>
+      <rect x="0" y="132" width="366" height="52" fill="none" stroke="var(--mc-ramp-2)" stroke-width="2" rx="3"/>
+      <text class="t" x="12" y="152">hash = H(ts ‖ actor ‖ action ‖ res ‖ prev)</text>
       <text class="c" x="12" y="170">four lines of code, computed at write time</text>
 
-      <path d="M330 158 H360 V206 H392" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#hch-b)"/>
+      <path d="M366 158 H386 V206 H404" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#hch-b)"/>
 
-      <rect x="400" y="188" width="268" height="36" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" rx="3"/>
-      <text class="t" x="412" y="211">daily root, anchored OUTSIDE the system</text>
+      <rect x="412" y="188" width="256" height="36" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" rx="3"/>
+      <text class="t" x="424" y="211">daily root, anchored OUTSIDE</text>
 
       <text class="k" x="0" y="240">without the anchor, an attacker who can rewrite the store can rewrite the chain</text>
     </svg>
