@@ -507,9 +507,18 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
    context with its own chrome, so this measure-relative bleed formula
    doesn't apply there — langswitch already scrolls on its own <pre>
    correctly via the generic rule above; only tab-size/margin needed to
-   be shared, not this width math. */
+   be shared, not this width math.
+
+   .layout .prose > pre is also included here: it's the bare-fence
+   shape for the brief window before code-copy.js runs and wraps <pre>
+   in .code-well (see that script's own comment — without it the code
+   "renders fine... just without the measure-flush bleed"). Without
+   this line a bare fence flashes at the generic 720px cap and then
+   snaps 19px wider the instant JS wraps it; matching the width here up
+   front removes that reflow instead of just narrowing its window. */
 .prose > .highlight .code-well,
-.layout .prose > .code-well{
+.layout .prose > .code-well,
+.layout .prose > pre{
   width:calc(min(100%,720px) + 38px);max-width:none;
   margin-inline:calc(max(0px,(100% - 720px)/2) - 19px) auto;
   position:relative;
@@ -634,14 +643,21 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    layout: guide template (toc rail + article)
    ============================================================ */
 .layout{max-width:820px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:54px;padding:50px 28px 130px}
-/* Sidebar layout is LEFT-ANCHORED, not viewport-centred (matches the
-   scryops-design kit). A two-column centred grid pushes the text half the
-   TOC width right of centre, which reads as shoved aside rather than a
-   margin — no max-width value fixes that from a centred container, so the
-   third track is a flexible minmax(0,1fr) that absorbs all surplus width
-   instead. The TOC partial now renders before <article> in single.html
-   (both for this grid placement and, at the stacked breakpoint below, so
-   DOM order matches reading order for assistive tech too).
+/* Sidebar layout is CENTRED on the viewport, not left-anchored. A prior
+   version gave the TOC its own fixed 200px track and put the only
+   flexible track on the right (`200px minmax(0,758px) minmax(0,1fr)`) —
+   that pushes the whole grid right by the TOC's width, since surplus
+   width only ever collects in the trailing track: measured 59px of
+   leftward prose offset from true centre at 1440px, growing with
+   viewport width since the flexible track absorbs 100% of the surplus
+   on one side only. Centring a fixed-width measure needs flexible
+   tracks on BOTH sides, so the TOC now lives inside the left 1fr gutter
+   (`justify-self:end`, `width:200px`) instead of owning a dedicated
+   track — the gutter still holds it flush to the measure's left edge,
+   it just no longer forces the grid off-centre to do it. The TOC
+   partial still renders before <article> in single.html (both for this
+   grid placement and, at the stacked breakpoint below, so DOM order
+   matches reading order for assistive tech too).
 
    The article track is 758px, not 720: the article width is not a
    reading-width decision, it's the 720px measure PLUS whatever evidence
@@ -653,8 +669,8 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    at 1400px viewport. Widening the track to match doesn't change the
    measure itself: `.layout .prose > *{max-width:720px}` still caps
    prose content at 720 regardless of how wide .article's own box is. */
-.layout.has-toc{max-width:none;grid-template-columns:200px minmax(0,758px) minmax(0,1fr)}
-.layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:start;width:200px;max-width:100%}
+.layout.has-toc{max-width:none;grid-template-columns:minmax(0,1fr) minmax(0,758px) minmax(0,1fr)}
+.layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:end;width:200px;max-width:100%}
 .layout.has-toc > .article{grid-column:2;grid-row:1;min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page */
 /* Reading column: prose holds the 720px measure (centered). Evidence
    (code, figures, tables) shares that same measure and aligns flush with
@@ -680,7 +696,15 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    own history includes finding 1030 insufficient for the same reason.) */
 @media (max-width:1083px){
   .layout,.layout.has-toc{max-width:800px;grid-template-columns:1fr;gap:30px;padding:34px 22px 90px}
-  .layout.has-toc > .toc,.layout.has-toc > .article{grid-column:auto;grid-row:auto}
+  /* grid-row set explicitly, not auto: auto lets DOM order win, and if
+     the TOC partial is ever moved back after </article> in single.html
+     it would drop the TOC to the page bottom instead of stacking it
+     above the article as intended. justify-self reset to start: the
+     desktop rule now reads end (to hug the centred measure), which
+     this breakpoint must not inherit, or the stacked TOC shifts right
+     instead of keeping its original left alignment. */
+  .layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:start}
+  .layout.has-toc > .article{grid-column:1;grid-row:2}
   .toc{position:static}
   .title{font-size:28px}
 }
