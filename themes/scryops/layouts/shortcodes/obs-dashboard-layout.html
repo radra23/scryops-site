@@ -19,7 +19,7 @@
 
       <!-- eyebrow -->
       <text x="380" y="18" fill="var(--muted)" font-size="11" text-anchor="middle"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.06em">PANEL LAYOUT — SERVICE HEALTH DASHBOARD</text>
+            font-family="var(--font-pixel)" letter-spacing="0.06em">PANEL LAYOUT — SERVICE HEALTH DASHBOARD</text>
 
       <!-- ── ROW 1: STAT PANELS ────────────────────────────────────────── -->
       <!-- left rail: danger red -->
@@ -33,20 +33,20 @@
       <!-- Stat panel A: Error Rate (red-accented, "bad" state) -->
       <rect x="140" y="30" width="196" height="56" fill="var(--bg)" stroke="var(--mc-ramp-1)" stroke-width="1.5" rx="1"/>
       <text x="238" y="43" fill="var(--muted)" font-size="11" text-anchor="middle"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">ERROR RATE (5XX)</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">ERROR RATE (5XX)</text>
       <text x="238" y="70" fill="var(--mc-ramp-1)" font-size="20" text-anchor="middle">5.2%</text>
       <text x="238" y="82" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">▲ above threshold</text>
 
       <!-- Stat panel B: Request Rate (neutral) -->
       <rect x="344" y="30" width="196" height="56" fill="var(--bg)" stroke="var(--border)" stroke-width="1" rx="1"/>
       <text x="442" y="43" fill="var(--muted)" font-size="11" text-anchor="middle"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">REQUEST RATE</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">REQUEST RATE</text>
       <text x="442" y="70" fill="var(--muted)" font-size="20" text-anchor="middle">1.2k/s</text>
 
       <!-- Stat panel C: Latency P99 (neutral) -->
       <rect x="548" y="30" width="204" height="56" fill="var(--bg)" stroke="var(--border)" stroke-width="1" rx="1"/>
       <text x="650" y="43" fill="var(--muted)" font-size="11" text-anchor="middle"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">LATENCY (P99)</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">LATENCY (P99)</text>
       <text x="650" y="70" fill="var(--muted)" font-size="20" text-anchor="middle">340ms</text>
 
       <!-- ── ROW 2: TIME SERIES PANELS ─────────────────────────────────── -->
@@ -60,7 +60,7 @@
       <!-- Time series panel D: Request Rate trend -->
       <rect x="140" y="104" width="300" height="64" fill="var(--bg)" stroke="var(--border)" stroke-width="1" rx="1"/>
       <text x="150" y="116" fill="var(--muted)" font-size="11"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">REQUEST RATE</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">REQUEST RATE</text>
       <!-- mini squiggle -->
       <polyline fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5"
         points="152,148 175,146 200,150 228,146 255,148 280,146 305,148 325,140 340,143 380,146 410,147 432,146"/>
@@ -68,7 +68,7 @@
       <!-- Time series panel E: Latency P50/P99 -->
       <rect x="448" y="104" width="304" height="64" fill="var(--bg)" stroke="var(--border)" stroke-width="1" rx="1"/>
       <text x="458" y="116" fill="var(--muted)" font-size="11"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">LATENCY P50 / P99</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">LATENCY P50 / P99</text>
       <!-- P99 line (more variable, amber) -->
       <polyline fill="none" stroke="var(--mc-ramp-2)" stroke-width="1.5" opacity="0.8"
         points="460,143 490,140 520,145 548,138 572,143 596,132 614,128 634,136 660,142 690,141 720,142 744,140"/>
@@ -91,7 +91,7 @@
       <!-- Table panel F -->
       <rect x="140" y="186" width="612" height="40" fill="var(--bg)" stroke="var(--border)" stroke-width="1" rx="1"/>
       <text x="150" y="198" fill="var(--muted)" font-size="11"
-            font-family="'Press Start 2P',monospace" letter-spacing="0.04em">BREAKDOWN / DRILL-DOWN</text>
+            font-family="var(--font-pixel)" letter-spacing="0.04em">BREAKDOWN / DRILL-DOWN</text>
       <!-- simulated table rows -->
       <line x1="140" y1="204" x2="752" y2="204" stroke="var(--border)" stroke-width="1"/>
       <line x1="140" y1="216" x2="752" y2="216" stroke="var(--border)" stroke-width="1"/>

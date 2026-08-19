@@ -98,6 +98,8 @@
      than splitting the name across two different fallbacks. */
   --font-pixel-scry:'Doto', ui-monospace, monospace;
   --font-pixel-ops:'Pixelify Sans', ui-monospace, monospace;
+  --fw-pixel-scry:900;
+  --fw-pixel-ops:700;
   --font-pixel:var(--font-pixel-ops);
   --font-typewriter:'Courier Prime', ui-monospace, monospace;
   --font-body:var(--font-read);
@@ -612,8 +614,9 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* ============================================================
    chrome — eyebrow, pixel wordmark, mode toggle
    ============================================================ */
-.scry-wordmark{font-family:var(--font-pixel-scry);font-size:13px;line-height:1;color:var(--heading)}
-.scry-wordmark b{font-family:var(--font-pixel-ops);color:var(--green);font-weight:400}
+.scry-wordmark{font-size:13px;line-height:1;color:var(--heading)}
+.scry-wordmark__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
+.scry-wordmark__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
 .pixel-tag{font-family:var(--font-code);font-size:11px;color:var(--muted)}
 
 .accent-line{height:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
@@ -932,8 +935,9 @@ nav.topic-list{padding:0;justify-content:flex-start}
 
 /* footer */
 .site-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center}
-.foot-logo{font-family:var(--font-pixel-scry);font-size:.65rem;color:var(--muted);margin-bottom:.8rem}
-.foot-logo .accent{font-family:var(--font-pixel-ops);color:var(--green)}
+.foot-logo{font-size:.65rem;color:var(--muted);margin-bottom:.8rem}
+.foot-logo__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
+.foot-logo__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
 .site-footer p{font-family:var(--font-code);font-size:.8rem;color:var(--muted)}
 .site-footer a{color:var(--cyan)}
 .site-footer a:hover{text-decoration:underline}

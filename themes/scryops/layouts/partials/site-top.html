@@ -2,7 +2,7 @@
      Sticky chrome: pixel wordmark + section nav + reading-preferences panel
      (theme dark/light/calm + reading toggles; behavior in prefs.js). */ -}}
 <header class="site-top">
-  <a class="scry-wordmark" href="/">scry<b>ops</b></a>
+  <a class="scry-wordmark" href="/"><span class="scry-wordmark__scry">scry</span><span class="scry-wordmark__ops">ops</span></a>
   <span class="pixel-tag">obs</span>
   <nav class="top-nav" aria-label="Primary">
     {{ range site.Menus.main }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
