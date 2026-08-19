@@ -1,14 +1,19 @@
 #!/usr/bin/env python3
-"""Self-host the four Google font families telemetry.css actually uses.
+"""Self-host the Google font families telemetry.css actually uses.
 
 Fetches the latin subset only (the site is lang="en"; the latin range already
 covers em-dashes and curly quotes), downloads each woff2 into the theme, and
 emits a fonts.css with local src paths. Idempotent.
+
+Doto (900) and Pixelify Sans (700) are the wordmark's two pixel voices
+(--font-pixel-scry / --font-pixel-ops) per the scryops-design DS spec —
+Press Start 2P is retained for pages that still name it directly, but new
+pixel-voice work uses this pair.
 """
 import os
 import re
+import subprocess
 import sys
-import urllib.request
 
 THEME = "/Users/jonhdoe/Repository/scryops-site/themes/scryops"
 FONT_DIR = os.path.join(THEME, "static/fonts/vendor")
@@ -23,6 +28,8 @@ GOOGLE_URL = (
     "&family=Courier+Prime:wght@400;700"
     "&family=Space+Mono:wght@400;700"
     "&family=Press+Start+2P"
+    "&family=Doto:wght@900"
+    "&family=Pixelify+Sans:wght@700"
     "&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400"
     "&display=swap"
 )
@@ -31,9 +38,13 @@ UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
 
 
 def fetch(url, binary=False):
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=30) as r:
-        data = r.read()
+    # curl, not urllib: this machine's python.org framework build has no
+    # local CA bundle wired up (SSLCertVerificationError), while curl uses
+    # the system trust store and just works.
+    data = subprocess.run(
+        ["curl", "-sSL", "--max-time", "30", "-A", UA, url],
+        check=True, capture_output=True,
+    ).stdout
     return data if binary else data.decode("utf-8")
 
 
