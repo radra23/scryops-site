@@ -36,34 +36,36 @@
 
 </div>
 
-{{ if gt (len $more) 0 }}
-<section class="front-explore">
-  <div class="front-explore__col">
-    <span class="topics-label">more reading</span>
+{{ $hasSubscribe := .Site.Params.brevo_form_url }}
+<div class="wrap" style="padding-top:8px">
+  {{ if $hasSubscribe }}
+  <div style="max-width:720px;margin:0 auto 48px">
+    {{ partial "subscribe-form.html" . }}
+  </div>
+  {{ end }}
+
+  {{ if gt (len $more) 0 }}
+  <section class="post-section">
+    <div class="section-head">
+      <span class="section-label">more reading</span>
+      <div class="section-rule"></div>
+    </div>
     <div class="post-grid">
       {{ range $more }}
       <a class="post-card" href="{{ .RelPermalink }}">
-        <span class="scry-tag">{{ .Type }}</span>
+        {{ $type := .Type }}
+        {{ if eq $type "articles" }}<span class="scry-tag trends">Article</span>
+        {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide</span>
+        {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to</span>
+        {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A</span>
+        {{ end }}
         <span class="post-card-title">{{ .Title }}</span>
         {{ with .Params.readtime }}<span class="read-time">{{ . }}m</span>{{ end }}
       </a>
       {{ end }}
     </div>
-  </div>
-  <div class="front-explore__col">
-    <span class="topics-label">browse by topic</span>
-    <nav class="topic-list">
-      {{ range first 6 site.Taxonomies.tags.ByCount }}
-      <a class="topic-row" href="{{ .Page.RelPermalink }}">
-        <span class="topic-name">{{ .Page.Title }}</span>
-        <span class="topic-badge">{{ .Count }}</span>
-      </a>
-      {{ end }}
-    </nav>
-  </div>
-</section>
-{{ end }}
-
-{{ partial "subscribe-form.html" . }}
+  </section>
+  {{ end }}
+</div>
 
 {{ end }}

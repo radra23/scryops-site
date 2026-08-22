@@ -2,9 +2,10 @@
        Site.Params.brevo_form_url is set. Call with the page context:
        {{ partial "subscribe-form.html" . }}
        NOTE: uses fixed ids (subscribe-form/-email/-btn/-msg) — safe on
-       different pages, but do NOT place two instances on the same page. */ -}}
+       different pages, but do NOT place two instances on the same page.
+       Renders bare (no .wrap/width constraint) — the caller controls
+       placement and width, matching the DS's inline-styled wrapper. */ -}}
 {{ with .Site.Params.brevo_form_url }}
-<div class="wrap">
 <section class="scry-sub" id="subscribe">
   <h2 class="scry-sub__label">Stay in the loop</h2>
   <p class="scry-sub__desc">New articles, guides, and how-tos — no noise, no cadence commitments.</p>
@@ -73,5 +74,4 @@
   });
 }());
 </script>
-</div>
 {{ end }}
