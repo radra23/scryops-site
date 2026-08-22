@@ -16,7 +16,7 @@
     <input class="scry-sub__input" id="subscribe-email" type="email" name="EMAIL" placeholder="you@example.com" required autocomplete="email">
     <button class="scry-sub__btn" id="subscribe-btn" type="submit">Subscribe</button>
   </form>
-  <p class="scry-sub__msg" id="subscribe-msg" aria-live="polite" hidden></p>
+  <p class="scry-sub__msg" id="subscribe-msg" aria-live="polite" hidden><span class="g" aria-hidden="true"></span><span id="subscribe-msg-text"></span></p>
 </section>
 
 <script>
@@ -26,9 +26,13 @@
   var input = document.getElementById('subscribe-email');
   var btn   = document.getElementById('subscribe-btn');
   var msg   = document.getElementById('subscribe-msg');
+  var msgGlyph = msg.querySelector('.g');
+  var msgText  = document.getElementById('subscribe-msg-text');
+  var GLYPH = { success: '✓', error: '■', loading: '···' };
 
   function setState(state, text) {
-    msg.textContent = text;
+    msgGlyph.textContent = GLYPH[state] || '';
+    msgText.textContent = text;
     msg.hidden = false;
     msg.className = 'scry-sub__msg ' + state;
     if (state === 'loading') {
