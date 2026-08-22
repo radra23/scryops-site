@@ -110,7 +110,7 @@ When you run `docker-compose up`, both Jaeger and the OpenTelemetry Collector wi
 
 ## Send a Test Trace
 
-Before wiring up a whole service, confirm the pipeline works by emitting a single span to the Collector (or directly to Jaeger — both listen on `localhost:4317`). Each snippet below is a complete, minimal program.
+Before wiring up a whole service, confirm the pipeline works by emitting a single span to the Collector at `localhost:4317`. Once the Collector was added to `docker-compose.yml`, Jaeger's own OTLP ports are no longer published to the host — only the Collector's `4317`/`4318` are — so the Collector is the only reachable endpoint for spans; it forwards them on to Jaeger. Each snippet below is a complete, minimal program.
 
 {{< langswitch >}}
 ```csharp
@@ -184,7 +184,7 @@ Navigate to `http://localhost:16686`. The UI is built around four views:
 
 2. **Trace Detail**: Clicking a trace opens the span waterfall — the full request path rendered as a timeline. Each row is one span: service name, operation name, start offset, and duration. Nested spans show parent-child relationships between services.
 
-3. **Trace Statistics**: Aggregate counts of traces, services, and operations across the selected time range.
+3. **Monitor**: Service Performance Monitoring (SPM) — request rate, error rate, and latency percentiles per service and operation, aggregated from span data over the selected time range.
 
 4. **Dependencies**: A service graph derived from span relationships in the stored traces, showing which services call which.
 

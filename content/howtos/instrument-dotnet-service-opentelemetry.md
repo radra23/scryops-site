@@ -23,6 +23,7 @@ Add the core packages to your project:
 <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
 <PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
 <PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0" />
+<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
 ```
 
 ## SDK Initialisation
@@ -49,8 +50,12 @@ builder.Services.AddOpenTelemetry()
         .SetResourceBuilder(resourceBuilder)
         .AddAspNetCoreInstrumentation(opts =>
         {
-            // Do not record 404s as errors — they are expected
+            // RecordException controls whether unhandled exceptions are recorded as
+            // exception events on the span — it has no effect on HTTP status codes.
+            // Leave it off unless you want exception stack traces attached to spans.
             opts.RecordException = false;
+            // Note: 404s are not marked as span errors by default — only 5xx responses
+            // are, per HTTP semantic conventions — so no extra config is needed for that.
             opts.Filter = ctx => ctx.Request.Path != "/health";
         })
         .AddHttpClientInstrumentation()
@@ -80,7 +85,9 @@ builder.Logging.AddOpenTelemetry(logging =>
     {
         opts.Endpoint = new Uri("http://localhost:4317");
     });
-    // Include trace context (TraceId, SpanId) in every log record
+    // TraceId and SpanId are injected into every log record automatically from
+    // Activity.Current — no toggle required. IncludeTraceState instead controls
+    // whether the W3C tracestate string is attached to log records.
     logging.IncludeTraceState = true;
     logging.IncludeScopes = true;
 });

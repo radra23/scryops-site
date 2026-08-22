@@ -33,7 +33,7 @@ requests_total
 **Allowed characters:**
 - Metric names: `[a-zA-Z0-9:_]` — underscores and colons only; no hyphens
 - Label names: `[a-zA-Z0-9_]` — underscores only; labels beginning with `__` are reserved for internal use
-- Maximum metric name length: 200 characters
+- Prometheus itself does not document a hard maximum metric name length; some downstream backends enforce their own practical limits on name/label metadata length, so check your storage backend's docs if you're near an extreme
 
 **Suffix conventions** (mandatory for standard types):
 - `_total` — counters
@@ -134,7 +134,7 @@ To detect staleness:
 (time() - timestamp(my_metric)) > 300
 ```
 
-Prometheus marks a series as stale when a scrape target stops returning it. Staleness markers propagate to queries after a configurable lookback window (`--storage.tsdb.min-block-duration`). For metrics from push-based pipelines (Pushgateway, OTel Collector batch exports), staleness detection requires an explicit freshness check.
+Prometheus marks a series as stale when a scrape target stops returning it. Queries still return the last value for a series until it falls outside the query lookback window, `--query.lookback-delta` (default 5m) — after that, the series is treated as absent rather than flat. For metrics from push-based pipelines (Pushgateway, OTel Collector batch exports), staleness detection requires an explicit freshness check.
 
 ## Monitoring the Monitoring
 

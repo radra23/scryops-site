@@ -29,7 +29,7 @@ The retention picture is where the contradiction gets sharpest, because here the
 
 {{< obs-retention-ladder >}}
 
-PCI DSS Requirement 10.7 sets a floor: at least twelve months of audit log history, with the most recent three months immediately available for analysis. HIPAA's documentation retention under 45 CFR §164.316(b)(2)(i) runs six years, and audit records are generally kept within that scope. SOX pushes some financial-system records to seven.
+PCI DSS Requirement 10.5.1 sets a floor: at least twelve months of audit log history, with the most recent three months immediately available for analysis. HIPAA's documentation retention under 45 CFR §164.316(b)(2)(i) runs six years, and audit records are generally kept within that scope. SOX pushes some financial-system records to seven.
 
 GDPR sets no floor at all. Article 5(1)(e) sets a *ceiling*: personal data must be kept no longer than is necessary for the purposes it was collected for.
 
@@ -77,9 +77,9 @@ For telemetry, that translates to a specific piece of advice. If you claim in yo
 
 PCI DSS is the most prescriptive of the four and, for telemetry, the easiest to reason about.
 
-Requirement 3.4 prohibits storing the full primary account number in retrievable form beyond what is necessary; masked display is limited to the first six and last four digits. Requirement 3.2 prohibits storing sensitive authentication data after authorisation, full stop: CVV, full track data, PIN. There is no retention window for a CVV. There is no masking that makes it acceptable.
+Requirement 3.5.1 prohibits storing the full primary account number in retrievable form beyond what is necessary; masked display (Requirement 3.4.1) is limited to the first six and last four digits. Requirement 3.3.1 prohibits storing sensitive authentication data after authorisation, full stop: CVV, full track data, PIN. There is no retention window for a CVV. There is no masking that makes it acceptable.
 
-Requirement 10 covers logging: 10.2 defines what must be logged, 10.3 protects logs from modification, 10.5 requires access to be limited, and 10.7 sets the twelve-month retention floor with three months immediately available.
+Requirement 10 covers logging: 10.2.1 defines what must be logged, 10.3.2 protects logs from modification, 10.3.1 requires access to be limited, and 10.5.1 sets the twelve-month retention floor with three months immediately available.
 
 The practical consequence for an observability pipeline is scope. If cardholder data can reach your telemetry, your telemetry infrastructure is in the cardholder data environment, and everything in Requirement 10 applies to your trace backend, your log store, and the people who can query them. Keeping PANs out of spans isn't only a data-protection control. It's a scope-reduction control, and scope reduction is the cheapest compliance work there is.
 
@@ -97,7 +97,7 @@ Six controls cover the overlap between all four frameworks. None of them are exo
 
 **3. Tier retention by content, not by signal type.** Traces stripped of identity can sit in cold storage for six years without a GDPR problem. Traces that carry identifiers shouldn't outlive the erasure deadline. Splitting the pipeline on that axis is more useful than splitting it on logs-versus-traces.
 
-**4. Restrict and record access to telemetry.** Both SOC 2 CC6 and PCI 10.5 ask who can read your observability data. Most teams can't answer for their trace backend. This is also the cheapest audit finding to prevent: see [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/).
+**4. Restrict and record access to telemetry.** Both SOC 2 CC6 and PCI 10.3.1 ask who can read your observability data. Most teams can't answer for their trace backend. This is also the cheapest audit finding to prevent: see [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/).
 
 **5. Document the lawful basis and the field decisions.** A one-page table of every span attribute and its disposition satisfies Article 30 record-keeping, gives the SOC 2 auditor a control description, and, more usefully, tells the next engineer what to do with a new field.
 
@@ -131,6 +131,6 @@ Step 1 is where most of the surprises live, and it's the step teams skip because
 
 - [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the Collector pipeline that implements most of the controls above
 - [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) — hashing, tokenisation, coarsening, and which to use when
-- [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — the access-recording control for SOC 2 CC6 and PCI 10.5
+- [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — the access-recording control for SOC 2 CC6 and PCI 10.3.1
 - [Telemetry Data Sovereignty](/guides/data-sovereignty-and-residency/) — where telemetry may legally live
 - [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — the application-level layer

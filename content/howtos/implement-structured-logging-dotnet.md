@@ -49,7 +49,7 @@ services.AddLogging(builder =>
             .AddEnvironmentVariable()
             .AddAttributes(new Dictionary<string, object>
             {
-                // Use string literal — opentelemetry.sdk.resources does not export SERVICE_VERSION
+                // There's no OTEL_SERVICE_VERSION env var — set it via the service.version resource attribute key
                 ["service.version"] = Assembly.GetExecutingAssembly()
                     .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
                     .InformationalVersion ?? "unknown",
@@ -203,7 +203,7 @@ For higher-throughput scenarios, route logs through the OTel Collector instead o
 
 **Inconsistent field names.** `orderId` vs `order_id` vs `OrderId` across services forces post-hoc normalization at query time. Pick a casing convention (`snake_case` is conventional in OTel semantic conventions) and enforce it via code review or a custom analyzer.
 
-**DEBUG in production.** Debug-level logs in production under non-trivial traffic can multiply storage costs by 10×. Set the minimum log level to `Information` in production and configure `appsettings.Production.json` explicitly rather than relying on a default you might have forgotten.
+**DEBUG in production.** Debug-level logs in production under non-trivial traffic can easily multiply storage costs several-fold (often 5-10x, as a rough order of magnitude). Set the minimum log level to `Information` in production and configure `appsettings.Production.json` explicitly rather than relying on a default you might have forgotten.
 
 ## Validating Required Fields
 

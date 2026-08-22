@@ -114,7 +114,7 @@ sum by (service, error_type) (
 )
 ```
 
-In the OTel Collector, the `transform` processor with OTTL statements enriches log records before they reach a backend. For deriving metrics from logs at collection time, use the `count_connector`. Both require `otel/opentelemetry-collector-contrib` — the core image does not include OTTL or connectors:
+In the OTel Collector, the `transform` processor with OTTL statements enriches log records before they reach a backend. For deriving metrics from logs at collection time, use the `count` connector. Both require `otel/opentelemetry-collector-contrib` — the core image does not include OTTL or connectors:
 
 ```yaml
 # otel-collector-config.yaml (requires otel/opentelemetry-collector-contrib)
@@ -127,9 +127,11 @@ processors:
 
 connectors:
   count:
-    spanevents:
+    logs:
 
 exporters:
+  otlp/loki:
+    endpoint: "http://loki:3100/otlp/v1/logs"
   prometheusremotewrite:
     endpoint: "http://prometheus:9090/api/v1/write"
 
@@ -138,7 +140,7 @@ service:
     logs:
       receivers: [otlp]
       processors: [transform/enrich_logs]
-      exporters: [otlp/loki]
+      exporters: [otlp/loki, count]
     metrics:
       receivers: [count]
       exporters: [prometheusremotewrite]
@@ -212,7 +214,7 @@ In Elasticsearch and OpenSearch, control field mapping explicitly. Fields you fi
 
 Loki's data model: streams (identified by a label set) contain timestamped log lines. Parsing — extracting structured fields from the log line — happens at query time with `| json`, `| logfmt`, or `| pattern`. You do not define a schema at write time. This makes ingestion cheap and schema evolution easy, but it means parsing cost is paid at query time on every alert evaluation.
 
-Alerting in Grafana uses LogQL expressions promoted to alert rules with a threshold and evaluation interval. The expression you write in Explore is the same expression you wire to an alert rule — no translation required. The key operational requirement: the Loki ruler component must be running for server-side alert evaluation. Without the ruler, Grafana falls back to evaluating LogQL queries from the Grafana server process directly. This works at low alert rule counts and short evaluation intervals, but does not scale. If you have more than a handful of log-based alert rules, deploy the ruler.
+Alerting in Grafana uses LogQL expressions promoted to alert rules with a threshold and evaluation interval. The expression you write in Explore is the same expression you wire to an alert rule — no translation required. Grafana-managed alert rules — the default path most teams use — are evaluated by the Grafana server process itself, polling Loki as a datasource; no Loki-side component is required. The Loki ruler component is only required for Loki-managed (ruler-based) alert rules, which are evaluated server-side inside Loki, independent of whether Grafana is running. Grafana-managed evaluation works fine at low alert rule counts and short evaluation intervals, but does not scale as well and adds load to the Grafana server. If you have more than a handful of log-based alert rules, deploy the ruler and move them to Loki-managed evaluation.
 
 ### CloudWatch Logs Insights
 

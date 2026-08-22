@@ -46,7 +46,7 @@ traceparent: 00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01
 - **parent-span-id**: the span ID of the calling span (makes this the parent-child link)
 - **flags**: currently only the `sampled` bit (01 = record this trace, 00 = do not)
 
-**`tracestate`** is a vendor extension slot for additional sampling or routing metadata. OpenTelemetry uses it for the `ot` key to carry sampling decisions.
+**`tracestate`** is a vendor extension slot for additional sampling or routing metadata. SDKs implementing the OTEP 235 consistent probability sampling extension use the `ot` tracestate key to carry sampling decisions.
 
 ## W3C Trace Context vs B3
 

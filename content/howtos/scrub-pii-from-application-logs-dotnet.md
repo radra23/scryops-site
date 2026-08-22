@@ -4,7 +4,7 @@ date: 2026-06-11
 draft: true
 excerpt: "Defense-in-depth for PII in logs: detect and mask sensitive values in .NET application code before they reach the OTel SDK, using compiled regex detection, smart redaction, and data minimisation patterns."
 readtime: 8
-tags: ["GDPR", "Privacy", "Security", "Logs", "Compliance", "OpenTelemetry"]
+tags: ["GDPR", "Privacy", "Security", "Logs", "Compliance", "OpenTelemetry", "How-to"]
 ---
 
 The primary control for PII in telemetry is the OTel Collector — see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) for the Collector pipeline that strips PII from spans and logs uniformly across all services. This how-to covers the application-level layer: detecting and masking PII in .NET before it reaches the OTel SDK.
@@ -485,7 +485,7 @@ public class PIIAccessAuditLogger
 |---|---|---|---|
 | GDPR | EU residents | No sensitive-category data without legal basis; data minimisation; third-party sink agreements required | 30 days |
 | CCPA | California residents | Disclose what personal data is logged; honour deletion requests | 45 days |
-| HIPAA | US health data | PHI prohibited in application logs; Business Associate Agreement required for third-party sinks | Yes |
+| HIPAA | US health data | PHI prohibited in application logs; Business Associate Agreement required for third-party sinks | No |
 | PCI DSS | Cardholder data | No full PAN in logs; no CVV; BIN (first 6) + last 4 digits are permissible | N/A |
 
 For the Collector-side controls that implement these obligations uniformly across services, see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).

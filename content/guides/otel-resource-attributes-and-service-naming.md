@@ -96,7 +96,7 @@ Consistent names are more valuable than descriptive names. Rules that matter:
 
 ## Enforcing Standards at the Pipeline Level
 
-The OTel Collector is your last line of defence before telemetry reaches storage. Use the `transform` processor to enforce standards:
+The OTel Collector is your last line of defence before telemetry reaches storage. Use the `transform` processor to normalise values, and the `filter` processor to drop telemetry that still doesn't meet the bar:
 
 ```yaml
 processors:
@@ -110,10 +110,15 @@ processors:
             where attributes["deployment.environment"] == "prod"
           - set(attributes["deployment.environment"], "staging")
             where attributes["deployment.environment"] == "stg"
-          # Reject telemetry with no service name
-          - limit(attributes, 0, ["service.name"])
-            where attributes["service.name"] == nil
+  filter/require_service_name:
+    error_mode: ignore
+    traces:
+      span:
+        # Drop spans with no service name
+        - resource.attributes["service.name"] == nil
 ```
+
+The `filter` processor drops any telemetry item matching its OTTL condition — that's the mechanism for rejection. Don't reach for `transform`'s `limit()` function here: it caps the *number* of attributes on a record (pruning down to N, with an optional priority list), it doesn't drop the record itself, so it can't reject anything on its own.
 
 ## The Self-Assessment Checklist
 

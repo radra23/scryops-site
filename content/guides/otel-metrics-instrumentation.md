@@ -24,7 +24,7 @@ Monotonically increasing. Only goes up. Resets to zero on restart.
 ```python
 requests_total = meter.create_counter(
     "http.server.requests",
-    unit="{requests}",
+    unit="{request}",
     description="Total HTTP requests received"
 )
 
@@ -95,7 +95,7 @@ Like a Counter but can decrease. Tracks values with a net direction.
 ```python
 active_requests = meter.create_up_down_counter(
     "http.server.active_requests",
-    unit="{requests}",
+    unit="{request}",
     description="Number of HTTP requests currently being processed"
 )
 
@@ -122,7 +122,7 @@ def collect_connection_pool_size(options):
 meter.create_observable_gauge(
     "db.client.connections.idle",
     callbacks=[collect_connection_pool_size],
-    unit="{connections}",
+    unit="{connection}",
     description="Number of idle database connections in the pool"
 )
 ```
@@ -144,11 +144,11 @@ The SDK calls `collect_connection_pool_size` on each collection interval without
 | CPU usage (current) | ObservableGauge |
 | Memory used (current) | ObservableGauge |
 | GC pause duration | Histogram |
-| Pool size (polled) | ObservableUpDownCounter |
+| Pool size (polled) | ObservableGauge |
 
 ## Attribute Cardinality and Metrics Cost
 
-Every unique combination of attribute values creates a new time series. A histogram with 10 buckets and one attribute with 100 values creates 1,000 time series. Add a second attribute with 50 values: 50,000 time series.
+Every unique combination of attribute values creates a new time series — and a histogram is worse than it looks, because each attribute combination doesn't produce one series, it produces one series per bucket boundary *plus* `_sum` and `_count`: `(buckets + 2) × combinations`. A histogram with 10 bucket boundaries and one attribute with 100 values creates (10 + 2) × 100 = 1,200 time series. Add a second attribute with 50 values: 100 × 50 = 5,000 combinations, so (10 + 2) × 5,000 = 60,000 time series.
 
 Rules for metric attributes:
 - Never use unbounded values: user IDs, request IDs, email addresses, full URLs

@@ -21,7 +21,7 @@ The minimum viable observability standards program covers four domains:
 
 **3. Implementation requirements** — Which OTel SDK version to use, which instrumentation libraries are required vs optional, how to handle errors, and minimum sampling configuration. This is the "how to instrument" section.
 
-**4. Operational requirements** — Data retention expectations, performance overhead limits (instrumentation should not add more than X% latency), security guidelines for PII in telemetry, and alert coverage requirements.
+**4. Operational requirements** — Data retention expectations, performance overhead limits (as a rule of thumb, instrumentation should not add more than 1-5% latency), security guidelines for PII in telemetry, and alert coverage requirements.
 
 ## Structuring the Repository
 
@@ -50,7 +50,7 @@ standards/
 
 Standards without enforcement are suggestions. Three levels of enforcement:
 
-**Automated (pipeline):** The OTel Collector enforces standards at the telemetry pipeline level. Use `transform` processors to normalise environment names, reject telemetry with missing required attributes, and tag non-compliant signals for review. This catches issues without requiring code changes.
+**Automated (pipeline):** The OTel Collector enforces standards at the telemetry pipeline level. Use `transform` processors to normalise environment names and tag non-compliant signals for review, and `filter` processors to reject telemetry with missing required attributes. This catches issues without requiring code changes.
 
 **Automated (CI):** Linting checks in CI that verify SDK versions, required auto-instrumentation libraries are present in dependencies, and configuration files reference approved exporters.
 
@@ -85,7 +85,7 @@ If you have no standards today, start with three things:
 2. `deployment.environment` closed vocabulary (`production`, `staging`, `development`)
 3. Error handling contract (when to set `ERROR` span status)
 
-These three cover 80% of the common problems. Everything else can be added incrementally.
+In practice, these three cover most common problems. Everything else can be added incrementally.
 
 <!-- TODO: Add section on the Collector as enforcement infrastructure (specific processor configs) -->
 <!-- TODO: Add section on standards for different org sizes: startup vs mid-size vs enterprise -->

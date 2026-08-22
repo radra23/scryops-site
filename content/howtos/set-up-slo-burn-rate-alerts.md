@@ -30,7 +30,7 @@ Here's where most SLO implementations go wrong before they've written a line of 
 ```
 # CPU usage, memory, queue depth — these might correlate with problems,
 # but they don't directly measure whether users are getting what they asked for
-avg(node_cpu_seconds_total{mode="idle"}) < 0.2
+avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) < 0.2
 ```
 
 ✅ **User-experience metrics — what your SLI should measure:**
@@ -61,7 +61,7 @@ Write this number down explicitly. It becomes the denominator for every burn rat
 
 {{< obs-budget-burn-rates >}}
 
-Burn rate is the multiplier on how fast you're consuming that 43.2 minutes. A burn rate of 1.0 means you're exactly on track to exhaust the budget at the end of 30 days. A burn rate of 14.0 means you'll exhaust the budget in roughly two days. The threshold of ~14x is well-established from the Google SRE Workbook: at this rate you're burning over 1% of your monthly budget every hour, demanding immediate action before significant budget damage accumulates.
+Burn rate is the multiplier on how fast you're consuming that 43.2 minutes. A burn rate of 1.0 means you're exactly on track to exhaust the budget at the end of 30 days. A burn rate of 14.4 means you'll exhaust the budget in roughly two days. The threshold of ~14.4x is well-established from the Google SRE Workbook: at this rate you're burning about 2% of your monthly budget every hour, demanding immediate action before significant budget damage accumulates.
 
 {{< obs-budget-healthbar >}}
 

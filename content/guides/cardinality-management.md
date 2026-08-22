@@ -75,7 +75,7 @@ Alert on growth rate, not just absolute count. A metric that grew from 500 to 5,
 
 Before adding a new label or metric, estimate its cardinality impact:
 
-**Storage**: Prometheus stores approximately 1–2 bytes per sample per second per series. At a 15s scrape interval, 10,000 series adds roughly 50–100 MB/day before compression. For a 30-day retention window, that is 1.5–3 GB from a single high-cardinality metric.
+**Storage**: Prometheus stores approximately 1–2 bytes per sample after compression. At a 15s scrape interval, 10,000 series adds roughly 50–100 MB/day post-compression. For a 30-day retention window, that is 1.5–3 GB from a single high-cardinality metric.
 
 **Query performance**: Queries that aggregate across many series are proportionally slower. A `sum(rate(http_requests_total[5m]))` over 50,000 series will be measurably slower than the same query over 500 series. Record frequently-queried high-cardinality expressions as recording rules to pre-aggregate at scrape time.
 

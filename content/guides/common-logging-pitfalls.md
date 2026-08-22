@@ -219,28 +219,21 @@ _logger.LogInformation("{@Registration}", new
 ```
 
 ```csharp
-// ✅ Tokenise identifiers; log attributes, not values
-private string TokeniseEmail(string email)
-{
-    using var sha256 = SHA256.Create();
-    var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(email + _salt));
-    return Convert.ToHexString(bytes)[..16];
-}
-
+// ✅ Delete identifying values; log attributes, not values
 _logger.LogInformation("{@Registration}", new
 {
-    user_id = TokeniseEmail(registration.Email),   // consistent token, not PII
-    age_band = GetAgeBand(registration.DateOfBirth), // "25-34", not the date
-    region = GetRegion(registration.Address),        // "EU-West", not the address
+    user_id = registration.UserId,                    // internal ID, not derived from email
+    age_band = GetAgeBand(registration.DateOfBirth),  // "25-34", not the date
+    region = GetRegion(registration.Address),          // "EU-West", not the address
     account_type = registration.AccountType,
     acquisition_channel = registration.AcquisitionChannel,
     fraud_score = registration.FraudScore
 });
 ```
 
-The log should contain attributes that describe the user — tier, region, acquisition channel, risk score — not the values that identify them. Use a consistent pseudonymisation function (SHA-256 with a stable salt) so the token correlates across log entries without exposing the underlying value.
+The log should contain attributes that describe the user — tier, region, acquisition channel, risk score — not the values that identify them. The email itself is deleted, not hashed: the address space is small enough that a single GPU can walk the entire list of plausible addresses, so a hash isn't opaque the way it is for a high-entropy business identifier. Correlate on the internal `user_id` the account system already assigns — it does the same job without the email ever reaching the log.
 
-Note that pseudonymised tokens are still personal data under GDPR Article 4(5). If you need to support right-to-erasure (Article 17), a tokenisation registry with deletion capability is required — deleting the mapping from token to identity renders historical logs unlinkable.
+Note that an internal user ID is still personal data under GDPR Article 4(5) once it can be tied back to an identity through the account record. If you need to support right-to-erasure (Article 17), a tokenisation registry with deletion capability is required — deleting the mapping from token to identity renders historical logs unlinkable. See [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) for when to hash, tokenise, or delete.
 
 ## Error Information Leaks
 

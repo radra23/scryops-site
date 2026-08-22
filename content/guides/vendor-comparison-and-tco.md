@@ -15,7 +15,7 @@ Sections to cover:
 3. Cardinality limits and their real cost (Datadog custom metrics pricing)
 4. Data retention economics: hot vs warm vs cold storage tiers
 5. Migration cost: what it takes to leave (data export, re-instrumentation, training)
-6. Comparison matrix: Datadog, New Relic, Grafana Cloud, Honeycomb, Dynatrace, Lightstep
+6. Comparison matrix: Datadog, New Relic, Grafana Cloud, Honeycomb, Dynatrace, ServiceNow Cloud Observability (formerly Lightstep)
 7. OTel-native stacks vs proprietary agent stacks: long-term cost implications
 8. Cost optimisation strategies: sampling, aggregation, tiered retention
 9. Build vs buy: when the open-source stack pencils out

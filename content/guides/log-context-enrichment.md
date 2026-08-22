@@ -176,6 +176,17 @@ public class LogContextMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly ILogger<LogContextMiddleware> _logger;
+    private readonly IUserTierCache _cache;
+
+    public LogContextMiddleware(
+        RequestDelegate next,
+        ILogger<LogContextMiddleware> logger,
+        IUserTierCache cache)
+    {
+        _next = next;
+        _logger = logger;
+        _cache = cache;
+    }
 
     public async Task InvokeAsync(HttpContext context)
     {
@@ -218,7 +229,7 @@ Both read from thread-local state. No cache, no I/O.
 
 ## Orchestrating Multiple Enrichment Providers
 
-When you have several enrichment providers, a pipeline applies them in priority order, skipping those that do not apply, and stopping when the time budget is exhausted:
+When you have several enrichment providers, a pipeline applies them in priority order, skipping those that do not apply, and stopping when the time budget is exhausted. Elapsed time is measured with `Stopwatch.GetElapsedTime` (available since .NET 7), which turns a starting timestamp into an elapsed `TimeSpan` directly, without the manual conversion required when using `Stopwatch.GetTimestamp()` alone:
 
 ```csharp
 public interface IEnrichmentProvider

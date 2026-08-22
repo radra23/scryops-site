@@ -215,20 +215,20 @@ Confirm the scrape is working at `http://localhost:9090/targets`. Your service s
 
 **Request rate:**
 ```promql
-rate(http_server_request_duration_count{job="myservice"}[5m])
+rate(http_server_request_duration_seconds_count{job="myservice"}[5m])
 ```
 
 **Error rate (fraction of 5xx responses):**
 ```promql
-rate(http_server_request_duration_count{job="myservice", http_response_status_code=~"5.."}[5m])
+rate(http_server_request_duration_seconds_count{job="myservice", http_response_status_code=~"5.."}[5m])
 /
-rate(http_server_request_duration_count{job="myservice"}[5m])
+rate(http_server_request_duration_seconds_count{job="myservice"}[5m])
 ```
 
 **P99 latency:**
 ```promql
 histogram_quantile(0.99,
-  rate(http_server_request_duration_bucket{job="myservice"}[5m])
+  rate(http_server_request_duration_seconds_bucket{job="myservice"}[5m])
 )
 ```
 
@@ -262,7 +262,7 @@ groups:
       - record: "job:order_duration_p99_by_tier:rate5m"
         expr: |
           histogram_quantile(0.99,
-            rate(order_processing_duration_bucket[5m])
+            rate(order_processing_duration_seconds_bucket[5m])
           ) by (tier)
 
       - record: "job:revenue_per_minute:rate5m"

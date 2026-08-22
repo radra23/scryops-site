@@ -113,7 +113,7 @@ histogram_quantile(0.99, sum by (le) (
 
 Set **Field → Unit** to `seconds (s)`. Give the queries legend labels `P50` and `P99` respectively. Title the panel `Latency`.
 
-If `http_request_duration_seconds_bucket` does not exist for your service, check what histogram name is exposed — common alternatives are `request_duration_seconds_bucket` or a service-specific prefix. A histogram exposes three series: `_bucket`, `_count`, and `_sum` — `histogram_quantile` requires all three to function correctly.
+If `http_request_duration_seconds_bucket` does not exist for your service, check what histogram name is exposed — common alternatives are `request_duration_seconds_bucket` or a service-specific prefix. A histogram exposes three series: `_bucket`, `_count`, and `_sum` — `histogram_quantile` only needs the `_bucket` series (it computes quantiles from the `le` labels); `_count` and `_sum` are unrelated to quantile computation and are used separately, for computing averages (e.g. `rate(x_sum)/rate(x_count)`).
 
 ## Step 6: Add Deployment Annotations
 
@@ -158,5 +158,5 @@ In Grafana, panels are dragged by their title bar and resized from the bottom-ri
 {{< obs-mascot class="barbarian" quip="BEFORE THE DASHBOARD: Conan reads ten thousand log lines BY HAND. Uphill. In the snow. AFTER THE DASHBOARD: three panels. Red means bad. Conan is free now. Conan is also, quietly, a little sad about it. Conan is NOT going back." caption="Conan the Bawkbarian would lay down his life for your error-rate stat panel." >}}
 
 - [Set Up SLO Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) — define error budgets and alert before they run out
-- [An Alert Without a Next Step Is Just Noise](/guides/alert-design-principles/) — writing alert bodies that give on-call engineers a starting point
+- [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/) — why alerting on the right signal matters more than fewer thresholds
 - [Detect Metric Anomalies with Prometheus and Grafana](/howtos/detect-anomalies-with-prometheus/) — moving beyond static thresholds with trend-based detection

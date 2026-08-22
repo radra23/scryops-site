@@ -2,14 +2,14 @@
 title: "How to Detect Metric Anomalies with Prometheus and Grafana"
 date: 2026-06-10
 draft: true
-excerpt: "Move beyond static thresholds by using Prometheus recording rules and Grafana ML to detect anomalous patterns in your metrics — without deploying a separate ML platform."
+excerpt: "Move beyond static thresholds by using Prometheus's predict_linear() function and alerting rules to catch metrics trending toward failure — without deploying a separate ML platform."
 readtime: 7
 tags: ["AIOps", "Prometheus", "Grafana", "Alerting", "How-to"]
 ---
 
 Static thresholds alert when a metric crosses a fixed line. Anomaly detection alerts when a metric behaves in a way that deviates from its own history. The two are not interchangeable: a threshold knows nothing about whether today's 15% error rate is normal for a Sunday afternoon or a sign of something breaking.
 
-This how-to covers the approaches available in Prometheus and Grafana — starting with the simplest (trend-based prediction) and building toward seasonal baseline detection.
+This how-to covers trend-based prediction with `predict_linear()` — the simplest anomaly-detection approach, and the one available in any stock Prometheus install without plugins. It's a solid foundation before reaching for heavier tooling like z-score recording rules or Grafana's ML-powered seasonal baselines.
 
 ## Approach 1: Trend-Based Alerting with `predict_linear()`
 
@@ -101,7 +101,7 @@ In the panel editor, set Query B's **Line style** to `Dashed` and Query C's line
 
 `predict_linear()` has two variables: the historical window and the forward horizon. Their relationship matters:
 
-A **short window with a long horizon** is highly sensitive to recent spikes and produces false positives on transient load. A **long window with a short horizon** is stable but slow to detect fast-moving degradation. The rule of thumb: the historical window should be at least 3× the forward horizon for a meaningful fit. A 4-hour prediction should be grounded in at least 12 hours of history.
+A **short window with a long horizon** is highly sensitive to recent spikes and produces false positives on transient load. A **long window with a short horizon** is stable but slow to detect fast-moving degradation. There is no universal multiplier that fits every metric — the right ratio depends on how noisy the underlying signal is. The disk-fill alert above uses a 6-hour window for a 4-hour horizon (1.5×) because disk usage is a slow, low-noise trend where a shorter history would still fit a stable line. The error-rate alert uses a 30-minute window for a 1-hour horizon (0.5×) because `rate()` already smooths the noisy per-request signal, so a shorter lookback is enough to fit a usable trend. Size the window to the metric's volatility, not to a fixed ratio: widen it if the fitted line jitters between evaluations, and only shorten it if you can also reduce noise (see below).
 
 If your metric is noisy, smooth it before passing to `predict_linear`. A rate over a longer window (e.g. `rate(...[15m])` instead of `rate(...[5m])`) reduces variance at the cost of some recency.
 

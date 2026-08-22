@@ -13,7 +13,7 @@ The result is a Grafana alert rule backed by a LogQL query, routing to PagerDuty
 
 {{< mermaid caption="Fig. — A LogQL threshold rule in Grafana routes critical errors to PagerDuty and warnings to Slack, based on severity labels set at alert-rule time." >}}
 flowchart LR
-    app["Service logs<br/>(structured JSON)"] --> agent["Alloy<br/>(log shipper)"]
+    app["Service logs<br/>(structured JSON)"] --> agent["Promtail<br/>(log shipper)"]
     agent --> loki[("Loki")]
     loki --> rule["Grafana alert rule<br/>LogQL + threshold"]
     rule -->|severity=critical| pd["PagerDuty (P1)"]
@@ -148,7 +148,7 @@ curl -X POST http://localhost:3100/loki/api/v1/push \
 
 Triggering a real error path confirms end-to-end log emission rather than just the alert pipeline.
 
-In Grafana → Alerting → Alert Rules, watch the alert state transition: Normal → Pending (condition met, waiting for the pending period) → Firing. If the alert stays in Normal after the condition is met, check that the Loki ruler component is running. Without the ruler, Grafana evaluates alert queries directly, and query load or misconfiguration can cause evaluation lag that masks the state transition.
+In Grafana → Alerting → Alert Rules, watch the alert state transition: Normal → Pending (condition met, waiting for the pending period) → Firing. If the alert stays in Normal after the condition is met, check the rule's evaluation status in Alerting → Alert Rules and confirm the Loki data source connection is healthy (Connections → Data sources → Loki → Test). This is a Grafana-managed alert querying Loki as a data source — not a Loki-native ruler-based alert — so the Loki ruler component isn't involved; query load against the data source or a misconfigured evaluation interval is what causes evaluation lag that masks the state transition.
 
 Once the alert reaches Firing, confirm the notification arrived in your contact point. Check the payload for the `runbook_url` annotation and the `service` label. If they are missing, the annotation template has a syntax error — Grafana drops the field silently rather than failing the notification.
 
@@ -231,7 +231,7 @@ scrape_configs:
           __path__: /var/log/app/*.log
 ```
 
-The Promtail image above still runs, but treat it as legacy-only for local testing.
+The Promtail setup above is the legacy tool used in this walkthrough — it still runs, but ship new deployments with Alloy instead.
 
 {{< insight bookmark >}}
 **Promtail is end-of-life — ship new deployments with Grafana Alloy.** Promtail entered LTS in February 2025 and reached end-of-life on **March 2, 2026**: no further updates, fixes, or support. Grafana Alloy is the official replacement for sending logs to Loki. Migrate an existing Promtail config with `alloy convert --source-format=promtail --output=config.alloy promtail-config.yaml` — the scrape semantics carry over; the config language changes.

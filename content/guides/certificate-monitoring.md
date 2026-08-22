@@ -122,8 +122,11 @@ const events = [];
 
 for (const cert of inventory) {
     try {
-    // OpenSSL inspection — use spawnSync with an argument array to avoid shell injection
-    const result = spawnSync('openssl', ['x509', '-in', cert.path, '-noout', '-enddate', '-subject', '-issuer']);
+    // OpenSSL inspection — use spawnSync with an argument array to avoid shell injection.
+    // -nameopt RFC2253 forces an unspaced "CN=value,O=value" format; without it, OpenSSL's
+    // default oneline output (default since 1.1.1+) renders "CN = value" WITH spaces around
+    // the "=", which silently breaks a naive split('CN=').
+    const result = spawnSync('openssl', ['x509', '-in', cert.path, '-noout', '-enddate', '-subject', '-issuer', '-nameopt', 'RFC2253']);
     const output = result.stdout.toString();
 
     // Parse output
@@ -138,7 +141,7 @@ for (const cert of inventory) {
     
     // Create event
     events.push({
-        eventType: 'SSLCertificateMonitoring',
+        type: 'certificate_monitoring',
         name: cert.name,
         domain: subject.split('CN=')[1].split(',')[0],
         issuer: issuer.split('CN=')[1].split(',')[0],
@@ -215,9 +218,9 @@ Even in these cases, daily or hourly checks are usually sufficient.
 | Synthetic Monitor | Every minute | 43,200 | 100% | 0% |
 | Synthetic Monitor | Hourly | 720 | 1.7% | 0% |
 | Synthetic Monitor | Daily | 30 | 0.07% | 0% |
-| Certificate Manager | Daily | 30 | 0.03% | 95% |
+| Certificate Manager | Daily | 30 | 0.07% | 95% |
 
-A certificate manager running daily checks uses roughly 0.03% of the resources that minute-by-minute synthetic monitoring does, and adds renewal automation. That frees up synthetic monitoring capacity for user journey validation — where the real signal lives.
+At the same daily check volume, a certificate manager and a daily synthetic monitor consume the same roughly 0.07% of the resources that minute-by-minute synthetic monitoring does — the difference is that the certificate manager also adds renewal automation on top. That frees up synthetic monitoring capacity for user journey validation — where the real signal lives.
 
 ## Migration Steps
 

@@ -90,7 +90,7 @@ Most production systems land somewhere in the middle — monitoring and alerting
 
 ## APM and Observability Platforms: Where They Sit
 
-"APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, Lightstep, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
+"APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, ServiceNow Cloud Observability, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
 
 In practice, most modern APM tools have expanded toward observability, and most observability platforms now include APM-style code-level features. The spectrum matters more than the label: the question to ask of any tool is not "is it APM or observability?" but "does it let me answer questions I did not anticipate before the incident?"
 
