@@ -10,7 +10,11 @@
 {{- $level := .Get 0 | default "info" -}}
 {{- $defaults := dict "info" "INFO" "warn" "WARN" "danger" "ERROR" -}}
 {{- $label := .Get 1 | default (index $defaults $level) -}}
+{{- $ranks := dict "info" 0 "warn" 1 "danger" 2 -}}
+{{- $rank := index $ranks $level -}}
+{{- $fills := dict "info" "var(--info-lb)" "warn" "var(--warn-lb)" "danger" "var(--dgr-lb)" -}}
+{{- $fill := index $fills $level -}}
 <div class="scry-callout {{ $level }}">
-  <span class="scry-callout__label">{{ $label }}</span>
+  <span class="scry-callout__label">{{ partial "obs-glyph.html" (dict "rank" $rank "fill" $fill) }}{{ $label }}</span>
   {{ .Inner | markdownify }}
 </div>
