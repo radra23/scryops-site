@@ -2,7 +2,7 @@
 {{ $pages := .Pages }}
 {{ $hero  := index $pages 0 }}
 {{ $rest  := after 1 $pages }}
-{{ $stype := .Type | title }}
+{{ $type := .Type }}
 <div class="wrap">
   <div class="lhead">
     <div class="lh-l">
@@ -36,7 +36,11 @@
         </svg>
       </div>
       {{ $firstTag := index .Params.tags 0 | default "" }}
-      <span class="scry-tag">{{ $stype }}{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      {{ if eq $type "articles" }}<span class="scry-tag trends">Article{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
+      {{ end }}
       <h2 class="herotitle">{{ .Title }}</h2>
       {{ with .Params.excerpt }}<p class="cc-dek">{{ . }}</p>{{ end }}
       <div class="cc-meta">{{ with .Params.readtime }}{{ . }} min · {{ end }}{{ .Date.Format "Jan 2006" | lower }}</div>

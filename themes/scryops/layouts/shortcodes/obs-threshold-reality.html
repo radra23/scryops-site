@@ -13,13 +13,13 @@
      top of it read as the same tone. */ -}}
 <figure class="diagram">
   <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;overflow:hidden;">
-    <svg viewBox="0 0 760 376" xmlns="http://www.w3.org/2000/svg" role="img"
+    <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="thr-title thr-desc"
          style="width:100%;display:block;font-family:var(--font-code);">
       <title id="thr-title">Static threshold versus a real 24-hour traffic pattern</title>
       <desc id="thr-desc">A service metric over 24 hours follows a diurnal curve: low overnight, a large midday and afternoon peak. A single dashed threshold rule is drawn across it. During the normal afternoon peak the metric rises above the line, marked with a hollow square where it crosses — a false alarm. At 3am a real incident spikes the metric well above its overnight baseline, marked with an X, but it stays just under the daytime-tuned threshold, so no alert fires and the incident is missed.</desc>
 
-      <rect x="0" y="0" width="760" height="376" fill="var(--fig-bg)"/>
+      <rect x="0" y="0" width="760" height="340" fill="var(--fig-bg)"/>
 
       <text x="82" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11" letter-spacing="0.04em">STATIC THRESHOLD vs. REALITY</text>
       <text x="82" y="47" fill="var(--muted)" font-size="12.5">// one fixed line, 24 hours of real traffic</text>
@@ -77,21 +77,6 @@
       </g>
       <text x="159.5" y="316" text-anchor="middle" fill="var(--mc-ramp-1)" font-size="12.5">03:00</text>
       <line x1="159.5" y1="300" x2="159.5" y2="305" stroke="var(--mc-ramp-1)" stroke-width="1"/>
-
-      <!-- divider + legend -->
-      <line x1="24" y1="338" x2="736" y2="338" stroke="var(--border)" stroke-width="1"/>
-      <g font-size="12.5" fill="var(--muted)">
-        <line x1="80" y1="356" x2="104" y2="356" stroke="var(--mc-ramp-4)" stroke-width="2.4"/>
-        <text x="110" y="360">observed</text>
-        <line x1="210" y1="356" x2="234" y2="356" stroke="var(--muted)" stroke-width="1.6" stroke-dasharray="5 4"/>
-        <text x="240" y="360">expected pattern</text>
-        <line x1="392" y1="356" x2="416" y2="356" stroke="var(--mc-ramp-3)" stroke-width="1.6" stroke-dasharray="6 4"/>
-        <text x="422" y="360">static threshold</text>
-        <rect x="554" y="352" width="9" height="9" fill="var(--fig-bg)" stroke="var(--mc-ramp-1)" stroke-width="1.6"/>
-        <text x="570" y="360">false alarm</text>
-        <text x="654" y="360" fill="var(--mc-ramp-1)">&#10007;</text>
-        <text x="666" y="360">missed</text>
-      </g>
     </svg>
   </div>
   <figcaption>Fig. &#8212; A single static line can&rsquo;t be right at both 3am and 2pm. Tune it for the daytime peak and it goes blind to a real overnight incident; tune it for the quiet hours and it screams through every normal afternoon.</figcaption>

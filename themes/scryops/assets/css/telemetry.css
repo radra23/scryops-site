@@ -1010,22 +1010,22 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .scry-prefs__sw{width:38px;height:21px;border-radius:999px;background:var(--border);border:1px solid var(--muted);flex:none;position:relative;transition:background .15s}
 .scry-prefs__sw::after{content:"";position:absolute;top:1px;left:1px;width:17px;height:17px;border-radius:50%;background:var(--muted);transition:transform .15s,background .15s}
 .scry-prefs__row[aria-checked="true"] .scry-prefs__sw{background:var(--green)}
-.scry-prefs__row[aria-checked="true"] .scry-prefs__sw::after{transform:translateX(17px);background:#06120C}
+.scry-prefs__row[aria-checked="true"] .scry-prefs__sw::after{transform:translateX(17px);background:var(--on-accent)}
 
 /* ── Permacomputing · Phase 2 — footprint badge + colophon ──────────────
    Terminal readouts that live on the always-dark code well, so the
    living-green eco signal reads identically in warm-paper AND soft-dark.
    footprint.js fills the real numbers via [data-footprint] + [data-fp-*]. */
 .scry-fp{font-family:var(--font-code);font-size:12px;line-height:1.85;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:12px 14px;color:var(--code-text)}
-.scry-fp .scry-fp__pr{color:var(--eco)}
+.scry-fp .scry-fp__pr{color:var(--code-eco)}
 .scry-fp .scry-fp__ar{color:var(--code-cyan)}
 .scry-fp .scry-fp__hi{color:var(--code-hi)}
-.scry-fp .scry-fp__eco{color:var(--eco)}
-.scry-fp .scry-fp__status{color:var(--eco)}
-.scry-fp.over .scry-fp__status{color:var(--danger)}
+.scry-fp .scry-fp__eco{color:var(--code-eco)}
+.scry-fp .scry-fp__status{color:var(--code-eco)}
+.scry-fp.over .scry-fp__status{color:var(--code-danger)}
 .scry-fp__bar{height:7px;border-radius:4px;background:rgba(127,176,105,.14);overflow:hidden;margin:8px 0 4px}
-.scry-fp__fill{height:100%;width:0;background:linear-gradient(90deg,var(--eco),var(--eco-bright));transition:width .4s ease}
-.scry-fp.over .scry-fp__fill{background:linear-gradient(90deg,var(--danger),var(--warn))}
+.scry-fp__fill{height:100%;width:0;background:linear-gradient(90deg,var(--code-eco),var(--code-eco));transition:width .4s ease}
+.scry-fp.over .scry-fp__fill{background:linear-gradient(90deg,var(--code-danger),var(--code-warn))}
 .scry-fp__note{font-family:var(--font-read);font-size:10.5px;color:var(--code-muted)}
 .scry-fp__method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid transparent}
 .scry-fp__method:hover{border-bottom-color:var(--code-cyan)}
@@ -1038,12 +1038,12 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 
 .scry-colophon{font-family:var(--font-code);font-size:12.5px;line-height:1.7;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:16px 18px;color:var(--code-text);max-width:var(--measure)}
 .scry-colophon .scry-colophon__cmd{color:var(--code-muted);margin-bottom:8px}
-.scry-colophon .scry-colophon__cmd b{color:var(--eco);font-weight:400}
+.scry-colophon .scry-colophon__cmd b{color:var(--code-eco);font-weight:400}
 .scry-colophon .scry-colophon__row{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:7px 0;border-bottom:1px solid var(--code-bd)}
 .scry-colophon .scry-colophon__row:last-child{border-bottom:none}
 .scry-colophon .scry-colophon__k{color:var(--code-muted)}
 .scry-colophon .scry-colophon__v{color:var(--code-hi)}
-.scry-colophon .scry-colophon__v .eco{color:var(--eco)}
+.scry-colophon .scry-colophon__v .eco{color:var(--code-eco)}
 .scry-colophon .scry-colophon__v a{color:var(--code-cyan);text-decoration:none}
 .scry-colophon .scry-colophon__v a:hover{text-decoration:underline}
 
@@ -1067,7 +1067,7 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 .scry-cucco__lvl{font-family:var(--font-pixel);font-size:.625rem;border:1px solid var(--ac);color:var(--ac);padding:4px 6px;line-height:1}
 .scry-cucco__hp{letter-spacing:1px;font-size:.8rem}
 .scry-cucco__hp .scry-cucco__heart--filled{color:var(--danger)}
-.scry-cucco__hp .scry-cucco__heart--empty{color:var(--border)}
+.scry-cucco__hp .scry-cucco__heart--empty{color:var(--muted)}
 .scry-cucco__xplabel{font-family:var(--font-pixel);font-size:.625rem;color:var(--muted)}
 .scry-cucco__xp{position:relative;flex:1;min-width:60px;max-width:130px;height:8px;background:var(--bg);border:1px solid var(--border);overflow:hidden}
 .scry-cucco__xp>span{position:absolute;left:0;top:0;bottom:0;display:block;background:var(--ac)}

@@ -61,7 +61,7 @@
       <p class="scry-cucco__quip">{{ $quip }}</p>
       <div class="scry-cucco__stats" aria-hidden="true">
         <span class="scry-cucco__lvl">LVL {{ $lvl }}</span>
-        <span class="scry-cucco__hp">{{ range $i := (seq 5) }}<span class="{{ if le $i $hp }}scry-cucco__heart--filled{{ else }}scry-cucco__heart--empty{{ end }}">&#9829;</span>{{ end }}</span>
+        <span class="scry-cucco__hp">{{ range $i := (seq 5) }}{{ if le $i $hp }}<span class="scry-cucco__heart--filled">&#9829;</span>{{ else }}<span class="scry-cucco__heart--empty">&#9825;</span>{{ end }}{{ end }}</span>
         <span class="scry-cucco__xplabel">XP</span>
         <span class="scry-cucco__xp"><span style="width:{{ $xp }}%"></span></span>
       </div>

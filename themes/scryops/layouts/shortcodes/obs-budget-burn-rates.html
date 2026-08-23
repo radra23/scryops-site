@@ -1,13 +1,13 @@
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
-    <svg viewBox="0 0 760 310" xmlns="http://www.w3.org/2000/svg" role="img"
+    <svg viewBox="0 0 760 288" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="bbr-title bbr-desc"
          style="width:100%;display:block;font-family:var(--font-code);">
       <title id="bbr-title">Error budget consumption by burn rate over 30 days</title>
       <desc id="bbr-desc">A line chart showing error budget percentage remaining over a 30-day window for three burn rates. At 1&#215; burn the budget reaches zero exactly at day 30, shown as a gray dashed line. At 6&#215; burn the budget is exhausted by day 5, shown as an amber line — the P1 threshold. At 14&#215; burn the budget is gone in roughly two days, shown as a red line — the P0 threshold demanding immediate action. The multiplier is not an abstraction: it is a deadline.</desc>
 
       <!-- background -->
-      <rect x="0" y="0" width="760" height="310" fill="var(--fig-bg)"/>
+      <rect x="0" y="0" width="760" height="288" fill="var(--fig-bg)"/>
 
       <!-- eyebrow -->
       <text x="380" y="22" text-anchor="middle" fill="var(--muted)"
@@ -93,17 +93,6 @@
       <!-- Annotation: 1x burn -->
       <text x="680" y="150" fill="var(--muted)" font-size="12.5">1&#215; burn</text>
       <text x="680" y="163" fill="var(--muted)" font-size="12.5">30d</text>
-
-      <!-- Legend row at y=285 -->
-      <!-- Red disc: 14x / P0 -->
-      <circle cx="84" cy="282" r="4.5" fill="var(--danger)"/>
-      <text x="93"  y="286" fill="var(--muted)" font-size="12.5">14&#215; / P0: ~2 days</text>
-      <!-- Amber square: 6x / P1 -->
-      <rect x="260" y="278" width="8" height="8" fill="var(--warn)"/>
-      <text x="273" y="286" fill="var(--muted)" font-size="12.5">6&#215; / P1: ~5 days</text>
-      <!-- Muted ring: 1x on track -->
-      <circle cx="444" cy="282" r="4" fill="none" stroke="var(--muted)" stroke-width="2"/>
-      <text x="453" y="286" fill="var(--muted)" font-size="12.5">1&#215; on track: 30 days</text>
     </svg>
   </div>
   <figcaption>Fig. &#8212; At 14&#215; burn rate, a 30-day error budget exhausts in roughly two days. The multiplier is not an abstraction &#8212; it&#8217;s a deadline.</figcaption>
