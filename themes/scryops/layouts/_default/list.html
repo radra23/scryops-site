@@ -1,69 +1,21 @@
 {{ define "main" }}
 {{ $pages := .Pages }}
-{{ $hero  := index $pages 0 }}
-{{ $rest  := after 1 $pages }}
 {{ $type := .Type }}
+{{ $eyebrows := dict "articles" "editorial opinion, big-picture takes" "guides" "in-depth technical references" "howtos" "step-by-step task walkthroughs" }}
 <div class="wrap">
   <div class="lhead">
     <div class="lh-l">
-      <div class="scry-eyebrow">section</div>
+      <div class="scry-eyebrow">{{ index $eyebrows $type | default "section" }}</div>
       <h1 class="lh-title">{{ .Title | lower }}</h1>
       {{ with .Params.description }}<p class="lh-sub">{{ . }}</p>{{ end }}
     </div>
     <span class="cnt">{{ len $pages }} indexed</span>
   </div>
 
-  {{ with $hero }}
-  <div class="lst-wrap">
-
-    {{/* ── Hero: featured first article ── */}}
-    <a href="{{ .RelPermalink }}" class="lst-hero">
-      <div class="herothumb">
-        <svg viewBox="0 0 340 120" width="100%" aria-hidden="true">
-          <defs>
-            <marker id="lah" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
-              <path fill="var(--edge)" d="M0 0L8 4L0 8z"/>
-            </marker>
-          </defs>
-          <rect fill="var(--node-fill)" stroke="var(--node-stroke)" rx="6" x="20"  y="40" width="80" height="40"/>
-          <text font-family="'IBM Plex Mono',monospace" font-size="12" fill="var(--nlab)" x="60"  y="65" text-anchor="middle">service</text>
-          <rect fill="var(--node-fill)" stroke="var(--node-stroke)" rx="6" x="130" y="40" width="80" height="40"/>
-          <text font-family="'IBM Plex Mono',monospace" font-size="12" fill="var(--nlab)" x="170" y="65" text-anchor="middle">collector</text>
-          <rect fill="var(--node-fill)" stroke="var(--node-stroke)" rx="6" x="240" y="40" width="80" height="40"/>
-          <text font-family="'IBM Plex Mono',monospace" font-size="12" fill="var(--nlab)" x="280" y="65" text-anchor="middle">backend</text>
-          <line stroke="var(--edge)" stroke-width="1.6" x1="100" y1="60" x2="128" y2="60" marker-end="url(#lah)"/>
-          <line stroke="var(--edge)" stroke-width="1.6" x1="210" y1="60" x2="238" y2="60" marker-end="url(#lah)"/>
-        </svg>
-      </div>
-      {{ $firstTag := index .Params.tags 0 | default "" }}
-      {{ if eq $type "articles" }}<span class="scry-tag trends">Article{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
-      {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
-      {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
-      {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A{{ with $firstTag }} · {{ . }}{{ end }} · #01</span>
-      {{ end }}
-      <h2 class="herotitle">{{ .Title }}</h2>
-      {{ with .Params.excerpt }}<p class="cc-dek">{{ . }}</p>{{ end }}
-      <div class="cc-meta">{{ with .Params.readtime }}{{ . }} min · {{ end }}{{ .Date.Format "Jan 2006" | lower }}</div>
-    </a>
-
-    {{/* ── List rail: remaining articles ── */}}
-    {{ if $rest }}
-    <div class="lst-list">
-      <div class="listlabel">More in this section</div>
-      {{ range $i, $p := $rest }}
-      <a href="{{ $p.RelPermalink }}" class="lst-row">
-        <span class="lst-num">{{ printf "%02d" (add $i 2) }}</span>
-        <div class="lst-rcol">
-          <span class="lst-rti">{{ $p.Title }}</span>
-          <span class="cc-meta">{{ index $p.Params.tags 0 | lower }}</span>
-        </div>
-        <span class="lst-rmeta">{{ with $p.Params.readtime }}{{ . }} min{{ end }}</span>
-      </a>
-      {{ end }}
-    </div>
+  <div class="feed">
+    {{ range $i, $p := $pages }}
+    {{ partial "article-card.html" (dict "num" (add $i 1) "page" $p) }}
     {{ end }}
-
   </div>
-  {{ end }}
 </div>
 {{ end }}
