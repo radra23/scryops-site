@@ -1,16 +1,20 @@
 {{ define "main" }}
-<section class="qa-section wrap">
-  <div class="section-head">
-    <span class="section-label">Q&amp;A</span>
-    <div class="section-rule"></div>
+<div class="wrap">
+  <div class="lhead">
+    <div class="lh-l">
+      <div class="scry-eyebrow">short answers</div>
+      <h1 class="lh-title">{{ .Title | lower }}</h1>
+      {{ with .Params.description }}<p class="lh-sub">{{ . }}</p>{{ end }}
+    </div>
+    <span class="cnt">{{ len .Pages }} answered</span>
   </div>
-  <div class="qa-list">
+  <section class="qa-section">
     {{ range .Pages }}
     <a href="{{ .RelPermalink }}" class="qa-item" style="display:block;text-decoration:none;color:inherit;">
       <div class="qa-q">{{ .Title }}</div>
       <div class="qa-a">{{ .Params.answer }}</div>
     </a>
     {{ end }}
-  </div>
-</section>
+  </section>
+</div>
 {{ end }}

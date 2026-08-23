@@ -853,7 +853,6 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* Q&A list */
 .qa-section{margin-bottom:4rem;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--cyan);padding:1.6rem 2rem 1.8rem}
-.qa-list{display:flex;flex-direction:column}
 .qa-item{padding:1.4rem 0;border-bottom:1px solid var(--border)}
 .qa-item:first-child{border-top:1px solid var(--border)}
 .qa-q{font-family:var(--font-display);font-size:.95rem;margin-bottom:.4rem;display:flex;gap:.6rem;color:var(--heading)}
