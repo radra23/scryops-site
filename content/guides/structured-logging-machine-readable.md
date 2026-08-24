@@ -7,10 +7,9 @@ readtime: 8
 tags: ["Logs", "OpenTelemetry", "Structured Logging", "AI", "Observability"]
 ---
 
-> "A log line that only a human can read is a log line that only a human can use. In 2026, that's half the job."
-> — A Data Engineer Who Has Seen Things
+A log line that only a human can read is a log line that only a human can use. In 2026, that's half the job.
 
-Logs were designed for humans. Someone grepping through a text file at 2am, looking for the line that explains what went wrong. That was the use case, and everything else — the format, the verbosity, the structure — was optimised for that scenario.
+Logs were designed for humans. Someone grepping through a text file at 2am, looking for the line that explains what went wrong. That was the use case. The format, the verbosity, the structure: all of it was optimised for that one scenario.
 
 That scenario is no longer the primary one.
 

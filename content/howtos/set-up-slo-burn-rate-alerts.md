@@ -3,7 +3,7 @@ title: "How to Set Up Your First SLO and Burn Rate Alerts"
 date: 2026-05-26
 draft: true
 excerpt: "A step-by-step walkthrough: define an SLI, calculate your error budget, write Prometheus recording rules, and wire up multi-window burn rate alerts that page you before users notice."
-readtime: 9
+readtime: 7
 tags: ["SLOs", "Alerting", "Prometheus", "Grafana", "How-to"]
 ---
 

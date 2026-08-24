@@ -3,7 +3,7 @@ title: "OpenTelemetry: What It Is and How It Fits Together"
 date: 2026-06-11
 draft: true
 excerpt: "OpenTelemetry is a single instrumentation layer that produces traces, metrics, and logs in a vendor-neutral format. This guide explains what each signal is for, how the SDK and Collector relate, and where to go next."
-readtime: 4
+readtime: 8
 tags: ["OpenTelemetry", "Observability", "Tracing", "Metrics", "Logs"]
 ---
 

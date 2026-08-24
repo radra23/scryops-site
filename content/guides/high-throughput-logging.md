@@ -3,7 +3,7 @@ title: "High-Throughput Logging: Scaling Observability to Internet Scale"
 date: 2026-06-07
 draft: false
 excerpt: "When your systems hit hundreds of thousands of requests per second, traditional logging collapses. Here is how to rethink collection, sampling, and export for extreme scale."
-readtime: 12
+readtime: 22
 tags: ["Logs", "OpenTelemetry", "Observability", "Sampling"]
 ---
 

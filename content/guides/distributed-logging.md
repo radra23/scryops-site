@@ -11,7 +11,9 @@ Single-service logging is a solved problem. Distributed logging is not. When a r
 
 ## Core Concepts
 
-### 1. Distributed Logging Components
+Here's the shape of a real pipeline, and the vocabulary you'll need for the rest of this guide.
+
+### Distributed Logging Components
 
 A production-grade logging pipeline has five distinct responsibilities:
 
@@ -21,7 +23,7 @@ A production-grade logging pipeline has five distinct responsibilities:
 - **Log Analysis**: Query and correlation tooling for surfacing patterns across services
 - **Log Visualization**: Dashboards and search UIs that make cross-service state legible to operators
 
-### 2. Log Types
+### Log Types
 
 Different log categories serve different operational purposes:
 
@@ -33,7 +35,9 @@ Different log categories serve different operational purposes:
 
 ## Implementation Patterns
 
-### 1. Log Collection
+These are the actual building blocks: trace-aware collection feeding a central aggregation layer that your analysis queries run against.
+
+### Log Collection
 
 Each log event must carry trace context from the moment it's emitted. Without `trace_id` and `span_id`, log-to-trace correlation is impossible downstream.
 
@@ -66,7 +70,7 @@ class DistributedLogger:
         self.logger.log(numeric_level, json.dumps(log_entry))
 ```
 
-### 2. Log Aggregation
+### Log Aggregation
 
 Aggregation centralizes log events across all services into a single queryable index. The pattern below routes each service's events into a per-service index while exposing a `logs-*` wildcard for cross-service queries.
 
@@ -96,7 +100,7 @@ class LogAggregator:
         )
 ```
 
-### 3. Log Analysis
+### Log Analysis
 
 Cross-service analysis requires aggregations at query time — not just retrieval. Error rate by service and log-level distribution are the baseline queries every pipeline should support.
 
@@ -130,7 +134,9 @@ class LogAnalyzer:
 
 ## Integration Patterns
 
-### 1. Service Mesh Integration
+Logging doesn't stop at your application code. Here's where the surrounding infrastructure needs to participate too.
+
+### Service Mesh Integration
 
 Service mesh sidecar proxies generate access logs automatically. Capture request ID, method, path, status, and duration at this layer so application code doesn't have to.
 
@@ -154,7 +160,7 @@ class ServiceMeshLogger:
         return self.mesh_client.log(log_entry)
 ```
 
-### 2. Message Queue Integration
+### Message Queue Integration
 
 Async message processing breaks the synchronous request chain. Log queue name, message ID, status, and processing time at both producer and consumer to reconstruct the full event timeline.
 
@@ -175,7 +181,7 @@ class MessageQueueLogger:
         return self.queue_client.log(log_entry)
 ```
 
-### 3. Database Integration
+### Database Integration
 
 Slow queries cause latency spikes that appear in application logs without context. Log query type, duration, and rows affected at the database layer to close that gap.
 
@@ -198,21 +204,23 @@ class DatabaseLogger:
 
 ## What Breaks in Production First
 
-### 1. Log Structure
+Nothing here is theoretical. These are the failure modes that show up in the first six months, roughly in this order.
+
+### Log Structure
 
 - Use a consistent field schema across all services — divergent field names make cross-service queries brittle
 - Include all operationally relevant fields at emit time — retrofitting fields requires redeployment
 - Maintain backward compatibility in schema changes — downstream consumers break silently on missing fields
 - Follow OTel semantic conventions — standard field names let off-the-shelf tooling work without configuration
 
-### 2. Log Management
+### Log Management
 
 - Implement log rotation — unbounded log files fill disks and kill services
 - Set retention policies — define upfront how long each log category must be kept
 - Monitor log volume per service — a cardinality explosion or debug log left on in production will exhaust storage
 - Handle backpressure — when the aggregation layer is unavailable, collectors must buffer or drop with a defined policy
 
-### 3. Security
+### Security
 
 - Sanitize sensitive fields before emission — PII in log pipelines is a compliance incident waiting to happen
 - Implement access control on log indexes — not every operator needs access to audit and security logs
@@ -221,7 +229,9 @@ class DatabaseLogger:
 
 ## Implementation Guidelines
 
-### 1. Service Configuration
+Configuration is where good intentions meet reality. Here's a reference shape for each layer.
+
+### Service Configuration
 
 ```yaml
 logging:
@@ -242,7 +252,7 @@ logging:
       access_control: true
 ```
 
-### 2. Monitoring
+### Monitoring
 
 ```yaml
 monitoring:
@@ -257,7 +267,7 @@ monitoring:
     - storage_critical
 ```
 
-### 3. Analysis
+### Analysis
 
 ```yaml
 analysis:
@@ -273,21 +283,23 @@ analysis:
 
 ## Common Challenges
 
-### 1. Performance
+You will hit these. The only question is whether you planned for them or you're debugging them live, in production, at 2am.
+
+### Performance
 
 - Log volume spikes under load — instrument collection throughput and set per-service emit rate limits
 - Storage costs scale with verbosity — tiered retention and sampling at the aggregation layer reduce spend
 - Query performance degrades on high-cardinality fields — index selectively, not everything
 - Network overhead — high-frequency log emission over a slow link introduces latency; batch where possible
 
-### 2. Reliability
+### Reliability
 
 - Log loss during collector restarts — persistent buffers on the collection agent prevent gaps
 - Collection failures — the service should not fail if the log sink is unavailable; fire-and-forget, buffer, or drop
 - Storage saturation — set storage alerts well before capacity limits, not at them
 - Query timeouts — time-bound queries and index on the fields operators actually filter by
 
-### 3. Maintenance
+### Maintenance
 
 - Schema evolution — use additive changes only; removing or renaming fields breaks existing dashboards and alerts
 - Tool upgrades — test aggregation pipeline upgrades against a sample of real log volume before rolling out

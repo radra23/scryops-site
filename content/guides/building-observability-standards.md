@@ -3,7 +3,7 @@ title: "Building Observability Standards for Your Organisation"
 date: 2026-06-10
 draft: true
 excerpt: "A standards document nobody reads is worse than no standards document — it creates the illusion of governance without the reality. A guide to building observability standards that engineering teams actually follow: how to structure them, how to enforce them, and how to keep them alive."
-readtime: 9
+readtime: 5
 tags: ["Observability", "Best Practices", "Reliability", "Philosophy"]
 ---
 

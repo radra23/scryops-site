@@ -63,6 +63,8 @@ The open-source ecosystem has solid certificate management tools:
 - **Certbot**: The reference Let's Encrypt client with extensible hooks for automated monitoring and renewal
 - **CFSSL**: CloudFlare's PKI toolkit providing certificate validation and bundle management capabilities
 
+Here's the actual call: unless you're already running one of the enterprise platforms above for machine-identity management that goes well beyond TLS certs, start with cert-manager. It's free, it's Kubernetes-native, and it exports Prometheus metrics you can alert on directly. No custom integration required. AppViewX, Venafi, and Keyfactor earn their price when you're managing thousands of certificates across a genuinely heterogeneous PKI estate with compliance requirements that need an audit trail baked in. For a team that's just trying to stop getting paged for expired certs, that's solving a problem you don't have yet.
+
 ## Infrastructure-Based Monitoring
 
 ### Load Balancers and Proxies

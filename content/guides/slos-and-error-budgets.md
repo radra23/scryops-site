@@ -3,7 +3,7 @@ title: "SLOs and Error Budgets"
 date: 2026-06-11
 draft: true
 excerpt: "Service Level Objectives and error budgets give reliability a quantitative shape — a target, a budget for deviation, and burn rate signals that tell you when to stop shipping and start fixing."
-readtime: 6
+readtime: 8
 tags: ["SLOs", "Alerting", "Reliability", "Observability", "On-Call"]
 ---
 

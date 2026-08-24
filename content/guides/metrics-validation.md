@@ -3,7 +3,7 @@ title: "Metrics Validation: A Quality Gate for Instrumentation"
 date: 2026-06-11
 draft: true
 excerpt: "Adding a metric is the easy part. A metric that uses the wrong type, violates naming conventions, or silently generates 50,000 series is worse than no metric — it degrades the whole system. This guide covers the checks to run before a metric ships."
-readtime: 7
+readtime: 9
 tags: ["Metrics", "Observability", "OpenTelemetry", "Prometheus", "Best Practices"]
 ---
 

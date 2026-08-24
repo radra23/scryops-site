@@ -7,8 +7,7 @@ readtime: 8
 tags: ["Logs", "Structured Logging", "Observability", "Best Practices"]
 ---
 
-> "An unversioned schema is a promise you've already broken."
-> — Anonymous
+An unversioned schema is a promise you've already broken.
 
 Structured logging solves the parsing problem. JSON events with consistent field names beat unstructured text for everything that reads logs programmatically — dashboards, alerts, anomaly detection, incident correlation. The whole argument for structured logging rests on the word *consistent*.
 

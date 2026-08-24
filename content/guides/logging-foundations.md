@@ -3,7 +3,7 @@ title: "Logging Foundations"
 date: 2026-06-07
 draft: true
 excerpt: "What logging actually is, why it matters beyond debugging, and how it fits into the broader observability stack — the mental model every engineer should have before touching a logging framework."
-readtime: 7
+readtime: 9
 tags: ["Logs", "Observability", "OpenTelemetry"]
 ---
 
