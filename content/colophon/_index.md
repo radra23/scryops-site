@@ -15,7 +15,7 @@ arrives at its numbers. Awareness, not absolution.
   <div class="scry-colophon__row"><span class="scry-colophon__k">delivery</span><span class="scry-colophon__v">prebuilt files served as-is</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">analytics</span><span class="scry-colophon__v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">offline</span><span class="scry-colophon__v">service worker · reads from cache when the network drops</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">fonts</span><span class="scry-colophon__v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P (no CDN)</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">fonts</span><span class="scry-colophon__v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P, Doto, Pixelify Sans (no CDN)</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">diagrams</span><span class="scry-colophon__v">Mermaid · pre-rendered static SVG <span class="eco">(0 JS, themes via CSS vars)</span></span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">deps</span><span class="scry-colophon__v"><span class="eco">0</span> runtime dependencies · budget: none by default</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">carbon</span><span class="scry-colophon__v">estimated per visit — see <a href="#method">method</a></span></div>
@@ -29,11 +29,11 @@ year lands beside it so the trend is visible, not just asserted.
 
 <div class="scry-colophon">
   <div class="scry-colophon__cmd"><b>scry@ops</b>:~$ footprint --year 2026</div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">pages</span><span class="scry-colophon__v">24 published</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">median page</span><span class="scry-colophon__v"><span class="eco">2.9 KB</span> · HTML, gzipped</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">heaviest</span><span class="scry-colophon__v">24.5 KB · HTML, gzipped</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">shared</span><span class="scry-colophon__v">29.2 KB · CSS + JS, cached after the first visit</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">font set</span><span class="scry-colophon__v">277.5 KB · all faces, cached; a page uses a subset — Lite / blocked = 0</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">pages</span><span class="scry-colophon__v">33 published</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">median page</span><span class="scry-colophon__v"><span class="eco">2.8 KB</span> · HTML, gzipped</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">heaviest</span><span class="scry-colophon__v">25.1 KB · HTML, gzipped</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">shared</span><span class="scry-colophon__v">35.4 KB · CSS + JS, cached after the first visit</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">font set</span><span class="scry-colophon__v">289.1 KB · all faces, cached; a page uses a subset — Lite / blocked = 0</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">trend</span><span class="scry-colophon__v"><span class="eco">baseline</span> · first year of record</span></div>
 </div>
 
