@@ -103,6 +103,10 @@ The retry storm example is illustrative. In practice, you cannot alert on a spec
 
 When a metric doesn't exist at the source, derive one from the log stream. This is appropriate when you're working with existing instrumentation you can't change and you need alertable aggregates. It is not a substitute for source instrumentation — the resolution and accuracy of a log-derived metric depends on your logging rate.
 
+{{< obs-log-to-metric-funnel >}}
+
+The derivation itself is cheap. Everything upstream of it, the ingest and the query that finds the matching lines, is where the cost actually lives.
+
 In Loki, any metric query over a log stream produces a derived metric. Promote it to a recording rule to materialize it:
 
 ```logql
@@ -198,6 +202,10 @@ This produces p95 latency per endpoint from logs, with no trace backend required
 
 ## Retention and Query Cost
 
+{{< obs-log-spend-ladder >}}
+
+Every one of those numbers scales with the choices made earlier in this guide: what you index, what you keep, and for how long.
+
 Log monitoring needs two retention tiers with different performance profiles.
 
 The hot tier covers active monitoring: real-time queries, alert evaluation, and incident investigation. This tier must serve queries in seconds. Expect 7 to 30 days here, with full indexing. The exact window depends on how long your incident investigation cycles run — if P1 investigations routinely look back 14 days, your hot tier is 14 days.
@@ -280,3 +288,9 @@ Infrastructure metrics — CPU, memory, disk I/O, network throughput — have no
 Distributed traces are a better tool for latency attribution. A log with `duration_ms` tells you a request took 450ms. A trace tells you 380ms of that was in a downstream database call, 40ms was in deserialization, and 30ms was in a Redis cache miss. Deriving latency from logs is an approximation useful when you have no trace backend. Once you have traces, the log-derived latency number is redundant and less accurate.
 
 Use logs for application-layer monitoring: business event tracking, error specifics, dependency failure modes, request-level context. Use metrics for infrastructure aggregates and SLO burn rate computation. Use traces for latency attribution and cross-service request path analysis.
+
+## See Also
+
+- [Observability Costs, KubeCon, re:Invent, and Gartner Takeaways](https://www.grepr.ai/blog/three-weeks-three-conferences-one-clear-message-about-observability-costs) — Grepr, 2026, aggregating Gartner client inquiry data. Source for the "over 50% of spend goes to logs" and "36% of enterprises spend over $1M/yr, 4% over $10M/yr" figures in the spend-ladder table.
+- [The Landscape of Observability in 2026: Balancing Cost and Innovation](https://www.elastic.co/resources/observability/report/landscape-observability-report) — Elastic, commissioned research by Dimensional Research, n=526, 2026. Source for the 97% "hit an unexpected cost or overage" figure; directional, not audited.
+- [2026 State of the Cloud](https://info.flexera.com/CM-REPORT-State-of-the-Cloud) — Flexera, 2026. Source for observability running 8-12% of cloud spend at the median, 10-15% for Kubernetes-heavy estates.
