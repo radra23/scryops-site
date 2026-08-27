@@ -1,0 +1,55 @@
+{{- /* layouts/shortcodes/obs-log-spend-ladder.html
+     P1-03 (design_handoff_p1_figures). Five published cost stats for
+     log-based monitoring, opening "Retention and Query Cost". Data and
+     copy are fixed to this figure; call with no parameters, same
+     convention as the other fixed-data obs- figures.
+
+     Component: DataTable, values printed rather than encoded. The five
+     rows share no common unit, so charting them as bars would imply a
+     comparison that doesn't exist — this stays a plain table, same as
+     obs-comparison-table.html's .scry-table.
+
+     Directional/list-price caveats are labelled inline in the Source
+     column, not only in the article's See Also block. */ -}}
+
+<figure class="diagram" aria-label="Table of five published cost figures for log-based monitoring: over 50 percent of observability spend goes to logs, 36 percent of enterprises spend over 1 million dollars a year on logs, 97 percent have hit an unexpected cost or overage, observability is 8 to 12 percent of cloud spend, and logs are billed twice — once on ingest, once on indexing.">
+  <div class="scry-table-wrap">
+  <table class="scry-table">
+    <thead>
+      <tr>
+        <th scope="col">Figure</th>
+        <th scope="col">Value</th>
+        <th scope="col">Source</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Share of observability spend on logs</td>
+        <td>over 50%</td>
+        <td>Gartner client data via Grepr, Jan 2026</td>
+      </tr>
+      <tr>
+        <td>Enterprises spending over $1M / yr on logs</td>
+        <td>36%</td>
+        <td>Gartner, 2026 &mdash; a further 4% exceed $10M / yr</td>
+      </tr>
+      <tr>
+        <td>Hit an unexpected cost or overage</td>
+        <td>97%</td>
+        <td>Elastic 2026 survey, n=526 &mdash; directional, not audited</td>
+      </tr>
+      <tr>
+        <td>Observability as share of cloud spend</td>
+        <td>8&ndash;12% median</td>
+        <td>Flexera 2026 &mdash; 10&ndash;15% for Kubernetes-heavy estates</td>
+      </tr>
+      <tr>
+        <td>Logs bill twice</td>
+        <td>$0.10 / GB ingest, then $1.70&ndash;2.55 / M events indexed</td>
+        <td>Published list price, 2026 &mdash; changes without notice</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <figcaption>Log-based monitoring is the most powerful and the most expensive thing in the stack, in that order. Every query strategy in this guide is also a cost decision.</figcaption>
+</figure>

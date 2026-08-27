@@ -1,0 +1,117 @@
+{{- /* layouts/shortcodes/obs-log-to-metric-funnel.html
+     P1-05 (design_handoff_p1_figures). Log-to-metric derivation for a
+     mid-size service: 40M raw lines a day collapsing to 12,000 matched
+     lines, 240 derived series, and one alert rule. Data and copy are
+     fixed to this figure; call with no parameters, same convention as
+     the other fixed-data obs- figures.
+
+     Rendering logic mirrors obs-column.html (TEMPLATE 01b, log-scale
+     ColumnChart) — the data spans roughly 7.6 decades (40M to 1), so a
+     linear axis would render three of four columns as nothing; log
+     scale is the only honest option.
+
+     EMPHASIS IS NOT A COLOUR. "series" (240, the third column) is the
+     only expensive decision in the pipeline and is singled out by
+     outline weight and label ink/weight only, same as obs-column. Rank
+     colour comes from --mc-ramp-*, assigned by value, independent of
+     the emphasis channel. */ -}}
+
+{{- $data := slice
+  (dict "label" "raw lines" "value" 40000000 "caption" "ingested")
+  (dict "label" "matched"   "value" 12000    "caption" "query hit")
+  (dict "label" "series"    "value" 240      "caption" "per label set")
+  (dict "label" "alerts"    "value" 1        "caption" "one rule")
+-}}
+{{- $n := len $data -}}
+{{- $emph := 2 -}} {{- /* "series" */ -}}
+{{- $title := "Log-to-metric derivation, mid-size service" -}}
+{{- $units := "records per day, log scale" -}}
+{{- /* raw lines (40M) to series (240) is ~5.2 orders of magnitude — the
+     bundle spec's original "four orders of magnitude" caption doesn't
+     match the actual data (raw-to-matched is ~3.5, raw-to-alerts is
+     ~7.6; no step or total in this dataset is four), so the wording
+     below states it accurately instead of reproducing that claim. */ -}}
+{{- $captionText := "Derivation collapses volume by more than five orders of magnitude before it reaches a derived series. Everything expensive happens before that collapse." -}}
+{{- $aria := "Logarithmic column chart showing 40 million raw log lines per day reducing to 12,000 matched lines, 240 derived series, and one alert rule. The series column is emphasised with a heavier outline as the only expensive decision." -}}
+
+{{- $W := 640.0 -}}
+{{- $pl := 62.0 -}}{{- $pr := 620.0 -}}
+{{- $pt := 40.0 -}}{{- $pb := 210.0 -}}
+{{- $ih := sub $pb $pt -}}
+
+{{- $maxCapLines := 0 -}}
+{{- range $data }}{{ with index . "caption" }}{{ $lines := split . "\n" }}{{ if gt (len $lines) $maxCapLines }}{{ $maxCapLines = len $lines }}{{ end }}{{ end }}{{ end -}}
+{{- $H := add 300.0 (mul (float $maxCapLines) 18.0) -}}
+
+{{- $maxVal := 0.0 -}}{{- $minPos := 0.0 -}}
+{{- range $data -}}
+  {{- $v := index . "value" | float -}}
+  {{- if gt $v $maxVal }}{{ $maxVal = $v }}{{ end -}}
+  {{- if or (eq $minPos 0.0) (and (gt $v 0.0) (lt $v $minPos)) }}{{ $minPos = $v }}{{ end -}}
+{{- end -}}
+{{- $log10 := 2.302585092994046 -}}
+{{- $hi := math.Pow 10 (math.Ceil (div (math.Log $maxVal) $log10)) -}}
+{{- /* one decade below the data minimum, not just floor(minPos) — the
+     smallest value (alerts, 1) sits exactly on its own decade boundary,
+     so a floor-to-minPos axis puts it at log-position zero and its bar
+     renders as a 1px sliver rather than a real, readable height. */ -}}
+{{- $lo := math.Pow 10 (sub (math.Floor (div (math.Log $minPos) $log10)) 1) -}}
+{{- $hiLog := div (math.Log $hi) $log10 -}}
+{{- $loLog := div (math.Log $lo) $log10 -}}
+{{- /* curated gridlines at each data point's order of magnitude, not
+     every decade from lo to hi — at 9 decades of span, one gridline
+     per decade is visual clutter with no data near most of them. */ -}}
+{{- $ticks := slice 1.0 100.0 10000.0 1000000.0 100000000.0 -}}
+
+{{- /* rank order: brightest ramp step to the largest value. The leading
+     dot in ".value" is load-bearing — sort silently no-ops without it. */ -}}
+{{- $sorted := sort $data ".value" "desc" -}}
+{{- $steps := slice "var(--mc-ramp-1)" "var(--mc-ramp-2)" "var(--mc-ramp-3)" "var(--mc-ramp-4)" "var(--mc-ramp-5)" -}}
+{{- $stepFor := dict -}}
+{{- $use := cond (le $n 4) 4 5 -}}
+{{- range $r, $row := $sorted -}}
+  {{- $stepFor = merge $stepFor (dict (index $row "label") (index $steps (cond (lt $r $use) $r (sub $use 1)))) -}}
+{{- end -}}
+
+{{- $slot := div (sub $pr $pl) (float $n) -}}
+{{- $bw := cond (lt (mul $slot 0.54) 104.0) (mul $slot 0.54) 104.0 -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-col__hd">{{ $title }}</div>
+    <div class="obs-col__sub">{{ $units }}</div>
+    <svg class="obs-col" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+
+      {{- range $tv := $ticks }}
+      {{- $y := sub $pb (mul (div (sub (div (math.Log $tv) $log10) $loLog) (sub $hiLog $loLog)) $ih) }}
+      <line x1="{{ $pl }}" y1="{{ $y }}" x2="{{ $pr }}" y2="{{ $y }}" stroke="var(--mc-border)" stroke-width="1"/>
+      <text x="{{ sub $pl 10 }}" y="{{ add $y 4 }}" text-anchor="end" class="obs-col__tick">{{ if ge $tv 1000000.0 }}{{ math.Round (div $tv 1000000.0) }}M{{ else if ge $tv 1000.0 }}{{ math.Round (div $tv 1000.0) }}K{{ else }}{{ math.Round $tv }}{{ end }}</text>
+      {{- end -}}
+
+      <line x1="{{ $pl }}" y1="{{ $pb }}" x2="{{ $pr }}" y2="{{ $pb }}" stroke="var(--mc-axis)" stroke-width="1.5"/>
+
+      {{- range $i, $d := $data }}
+      {{- $v := index $d "value" | float -}}
+      {{- $cx := add $pl (add (mul $slot (float $i)) (div $slot 2)) -}}
+      {{- $c := cond (gt $v $lo) $v $lo -}}
+      {{- $top := sub $pb (mul (div (sub (div (math.Log $c) $log10) $loLog) (sub $hiLog $loLog)) $ih) -}}
+      {{- $on := eq $i $emph -}}
+      {{- $h := sub $pb $top -}}{{- $h = cond (gt $h 1.0) $h 1.0 -}}
+      {{- $step := index $stepFor (index $d "label") -}}
+      <rect x="{{ sub $cx (div $bw 2) }}" y="{{ $top }}" width="{{ $bw }}" height="{{ $h }}"
+            fill="{{ $step | safeCSS }}" stroke="var(--mc-ink)"
+            stroke-width="{{ if $on }}3.5{{ else }}1{{ end }}"/>
+      <text x="{{ $cx }}" y="{{ sub $top 12 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
+            class="obs-col__val{{ if $on }} on{{ end }}">{{ if ge $v 1000000.0 }}{{ strings.TrimSuffix ".0" (printf "%.1f" (div $v 1000000.0)) }}M{{ else if ge $v 1000.0 }}{{ strings.TrimSuffix ".0" (printf "%.1f" (div $v 1000.0)) }}K{{ else }}{{ math.Round $v }}{{ end }}</text>
+      <text x="{{ $cx }}" y="{{ add $pb 25 }}" text-anchor="middle" font-weight="{{ if $on }}600{{ else }}400{{ end }}"
+            class="obs-col__lab{{ if $on }} on{{ end }}">{{ index $d "label" }}</text>
+      {{- with index $d "caption" }}
+      {{- range $li, $line := split . "\n" }}
+      <text x="{{ $cx }}" y="{{ add (add $pb 45) (mul (float $li) 17) }}" text-anchor="middle" class="obs-col__cap">{{ $line }}</text>
+      {{- end }}
+      {{- end }}
+      {{- end }}
+    </svg>
+  </div>
+  <figcaption>{{ $captionText }}</figcaption>
+</figure>
