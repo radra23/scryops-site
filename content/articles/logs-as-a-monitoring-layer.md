@@ -23,6 +23,10 @@ The log stream at 14:22 UTC shows something different: `payment-api` returning H
 
 The metric told you something was wrong. The log told you what.
 
+{{< obs-same-incident-two-views >}}
+
+The chart is a real encoding of a real signal. The log lines are the same incident, read a different way — and only one of them tells you where to look next.
+
 ## The Signal Hidden in Structured Logs
 
 Free-text logs are searchable. Structured logs are queryable. That gap determines what your monitoring layer can actually do.
