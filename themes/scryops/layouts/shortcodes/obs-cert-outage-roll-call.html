@@ -1,0 +1,59 @@
+{{- /* layouts/shortcodes/obs-cert-outage-roll-call.html
+     P1-02 (design_handoff_p1_figures). Five publicly disclosed outages
+     caused by an expired TLS certificate — the "most preventable cause"
+     opener for certificate-monitoring.md. Data and copy are fixed to this
+     figure; call with no parameters, same convention as the other
+     fixed-data obs- figures.
+
+     Component: DataTable, first column mono row-header (same rowhead
+     convention as obs-comparison-table.html's .scry-table). Register is
+     deadpan — no editorial in the rows, the joke lands only in the closing
+     caption line, same move as obs-pii-hall-of-shame. */ -}}
+
+<figure class="diagram" aria-label="Table of five publicly disclosed outages caused by an expired TLS certificate: Ericsson with O2 and SoftBank, Epic Games, Google Voice, Microsoft Teams, and Spotify Megaphone, each listing downtime, scope, and cause.">
+  <div class="scry-table-wrap">
+  <table class="scry-table">
+    <thead>
+      <tr>
+        <th scope="col">Incident</th>
+        <th scope="col">Down</th>
+        <th scope="col">Scope</th>
+        <th scope="col">Cause</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" class="rowhead">Ericsson &rarr; O2, SoftBank</th>
+        <td>~24h</td>
+        <td>32M subscribers, 11 operators</td>
+        <td>Expired cert in SGSN-MME nodes</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">Epic Games</th>
+        <td>5.5h</td>
+        <td>Fortnite, Rocket League, Store</td>
+        <td>One wildcard across hundreds of services</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">Google Voice</th>
+        <td>4h</td>
+        <td>No VoIP calls</td>
+        <td>Cert config update failed to renew</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">Microsoft Teams</th>
+        <td>~3h</td>
+        <td>Global sign-in</td>
+        <td>Auth cert expired without triggering renewal</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">Spotify Megaphone</th>
+        <td>~8h</td>
+        <td>Podcast publishers locked out</td>
+        <td>Missed renewal on the CMS</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <figcaption>Every one of these companies had a monitoring team. None of them were attacked. The certificate simply reached its Not After date on schedule, as designed.</figcaption>
+</figure>
