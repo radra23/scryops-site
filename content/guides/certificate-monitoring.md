@@ -7,6 +7,12 @@ readtime: 8
 tags: ["Security", "Observability", "Monitoring"]
 ---
 
+TLS certificate expiry is one of the most preventable causes of outages in production. It doesn't take an attacker, a zero-day, or a novel failure mode — it only takes a date on a calendar nobody watched.
+
+{{< obs-cert-outage-roll-call >}}
+
+Every one of these outages had a fix that was available weeks in advance: a renewal, run on schedule.
+
 ## The Mechanics of Certificate Management
 
 Effective certificate monitoring requires purpose-built tools for this specific observability domain.
@@ -42,6 +48,10 @@ graph TB
 {{< /mermaid >}}
 
 Minute-by-minute synthetic checks are the wrong tool for this job. Certificate expiry is a slow-moving signal — a daily check gives you days or weeks of lead time, which is all you need to act. Switching to dedicated lifecycle management tools means you get structured expiry metadata and renewal automation, not just a binary pass/fail every 60 seconds.
+
+{{< obs-cert-lifetime-collapse >}}
+
+The shrinking lifetime isn't a hypothetical future problem you can plan around later — it's already forcing the automation question today.
 
 ## Dedicated Certificate Management Solutions
 
@@ -236,3 +246,14 @@ To move from synthetic certificate checking to lifecycle management:
 6. **Optimization**: Continuously refine your certificate lifecycle management
 
 Start with the certificates that are closest to expiry or have no automation in place. Retire synthetic monitors only after the replacement tooling has been running cleanly for at least one renewal cycle.
+
+## See Also
+
+- [Ballot SC-081v3: Introduce Schedule of Reducing Validity and Data Reuse Periods](https://cabforum.org/2025/04/11/ballot-sc081v3-introduce-schedule-of-reducing-validity-and-data-reuse-periods/) — CA/Browser Forum, Apr 2025. The ballot behind the 200/100/47-day schedule in the lifetime-collapse figure.
+- [TLS Certificate Lifetimes Will Officially Reduce to 47 Days](https://www.digicert.com/blog/tls-certificate-lifetimes-will-officially-reduce-to-47-days) — DigiCert, 2026. Confirms the phased rollout dates and the domain-validation reuse period dropping to 10 days by 2029.
+- [Preparing for 47-Day SSL/TLS Certificates](https://www.ssl.com/article/preparing-for-47-day-ssl-tls-certificates/) — SSL.com, 2026. Second CA source for the same schedule, used to cross-check the renewal-frequency arithmetic in the figure's caption row.
+- [Ericsson apologises for telco service failures, identifies expired software certificate as main issue](https://iot-now.com/2018/12/07/91023-ericsson-apologises-telco-service-failures-identifies-expired-software-certificate-main-issue/) — IoT Now, Dec 2018. Ericsson's own account of the SGSN-MME certificate expiry that cut off roughly 32 million O2 and SoftBank subscribers.
+- [The April 6, 2021 Fortnite Outage Report](https://www.epicgames.com/fortnite/en-US/news/april-6-technical-service-outage-report) — Epic Games, Apr 2021. Epic's public post-mortem on the expired wildcard certificate behind the 5.5-hour outage.
+- [Recent Google Voice outage caused by expired certificates](https://www.bleepingcomputer.com/news/google/recent-google-voice-outage-caused-by-expired-certificates/) — BleepingComputer, Feb 2021, reporting on Google's own root-cause analysis. Primary Google Cloud incident summary is no longer published at its original URL; this is the closest surviving account.
+- [Microsoft's Slack competitor Teams is down due to an expired authentication certificate](https://www.geekwire.com/2020/microsofts-slack-competitor-teams-due-expired-authentication-certificate/) — GeekWire, Feb 2020. Covers Microsoft's own incident statement on the expired auth certificate behind the global sign-in outage.
+- [Keyfactor Research Reveals Digital Certificate Outages a Weekly Reality for 1 in 10 Enterprises](https://www.keyfactor.com/press-releases/keyfactor-research-reveals-digital-certificate-outages-a-weekly-reality-for-1-in-10-enterprises/) — Keyfactor, 2026. Source for the finding that a certificate outage typically pulls 11-20 people into the response.
