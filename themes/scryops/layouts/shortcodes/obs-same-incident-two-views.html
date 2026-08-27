@@ -1,0 +1,103 @@
+{{- /* layouts/shortcodes/obs-same-incident-two-views.html
+     P1-04 (design_handoff_p1_figures). The same incident shown two ways:
+     a line chart of the error-rate spike, then the four structured log
+     fields that actually point at the fix. Two blocks, not one — the
+     chart is a data encoding, the log lines are evidence. Data and copy
+     are fixed to this figure; call with no parameters, same convention
+     as the other fixed-data obs- figures.
+
+     Chart data is illustrative (labelled as such in the subtitle and
+     alt text), not a measured incident — adapted from obs-series.html
+     (TEMPLATE 03b) for a single series, so it keeps the same threshold-
+     as-dashed-rule-not-a-tinted-band treatment.
+
+     Terminal well uses the theme-independent code constants (--code-bg,
+     --code-text, --code-hi, --code-muted, --code-bd) so it stays dark
+     and legible in every theme, same as the .bg-term pattern in
+     obs-pii-bingo.html. Field names (level, tenant, op, dep, status,
+     retries, trace_id, pool, region) match this library's structured-
+     logging conventions elsewhere in the site. */ -}}
+
+{{- /* plain hyphen, not the &minus; entity — a bare, undeclared HTML named
+     entity inside an SVG text element is not valid XML and fails this
+     repo's well-formedness check even though Hugo/the browser render it
+     fine; a literal "-" needs no entity at all. NOTE: this file's comments
+     must never spell out the SVG element's own opening or closing markup —
+     scripts/verify_visuals.py locates the region to validate by searching
+     for those exact substrings, so writing them literally in a comment
+     (even to describe this very gotcha) gets mistaken for the real
+     element and pulls in everything from that point on. */ -}}
+{{- $labels := slice "-90s" "-60s" "-30s" "T" "+30s" "+60s" -}}
+{{- $values := slice 0.2 0.3 0.2 4.2 4.0 4.1 -}}
+{{- $hi := 5.0 -}}
+{{- $thrVal := 1.0 -}}
+{{- $thrLabel := "alert threshold" -}}
+{{- $n := len $values -}}
+{{- $aria := "Line chart of error rate rising from about 0.2 percent to 4.2 percent at time T, crossing a dashed alert threshold at 1 percent. Illustrative, not measured." -}}
+
+{{- $W := 640 -}}{{- $H := 240 -}}
+{{- $pl := 52 -}}{{- $pr := 588 -}}{{- $pt := 22 -}}{{- $pb := 180 -}}
+{{- $ih := sub $pb $pt -}}
+{{- $ticks := 5 -}} {{- /* 0/1/2/3/4/5 — divides evenly into hi=5, unlike 4 (which rounds 2.5 to 3 and silently skips "2") */ -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-ser__hd">Error rate around an incident</div>
+    <div class="obs-ser__sub">percent of requests failing &middot; illustrative, not measured</div>
+    <svg class="obs-ser" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+
+      {{- range $t := seq 0 $ticks }}
+      {{- $val := mul (div $hi (float $ticks)) (float $t) -}}
+      {{- $y := sub $pb (mul (div $val $hi) $ih) }}
+      <line x1="{{ $pl }}" y1="{{ $y }}" x2="{{ $pr }}" y2="{{ $y }}" stroke="var(--mc-border)" stroke-width="1"/>
+      <text x="{{ sub $pl 10 }}" y="{{ add $y 4 }}" text-anchor="end" class="obs-ser__tick">{{ math.Round $val }}</text>
+      {{- end }}
+
+      <line x1="{{ $pl }}" y1="{{ $pb }}" x2="{{ $pr }}" y2="{{ $pb }}" stroke="var(--mc-axis)" stroke-width="1.5"/>
+
+      {{- /* threshold: dashed rule, labelled in place — never a tinted band */ -}}
+      {{- $ty := sub $pb (mul (div $thrVal $hi) $ih) }}
+      <line x1="{{ $pl }}" y1="{{ $ty }}" x2="{{ $pr }}" y2="{{ $ty }}"
+            stroke="var(--mc-ramp-3)" stroke-width="1.6" stroke-dasharray="7 4"/>
+      <text x="{{ add $pl 6 }}" y="{{ sub $ty 7 }}" class="obs-ser__thr">{{ $thrLabel }} {{ $thrVal }}%</text>
+
+      {{- $pts := slice -}}
+      {{- range $i, $v := $values -}}
+        {{- $x := add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl)) -}}
+        {{- $y := sub $pb (mul (div $v $hi) $ih) -}}
+        {{- $pts = $pts | append (printf "%.2f,%.2f" $x $y) -}}
+      {{- end }}
+      {{- /* hoisted into its own variable — the delimiter's quotes, nested
+           directly inside the already-quoted points="..." attribute, read
+           as broken markup to the plain-text well-formedness checker even
+           though Hugo evaluates the expression fine (same class of bug as
+           obs-column.html's map-key-in-attribute note). */ -}}
+      {{- $ptsStr := delimit $pts " " -}}
+      <polyline points="{{ $ptsStr }}" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-linecap="butt"/>
+      {{- range $i, $v := $values }}
+      {{- $x := add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl)) -}}
+      {{- $y := sub $pb (mul (div $v $hi) $ih) -}}
+      {{- /* formatted into variables first, not inlined — a quoted printf
+           format string nested inside the already-quoted cx="..." attribute
+           is the same broken-markup pattern as the polyline fix above. */ -}}
+      {{- $cx := printf "%.2f" $x -}}
+      {{- $cy := printf "%.2f" $y -}}
+      <circle cx="{{ $cx }}" cy="{{ $cy }}" r="4" fill="var(--mc-ramp-1)"/>
+      {{- end }}
+
+      {{- range $i, $l := $labels }}
+      {{- $x := add $pl (mul (div (float $i) (sub $n 1)) (sub $pr $pl)) }}
+      <text x="{{ $x }}" y="{{ add $pb 24 }}" text-anchor="middle" class="obs-ser__xlab">{{ $l }}</text>
+      {{- end }}
+    </svg>
+
+    <div class="obs-siv__term">
+      <div class="p">level=ERROR tenant=acme-eu op=checkout.submit</div>
+      <div class="p">dep=payments-api status=503 retries=3</div>
+      <div class="p">trace_id=4bf92f3577b34da6a3ce929d0e0e4736 pool=exhausted</div>
+      <div class="p">region=eu-west-1 <span class="obs-siv__note">&mdash; 97% of errors share this key</span></div>
+      <div class="obs-siv__answer">&rarr; one tenant, one dependency, one region. The investigation starts at the answer.</div>
+    </div>
+  </div>
+  <figcaption>Both halves are correct. Only one tells you what to do next.</figcaption>
+</figure>

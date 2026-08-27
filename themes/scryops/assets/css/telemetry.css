@@ -1311,6 +1311,15 @@ html.calm {
 .obs-ser__thr{font-size:12.5px;fill:var(--mc-ink-muted)}
 .obs-ser__ev{font-size:12.5px;fill:var(--mc-ink)}
 
+/* ---- same-incident-two-views: terminal well beneath the line chart ----
+   Same theme-independent code tokens and sizing as the .bg-term / .calc
+   wells (obs-pii-bingo.html, obs-hash-danger.html) — always dark, never
+   overridden per theme. */
+.obs-siv__term{margin-top:14px;background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);padding:.85rem 1rem;font-family:var(--font-code);font-size:.78rem;line-height:1.85;color:var(--code-text)}
+.obs-siv__term .p{color:var(--code-muted)}
+.obs-siv__note{color:var(--code-muted)}
+.obs-siv__answer{color:var(--code-hi);font-weight:600;margin-top:.3rem}
+
 /* ---- column (template 01b): vertical sibling of obs-ranked-bars, log scale ----
    Same viewBox-scaling note as obs-ser above: tick/y-label text stays at
    the measured-safe 12.5px rather than canonical --mc-text-tick (12px);
