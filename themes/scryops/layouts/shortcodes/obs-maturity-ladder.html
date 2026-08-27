@@ -1,0 +1,61 @@
+{{- /* layouts/shortcodes/obs-maturity-ladder.html
+     P1-09 (design_handoff_p1_figures) · lo-fi, closes a TODO. Replaces
+     13 self-assessment-table rows with five rungs, each collapsed to the
+     one diagnostic question that actually separates it from the rung
+     below. Data and copy are fixed to this figure; call with no
+     parameters, same convention as the other fixed-data obs- figures.
+
+     Component: DecisionTree (TEMPLATE 05b, obs-decision-tree.html) in
+     tier-ladder mode, adapted with the data hardcoded.
+
+     OPEN DECISION RESOLVED (per user direction): the glyph vocabulary
+     caps at four silhouettes (circle/triangle/square/diamond) but this
+     model has five levels. Level 5 reuses the diamond from level 4 —
+     obs-glyph.html's rank branch is `if/else if/else`, so any rank >= 3
+     already falls through to the diamond case — differentiated from
+     level 4 by rail weight alone (both already sit on the brightest
+     ramp step), not a new shape. The model keeps its real five rungs
+     rather than collapsing
+     to four. */ -}}
+
+{{- $branches := slice
+  (dict "head" "L1 &middot; REACTIVE" "action" "Do you know why something broke before someone tells you?")
+  (dict "head" "L2 &middot; STRUCTURED" "action" "Can you find the log line for any given request?")
+  (dict "head" "L3 &middot; CORRELATED" "action" "Can you jump from an alert to the trace to the log line, in one path?")
+  (dict "head" "L4 &middot; PROACTIVE" "action" "Do you catch problems before they page anyone?")
+  (dict "head" "L5 &middot; PREDICTIVE" "action" "Does your reliability data change a product or business decision?")
+-}}
+{{- $steps := slice "var(--mc-ramp-4)" "var(--mc-ramp-3)" "var(--mc-ramp-2)" "var(--mc-ramp-1)" "var(--mc-ramp-1)" -}}
+{{- $ranks := slice 0 1 2 3 4 -}} {{- /* rank 3 and 4 both fall through obs-glyph.html's else branch to the diamond */ -}}
+
+{{- /* replace, not plainify — plainify doesn't decode named HTML entities,
+     so an "&middot;" surviving into a printf that's interpolated straight
+     into an aria-label gets re-escaped to the literal text "&amp;middot;"
+     by Hugo's autoescaper. */ -}}
+{{- $desc := slice -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s — %s" (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- $aria := printf "Five-rung observability maturity ladder, least to most mature: %s. Levels 4 and 5 share the diamond glyph, told apart by rail weight rather than shape or colour. Recovery time from a failed deployment ranges from over a week at level 1 to under an hour at level 5, per DORA 2025." (delimit $desc "; ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-dt" role="img" aria-label="{{ $aria }}">
+      <div class="obs-dt__hd">THE FIVE LEVELS</div>
+      <div class="obs-dt__sub">recovery from a failed deploy: L1 over a week &middot; L5 under an hour (DORA 2025)</div>
+      <div class="obs-dt__body noStem">
+        <div class="obs-rank">
+          {{- range $i, $b := $branches }}
+          {{- $rank := index $ranks $i -}}
+          <div class="obs-rank__row" data-rank="{{ $i }}">
+            <span class="obs-rank__g">{{ partial "obs-glyph.html" (dict "rank" $rank "fill" (index $steps $i)) }}</span>
+            <div>
+              <div class="obs-rank__head">{{ index $b "head" | safeHTML }}</div>
+              <p class="obs-rank__act">{{ index $b "action" }}</p>
+            </div>
+          </div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>The rung you are on is the one whose question you cannot answer yet.</figcaption>
+</figure>

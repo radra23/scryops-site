@@ -1228,6 +1228,11 @@ html.calm {
 .obs-rank__row[data-rank="1"]{border-left:2.5px solid var(--mc-ramp-2)}
 .obs-rank__row[data-rank="2"]{border-left:3.5px solid var(--mc-ramp-1)}
 .obs-rank__row[data-rank="3"]{border-left:4px solid var(--mc-ramp-1)}
+/* 5th rung: obs-maturity-ladder.html only (a 5-level ladder that reuses
+   the diamond glyph for both rank 3 and rank 4 per the resolved open
+   decision — same brightest ramp step as rank 3, one heavier weight so
+   the two rungs still read apart without a new shape). */
+.obs-rank__row[data-rank="4"]{border-left:4.5px solid var(--mc-ramp-1)}
 .obs-rank__g{margin-top:3px}
 .obs-rank__head{font-size:var(--mc-text-value);line-height:1.5;color:var(--mc-ink);font-weight:600}
 .obs-rank__act{font-family:var(--font-read);font-size:var(--mc-text-label);line-height:1.55;color:var(--mc-ink-secondary);margin:4px 0 0}

@@ -1,0 +1,67 @@
+{{- /* layouts/shortcodes/obs-check-cadence-vs-response.html
+     P1-11 (design_handoff_p1_figures) · lo-fi. The section's own logic,
+     drawn: certificate renewal ownership and automation decide the right
+     check cadence, not the other way around. Data and copy are fixed to
+     this figure; call with no parameters, same convention as the other
+     fixed-data obs- figures.
+
+     Component: DecisionTree (TEMPLATE 05b, obs-decision-tree.html),
+     stem + fan, adapted with the data hardcoded instead of parsed from
+     .Inner JSON. Branches ordered least severe first so the no-owner
+     case lands on the heaviest rail, per the bundle's encoding note. */ -}}
+
+{{- $stem := slice
+  (dict "label" "Certificate approaching expiry" "caption" "entry" "entry" true)
+  (dict "label" "Is there a clear owner?" "caption" "no &rarr; stop, cadence doesn't matter yet" "kind" "tint")
+  (dict "label" "Is renewal automated?" "kind" "tint" "edge" "yes")
+-}}
+{{- $branches := slice
+  (dict "head" "AUTOMATED &middot; e.g. cert-manager, ACME" "action" "Check daily. You're watching the pipeline, not racing a deadline.")
+  (dict "head" "MANUAL &middot; change window required" "action" "Check weekly. Alert at 30 days so there's time to schedule the change.")
+  (dict "head" "NO OWNER" "action" "Check frequency is irrelevant. Find the owner before anything else.")
+-}}
+{{- $steps := slice "var(--mc-ramp-3)" "var(--mc-ramp-2)" "var(--mc-ramp-1)" -}}
+{{- $shapes := slice "circle" "triangle" "square" -}}
+
+{{- /* replace, not plainify — plainify doesn't decode named HTML entities,
+     so an "&middot;" surviving into a printf that's interpolated straight
+     into an aria-label gets re-escaped to the literal text "&amp;middot;"
+     by Hugo's autoescaper. */ -}}
+{{- $desc := slice -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s marks %s — %s" (index $shapes $i) (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- $aria := printf "Decision tree for certificate check cadence. Two questions — is there a clear owner, and is renewal automated — fan out to three outcomes least to most severe: %s. Severity is carried by shape and rail weight, not colour." (delimit $desc "; ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-dt" role="img" aria-label="{{ $aria }}">
+      <div class="obs-dt__hd">CHECK CADENCE, NOT GUESSWORK</div>
+      <div class="obs-dt__sub">// match the interval to who can actually act on it</div>
+      <div class="obs-dt__body">
+        <div class="obs-dt__stem">
+          {{- range $i, $s := $stem }}
+          {{- if gt $i 0 }}
+          <span class="obs-dt__link" aria-hidden="true">&#8595;{{ with index $s "edge" }}<span>{{ . }}</span>{{ end }}</span>
+          {{- end }}
+          <span class="obs-dt__node{{ if index $s "entry" }} entry{{ end }}{{ if eq (index $s "kind" | default "") "tint" }} tint{{ end }}">
+            <span class="obs-dt__nm">{{ index $s "label" }}</span>
+            {{- with index $s "caption" }}<span class="obs-dt__cap">{{ . | safeHTML }}</span>{{ end }}
+          </span>
+          {{- end }}
+        </div>
+        <div class="obs-dt__fan" aria-hidden="true">&#8594;</div>
+        <div class="obs-rank">
+          {{- range $i, $b := $branches }}
+          <div class="obs-rank__row" data-rank="{{ $i }}">
+            <span class="obs-rank__g">{{ partial "obs-glyph.html" (dict "rank" $i "fill" (index $steps $i)) }}</span>
+            <div>
+              <div class="obs-rank__head">{{ index $b "head" | safeHTML }}</div>
+              <p class="obs-rank__act">{{ index $b "action" }}</p>
+            </div>
+          </div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Checking every minute buys nothing if the fix takes a week to schedule.</figcaption>
+</figure>

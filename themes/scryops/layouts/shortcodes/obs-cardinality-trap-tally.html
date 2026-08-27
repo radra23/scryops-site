@@ -1,0 +1,74 @@
+{{- /* layouts/shortcodes/obs-cardinality-trap-tally.html
+     P1-06 (design_handoff_p1_figures) · lo-fi, humour. Five log fields
+     that look harmless as a metric label and are fatal as one, ranked by
+     how many series they actually add. Data and copy are fixed to this
+     figure; call with no parameters, same convention as the other
+     fixed-data obs- figures.
+
+     DATA NOTE: the bundle's own spec flags this figure as blocked —
+     "series counts must be computed for a stated reference service, not
+     invented" — and points at a multiplier table (P2-06) that is not
+     part of this handoff and does not exist in this repo. Per the user's
+     explicit direction, the numbers below are reasoned, clearly-labelled
+     estimates on the ONE real anchor the spec does give (4 endpoints x
+     5 status codes x 12 pods = 240 baseline series for a normal metric),
+     not measured production data — stated as such in the units line and
+     caption rather than presented as sourced fact.
+
+     Component: BarChart (TEMPLATE 01, obs-ranked-bars.html), hardcoded.
+     Ramp steps assigned by rank, computed here — same law as the source
+     template. Emphasis on the worst offender (request_id) via outline
+     weight and label ink/weight only, never colour. */ -}}
+
+{{- $baseline := 240 -}}
+{{- $rows := slice
+  (dict "label" "request_id"                     "value" 24000 "mult" "100&times;")
+  (dict "label" "user_id"                        "value" 10800 "mult" "45&times;")
+  (dict "label" "full URL path"                  "value" 4800  "mult" "20&times;")
+  (dict "label" "stack-trace hash"                "value" 1920  "mult" "8&times;")
+  (dict "label" "pod_name (under autoscaling)"    "value" 720   "mult" "3&times;")
+-}}
+{{- $n := len $rows -}}
+{{- $emph := 0 -}} {{- /* request_id, the worst offender */ -}}
+
+{{- $hi := 0.0 -}}
+{{- range $rows }}{{ $v := index . "value" | float }}{{ if gt $v $hi }}{{ $hi = $v }}{{ end }}{{ end -}}
+{{- $hi = cond (gt $hi 0.0) $hi 1.0 -}}
+
+{{- $sorted := sort $rows ".value" "desc" -}}
+{{- $steps := slice "var(--mc-ramp-1)" "var(--mc-ramp-2)" "var(--mc-ramp-3)" "var(--mc-ramp-4)" "var(--mc-ramp-5)" -}}
+{{- $stepFor := dict -}}
+{{- $use := cond (le $n 4) 4 5 -}}
+{{- range $r, $row := $sorted -}}
+  {{- $stepFor = merge $stepFor (dict (index $row "label") (index $steps (cond (lt $r $use) $r (sub $use 1)))) -}}
+{{- end -}}
+
+{{- /* replace, not plainify — plainify doesn't decode named HTML entities,
+     so an "&times;" surviving into a printf that's interpolated straight
+     into an aria-label gets re-escaped to the literal text "&amp;times;"
+     by Hugo's autoescaper. */ -}}
+{{- $desc := slice -}}
+{{- range $rows }}{{ $desc = $desc | append (printf "%s: %v series, %s the baseline" (index . "label") (index . "value") (index . "mult" | replace "&times;" "x")) }}{{ end -}}
+{{- $aria := printf "Bar chart of series count added by five log fields if used as a metric label, against a 240-series baseline for a reference service with 4 endpoints, 5 status codes and 12 pods. %s. Bars are shaded from strongest to faintest in rank order, and the worst offender, request_id, carries a heavier outline." (delimit $desc "; ") -}}
+
+<figure class="diagram" aria-label="{{ $aria }}">
+  <div class="diag-card">
+    <div class="obs-dt__hd" style="font-family:var(--font-read);font-size:15px;font-weight:500;margin-bottom:4px">What one bad label does to a {{ $baseline }}-series metric</div>
+    <div class="obs-dt__sub" style="margin-bottom:16px">estimated distinct series added per day &middot; baseline {{ $baseline }} (4 endpoints &times; 5 status codes &times; 12 pods) &middot; reasoned estimate, not measured</div>
+    <div class="obs-bars">
+      {{- range $i, $row := $rows }}
+      {{- $v := index $row "value" | float -}}
+      {{- $step := index $stepFor (index $row "label") -}}
+      {{- $on := eq $i $emph -}}
+      <div class="obs-bars__row{{ if $on }} on{{ end }}">
+        <span class="obs-bars__lab">{{ index $row "label" }}</span>
+        <span class="obs-bars__track">
+          <span class="obs-bars__fill" style="display:block;width:{{ math.Round (mul (div $v $hi) 100) }}%;background:{{ $step | safeCSS }}"></span>
+        </span>
+        <span class="obs-bars__val">{{ index $row "value" }} <small>({{ index $row "mult" | safeHTML }})</small></span>
+      </div>
+      {{- end }}
+    </div>
+  </div>
+  <figcaption>Every one of these is a perfectly good log field. None of them is a metric label.</figcaption>
+</figure>

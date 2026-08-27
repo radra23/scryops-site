@@ -1,0 +1,46 @@
+{{- /* layouts/shortcodes/obs-maturity-traps.html
+     P1-10 (design_handoff_p1_figures) · lo-fi, humour. One named trap per
+     level, flat register — same deadpan move as obs-pii-hall-of-shame:
+     no editorial in the rows, the joke is the closing line only. Data
+     and copy are fixed to this figure; call with no parameters, same
+     convention as the other fixed-data obs- figures.
+
+     Component: DataTable, plain .scry-table (obs-comparison-table.html's
+     pattern), no row-header variant needed — every row is already a
+     named level. */ -}}
+
+<figure class="diagram" aria-label="Table of one characteristic trap per observability maturity level: level 1 dashboard hoarding, level 2 the tool-sprawl plateau, level 3 SLO theatre, level 4 the platform team as ticket queue, level 5 the maturity model itself as a shopping list.">
+  <div class="scry-table-wrap">
+  <table class="scry-table">
+    <thead>
+      <tr>
+        <th scope="col">Level</th>
+        <th scope="col">Characteristic Trap</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <th scope="row" class="rowhead">L1 &middot; Reactive</th>
+        <td>Dashboard hoarding &mdash; building a display case before there's anything to display.</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">L2 &middot; Structured</th>
+        <td>The tool-sprawl plateau &mdash; more collectors and backends, no more correlation than before.</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">L3 &middot; Correlated</th>
+        <td>SLO theatre &mdash; targets defined for the review deck, not backed by an error budget anyone actually enforces.</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">L4 &middot; Proactive</th>
+        <td>The platform team as ticket queue &mdash; built to prevent incidents, spending its time fielding requests instead.</td>
+      </tr>
+      <tr>
+        <th scope="row" class="rowhead">L5 &middot; Predictive</th>
+        <td>The maturity model itself as a shopping list &mdash; treating this ladder as features to buy, not behaviour to change.</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+  <figcaption>Each level has a characteristic way of feeling finished. That feeling is the trap.</figcaption>
+</figure>

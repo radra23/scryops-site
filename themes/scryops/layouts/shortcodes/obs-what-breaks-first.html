@@ -1,0 +1,49 @@
+{{- /* layouts/shortcodes/obs-what-breaks-first.html
+     P1-08 (design_handoff_p1_figures) · lo-fi. The three failure classes
+     from "What Breaks in Production First," ordered by when they actually
+     show up. Data and copy are fixed to this figure; call with no
+     parameters, same convention as the other fixed-data obs- figures.
+
+     Component: DecisionTree (TEMPLATE 05b, obs-decision-tree.html) in
+     tier-ladder mode — no stem, branches only, adapted here with the
+     data hardcoded instead of parsed from .Inner JSON. Rank rides on
+     glyph silhouette, rail value, and rail weight — never hue. Ordered
+     least severe first, per the source article's own progression. */ -}}
+
+{{- $branches := slice
+  (dict "head" "STRUCTURE &middot; schema drift" "action" "Divergent field names and silent schema changes break queries and dashboards before anyone notices.")
+  (dict "head" "MANAGEMENT &middot; retention" "action" "Unbounded log volume and undefined retention policies exhaust storage and force reactive firefighting.")
+  (dict "head" "SECURITY &middot; access control" "action" "Unsanitised fields and unrestricted index access turn a log pipeline into a compliance incident.")
+-}}
+{{- $steps := slice "var(--mc-ramp-3)" "var(--mc-ramp-2)" "var(--mc-ramp-1)" -}}
+
+{{- /* replace, not plainify — plainify doesn't decode named HTML entities,
+     so an "&middot;" surviving into a printf that's interpolated straight
+     into an aria-label gets re-escaped to the literal text "&amp;middot;"
+     by Hugo's autoescaper. */ -}}
+{{- $desc := slice -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "rank %d, %s — %s" $i (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- $aria := printf "Ranked tiers of what breaks first in a distributed logging pipeline, least to most severe: %s. Severity is carried by shape and rail weight, not colour." (delimit $desc "; ") -}}
+
+<figure class="diagram">
+  <div class="diag-card">
+    <div class="obs-dt" role="img" aria-label="{{ $aria }}">
+      <div class="obs-dt__hd">WHAT BREAKS FIRST</div>
+      <div class="obs-dt__sub">// in roughly this order, the first six months</div>
+      <div class="obs-dt__body noStem">
+        <div class="obs-rank">
+          {{- range $i, $b := $branches }}
+          <div class="obs-rank__row" data-rank="{{ $i }}">
+            <span class="obs-rank__g">{{ partial "obs-glyph.html" (dict "rank" $i "fill" (index $steps $i)) }}</span>
+            <div>
+              <div class="obs-rank__head">{{ index $b "head" | safeHTML }}</div>
+              <p class="obs-rank__act">{{ index $b "action" }}</p>
+            </div>
+          </div>
+          {{- end }}
+        </div>
+      </div>
+    </div>
+  </div>
+  <figcaption>Schema drift comes first, retention second, access control last &mdash; and last is the one with a regulator attached.</figcaption>
+</figure>

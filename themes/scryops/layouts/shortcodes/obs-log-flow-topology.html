@@ -1,0 +1,88 @@
+{{- /* layouts/shortcodes/obs-log-flow-topology.html
+     P1-07 (design_handoff_p1_figures) · lo-fi. The collection pipeline
+     this guide describes across nine code blocks and never draws: app to
+     sidecar agent to Collector to aggregator to store, plus the four
+     silent drop points along the way. Data and copy are fixed to this
+     figure; call with no parameters, same convention as the other
+     fixed-data obs- figures.
+
+     Component: FlowDiagram (border = rank, fill = kind, dash =
+     conditionality), modeled on obs-pii-leak-paths.html's box-and-path
+     structure. Two kinds of node: the five pipeline stages (thin solid
+     border, no fill) and the four conditional drop points (dashed
+     border, weight and ramp step rise with how much processing was
+     already lost by that point, light fill as the second "kind" cue).
+     Connectors step orthogonally; each drop point hangs on its own
+     straight vertical run directly below its connector's midpoint, so no
+     jog is needed to stay orthogonal. */ -}}
+
+{{- $stages := slice "App" "Sidecar Agent" "Collector" "Aggregator" "Store" -}}
+{{- $stageX := slice 25 155 285 415 545 -}}
+{{- $stageW := 110 -}}{{- $stageY := 40 -}}{{- $stageH := 44 -}}
+{{- $stageMidY := add $stageY (div $stageH 2) -}}
+
+{{- $drops := slice
+  (dict "l1" "agent buffer" "l2" "overflow")
+  (dict "l1" "Collector queue" "l2" "full")
+  (dict "l1" "aggregator" "l2" "backpressure")
+  (dict "l1" "index" "l2" "rejection")
+-}}
+{{- $dropSteps := slice "var(--mc-ramp-3)" "var(--mc-ramp-2)" "var(--mc-ramp-1)" "var(--mc-ramp-1)" -}}
+{{- $dropW := slice "1.5" "2.17" "2.83" "3.5" -}}
+{{- /* 110, not the 130 stage width — the connector pitch between adjacent
+     midpoints is exactly 130, so a 130-wide box touches its neighbour
+     edge to edge with zero gap; 110 leaves a 20px gap, matching the
+     spacing between the pipeline stage boxes above. */ -}}
+{{- $dropY := 170 -}}{{- $dropH := 50 -}}{{- $dropBoxW := 110 -}}
+
+{{- $aria := "Log collection flow: app to sidecar agent to Collector to aggregator to store, drawn as five boxes with thin solid borders and no fill. Four conditional drop points hang below the connectors between them, drawn with dashed borders that grow heavier and brighter from agent buffer overflow through Collector queue full and aggregator backpressure to index rejection, ranking how much processing was already lost by the time each one happens." -}}
+
+<figure class="diagram log-flow-topo" aria-label="{{ $aria }}">
+  <style>
+    .log-flow-topo .diag-card{padding:1rem;overflow:hidden;}
+    .log-flow-topo svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
+    .log-flow-topo .n{font-size:13px;fill:var(--mc-ink);}
+    .log-flow-topo .d{font-size:12.5px;fill:var(--mc-ink-secondary);}
+    .log-flow-topo .k{font-size:12.5px;fill:var(--mc-ink-muted);}
+  </style>
+  <div class="diag-card">
+    <svg viewBox="0 0 680 250" role="img" aria-label="{{ $aria }}">
+      <defs>
+        <marker id="lft-arw" viewBox="0 0 9 9" refX="8" refY="4.5" markerWidth="9" markerHeight="9" markerUnits="userSpaceOnUse" orient="auto"><path d="M0 0 L9 4.5 L0 9 Z" fill="var(--mc-ramp-3)"/></marker>
+      </defs>
+
+      {{- /* main chain: solid connectors between consecutive stages */ -}}
+      {{- range $i := seq 0 3 }}
+      {{- $x1 := add (index $stageX $i) $stageW -}}
+      {{- $x2 := index $stageX (add $i 1) -}}
+      <line x1="{{ $x1 }}" y1="{{ $stageMidY }}" x2="{{ $x2 }}" y2="{{ $stageMidY }}" stroke="var(--mc-ramp-3)" stroke-width="1.5" marker-end="url(#lft-arw)"/>
+      {{- end }}
+
+      {{- /* pipeline stage boxes: kind = stage, uniform thin border, no fill */ -}}
+      {{- range $i, $s := $stages }}
+      {{- $x := index $stageX $i -}}
+      <rect x="{{ $x }}" y="{{ $stageY }}" width="{{ $stageW }}" height="{{ $stageH }}" fill="none" stroke="var(--mc-ramp-3)" stroke-width="1.5" rx="3"/>
+      <text class="n" x="{{ add $x (div $stageW 2) }}" y="{{ add $stageMidY 4 }}" text-anchor="middle">{{ $s }}</text>
+      {{- end }}
+
+      {{- /* drop points: kind = risk (light fill), dash = conditionality,
+           border weight + ramp step = rank (how much was already lost) */ -}}
+      {{- range $i := seq 0 3 }}
+      {{- $x1 := add (index $stageX $i) $stageW -}}
+      {{- $x2 := index $stageX (add $i 1) -}}
+      {{- $midX := div (add $x1 $x2) 2 -}}
+      {{- $step := index $dropSteps $i -}}
+      {{- $w := index $dropW $i -}}
+      {{- $boxX := sub $midX (div $dropBoxW 2) -}}
+      {{- $d := index $drops $i -}}
+      <line x1="{{ $midX }}" y1="{{ $stageMidY }}" x2="{{ $midX }}" y2="{{ $dropY }}" stroke="{{ $step | safeCSS }}" stroke-width="{{ $w }}" stroke-dasharray="5 4" marker-end="url(#lft-arw)"/>
+      <rect x="{{ $boxX }}" y="{{ $dropY }}" width="{{ $dropBoxW }}" height="{{ $dropH }}" fill="{{ $step | safeCSS }}" fill-opacity="0.1" stroke="{{ $step | safeCSS }}" stroke-width="{{ $w }}" stroke-dasharray="5 4" rx="3"/>
+      <text class="d" x="{{ $midX }}" y="{{ add $dropY 22 }}" text-anchor="middle">{{ index $d "l1" }}</text>
+      <text class="d" x="{{ $midX }}" y="{{ add $dropY 38 }}" text-anchor="middle">{{ index $d "l2" }}</text>
+      {{- end }}
+
+      <text class="k" x="25" y="238">rail weight = severity &nbsp;&middot;&nbsp; dashed = conditional, not guaranteed</text>
+    </svg>
+  </div>
+  <figcaption>Four hops, four places a log line can vanish without an error anywhere.</figcaption>
+</figure>
