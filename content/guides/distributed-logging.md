@@ -39,6 +39,10 @@ These are the actual building blocks: trace-aware collection feeding a central a
 
 ### Log Collection
 
+{{< obs-log-flow-topology >}}
+
+Every one of those drop points fails silently. Nothing here raises an exception; the log line is just gone.
+
 Each log event must carry trace context from the moment it's emitted. Without `trace_id` and `span_id`, log-to-trace correlation is impossible downstream.
 
 ```python
@@ -205,6 +209,10 @@ class DatabaseLogger:
 ## What Breaks in Production First
 
 Nothing here is theoretical. These are the failure modes that show up in the first six months, roughly in this order.
+
+{{< obs-what-breaks-first >}}
+
+The rest of this section is the detail behind each tier.
 
 ### Log Structure
 

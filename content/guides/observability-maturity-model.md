@@ -27,6 +27,10 @@ Maturity means all four pillars advancing. A team with perfect tracing but no at
 
 ## The Five Levels
 
+{{< obs-maturity-ladder >}}
+
+Each level below expands on the one diagnostic question above it: what it looks like in practice, and the indicators that show you've actually reached it.
+
 **Level 1 — Reactive**
 
 Logs exist. Alerting is threshold-based or absent. Incidents are surprises. The question "why did this break?" requires an engineer who knows the code, not an engineer who knows the tooling.
@@ -114,6 +118,10 @@ At **Level 4**, the blocker is usually prioritisation — observability-driven d
 At **Level 5**, the blocker is usually executive alignment — the business case for ML-assisted operations requires connecting reliability to revenue, which requires a different kind of conversation.
 
 ## Common Traps by Level
+
+{{< obs-maturity-traps >}}
+
+Those are the traps of settling in. The ones below are the traps of moving on — the mistakes teams make trying to leave a level before they've actually earned it.
 
 **Trap at L1→L2:** Installing a full Prometheus + Grafana + Tempo + Loki stack before you have structured logs. You are building the display case before you have anything to display.
 

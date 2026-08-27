@@ -212,6 +212,10 @@ There is no point detecting a certificate problem faster than your team can act 
 
 Alerting faster than you can respond adds cognitive load without reducing risk.
 
+{{< obs-check-cadence-vs-response >}}
+
+Ownership and automation decide the cadence. The table above just turns that decision into a response-time budget.
+
 ## When Synthetic Monitoring Is the Right Call
 
 Use synthetic monitoring for certificate validation only in these specific cases:

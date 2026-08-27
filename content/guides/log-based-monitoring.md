@@ -154,6 +154,10 @@ Prefer source-side metrics for high-cardinality signals. Log-to-metric derivatio
 
 ### Cardinality Traps
 
+{{< obs-cardinality-trap-tally >}}
+
+None of these fields did anything wrong in the log line. The trap is only sprung when one of them becomes a metric label.
+
 Never filter on unbounded high-cardinality fields directly inside an alert expression. `user_id`, `trace_id`, `request_id`, `session_id` — these fields have millions of distinct values. A LogQL filter like `| json | user_id="specific_value"` runs a full scan across every log line in the queried stream to find that one value. Running this as a recurring alert rule scans the full stream on every evaluation interval.
 
 The rule is: aggregate first, alert on the aggregate. Group by a bounded dimension (`customer_tier`, `account_type`, `region`, `error_type`) rather than a raw identifier. If you need per-entity anomaly detection, pre-compute a log-derived metric grouped by the bounded dimension, and alert when any bucket in that dimension exceeds a threshold.
