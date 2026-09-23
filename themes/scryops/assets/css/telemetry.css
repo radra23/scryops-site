@@ -611,6 +611,11 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .toc ul ul a{padding-left:26px}
 .toc a:hover{color:var(--text)}
 .toc a.active{color:var(--link);border-left-color:var(--link)}
+/* The fold (toc.html) is a <details>; on the sidebar it is always open and
+   its summary is just the label, so strip the marker and the toggle. */
+.toc-fold > summary{list-style:none;display:block;pointer-events:none}
+.toc-fold > summary::-webkit-details-marker{display:none}
+.toc-count{letter-spacing:.08em}
 
 /* ============================================================
    chrome — eyebrow, pixel wordmark, mode toggle
@@ -710,6 +715,15 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
   .layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:start}
   .layout.has-toc > .article{grid-column:1;grid-row:2}
   .toc{position:static}
+  /* Stacked: the TOC folds to one 44px row so the title leads the page.
+     stretch (not start) so the row spans the column; still left-aligned. */
+  .layout.has-toc > .toc{justify-self:stretch;width:auto}
+  .toc-fold{border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+  .toc-fold > summary{pointer-events:auto;cursor:pointer;display:flex;align-items:center;justify-content:space-between;min-height:44px;box-sizing:border-box;margin:0;padding:12px 14px;color:var(--text)}
+  .toc-fold > summary::after{content:"▾";color:var(--muted);letter-spacing:0}
+  .toc-fold[open] > summary::after{content:"▴"}
+  .toc-fold > summary:focus-visible{outline:2px solid var(--link);outline-offset:2px}
+  .toc-fold > nav{padding:0 14px 12px}
   .title{font-size:28px}
 }
 
