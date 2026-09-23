@@ -1,4 +1,6 @@
 {{ define "main" }}
+{{- /* Colors are tokens only (the drawing inverts with dark / light / calm):
+     paper --text, fold --muted/--violet, ink --bg. */ -}}
 <style>
   .page-404 {
     display: flex;
@@ -23,7 +25,7 @@
     font-size: clamp(3rem, 10vw, 6rem);
     color: var(--text);
     line-height: 1;
-    text-shadow: 4px 4px 0 #000, 8px 8px 0 rgba(0,0,0,0.4);
+    text-shadow: 4px 4px 0 var(--border);
   }
 
   .page-404__doc {
@@ -36,7 +38,7 @@
 
   .page-404__label {
     font-family: var(--font-pixel);
-    font-size: clamp(0.55rem, 2vw, 0.85rem);
+    font-size: clamp(0.625rem, 2vw, 0.85rem); /* pixel face floor: 10px */
     color: var(--text);
     letter-spacing: 0.1em;
     margin-bottom: 2.5rem;
@@ -73,35 +75,35 @@
          role="img"
          aria-label="sad document">
       <!-- document body -->
-      <rect x="10" y="10" width="90" height="100" fill="#F0EEE8"/>
+      <rect x="10" y="10" width="90" height="100" fill="var(--text)"/>
       <!-- fold: shadow behind, then fold face -->
-      <polygon points="70,10 100,10 100,40" fill="#B0AEA8"/>
-      <polygon points="70,10 100,40 70,40"  fill="#D0CEC8"/>
+      <polygon points="70,10 100,10 100,40" fill="var(--muted)"/>
+      <polygon points="70,10 100,40 70,40"  fill="var(--violet)"/>
       <!-- outline -->
       <polygon points="10,10 70,10 100,40 100,110 10,110"
-               fill="none" stroke="#0D0D0D" stroke-width="4" stroke-linejoin="round"/>
+               fill="none" stroke="var(--bg)" stroke-width="4" stroke-linejoin="round"/>
       <!-- fold crease -->
-      <line x1="70" y1="10" x2="100" y2="40" stroke="#0D0D0D" stroke-width="4"/>
+      <line x1="70" y1="10" x2="100" y2="40" stroke="var(--bg)" stroke-width="4"/>
 
       <!-- left X eye  (3×3 at 8px/pixel, top-left corner at 18,42) -->
-      <rect x="18" y="42" width="8" height="8" fill="#0D0D0D"/><!-- TL -->
-      <rect x="34" y="42" width="8" height="8" fill="#0D0D0D"/><!-- TR -->
-      <rect x="26" y="50" width="8" height="8" fill="#0D0D0D"/><!-- centre -->
-      <rect x="18" y="58" width="8" height="8" fill="#0D0D0D"/><!-- BL -->
-      <rect x="34" y="58" width="8" height="8" fill="#0D0D0D"/><!-- BR -->
+      <rect x="18" y="42" width="8" height="8" fill="var(--bg)"/><!-- TL -->
+      <rect x="34" y="42" width="8" height="8" fill="var(--bg)"/><!-- TR -->
+      <rect x="26" y="50" width="8" height="8" fill="var(--bg)"/><!-- centre -->
+      <rect x="18" y="58" width="8" height="8" fill="var(--bg)"/><!-- BL -->
+      <rect x="34" y="58" width="8" height="8" fill="var(--bg)"/><!-- BR -->
 
       <!-- right X eye (same pattern, offset +40) -->
-      <rect x="58" y="42" width="8" height="8" fill="#0D0D0D"/>
-      <rect x="74" y="42" width="8" height="8" fill="#0D0D0D"/>
-      <rect x="66" y="50" width="8" height="8" fill="#0D0D0D"/>
-      <rect x="58" y="58" width="8" height="8" fill="#0D0D0D"/>
-      <rect x="74" y="58" width="8" height="8" fill="#0D0D0D"/>
+      <rect x="58" y="42" width="8" height="8" fill="var(--bg)"/>
+      <rect x="74" y="42" width="8" height="8" fill="var(--bg)"/>
+      <rect x="66" y="50" width="8" height="8" fill="var(--bg)"/>
+      <rect x="58" y="58" width="8" height="8" fill="var(--bg)"/>
+      <rect x="74" y="58" width="8" height="8" fill="var(--bg)"/>
 
       <!-- frown: middle row ABOVE corners row = corners droop down = sad
            middle: x=34–66 at y=74 | corner drops at y=82 -->
-      <rect x="34" y="74" width="32" height="8" fill="#0D0D0D"/><!-- middle (high) -->
-      <rect x="26" y="82" width="8"  height="8" fill="#0D0D0D"/><!-- left corner (low) -->
-      <rect x="66" y="82" width="8"  height="8" fill="#0D0D0D"/><!-- right corner (low) -->
+      <rect x="34" y="74" width="32" height="8" fill="var(--bg)"/><!-- middle (high) -->
+      <rect x="26" y="82" width="8"  height="8" fill="var(--bg)"/><!-- left corner (low) -->
+      <rect x="66" y="82" width="8"  height="8" fill="var(--bg)"/><!-- right corner (low) -->
     </svg>
 
     <span class="page-404__number">4</span>

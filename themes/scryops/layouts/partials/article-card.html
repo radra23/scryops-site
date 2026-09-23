@@ -1,12 +1,16 @@
 {{ $num := .num }}
 {{ $page := .page }}
 {{ $h := .heading | default "h2" }}
+{{- /* badge: the type tag (Guide, How-to…). Off on single-type section listings,
+     where every row would repeat the page title; on for mixed feeds. */ -}}
+{{ $badge := .badge | default true }}
 <a href="{{ $page.RelPermalink }}" class="scry-artcard" style="text-decoration:none;">
   <div class="scry-artcard__num">{{ printf "%02d" $num }}</div>
   <div>
     <div class="scry-artcard__meta">
       {{ $type := $page.Type }}
-      {{ if eq $type "articles" }}<span class="scry-tag trends">Article</span>
+      {{ if not $badge }}
+      {{ else if eq $type "articles" }}<span class="scry-tag trends">Article</span>
       {{ else if eq $type "guides" }}<span class="scry-tag guide">Guide</span>
       {{ else if eq $type "howtos" }}<span class="scry-tag howto">How-to</span>
       {{ else if eq $type "qa" }}<span class="scry-tag qa">Q&amp;A</span>
