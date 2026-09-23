@@ -25,7 +25,12 @@
 <figure class="obs-fig avl" aria-label="A property-by-property comparison of application logs and audit trails across eight properties: purpose, loss tolerance, threat model, write path, mutability, ordering, retention and sampling. Logs are a lossy debugging aid defending against confusion; audit trails are evidence defending against an insider with legitimate access, written to a separate append-only store, ordered by sequence number, retained one to six years by mandate, and never sampled.">
   <style>
     .avl .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
-    .avl table{width:100%;border-collapse:collapse;table-layout:fixed;}
+    /* table-layout:fixed pins the table to 100% of its box however narrow, so
+       on a phone single long words ("disqualifying") spilled out of their
+       cells and past the card border. min-width keeps the columns readable;
+       below it the table scrolls inside .sc instead (GUIDELINES #2). */
+    .avl .sc{overflow-x:auto;}
+    .avl table{width:100%;min-width:28rem;border-collapse:collapse;table-layout:fixed;}
     .avl th,.avl td{text-align:left;vertical-align:top;border-bottom:1px solid var(--border);}
     .avl thead th{padding:0 .75rem .55rem 0;font-weight:400;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mc-ink-muted);}
     .avl thead th.k{width:126px;}
@@ -41,6 +46,7 @@
     .avl figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
   <div class="w">
+    <div class="sc" role="region" aria-label="Application log vs audit trail, eight properties" tabindex="0">
     <table>
       <thead>
         <tr>
@@ -59,6 +65,7 @@
         {{- end }}
       </tbody>
     </table>
+    </div>
     <div class="foot">One difference drives all the others: an application log defends against <b>confusion</b>, an audit trail defends against a <b>person</b>. Everything in the right-hand column follows from assuming that person already has your database credentials.</div>
   </div>
   <figcaption>Fig. &mdash; If the same code writes both, you have one of them. It is not the audit trail.</figcaption>
