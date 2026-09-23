@@ -897,15 +897,19 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .about-content a{color:var(--link);text-decoration:underline;text-underline-offset:2px}
 
 /* subscribe */
-.scry-sub{margin-bottom:4rem;border:1px solid var(--border);border-left:3px solid var(--green);padding:1.6rem 2rem;background:var(--surface);border-radius:var(--radius)}
+/* Green budget (DS: ~3 marks per view): the home first screen already spends
+   green on the wordmark, the headline word and "Start reading", so the
+   subscribe block uses the ink ramp — rule in --cyan, an outlined button.
+   Only the success message stays green: it is genuine healthy status. */
+.scry-sub{margin-bottom:4rem;border:1px solid var(--border);border-left:3px solid var(--cyan);padding:1.6rem 2rem;background:var(--surface);border-radius:var(--radius)}
 .scry-sub__label{font-family:var(--font-display);font-size:1.05rem;color:var(--heading);margin-bottom:.4rem;text-transform:lowercase}
 .scry-sub__desc{font-family:var(--font-read);font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
 .scry-sub__form{display:flex;gap:.6rem;flex-wrap:wrap}
 .scry-sub__input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--muted);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px;border-radius:var(--radius-sm)}
 .scry-sub__input::placeholder{color:var(--muted)}
 .scry-sub__input:focus{border-color:var(--green)}
-.scry-sub__btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--on-accent);background:var(--green);border:none;padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap;border-radius:var(--radius-sm)}
-.scry-sub__btn:hover{background:var(--cyan)}
+.scry-sub__btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text);background:transparent;border:1px solid var(--muted);padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap;border-radius:var(--radius-sm)}
+.scry-sub__btn:hover{border-color:var(--cyan);color:var(--cyan)}
 .scry-sub__btn[disabled]{opacity:.55;cursor:not-allowed}
 /* Success/error is a green/coral pair — the exact confusion case for ~8%
    of men — so each state also carries a distinct glyph silhouette, not
@@ -966,7 +970,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
   .site-top .scry-wordmark{display:inline-flex;align-items:center;min-height:44px;border-bottom:none}
   .scry-prefs__btn{min-height:44px}
   .top-nav a{display:inline-flex;align-items:center;min-height:44px}
-  .scry-btn{min-height:44px}
+  .scry-btn,.scry-sub__btn{min-height:44px}
 }
 
 /* quote_with_author shortcode */
@@ -1000,9 +1004,10 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .front-feed{padding:24px 0}
 .scry-feed{background:var(--code-bg);border:1px solid var(--code-bd);border-radius:var(--radius);overflow:hidden}
 .scry-feed__hdr{font-family:var(--font-code);font-size:11.5px;color:var(--code-muted);padding:12px 15px;border-bottom:1px solid var(--code-bd)}
-.scry-feed__hdr .fp{color:var(--code-green)}
+/* prompt + cursor in bright ink, not green: the terminal is identity, not a CTA */
+.scry-feed__hdr .fp{color:var(--code-cyan)}
 .scry-feed__hdr .fa{color:var(--code-cyan)}
-.scry-feed__cursor{display:inline-block;width:7px;height:13px;background:var(--code-green);vertical-align:-2px;margin-left:3px;animation:scry-blink 1.1s step-end infinite}
+.scry-feed__cursor{display:inline-block;width:7px;height:13px;background:var(--code-hi);vertical-align:-2px;margin-left:3px;animation:scry-blink 1.1s step-end infinite}
 @media (prefers-reduced-motion:reduce){.scry-feed__cursor{animation:none}}
 .scry-feed__row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:11px;align-items:baseline;padding:10px 15px;border-bottom:1px solid var(--code-bd);text-decoration:none}
 .scry-feed__row:last-child{border-bottom:none}
