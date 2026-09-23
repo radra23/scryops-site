@@ -1,0 +1,47 @@
+{{- /* Markdown table render hook. Wraps every Markdown table in its own
+       horizontal-scroll container so a table wider than the measure scrolls
+       in place instead of widening the page (GUIDELINES #2). Focusable +
+       labelled region so keyboard users can scroll it. Tables emitted as raw
+       HTML by shortcodes (e.g. obs-comparison-table) don't pass through here
+       and keep their own .scry-table-wrap. A Markdown attribute block
+       ({title="..."}) supplies a more specific label than the default. */ -}}
+{{- $label := or .Attributes.title "Table" -}}
+<div class="table-scroll" role="region" aria-label="{{ $label }}" tabindex="0">
+<table
+  {{- range $k, $v := .Attributes }}
+    {{- if $v }}
+      {{- printf " %s=%q" $k (string $v) | safeHTMLAttr }}
+    {{- end }}
+  {{- end }}>
+  <thead>
+    {{- range .THead }}
+    <tr>
+      {{- range . }}
+      <th
+        {{- with .Alignment }}
+          {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+        {{- end -}}
+      >
+        {{- .Text -}}
+      </th>
+      {{- end }}
+    </tr>
+    {{- end }}
+  </thead>
+  <tbody>
+    {{- range .TBody }}
+    <tr>
+      {{- range . }}
+      <td
+        {{- with .Alignment }}
+          {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+        {{- end -}}
+      >
+        {{- .Text -}}
+      </td>
+      {{- end }}
+    </tr>
+    {{- end }}
+  </tbody>
+</table>
+</div>

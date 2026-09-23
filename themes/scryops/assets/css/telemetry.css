@@ -412,15 +412,13 @@ h3,.h3{font-family:var(--font-display);font-weight:400;font-size:var(--fs-h3);co
 /* A plain element right after a heading gets a tighter step than the general
    34px evidence / 22px paragraph rhythm (--sp-4) — 30px, deliberately off the
    4px scale, per the DS reading-page template. The :not() guards are
-   intentional, not decorative: without them, .prose > table (1 class + 1
-   type, same as this rule's own 1 class + 1 type) would *tie* it, with the
-   winner decided fragilely by file order; .prose > .highlight (2 classes)
-   already *outranks* it (1 class + 1 type) regardless of order. The explicit
-   :not() exclusion makes both structurally unmatchable here either way, so
+   intentional, not decorative: .prose > .table-scroll and .prose > .highlight
+   (2 classes each) already outrank this rule (1 class + 1 type), but the
+   explicit :not() exclusion makes evidence structurally unmatchable here, so
    evidence keeps full spacing after a heading regardless of future edits to
    this file. */
-.prose > h2 + *:not(table):not(.highlight):not(figure),
-.prose > h3 + *:not(table):not(.highlight):not(figure){margin-top:30px}
+.prose > h2 + *:not(.table-scroll):not(.highlight):not(figure),
+.prose > h3 + *:not(.table-scroll):not(.highlight):not(figure){margin-top:30px}
 /* .prose > * + * (line 324) has higher specificity (one class) than the bare
    h2,.h2 / h3,.h3 selectors above (one type selector for a plain <h2>/<h3>),
    so it silently wins margin-top for any heading that isn't .prose's first
@@ -592,7 +590,12 @@ table{width:100%;border-collapse:collapse;font-size:14px}
    children of .prose (where .Content actually renders) so a table already
    nested inside a figure card (e.g. obs-comparison-table.html's
    .scry-table) isn't double-margined. */
-.prose > table{margin:34px 0}
+.prose > .table-scroll{margin:34px 0}
+/* Markdown tables arrive wrapped by render-table.html. A table wider than the
+   720px measure (or the phone viewport) scrolls inside this box instead of
+   widening the page (GUIDELINES #2). tabindex=0 on the wrapper makes it
+   keyboard-scrollable; the global :focus-visible ring covers it. */
+.table-scroll{overflow-x:auto}
 thead th{text-align:left;font-family:var(--font-code);font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:9px 13px;background:var(--th);border-bottom:1px solid var(--tborder)}
 tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tborder);line-height:1.5;vertical-align:top}
 
