@@ -10,11 +10,29 @@
      that point in the parse, so it's wrapped in DOMContentLoaded — by the
      time that fires the whole document, including <article>, is parsed,
      regardless of where this partial sits in the source. */ -}}
+{{- /* Below the 1084px stack breakpoint the TOC sits above the title, so a
+     full list (20+ entries on long guides) pushed the title a screen and a
+     half down. It is a <details> so the stacked layout can fold it to one
+     row: rendered open (no-JS keeps the full list everywhere), then the
+     inline script right after it closes it on narrow viewports before first
+     paint. The media query must stay in step with telemetry.css. */ -}}
 {{ if .Params.toc | default true }}
-<aside class="toc">
-  <div class="toc-label">On this page</div>
-  {{ .TableOfContents }}
+{{ $sections := len (findRE `<h2[\s>]` .Content) }}
+<aside class="toc" aria-label="On this page">
+  <details class="toc-fold" open>
+    <summary class="toc-label">On this page{{ with $sections }} <span class="toc-count">({{ . }})</span>{{ end }}</summary>
+    {{ .TableOfContents }}
+  </details>
 </aside>
+<script>
+  (function () {
+    var d = document.currentScript.previousElementSibling.querySelector('.toc-fold');
+    var mq = window.matchMedia('(max-width:1083px)');
+    function sync() { d.open = !mq.matches; }
+    sync();
+    if (mq.addEventListener) mq.addEventListener('change', sync);
+  })();
+</script>
 <script>
   document.addEventListener('DOMContentLoaded', function () {
     var links = document.querySelectorAll('.toc a');

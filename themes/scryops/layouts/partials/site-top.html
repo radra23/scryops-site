@@ -4,9 +4,29 @@
 <header class="site-top">
   <a class="scry-wordmark" href="/"><span class="scry-wordmark__scry">scry</span><span class="scry-wordmark__ops">ops</span></a>
   <span class="pixel-tag">obs</span>
-  <nav class="top-nav" aria-label="Primary">
-    {{ range site.Menus.main }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
-  </nav>
+  {{- /* Under 600px the six links wrapped to two rows plus a third for
+       Reading (~190px of chrome). The nav sits in a <details> so phones get
+       one row with a "menu" disclosure: rendered open (no-JS keeps the full
+       nav), then closed before first paint on narrow viewports. Same pattern
+       as toc.html; the media query must stay in step with telemetry.css. */ -}}
+  <details class="top-menu" open>
+    <summary class="top-menu__btn">menu</summary>
+    <nav class="top-nav" aria-label="Primary">
+      {{ range site.Menus.main }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
+    </nav>
+  </details>
+  <script>
+    (function () {
+      var d = document.currentScript.previousElementSibling;
+      var mq = window.matchMedia('(max-width:599px)');
+      function sync() { d.open = !mq.matches; }
+      sync();
+      if (mq.addEventListener) mq.addEventListener('change', sync);
+      d.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && mq.matches && d.open) { d.open = false; d.querySelector('summary').focus(); }
+      });
+    })();
+  </script>
   <span class="spacer"></span>
   {{/* show the type/reading-time meta only on real content pages — not home, not generic "page" types (about, colophon) where "PAGE" is just noise */}}
   {{ if and (not .IsHome) (ne .Type "page") }}<span class="site-meta">{{ .Type | upper }}{{ with .Params.readingTime }} · {{ . }} MIN{{ end }}</span>{{ end }}
