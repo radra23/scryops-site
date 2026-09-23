@@ -608,7 +608,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    the left rail on each link carries the structure. */
 .toc nav,.toc ul{margin:0;padding:0;list-style:none}
 .toc li{margin:0}
-.toc a{display:block;font-family:var(--font-code);font-size:12.5px;line-height:1.45;color:var(--muted);text-decoration:none;border-bottom:none;padding:6px 0 6px 13px;border-left:2px solid var(--border)}
+.toc a{display:block;text-transform:lowercase;font-family:var(--font-code);font-size:12.5px;line-height:1.45;color:var(--muted);text-decoration:none;border-bottom:none;padding:6px 0 6px 13px;border-left:2px solid var(--border)}
 /* nested h3 entries: indent the TEXT, not the rail — every link keeps the same
    left edge so the rail is one clean continuous line (matches the reference). */
 .toc ul ul a{padding-left:26px}
@@ -626,7 +626,6 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .scry-wordmark{font-size:13px;line-height:1;color:var(--heading)}
 .scry-wordmark__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .scry-wordmark__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
-.pixel-tag{font-family:var(--font-code);font-size:11px;color:var(--muted)}
 
 .accent-line{height:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
 
@@ -698,6 +697,9 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .site-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--bg);border-bottom:1px solid var(--border)}
 .site-top .spacer{flex:1}
 .site-meta{font-family:var(--font-code);font-size:11px;letter-spacing:.14em;color:var(--muted)}
+/* tagline beside the wordmark: only where the bar has room (was an unexplained "obs") */
+.site-tagline{font-family:var(--font-code);font-size:11px;color:var(--muted);white-space:nowrap}
+@media (max-width:1199px){.site-tagline{display:none}}
 
 /* Below 1084 a sidebar can only exist by stealing from the measure. The
    threshold counts BOTH gaps and BOTH paddings for the 3-track grid above:
@@ -945,7 +947,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    block). "obs" and the type/readtime meta go: the article repeats the meta. */
 @media (max-width:599px){
   .site-top{flex-wrap:nowrap;padding:6px 12px 6px 20px;gap:6px}
-  .site-top .pixel-tag,.site-top .site-meta{display:none}
+  .site-top .site-meta{display:none}
   .site-top .scry-wordmark{order:0}
   .site-top .spacer{order:1}
   .site-top .scry-prefs__btn{order:2}

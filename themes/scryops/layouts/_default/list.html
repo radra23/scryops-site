@@ -14,7 +14,7 @@
 
   <div class="feed">
     {{ range $i, $p := $pages }}
-    {{ partial "article-card.html" (dict "num" (add $i 1) "page" $p) }}
+    {{ partial "article-card.html" (dict "num" (add $i 1) "page" $p "badge" false) }}
     {{ end }}
   </div>
 </div>
