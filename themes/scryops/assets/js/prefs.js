@@ -69,6 +69,14 @@
         var open = panel.hasAttribute('hidden');
         if (open) panel.removeAttribute('hidden'); else panel.setAttribute('hidden', '');
         btn.setAttribute('aria-expanded', String(open));
+        // Move focus into the dialog on open, to the active theme (the control
+        // a reader most often came for), so keyboard and screen-reader users
+        // land inside it. Escape (below) hands focus back to the button.
+        if (open) {
+          var first = panel.querySelector('[data-pref-theme][aria-pressed="true"]') ||
+                      panel.querySelector('button');
+          if (first) first.focus();
+        }
       });
       document.addEventListener('click', function (e) {
         if (!panel.hasAttribute('hidden') && !panel.contains(e.target) && e.target !== btn) {
