@@ -193,7 +193,7 @@ services.AddLogging(builder =>
 
 The async wrapper uses an in-process queue. The default queue size is 10,000 events; if the downstream sink blocks, events beyond that are dropped. Set `blockWhenFull: true` if you cannot tolerate dropped logs, at the cost of request latency under backpressure.
 
-For higher-throughput scenarios, route logs through the OTel Collector instead of writing directly to the backend — the Collector's `batch` processor handles the buffering outside the application process. See [High-Throughput Logging](/guides/high-throughput-logging/).
+For higher-throughput scenarios, route logs through the OTel Collector instead of writing directly to the backend — the Collector's `batch` processor handles the buffering outside the application process. See [High-Throughput Logging: Sampling, Collectors, and the Wire](/guides/high-throughput-log-pipelines/).
 
 ## Common Pitfalls
 
