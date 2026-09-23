@@ -12,7 +12,16 @@
   <details class="top-menu" open>
     <summary class="top-menu__btn">menu</summary>
     <nav class="top-nav" aria-label="Primary">
-      {{ range site.Menus.main }}{{ if partial "fn/nav-live.html" .URL }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}{{ end }}
+      {{- /* Current section: IsMenuCurrent only matches a menu entry's own page,
+           so it never fired for URL-only entries. Compare URLs instead:
+           the section's list page itself gets aria-current="page"; any page
+           inside it (a guide, a how-to, a tag page) gets aria-current="true". */ -}}
+      {{ $section := cond (ne $.Section "") (printf "/%s/" $.Section) "" }}
+      {{ range site.Menus.main }}{{ if partial "fn/nav-live.html" .URL }}
+        {{- $current := "" -}}
+        {{- if eq .URL $.RelPermalink }}{{ $current = "page" }}{{ else if and $section (eq .URL $section) }}{{ $current = "true" }}{{ end -}}
+        <a href="{{ .URL | relURL }}"{{ with $current }} aria-current="{{ . }}"{{ end }}>{{ .Name }}</a>
+      {{- end }}{{ end }}
     </nav>
   </details>
   <script>
