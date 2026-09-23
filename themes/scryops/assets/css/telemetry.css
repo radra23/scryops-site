@@ -893,6 +893,17 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* single-header (qa/single) + about page */
 .single-header{margin-bottom:2.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+/* series strip (partial: series-strip.html) — the TOC's rail language:
+   lowercase mono, a 2px rail, the current part bright with a bright rail */
+.series{margin-top:1.1rem;padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface)}
+.series-label{font-family:var(--font-code);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.series ol{list-style:none;margin:0;padding:0}
+.series li{margin:0}
+.series a{display:flex;gap:10px;align-items:baseline;font-family:var(--font-code);font-size:12.5px;line-height:1.45;text-transform:lowercase;color:var(--muted);border-bottom:none;padding:6px 0 6px 12px;border-left:2px solid var(--border)}
+.series a:hover{color:var(--text)}
+.series a[aria-current]{color:var(--link);border-left-color:var(--link)}
+.series-n{flex:none;min-width:1.5ch;color:inherit}
+@media (pointer:coarse){.series a{min-height:44px;align-items:center}}
 .single-header h1{font-family:var(--font-display);font-size:1.9rem;font-weight:400;line-height:1.25;margin-bottom:.8rem;color:var(--heading);text-transform:lowercase}
 .about-content{font-family:var(--font-read);font-size:.95rem;line-height:1.75;color:var(--text)}
 .about-content p{margin-bottom:.8rem}

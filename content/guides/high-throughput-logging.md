@@ -5,6 +5,9 @@ draft: false
 excerpt: "At hundreds of thousands of requests per second, the logging call itself becomes the bottleneck. Async channels, pooling, batching, and circuit breakers keep log I/O off the request thread."
 readtime: 9
 tags: ["Logs", "Reliability", "Observability"]
+series: "High-throughput logging"
+series_part: 1
+series_title: "Keeping the hot path fast"
 ---
 
 At 1.5 million log events per second — the rate a 100,000 req/s service produces at 15 log lines per request — synchronous logging stops being an option and becomes a bottleneck. The queue fills, the write thread blocks, and the service pays latency for log I/O. The challenge is not just volume: it is that every architecture decision made at moderate scale (blocking writes, uniform log levels, single-threaded export) hits a hard ceiling at this rate.
