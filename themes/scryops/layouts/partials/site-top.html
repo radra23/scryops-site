@@ -12,7 +12,7 @@
   <details class="top-menu" open>
     <summary class="top-menu__btn">menu</summary>
     <nav class="top-nav" aria-label="Primary">
-      {{ range site.Menus.main }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}
+      {{ range site.Menus.main }}{{ if partial "fn/nav-live.html" .URL }}<a href="{{ .URL | relURL }}"{{ if $.IsMenuCurrent "main" . }} aria-current="page"{{ end }}>{{ .Name }}</a>{{ end }}{{ end }}
     </nav>
   </details>
   <script>

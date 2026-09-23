@@ -1,0 +1,16 @@
+{{- /* layouts/partials/fn/nav-live.html
+     Returns true when a nav URL should be shown: any non-listing target
+     (tags, colophon, and about, a `type: page` section) always, a listing
+     section only once it has at least one published page. Keeps the chrome from advertising sections
+     that are all drafts (How-tos and Q&A, as of 2026-09).
+     .RegularPages already excludes drafts in a production build; under
+     `hugo server --buildDrafts` drafts count, so every section shows locally.
+     Usage: {{ if partial "fn/nav-live.html" "/howtos/" }}…{{ end }} */ -}}
+{{- $live := true -}}
+{{- with site.GetPage . -}}
+  {{- /* type "page" sections (about) are standalone pages, not listings */ -}}
+  {{- if and (eq .Kind "section") (ne .Type "page") -}}
+    {{- $live = gt (len .RegularPages) 0 -}}
+  {{- end -}}
+{{- end -}}
+{{- return $live -}}
