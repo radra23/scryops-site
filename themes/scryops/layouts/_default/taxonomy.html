@@ -4,10 +4,25 @@
     <span class="section-label">{{ .Title }}</span>
     <div class="section-rule"></div>
   </div>
+  {{- /* Most-used first (ByCount; ties alphabetical). Terms with a single
+       page go in a quieter second row, so the main cloud shows the topics
+       the site actually covers rather than first-seen order. */ -}}
+  {{ $main := slice }}{{ $once := slice }}
+  {{ range .Data.Terms.ByCount }}
+    {{ if gt .Count 1 }}{{ $main = $main | append . }}{{ else }}{{ $once = $once | append . }}{{ end }}
+  {{ end }}
+  {{ with $main }}
   <div class="tag-cloud">
-    {{ range .Pages }}
-    <a href="{{ .RelPermalink }}" class="scry-tagpill">{{ .Title }} ({{ len .Pages }})</a>
-    {{ end }}
+    {{ range . }}<a href="{{ .Page.RelPermalink }}" class="scry-tagpill">{{ .Page.Title }} ({{ .Count }})</a>{{ end }}
   </div>
+  {{ end }}
+  {{ with $once }}
+  <div class="tag-also">
+    <div class="scry-eyebrow">also · one page each</div>
+    <div class="tag-cloud tag-cloud--quiet">
+      {{ range . }}<a href="{{ .Page.RelPermalink }}" class="scry-tagpill">{{ .Page.Title }}</a>{{ end }}
+    </div>
+  </div>
+  {{ end }}
 </section>
 {{ end }}
