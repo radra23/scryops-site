@@ -3,6 +3,9 @@ languageCode = "en-us"
 title = "scryops — observability decoded"
 theme = "scryops"
 
+# Keep generated list titles as written: tag names must match the canonical
+# casing in scripts/normalize-tags.py ("How-to", "OTLP"), not Hugo's title case.
+capitalizeListTitles = false
 [params]
   description = "An independent publication on modern observability engineering. Trends, deep dives, how-tos, and open questions."
   topics = ["logs", "metrics", "traces", "opentelemetry", "distributed-systems"]
