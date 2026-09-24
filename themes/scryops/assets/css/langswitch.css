@@ -26,10 +26,11 @@
 /* chrome bar */
 .langswitch .ls-chrome { display: flex; align-items: center; gap: 11px; padding: 11px 15px; border-bottom: 1px solid var(--ls-border); }
 .langswitch .ls-dots { display: flex; gap: 6px; }
-.langswitch .ls-dots i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; background: var(--ls-border-strong); }
-.langswitch .ls-dots i:nth-child(1) { background: #FF5F56; }
-.langswitch .ls-dots i:nth-child(2) { background: #FFBD2E; }
-.langswitch .ls-dots i:nth-child(3) { background: #27C93F; }
+/* Window dots are decoration, so they stay in warm ink, never the macOS
+   red/yellow/green (hue is a signal on this site, and a green dot on every
+   code block spends the green budget). Mixed from tokens that exist in every
+   theme; --ls-border-strong would fall back to a cool #3A3A3A here. */
+.langswitch .ls-dots i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; background: color-mix(in srgb, var(--muted) 45%, var(--ls-surface)); }
 .langswitch .ls-file { font-size: 12px; color: var(--ls-muted); }
 .langswitch .ls-copy { margin-left: auto; font-family: var(--ls-mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ls-muted); background: transparent; border: 1px solid var(--ls-border-strong); padding: 5px 11px; cursor: pointer; border-radius: 0; transition: color 0.15s, border-color 0.12s, background 0.12s; }
 .langswitch .ls-copy:hover { color: var(--ls-amber); border-color: var(--ls-amber); }
