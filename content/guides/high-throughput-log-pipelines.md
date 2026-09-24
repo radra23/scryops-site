@@ -1,10 +1,14 @@
 ---
 title: "High-Throughput Logging: Sampling, Collectors, and the Wire"
-date: 2026-09-23
+date: 2026-06-07
+lastmod: 2026-09-23
 draft: false
 excerpt: "At 1.5 million log events per second you cannot keep, batch, or ship everything the way you did at moderate scale. Content-aware sampling, OTel exporter tuning, Collector-side batching, and cheaper bytes on the wire."
 readtime: 11
 tags: ["Logs", "Sampling", "OpenTelemetry", "Collector", "OTLP"]
+series: "High-throughput logging"
+series_part: 2
+series_title: "Sampling, Collectors, and the wire"
 ---
 
 A fast hot path only moves the problem downstream. Once the log call is an in-memory enqueue ([Keeping the Hot Path Fast](/guides/high-throughput-logging/) covers that half), 1.5 million events per second still have to be filtered, batched, serialized, and shipped — and every one of those steps has a default that was tuned for moderate scale. The exporter protocol, sampling policy, batch cadence, and wire format all need explicit redesign for the load.

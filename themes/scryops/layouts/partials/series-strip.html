@@ -1,0 +1,22 @@
+{{- /* layouts/partials/series-strip.html
+     Lists every page sharing this page's `series` param, ordered by
+     `series_part`, under the article header. Shown only when the series
+     has more than one published page. Frontmatter per page:
+       series:       "High-throughput logging"   (display name; the join key)
+       series_part:  1                           (order)
+       series_title: "Keeping the hot path fast" (short label in the strip)
+     Styled like the TOC rail; the current page carries aria-current="page". */ -}}
+{{ with .Params.series }}
+{{ $name := . }}
+{{ $parts := sort (where site.RegularPages "Params.series" $name) "Params.series_part" }}
+{{ if gt (len $parts) 1 }}
+<nav class="series" aria-label="Series: {{ $name }}">
+  <div class="series-label">series · {{ $name }} · part {{ $.Params.series_part }} of {{ len $parts }}</div>
+  <ol>
+    {{ range $parts }}
+    <li><a href="{{ .RelPermalink }}"{{ if eq .Permalink $.Permalink }} aria-current="page"{{ end }}><span class="series-n">{{ .Params.series_part }}</span>{{ .Params.series_title | default .Title }}</a></li>
+    {{ end }}
+  </ol>
+</nav>
+{{ end }}
+{{ end }}

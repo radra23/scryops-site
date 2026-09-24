@@ -1,10 +1,14 @@
 ---
 title: "How to Benchmark Synchronous vs Channel Logging"
-date: 2026-09-23
+date: 2026-06-07
+lastmod: 2026-09-23
 draft: false
 excerpt: "Async logging is supposed to take I/O off the request thread. Measure it: a sync-vs-channel benchmark under concurrent producers, in .NET, Go, or Python, and how to read the result."
 readtime: 6
 tags: ["Logs", "Python", "How-to"]
+series: "High-throughput logging"
+series_part: 3
+series_title: "Try it: benchmark sync vs channel"
 ---
 
 Every decision in [High-Throughput Logging: Keeping the Hot Path Fast](/guides/high-throughput-logging/) rests on one claim: synchronous logging makes the calling thread wait for I/O, and a queue or channel takes that wait off the hot path. That is worth measuring rather than asserting — and each language has a native way to do it: [BenchmarkDotNet](https://benchmarkdotnet.org/) in .NET, the `testing` package's parallel benchmarks in Go, and `perf_counter` around `QueueHandler` in Python. Each harness below pits a synchronous, locked write against a queue/channel enqueue under concurrent producers — the regime a high-throughput service actually runs in.
