@@ -53,6 +53,15 @@
 .langswitch .ls-menuitem { display: flex; align-items: center; gap: 9px; width: 100%; text-align: left; font-family: var(--ls-mono); font-size: 12.5px; padding: 9px 12px; background: transparent; border: none; color: var(--ls-text); cursor: pointer; }
 .langswitch .ls-menuitem:hover, .langswitch .ls-menuitem.is-active { background: var(--ls-wash); color: var(--ls-amber); }
 
+/* Touch: 44px targets on coarse pointers. Tabs, the overflow toggle and its
+   menu items simply grow. Copy keeps its small visual size and grows its hit
+   area with an invisible ::after instead, so the tab row stays tidy. */
+@media (pointer: coarse) {
+  .langswitch .ls-tab, .langswitch .ls-more, .langswitch .ls-menuitem { min-height: 44px; }
+  .langswitch .ls-copy { position: relative; }
+  .langswitch .ls-copy::after { content: ""; position: absolute; inset: -12px -4px; }
+}
+
 /* smart-default hint */
 .langswitch .ls-hint { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-bottom: 1px solid var(--ls-border); background: var(--ls-wash); font-size: 11px; color: var(--ls-muted); }
 .langswitch .ls-hint strong { color: var(--ls-amber); font-weight: 700; }

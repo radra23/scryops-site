@@ -544,6 +544,10 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 .code-copy-btn:hover{color:var(--cyan);border-color:var(--cyan)}
 .code-copy-btn:active{transform:translateY(1px)}
 .code-copy-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+/* Touch: grow the hit area past 44px with an invisible ::after, not the button.
+   A 44px button would overlap the first code line (the well's top padding is
+   44px and the button sits at top:10px). */
+@media (pointer:coarse){.code-copy-btn::after{content:"";position:absolute;inset:-12px -4px}}
 
 /* ============================================================
    callouts  —  {{< callout info >}} … {{< /callout >}}
