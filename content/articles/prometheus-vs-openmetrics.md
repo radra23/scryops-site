@@ -11,8 +11,8 @@ Prometheus defined the metrics exposition format that most of the ecosystem adop
 
 ## Where the formats diverge
 
-- **Timestamps**: OpenMetrics requires millisecond precision; Prometheus uses seconds.
-- **Exemplars**: OpenMetrics supports exemplars natively; Prometheus added them later with different semantics.
+- **Timestamps**: The Prometheus text format writes timestamps as integer milliseconds since the epoch; OpenMetrics writes them in seconds, as a float that can carry sub-second precision.
+- **Exemplars**: OpenMetrics defines exemplars (a sample tagged with, say, a trace ID); the classic Prometheus text format has nowhere to put one. Prometheus only ingests exemplars from OpenMetrics or protobuf scrapes, and only with exemplar storage enabled (`--enable-feature=exemplar-storage`).
 - **Info and StateSet types**: OpenMetrics adds `info` and `stateset` metric types. The Prometheus text format has no equivalent, so Prometheus stores them as gauges (an info metric becomes a `_info` series with value 1).
 - **EOF marker**: OpenMetrics requires an explicit EOF; Prometheus does not.
 
