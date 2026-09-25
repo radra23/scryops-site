@@ -15,8 +15,12 @@
      to keep the rendered floor at ~11px+.                                */ -}}
 
 <figure class="diagram pii-paths" aria-label="Three mechanisms carry personal data into a trace backend. Span attributes and correlated log records travel there directly, drawn with hairline borders. Baggage propagation, drawn with the heaviest border, travels first into every downstream service's own spans and only then to the backend.">
+  {{- /* No overflow:hidden here: this two-class rule outranks telemetry.css's
+       .diag-card{overflow-x:auto}, and with the SVG held at its 636px
+       min-width that clipped the right half of the figure on phones with
+       no way to reach it. Padding only; the card pans instead. */ -}}
   <style>
-    .pii-paths .diag-card{padding:1rem;overflow:hidden;}
+    .pii-paths .diag-card{padding:1rem;}
     .pii-paths svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
     .pii-paths .n{font-size:13px;fill:var(--mc-ink);}
     .pii-paths .c{font-size:12.5px;fill:var(--mc-ink-muted);}

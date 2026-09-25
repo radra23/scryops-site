@@ -38,8 +38,12 @@
 {{- $aria := "Log collection flow: app to sidecar agent to Collector to aggregator to store, drawn as five boxes with thin solid borders and no fill. Four conditional drop points hang below the connectors between them, drawn with dashed borders that grow heavier and brighter from agent buffer overflow through Collector queue full and aggregator backpressure to index rejection, ranking how much processing was already lost by the time each one happens." -}}
 
 <figure class="diagram log-flow-topo" aria-label="{{ $aria }}">
+  {{- /* No overflow:hidden here: this two-class rule outranks telemetry.css's
+       .diag-card{overflow-x:auto}, and with the SVG held at its 636px
+       min-width that clipped the right half of the figure on phones with
+       no way to reach it. Padding only; the card pans instead. */ -}}
   <style>
-    .log-flow-topo .diag-card{padding:1rem;overflow:hidden;}
+    .log-flow-topo .diag-card{padding:1rem;}
     .log-flow-topo svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
     .log-flow-topo .n{font-size:13px;fill:var(--mc-ink);}
     .log-flow-topo .d{font-size:12.5px;fill:var(--mc-ink-secondary);}
