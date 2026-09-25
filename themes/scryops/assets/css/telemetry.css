@@ -835,7 +835,9 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* section label + rule */
 .section-head{display:flex;align-items:center;gap:1rem;margin-bottom:.5rem}
-.section-label{font-family:var(--font-code);font-size:.6875rem;color:var(--green);text-transform:uppercase;letter-spacing:.18em;white-space:nowrap}
+/* muted like the eyebrow: section labels are structure, not a CTA, so they
+   stay off the green budget */
+.section-label{font-family:var(--font-code);font-size:.6875rem;color:var(--muted);text-transform:uppercase;letter-spacing:.18em;white-space:nowrap}
 .section-rule{flex:1;height:1px;background:var(--border)}
 
 /* article feed (list/term) + cards (was .article — renamed .art-card to avoid
@@ -892,8 +894,11 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .tags-section{margin-bottom:4rem}
 .tag-cloud{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:1rem}
 .scry-tagpill{font-family:var(--font-code);font-size:.75rem;color:var(--muted);border:1px solid var(--border);border-radius:var(--radius-pill);padding:0 .9rem;letter-spacing:.02em;display:inline-flex;align-items:center;min-height:44px}
-.scry-tagpill::before{content:"#";color:var(--green);font-weight:700;margin-right:.15rem}
-.scry-tagpill:hover{color:var(--green);border-color:var(--green);background:color-mix(in srgb,var(--green) 6%,transparent)}
+/* Tag pills read in the ink ramp, not green: a page of tags was ~19 green
+   marks against a budget of ~3. The # matches the home hero chips (--cyan is
+   bright ink); hover brightens like a link instead of shifting hue. */
+.scry-tagpill::before{content:"#";color:var(--cyan);font-weight:700;margin-right:.15rem}
+.scry-tagpill:hover{color:var(--link);border-color:var(--link);background:color-mix(in srgb,var(--link) 6%,transparent)}
 /* Topics page (taxonomy.html): one-page tags sit in a quieter row. The cue is
    the dashed border, not hue, so it survives pref-mono; pills keep 44px. */
 .tag-also{margin-top:2.2rem}
