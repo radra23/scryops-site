@@ -218,6 +218,8 @@ At very high throughput — sustained above roughly 5,000 log records per second
 
 The fix is to stop batching inside the application and let the OTel Collector do it instead. The SDK sends small, frequent OTLP deliveries to a Collector running on localhost. The Collector accumulates those deliveries and emits large, efficient batches toward the backend. The application's buffer shrinks dramatically; the Collector — a separate process with its own memory — absorbs the burst.
 
+{{< obs-collector-offload >}}
+
 Configure the SDK to minimise in-process holding time:
 
 ```csharp
