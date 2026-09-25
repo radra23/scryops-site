@@ -212,6 +212,152 @@ Register the Meter the same way as the ActivitySource:
     .AddMeter("Commerce.Orders"))
 ```
 
+## Background Services and Workers
+
+A `BackgroundService` runs outside the HTTP pipeline, so no incoming request starts a trace for it. Give each iteration of the worker loop its own root span:
+
+```csharp
+public class OrderProcessingWorker : BackgroundService
+{
+    private static readonly ActivitySource ActivitySource = new("Commerce.OrderWorker");
+    private readonly ILogger<OrderProcessingWorker> _logger;
+    private readonly IOrderRepository _orders;
+
+    public OrderProcessingWorker(ILogger<OrderProcessingWorker> logger, IOrderRepository orders)
+    {
+        _logger = logger;
+        _orders = orders;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            // No parent in scope, so this starts a new trace for the cycle
+            using (var activity = ActivitySource.StartActivity("worker.process_pending_orders"))
+            {
+                try
+                {
+                    var pending = await _orders.GetPendingAsync();
+                    activity?.SetTag("orders.pending_count", pending.Count);
+
+                    foreach (var order in pending)
+                    {
+                        using var orderActivity = ActivitySource.StartActivity("worker.process_order");
+                        orderActivity?.SetTag("order.id", order.Id);
+                        await _orders.ProcessAsync(order);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    activity?.RecordException(ex);
+                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
+                    _logger.LogError(ex, "Worker cycle failed");
+                }
+            }
+
+            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+        }
+    }
+}
+```
+
+The cycle span is disposed before the delay, so the 30-second wait is not counted as part of the work. Register the source alongside the others:
+
+```csharp
+.WithTracing(tracing => tracing
+    // ... existing config ...
+    .AddSource("Commerce.OrderWorker"))
+```
+
+A worker that polls every 30 seconds emits 2,880 cycle traces a day per replica, most of them empty when the queue is idle. If that is noise for you, filter out cycles where `orders.pending_count` is `0` in the Collector (tail sampling), or only start the span once a poll has found work.
+
+### Work handed to a queue in-process
+
+`Activity.Current` is stored in an `AsyncLocal`, so it carries across `await` and into `Task.Run` automatically. A span started inside `Task.Run` is already a child of the request span, even if the request finishes first.
+
+Context is lost when work passes through something that does not carry the execution context with it: a `Channel<T>` or `BlockingCollection<T>` read by a hosted service, a database outbox table, or a custom job queue. The consumer runs on its own loop, where `Activity.Current` is whatever that loop has, not the request that queued the work. Capture the context when you enqueue and pass it along with the work item:
+
+```csharp
+public record EmailJob(int OrderId, ActivityContext Parent);
+
+// In the request handler: capture the context while the request span is current
+await _emailQueue.Writer.WriteAsync(
+    new EmailJob(order.Id, Activity.Current?.Context ?? default));
+
+// In the hosted service that drains the channel
+await foreach (var job in _emailQueue.Reader.ReadAllAsync(stoppingToken))
+{
+    using var activity = ActivitySource.StartActivity(
+        "notifications.send_confirmation",
+        ActivityKind.Internal,
+        parentContext: job.Parent);
+
+    activity?.SetTag("order.id", job.OrderId);
+    await _notifications.SendConfirmationAsync(job.OrderId);
+}
+```
+
+Without `job.Parent`, the email span becomes a disconnected root trace that you cannot reach from the originating request. If the job may run long after the request has returned, you can use `links:` in place of `parentContext:`. The job then gets a trace of its own that still links back to the request, instead of stretching the request's trace out by minutes.
+
+## Message Queue Instrumentation
+
+HTTP instrumentation propagates trace context automatically through the `traceparent` header. A message broker only carries what you put in the message. Inject the context into message headers when you publish, and extract it when you consume. (RabbitMQ.Client 7 and several other broker clients now emit these spans themselves; check your client before writing this by hand.)
+
+**Producer**: inject before publishing.
+
+```csharp
+using OpenTelemetry;                              // Baggage
+using OpenTelemetry.Context.Propagation;          // Propagators, PropagationContext
+
+public async Task PublishOrderCreatedAsync(Order order)
+{
+    using var activity = ActivitySource.StartActivity("send order-events", ActivityKind.Producer);
+    activity?.SetTag("messaging.system", "rabbitmq");
+    activity?.SetTag("messaging.operation.type", "send");
+    activity?.SetTag("messaging.destination.name", "order-events");
+    activity?.SetTag("order.id", order.Id);
+
+    var message = new OrderCreatedMessage { OrderId = order.Id, Headers = new() };
+
+    // Write traceparent (and baggage) into the message headers
+    Propagators.DefaultTextMapPropagator.Inject(
+        new PropagationContext(Activity.Current?.Context ?? default, Baggage.Current),
+        message.Headers,
+        (headers, key, value) => headers[key] = value);
+
+    await _bus.PublishAsync("order-events", message);
+}
+```
+
+**Consumer**: extract before processing.
+
+```csharp
+public async Task HandleOrderCreatedAsync(OrderCreatedMessage message)
+{
+    var parent = Propagators.DefaultTextMapPropagator.Extract(
+        default,
+        message.Headers,
+        (headers, key) => headers.TryGetValue(key, out var value)
+            ? new[] { value }
+            : Array.Empty<string>());
+    Baggage.Current = parent.Baggage;
+
+    using var activity = ActivitySource.StartActivity(
+        "process order-events",
+        ActivityKind.Consumer,
+        parent.ActivityContext);
+    activity?.SetTag("messaging.system", "rabbitmq");
+    activity?.SetTag("messaging.operation.type", "process");
+    activity?.SetTag("messaging.destination.name", "order-events");
+    activity?.SetTag("order.id", message.OrderId);
+
+    await _orders.HandleCreatedAsync(message.OrderId);
+}
+```
+
+Span names follow the messaging semantic conventions' `{operation} {destination}` pattern, and `ActivityKind.Producer` / `ActivityKind.Consumer` let backends draw the hop across the broker. The messaging conventions are still marked Development, so attribute names can change between releases; pin the version you follow. `DefaultTextMapPropagator` writes W3C `traceparent` by default, the same header HTTP uses, so the consumer span appears as a child of the producer span in the same trace with no extra configuration.
+
 ## Verifying the Setup
 
 Run a local Collector and check signals are arriving:
@@ -255,7 +401,9 @@ service:
 
 Send a request to your service and check the Collector output for spans with your `service.name`, `deployment.environment`, and custom attributes.
 
+- [OTel Context Propagation](/guides/otel-context-propagation/): W3C traceparent, B3, and where propagation breaks across async boundaries
+- [How to Configure Prometheus for Your Service](/howtos/configure-prometheus/): adding the metrics pipeline to the setup above
+
 <!-- TODO: Add section on the .NET zero-code instrumentation agent (for legacy services you cannot modify) -->
 <!-- TODO: Add section on ASP.NET Core Minimal API vs Controller instrumentation differences -->
-<!-- TODO: Add section on background services and Worker instrumentation -->
 <!-- TODO: Add section on connecting trace context to Serilog structured logs (if not using ILogger bridge) -->
