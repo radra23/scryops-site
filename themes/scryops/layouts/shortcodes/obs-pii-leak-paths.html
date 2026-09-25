@@ -16,7 +16,9 @@
 
 <figure class="diagram pii-paths" aria-label="Three mechanisms carry personal data into a trace backend. Span attributes and correlated log records travel there directly, drawn with hairline borders. Baggage propagation, drawn with the heaviest border, travels first into every downstream service's own spans and only then to the backend.">
   <style>
-    .pii-paths .diag-card{padding:1rem;overflow:hidden;}
+    /* no overflow:hidden here: the global .diag-card overflow-x:auto plus the
+       svg min-width:636px keep labels readable on phones by scrolling */
+    .pii-paths .diag-card{padding:1rem;}
     .pii-paths svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
     .pii-paths .n{font-size:13px;fill:var(--mc-ink);}
     .pii-paths .c{font-size:12.5px;fill:var(--mc-ink-muted);}
