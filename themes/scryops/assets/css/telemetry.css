@@ -8,6 +8,10 @@
 
 :root {
   /* ---- color · dark (default) — Telemetry, warm/de-neon (DS Jul-2026) ---- */
+  /* UA-painted parts (scrollbars in overflow-x:auto figures, tables and code,
+     form controls) follow color-scheme, which otherwise stays light and paints
+     a pale scrollbar inside dark cards. Calm inherits dark; light overrides. */
+  color-scheme:dark;
   --bg:#141210;             /* warm charcoal — softened near-black (body still ~12.6:1) */
   --surface:#1C1915;        /* card elevation above the page */
   --border:#2B2620;
@@ -141,6 +145,7 @@
 }
 
 html.light {
+  color-scheme:light;
   --bg:#F6F3EC;
   --surface:#FFFDF7;
   --border:#E6DFD2;
@@ -458,6 +463,7 @@ pre,.highlight pre,.chroma{
   border:1px solid var(--code-bd);border-radius:var(--radius);
   padding:16px 18px 22px;font-size:var(--fs-code);line-height:var(--lh-code);
   overflow-x:auto;tab-size:4;
+  color-scheme:dark; /* the well is dark in every theme, so is its scrollbar */
 }
 pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
 /* Evidence gets more vertical air than the paragraph rhythm (34px vs
