@@ -445,6 +445,7 @@ a:visited{color:var(--link)}
   font-family:var(--font-code);font-size:.85em;
   background:var(--ic-bg);color:var(--ic-text);
   border:1px solid var(--ic-bd);padding:1px 6px;border-radius:var(--radius-sm);
+  overflow-wrap:anywhere; /* not break-word: only `anywhere` lowers min-content, so long identifiers stop widening grid/flex ancestors at phone width */
 }
 
 /* ============================================================
@@ -686,7 +687,8 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    prose content at 720 regardless of how wide .article's own box is. */
 .layout.has-toc{max-width:none;grid-template-columns:minmax(0,1fr) minmax(0,758px) minmax(0,1fr)}
 .layout.has-toc > .toc{grid-column:1;grid-row:1;justify-self:end;width:200px;max-width:100%}
-.layout.has-toc > .article{grid-column:2;grid-row:1;min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page */
+.layout > .article{min-width:0}   /* min-width:0 lets the grid item shrink below wide content (tables/diagrams) so their own overflow-x containers scroll instead of the page. On every .layout, not just .has-toc: TOC-less pages overflowed at phone width without it */
+.layout.has-toc > .article{grid-column:2;grid-row:1}
 /* Reading column: prose holds the 720px measure (centered). Evidence
    (code, figures, tables) shares that same measure and aligns flush with
    the prose left/right edges, rather than breaking out wider (GUIDELINES
@@ -713,7 +715,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    sidebar still renders — verified against the scryops-design kit, whose
    own history includes finding 1030 insufficient for the same reason.) */
 @media (max-width:1083px){
-  .layout,.layout.has-toc{max-width:800px;grid-template-columns:1fr;gap:30px;padding:34px 22px 90px}
+  .layout,.layout.has-toc{max-width:800px;grid-template-columns:minmax(0,1fr);gap:30px;padding:34px 22px 90px}
   /* grid-row set explicitly, not auto: auto lets DOM order win, and if
      the TOC partial is ever moved back after </article> in single.html
      it would drop the TOC to the page bottom instead of stacking it
@@ -780,7 +782,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .scry-insight__icon{flex-shrink:0;margin-top:3px;width:16px;height:16px}
 .scry-insight.lightbulb .scry-insight__icon{color:var(--green)}
 .scry-insight.bookmark .scry-insight__icon{color:var(--cyan)}
-.scry-insight__body{font-family:var(--font-read);font-size:14.5px;line-height:1.66;color:var(--text)}
+.scry-insight__body{flex:1;min-width:0;font-family:var(--font-read);font-size:14.5px;line-height:1.66;color:var(--text)}
 .scry-insight__body strong{display:block;font-weight:700;margin-bottom:4px}
 .scry-insight.lightbulb .scry-insight__body strong{color:var(--green)}
 .scry-insight.bookmark .scry-insight__body strong{color:var(--cyan)}
