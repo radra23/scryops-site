@@ -3,7 +3,7 @@ title: "Getting Started with Grafana Alloy"
 date: 2026-03-12
 draft: true
 excerpt: "Alloy replaces the Grafana Agent. What changed, what stayed the same, and a minimal config to get your first pipeline flowing in under 15 minutes."
-readtime: 4
+readtime: 2
 tags: ["Grafana", "OpenTelemetry", "Metrics", "Logs"]
 ---
 

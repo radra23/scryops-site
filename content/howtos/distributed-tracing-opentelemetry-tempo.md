@@ -3,7 +3,7 @@ title: "How to Set Up Distributed Tracing with OpenTelemetry and Tempo"
 date: 2026-03-18
 draft: true
 excerpt: "Instrument a microservice, ship spans to Grafana Tempo, and surface them in dashboards — zero proprietary vendor lock-in."
-readtime: 6
+readtime: 2
 tags: ["OpenTelemetry", "Tracing", "Grafana"]
 ---
 

@@ -3,7 +3,7 @@ title: "OpenTelemetry in 2026: The State of Unified Observability"
 date: 2026-03-25
 draft: true
 excerpt: "After years of fragmentation, the ecosystem is converging. We take stock of where OTel stands, what's still missing, and the battles yet to be fought."
-readtime: 8
+readtime: 2
 tags: ["OpenTelemetry", "Tracing", "Metrics", "Logs"]
 ---
 

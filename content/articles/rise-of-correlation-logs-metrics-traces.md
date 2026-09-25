@@ -3,7 +3,7 @@ title: "The Rise of Correlation: Connecting Logs, Metrics, and Traces"
 date: 2026-03-20
 draft: true
 excerpt: "Unified querying across signals isn't just a UX nicety — it's becoming the baseline for incident response. Here's how the major platforms are approaching it."
-readtime: 5
+readtime: 2
 tags: ["Tracing", "Metrics", "Logs", "OpenTelemetry"]
 ---
 

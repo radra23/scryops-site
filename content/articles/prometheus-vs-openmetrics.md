@@ -3,7 +3,7 @@ title: "Prometheus vs OpenMetrics: What the Format Shift Means for Your Stack"
 date: 2026-03-15
 draft: true
 excerpt: "The metrics exposition format wars are quietly reshaping how tooling is built. We trace the divergence and what it means for teams running large scrape fleets."
-readtime: 7
+readtime: 2
 tags: ["Prometheus", "Metrics", "OpenTelemetry", "OTLP"]
 ---
 
@@ -13,7 +13,7 @@ Prometheus defined the metrics exposition format that most of the ecosystem adop
 
 - **Timestamps**: OpenMetrics requires millisecond precision; Prometheus uses seconds.
 - **Exemplars**: OpenMetrics supports exemplars natively; Prometheus added them later with different semantics.
-- **Info and StatefulSet types**: OpenMetrics introduced new metric types that Prometheus doesn't handle the same way.
+- **Info and StateSet types**: OpenMetrics adds `info` and `stateset` metric types. The Prometheus text format has no equivalent, so Prometheus stores them as gauges (an info metric becomes a `_info` series with value 1).
 - **EOF marker**: OpenMetrics requires an explicit EOF; Prometheus does not.
 
 ## Impact on large scrape fleets
