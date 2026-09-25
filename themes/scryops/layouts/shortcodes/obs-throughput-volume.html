@@ -1,5 +1,9 @@
 <figure class="diagram">
-  <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;overflow:hidden;">
+  {{- /* No overflow:hidden here: an inline value outranks telemetry.css's
+       .diag-card{overflow-x:auto}, and with the SVG held at its 636px
+       min-width that clipped the right half of the chart on phones with
+       no way to reach it. Padding only; the card pans instead. */ -}}
+  <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;">
     <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="tv-title tv-desc"
          style="width:100%;display:block;font-family:var(--font-code);">
