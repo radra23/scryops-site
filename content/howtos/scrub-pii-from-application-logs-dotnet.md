@@ -1,525 +1,308 @@
 ---
 title: "Scrub PII from Application Logs in .NET"
-date: 2026-06-11
-draft: true
-excerpt: "Defense-in-depth for PII in logs: detect and mask sensitive values in .NET application code before they reach the OTel SDK, using compiled regex detection, smart redaction, and data minimisation patterns."
-readtime: 8
+date: 2026-09-26
+draft: false
+excerpt: "Keep personal data out of your .NET logs before they leave the process: classify fields so the logger erases or pseudonymises them, scrub free text and exception messages in an OpenTelemetry processor, and prove nothing leaks."
+readtime: 10
 tags: ["GDPR", "Privacy", "Security", "Logs", "Compliance", "OpenTelemetry", "How-to"]
 ---
 
-The primary control for PII in telemetry is the OTel Collector — see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) for the Collector pipeline that strips PII from spans and logs uniformly across all services. This how-to covers the application-level layer: detecting and masking PII in .NET before it reaches the OTel SDK.
+Your main control for PII in telemetry is the OTel Collector. [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) covers that pipeline, and it protects every service at once. This how-to covers the layer in front of it: stopping personal data inside the .NET process, before it's ever exported.
 
-Application-level scrubbing handles two categories the Collector cannot easily catch: PII embedded in log message strings (not structured attributes), and PII in exception messages that propagate through the stack. Neither belongs in telemetry. Neither is easy to strip with OTTL transforms after the fact.
-
-The sections below are a reference set of independent patterns, not a strict step-by-step sequence — pick the ones that match your PII categories and skip the rest.
+You'll do it in two passes. First, you classify your data so the logger erases or pseudonymises it the moment it's logged. Then an OpenTelemetry processor catches what classification can't see: personal data baked into a message string, or echoed back in an exception message. By the end, a seeded email address, card number and IP address go in one end and nothing personal comes out the other. You'll check that yourself in step 5.
 
 {{< obs-telemetry-controls-map here="app" >}}
 
-## PII Categories in Application Logs
+## Before You Start
 
-The most common sources in a typical .NET service:
+You need:
 
-| Category | Examples | GDPR sensitivity | Default action |
-|---|---|---|---|
-| Credit card numbers | `4111-1111-1111-1111` | Critical | Mask to first 4 + last 4 |
-| Social Security Numbers | `123-45-6789` | Critical | Remove entirely |
-| Email addresses | `user@example.com` | High | Mask or remove |
-| Phone numbers | `(415) 555-1234` | High | Mask |
-| IP addresses | `192.168.1.100` | High (GDPR Article 4) | Remove |
-| Business identifiers | Order IDs, transaction IDs | Medium | Hash (correlatable) |
+- .NET 8 or later
+- `Microsoft.Extensions.Compliance.Redaction` and `Microsoft.Extensions.Telemetry` for classification and redaction
+- `OpenTelemetry.Extensions.Hosting` plus an exporter: `OpenTelemetry.Exporter.OpenTelemetryProtocol` for production, `OpenTelemetry.Exporter.Console` for step 5
+- A random 32-byte key, base64-encoded, stored wherever you keep secrets
 
-IP addresses are personal data under GDPR: they identify a natural person's device and, combined with timestamps and other attributes, can identify the person. They must not appear in log records or span attributes.
+Every sample below was compiled and run against `Microsoft.Extensions.Compliance.Redaction` 10.10.0 and OpenTelemetry .NET 1.19.1 on `net8.0`.
 
-## Quasi-Identifier Risk
+## Step 1: Classify Your Data
 
-Direct identifiers — email addresses, SSNs, card numbers — are straightforward to find and remove. Quasi-identifiers are harder: fields that are individually innocuous but identifying when logged together.
-
-The combination `{ zip_code, birth_date, gender }` is a documented example: three low-risk fields together can uniquely identify a large fraction of the population. Risk compounds non-linearly with each additional attribute.
-
-`QuasiIdentifierRiskAnalyzer` helps quantify this before deciding what to log:
+Start by telling the compiler which fields are personal. A taxonomy is a named set of classifications, and each classification gets an attribute you can put on a property or parameter:
 
 ```csharp
-/// <summary>
-/// Quantifies re-identification risk from quasi-identifier combinations.
-/// Risk scores are illustrative defaults — calibrate to your data distribution
-/// and jurisdiction before using this for compliance decisions.
-/// </summary>
-public class QuasiIdentifierRiskAnalyzer
+using Microsoft.Extensions.Compliance.Classification;
+
+public static class PrivacyTaxonomy
 {
-    private readonly Dictionary<string, double> _baseRiskScores = new()
+    public static string Name => "Privacy";
+
+    public static DataClassification PersonalData => new(Name, nameof(PersonalData));
+    public static DataClassification Pseudonymous => new(Name, nameof(Pseudonymous));
+}
+
+public sealed class PersonalDataAttribute : DataClassificationAttribute
+{
+    public PersonalDataAttribute() : base(PrivacyTaxonomy.PersonalData) { }
+}
+
+public sealed class PseudonymousAttribute : DataClassificationAttribute
+{
+    public PseudonymousAttribute() : base(PrivacyTaxonomy.Pseudonymous) { }
+}
+```
+
+Two classes are enough to start, and each one maps to a decision from [Data Masking in Telemetry](/guides/data-masking-in-telemetry/):
+
+- **`PersonalData`** gets erased. Email addresses, names, phone numbers and IP addresses all go here.
+- **`Pseudonymous`** gets a keyed hash, so you can still follow one user across log lines without knowing who they are. Internal user IDs go here.
+
+Email addresses belong in `PersonalData`, not `Pseudonymous`, even though a keyed hash looks safe. Anyone who gets hold of the key can hash a list of known addresses and match every one, and a pseudonym built from an email still links the same person across every system that uses it. Save pseudonyms for internal IDs that mean nothing outside your service.
+
+Now mark up the types you log:
+
+```csharp
+public record Customer(
+    [property: Pseudonymous] string Id,
+    [property: PersonalData] string Email,
+    string Tier,
+    string Country);
+```
+
+`Tier` and `Country` stay unclassified. They're business context, and they're what makes the log line useful.
+
+## Step 2: Log Through Generated Methods
+
+Classification only works if the logger can see it, and it sees it through the `[LoggerMessage]` source generator:
+
+```csharp
+using Microsoft.Extensions.Logging;
+
+public static partial class Log
+{
+    [LoggerMessage(Level = LogLevel.Information, Message = "Checkout started")]
+    public static partial void CheckoutStarted(ILogger logger, [LogProperties] Customer customer);
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Password reset requested for {UserId}")]
+    public static partial void PasswordResetRequested(ILogger logger, [Pseudonymous] string userId);
+}
+```
+
+`[LogProperties]` expands the object into one tag per property (`customer.Id`, `customer.Email`, and so on) and carries each property's classification with it. A classified parameter like `userId` gets redacted in its tag and in the formatted message.
+
+Anything you log as a plain string skips all of this. `logger.LogWarning($"Declined for {email}")` hands the logger a finished string, and there's no attribute left to find. Step 4 handles those.
+
+## Step 3: Register the Redactors
+
+Wire each classification to a redactor in `Program.cs`:
+
+```csharp
+using Microsoft.Extensions.Compliance.Classification;
+using Microsoft.Extensions.Compliance.Redaction;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using OpenTelemetry.Logs;
+
+var builder = Host.CreateApplicationBuilder(args);
+
+builder.Logging.EnableRedaction();
+
+builder.Services.AddRedaction(redaction =>
+{
+    redaction.SetRedactor<ErasingRedactor>(
+        new DataClassificationSet(PrivacyTaxonomy.PersonalData));
+
+#pragma warning disable EXTEXP0002 // HMAC redaction is marked experimental
+    redaction.SetHmacRedactor(
+        builder.Configuration.GetSection("Redaction:Hmac"),
+        new DataClassificationSet(PrivacyTaxonomy.Pseudonymous));
+#pragma warning restore EXTEXP0002
+});
+```
+
+And give the HMAC redactor its key from your secret store, not from a file in the repo:
+
+```json
+{
+  "Redaction": {
+    "Hmac": {
+      "KeyId": 1,
+      "Key": "<base64, at least 44 characters>"
+    }
+  }
+}
+```
+
+`EnableRedaction()` runs redaction inside the logger itself, so every logging provider gets the redacted values. `ErasingRedactor` swaps the value for an empty string. The HMAC redactor produces something like `1:ctQ7VjfIiA+r0ytHtF+uRA==`, where the `1:` is the key ID.
+
+If the key is missing or shorter than 44 characters, the app refuses to start with an `OptionsValidationException`. That's the behaviour you want. A service that quietly logged raw IDs because a secret didn't load would be much worse.
+
+Two details will trip you up if nobody tells you:
+
+**The field name is part of the pseudonym.** By default, the logger mixes each tag's name into the hash. The same user ID logged as `UserId` in one place and `customer.Id` in another comes out as two different values, so the two lines won't join. Log the ID under the same name everywhere. If you really need to join across different names, set `EnableRedaction(o => o.ApplyDiscriminator = false)`.
+
+**Rotating the key breaks correlation, on purpose.** A new key needs a new `KeyId`. Values with different key IDs are unrelated by design, so a user's trail starts fresh after rotation.
+
+## Step 4: Scrub Free Text and Exceptions
+
+Classification can't see inside a string that was built before it reached the logger. That covers two big leaks: your own interpolated messages, and exception messages from libraries that echo user input back ("Invalid email format: jane.doe@example.com").
+
+An OpenTelemetry log processor runs on every record before the exporter does, and in recent OpenTelemetry .NET releases (checked on 1.19.1) it's allowed to rewrite the record. Here's one that scrubs the message, the body and every string attribute:
+
+```csharp
+using System.Text.RegularExpressions;
+using OpenTelemetry;
+using OpenTelemetry.Logs;
+
+public sealed partial class PiiScrubbingProcessor : BaseProcessor<LogRecord>
+{
+    [GeneratedRegex(@"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9-]{1,63}(?:\.[A-Za-z0-9-]{1,63}){0,8}\.[A-Za-z]{2,24}",
+        RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]
+    private static partial Regex Email();
+
+    // 13 to 19 digits, optionally split by spaces or hyphens. Luhn-checked below.
+    [GeneratedRegex(@"\b\d(?:[ -]?\d){12,18}\b",
+        RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]
+    private static partial Regex CardCandidate();
+
+    [GeneratedRegex(@"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b",
+        RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 100)]
+    private static partial Regex IPv4();
+
+    public override void OnEnd(LogRecord record)
     {
-        ["zip_code"]        = 0.35,
-        ["birth_date"]      = 0.40,
-        ["gender"]          = 0.15,
-        ["job_title"]       = 0.25,
-        ["income_range"]    = 0.30,
-        ["education_level"] = 0.20,
-        ["marital_status"]  = 0.18
-    };
+        record.FormattedMessage = Scrub(record.FormattedMessage);
+        record.Body = Scrub(record.Body);
 
-    /// <summary>Returns true when the combination crosses the 0.6 risk threshold.</summary>
-    public bool ShouldProtectCombination(IEnumerable<string> fieldNames)
-        => CalculateCombinedRisk(fieldNames.ToList()) > 0.6;
+        var attributes = new List<KeyValuePair<string, object?>>();
+        foreach (var (key, value) in record.Attributes ?? [])
+        {
+            if (record.Exception is not null && key.StartsWith("exception.", StringComparison.Ordinal))
+                continue; // replaced below
+            attributes.Add(new(key, value is string s ? Scrub(s) : value));
+        }
 
-    public double CalculateCombinedRisk(List<string> quasiIds)
+        if (record.Exception is { } ex)
+        {
+            // Exception.Message is read-only, so export scrubbed
+            // semantic-convention attributes instead of the live object.
+            attributes.Add(new("exception.type", ex.GetType().FullName));
+            attributes.Add(new("exception.message", Scrub(ex.Message)));
+            attributes.Add(new("exception.stacktrace", Scrub(ex.ToString())));
+            record.Exception = null;
+        }
+
+        record.Attributes = attributes;
+    }
+
+    public static string? Scrub(string? text)
     {
-        var present = quasiIds
-            .Where(_baseRiskScores.ContainsKey)
-            .ToList();
+        if (string.IsNullOrEmpty(text)) return text;
+        try
+        {
+            text = Email().Replace(text, "[REDACTED:EMAIL]");
+            text = CardCandidate().Replace(text, m => PassesLuhn(m.Value) ? "[REDACTED:CARD]" : m.Value);
+            return IPv4().Replace(text, "[REDACTED:IP]");
+        }
+        catch (RegexMatchTimeoutException)
+        {
+            return "[REDACTED:UNSCANNED]"; // fail closed
+        }
+    }
 
-        if (present.Count == 0) return 0;
-        if (present.Count == 1) return _baseRiskScores[present[0]];
-
-        // Risk compounds non-linearly: three quasi-IDs together are
-        // far more identifying than the sum of their individual scores
-        var baseRisk         = present.Sum(id => _baseRiskScores[id]);
-        var compoundingFactor = Math.Pow(1.3, present.Count - 1);
-        return Math.Min(baseRisk * compoundingFactor, 1.0);
+    private static bool PassesLuhn(string candidate)
+    {
+        int sum = 0;
+        bool doubleIt = false;
+        for (int i = candidate.Length - 1; i >= 0; i--)
+        {
+            if (!char.IsAsciiDigit(candidate[i])) continue;
+            int d = candidate[i] - '0';
+            if (doubleIt && (d *= 2) > 9) d -= 9;
+            sum += d;
+            doubleIt = !doubleIt;
+        }
+        return sum % 10 == 0;
     }
 }
 ```
 
-Use `ShouldProtectCombination` before writing a log field combination:
+Register it ahead of the exporter, and clear the default providers while you're there. The first pitfall below explains why:
 
 ```csharp
-var analyzer = new QuasiIdentifierRiskAnalyzer();
-
-// { zip_code, birth_date, gender } → risk ≈ 1.0 (three-field compounding)
-if (analyzer.ShouldProtectCombination(logFields.Keys))
+builder.Logging.ClearProviders();
+builder.Logging.AddOpenTelemetry(otel =>
 {
-    // Options: remove quasi-identifiers, generalise (postal prefix only,
-    // age range instead of birth date), or route to restricted-access storage
-}
+    otel.IncludeFormattedMessage = true;
+    otel.AddProcessor(new PiiScrubbingProcessor()); // before the exporter
+    otel.AddOtlpExporter();
+});
 ```
 
-Run every combination through it once and the pattern practically draws itself:
+The exception handling deserves a closer look. You can't change `Exception.Message`, and rebuilding the exception would lose its type. So the processor exports the exception as `exception.type`, `exception.message` and `exception.stacktrace` attributes, the same names the OpenTelemetry semantic conventions use, with the text scrubbed. Then it drops the live object so the exporter can't serialise the raw message anyway.
 
-{{< obs-quasi-id-risk >}}
-
-Generalisation strategy: replace specific values with ranges or prefixes — `"94107"` → `"94"` (postal district), `"1985-03-22"` → `"1980s"`, `"male"` → omit or use only for aggregate statistics. This preserves diagnostic signal while raising the bar for re-identification.
-
-## Detection
-
-`PIIDetector` scans text for known PII patterns using compiled regex. Compiled regexes are safe for concurrent use across threads.
-
-Before you write one, it's worth knowing what a bad pattern costs. A PII detector runs against every log line in production, and that's about the worst place you could pick to meet a pathological input:
+The regexes run on every log line in production, and that's a terrible place to meet a pathological input:
 
 {{< obs-regex-shame >}}
 
-Two defences, both cheap. Bound your quantifiers instead of trusting greedy matching, and give `Regex` construction a `matchTimeout` so a pathological input takes down one log line, not your whole thread pool.
+So every pattern has bounded quantifiers and a 100 ms match timeout, and a timeout fails closed: the whole string becomes `[REDACTED:UNSCANNED]` instead of going out unchecked. `[GeneratedRegex]` builds the matcher at compile time, so no pattern gets parsed while your service runs. The card pattern only redacts runs of digits that pass the Luhn check, which keeps most long order numbers readable. Not all of them, though: about one random digit run in ten passes Luhn by chance, so don't rely on a raw order number surviving a free-text message.
+
+These three patterns are a floor, not a finished list. Add the identifiers your own data carries, such as IPv6 addresses, phone numbers or national ID formats, and test each new pattern against real log lines for false positives before you ship it.
+
+## Step 5: Verify Nothing Leaks
+
+Swap `AddOtlpExporter()` for `AddConsoleExporter()` and log one of everything:
 
 ```csharp
-public class PIIDetector
-{
-    // RegexOptions.Compiled: compiled to IL at construction time, thread-safe
-    private readonly Dictionary<string, Regex> _patterns = new()
-    {
-        ["credit_card"] = new Regex(
-            @"\b(?:\d{4}[-\s]?){3}\d{4}\b",
-            RegexOptions.Compiled),
+using var host = builder.Build();
+var logger = host.Services.GetRequiredService<ILogger<Program>>();
 
-        ["ssn"] = new Regex(
-            @"\b\d{3}-?\d{2}-?\d{4}\b",
-            RegexOptions.Compiled),
-
-        // Note: [A-Za-z] not [A-Z|a-z] — the | is a literal character in a character class
-        ["email"] = new Regex(
-            @"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b",
-            RegexOptions.Compiled),
-
-        ["phone"] = new Regex(
-            @"\b(?:\+?1[-.\s]?)?\(?[0-9]{3}\)?[-.\s]?[0-9]{3}[-.\s]?[0-9]{4}\b",
-            RegexOptions.Compiled),
-
-        // IP addresses are PII under GDPR
-        ["ip_address"] = new Regex(
-            @"\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b",
-            RegexOptions.Compiled),
-    };
-
-    public PIIDetectionResult Analyze(string text)
-    {
-        var findings = new List<PIIFinding>();
-        foreach (var (category, pattern) in _patterns)
-        {
-            foreach (Match match in pattern.Matches(text))
-            {
-                findings.Add(new PIIFinding(category, match.Index, match.Length));
-            }
-        }
-        return new PIIDetectionResult(findings.Count > 0, findings);
-    }
-
-    public string ScrubText(string text)
-    {
-        foreach (var (category, pattern) in _patterns)
-        {
-            text = pattern.Replace(text, $"[REDACTED:{category.ToUpperInvariant()}]");
-        }
-        return text;
-    }
-}
-
-public record PIIFinding(string Category, int Position, int Length);
-public record PIIDetectionResult(bool HasPII, IReadOnlyList<PIIFinding> Findings);
+Log.CheckoutStarted(logger, new Customer("usr_8f2c", "jane.doe@example.com", "gold", "PT"));
+Log.PasswordResetRequested(logger, "usr_8f2c");
+logger.LogWarning("Card 4111 1111 1111 1111 declined for jane.doe@example.com from 203.0.113.9");
+logger.LogInformation("Order 1234567890123 shipped");
+try { throw new InvalidOperationException("Invalid email format: jane.doe@example.com"); }
+catch (Exception ex) { logger.LogError(ex, "Signup validation failed"); }
 ```
 
-## Masking Strategies
+Run it, and the exporter shows this (trimmed to the interesting lines):
 
-Static helpers for the most common masking operations:
-
-```csharp
-public static class RedactionStrategies
-{
-    public static string MaskCreditCard(string cardNumber)
-    {
-        if (string.IsNullOrEmpty(cardNumber) || cardNumber.Length < 8)
-            return "[REDACTED:CARD]";
-        var digits = cardNumber.Replace("-", "").Replace(" ", "");
-        return $"{digits[..4]}****{digits[^4..]}";
-    }
-
-    /// <summary>
-    /// Masks the local part while preserving the domain for support/debugging.
-    /// For high-risk scenarios (healthcare, finance) consider removing entirely.
-    /// </summary>
-    public static string MaskEmail(string email)
-    {
-        if (string.IsNullOrEmpty(email) || !email.Contains('@'))
-            return "[REDACTED:EMAIL]";
-        var parts = email.Split('@');
-        return $"{parts[0][0]}***@{parts[1]}";
-    }
-
-    public static string MaskPhone(string phone)
-    {
-        var digits = new string(phone.Where(char.IsDigit).ToArray());
-        if (digits.Length < 7)
-            return "[REDACTED:PHONE]";
-        return $"({digits[..3]}) ***-**{digits[^2..]}";
-    }
-
-    /// <summary>
-    /// Produces a correlatable pseudonym for business identifiers (order IDs, transaction IDs).
-    /// For personal identifiers (email, user identity), use HMAC-SHA256 with a rotating secret
-    /// key — see the guidance in /guides/pii-in-telemetry/.
-    /// </summary>
-    public static string HashIdentifier(string identifier, string salt)
-    {
-        var hashBytes = SHA256.HashData(Encoding.UTF8.GetBytes(identifier + salt));
-        return Convert.ToBase64String(hashBytes)[..12];
-    }
-}
+```text
+customer.Email:
+customer.Id: 1:ctQ7VjfIiA+r0ytHtF+uRA==
+customer.Country: PT
+customer.Tier: gold
+LogRecord.FormattedMessage:        Password reset requested for 1:y3TRUgKhkw4++JMAOxuVag==
+LogRecord.FormattedMessage:        Card [REDACTED:CARD] declined for [REDACTED:EMAIL] from [REDACTED:IP]
+LogRecord.FormattedMessage:        Order 1234567890123 shipped
+exception.type: System.InvalidOperationException
+exception.message: Invalid email format: [REDACTED:EMAIL]
 ```
 
-`SHA256.HashData` (static, .NET 5+) avoids the `IDisposable` pattern of `SHA256.Create()`.
+Your HMAC values will differ, because your key does. Now make it a check you can repeat:
 
-The default `MaskEmail` uses minimal masking (preserves domain for support debugging). For stricter contexts, choose the level explicitly:
-
-```csharp
-public enum EmailMaskingLevel
-{
-    Minimal,    // j***@example.com — preserves domain and first character
-    Standard,   // ***@example.com — preserves domain only
-    DomainOnly, // [USER]@example.com — no user-part information
-    Complete    // [REDACTED:EMAIL]
-}
-
-// Overload — the parameterless MaskEmail() corresponds to EmailMaskingLevel.Minimal
-public static string MaskEmail(string email, EmailMaskingLevel level)
-{
-    if (string.IsNullOrEmpty(email) || !email.Contains('@'))
-        return "[REDACTED:EMAIL]";
-
-    var parts = email.Split('@');
-    return level switch
-    {
-        EmailMaskingLevel.Minimal    => $"{parts[0][0]}***@{parts[1]}",
-        EmailMaskingLevel.Standard   => $"***@{parts[1]}",
-        EmailMaskingLevel.DomainOnly => $"[USER]@{parts[1]}",
-        EmailMaskingLevel.Complete   => "[REDACTED:EMAIL]",
-        _                            => $"{parts[0][0]}***@{parts[1]}"
-    };
-}
+```bash
+! dotnet run | grep -E 'jane\.doe|4111 1111|203\.0\.113'
 ```
 
-Healthcare and financial services contexts typically require `DomainOnly` or `Complete`. If your organisation processes sensitive categories of personal data (GDPR Article 9), prefer `Complete` and rely on tokenised identifiers in audit logs rather than email values for correlation.
-
-## Smart Redaction: Preserving Business Context
-
-Removing all user-related data makes logs useless for debugging. Smart redaction keeps the business context (tier, region, order size) while eliminating personal identifiers:
-
-```csharp
-public class SmartRedactor
-{
-    private readonly RedactionPolicy _policy;
-
-    public object Redact(object logData) => logData switch
-    {
-        UserContext user => new
-        {
-            // Hash the ID for correlation without exposing the value
-            user_id          = _policy.HashIds
-                ? RedactionStrategies.HashIdentifier(user.Id, _policy.Salt)
-                : "[USER_ID_REDACTED]",
-            user_tier        = user.Tier,                  // Business context, not PII
-            user_region      = user.Region?[..2],          // Country code only
-            session_age_min  = (DateTime.UtcNow - user.SessionStart).TotalMinutes,
-            is_authenticated = user.IsAuthenticated,
-            // Never log: user.Email, user.Phone, user.Address, user.IPAddress
-        },
-
-        PaymentContext payment => new
-        {
-            payment_id       = _policy.HashIds
-                ? RedactionStrategies.HashIdentifier(payment.Id, _policy.Salt)
-                : "[PAYMENT_ID_REDACTED]",
-            amount           = payment.Amount,            // Business metric, not PII
-            currency         = payment.Currency,
-            payment_method   = payment.Method,            // "card", "paypal", etc.
-            card_type        = payment.CardType,          // "visa", "mastercard", etc.
-            // Last 4 digits are safe for support correlation
-            card_last_four   = payment.CardNumberLastFour,
-            gateway          = payment.GatewayProvider,
-            success          = payment.Success,
-            // Never log: full card number, CVV, billing address, cardholder name
-        },
-
-        AddressContext address => new
-        {
-            country          = address.Country,
-            state_province   = address.StateProvince,
-            postal_prefix    = address.PostalCode?[..3],  // Rough geographic area
-            address_type     = address.Type,              // "residential", "business"
-            // Never log: street, city, full postal code — these are direct identifiers
-        },
-
-        _ => logData
-    };
-}
-```
-
-{{< insight bookmark >}}
-`payment.CardNumberLastFour` should be a dedicated field on your model, not derived from a full card number at log time. If you have the full card number in memory long enough to call `[^4..]`, your application is holding PII longer than necessary. PCI DSS requires minimising where full PANs exist.
-{{< /insight >}}
-
-## Policy Configuration
-
-Make the redaction level configurable per environment:
-
-```csharp
-public class RedactionPolicy
-{
-    public string   Version             { get; init; } = "1.0";
-    public string[] ComplianceFrameworks { get; init; } = [];
-    public bool     HashIds             { get; init; } = true;
-    public string   Salt                { get; init; } = string.Empty;
-    public RedactionLevel Level         { get; init; } = RedactionLevel.Standard;
-
-    public static RedactionPolicy ForEnvironment(string environment) =>
-        environment.ToLowerInvariant() switch
-        {
-            "production" => new RedactionPolicy
-            {
-                ComplianceFrameworks = ["GDPR", "CCPA", "PCI_DSS"],
-                HashIds  = true,
-                Level    = RedactionLevel.Aggressive
-            },
-            "staging" => new RedactionPolicy
-            {
-                ComplianceFrameworks = ["GDPR", "CCPA"],
-                HashIds  = true,
-                Level    = RedactionLevel.Standard
-            },
-            _ => new RedactionPolicy   // development
-            {
-                ComplianceFrameworks = [],
-                HashIds  = false,
-                Level    = RedactionLevel.Minimal
-            }
-        };
-}
-
-public enum RedactionLevel
-{
-    Minimal,     // Basic regex patterns only — development
-    Standard,    // Common PII patterns — staging
-    Aggressive   // Comprehensive detection + conservative redaction — production
-}
-```
-
-## Privacy-Safe Logging
-
-Wrap `ILogger<T>` to apply redaction at the call site before values reach the structured log:
-
-```csharp
-public class PrivacySafeLogger<T>
-{
-    private readonly ILogger<T> _logger;
-    private readonly SmartRedactor _redactor;
-
-    public void LogUserAction(string action, object context)
-    {
-        var safeContext = _redactor.Redact(context);
-        _logger.LogInformation(
-            "User action {Action} completed for {UserTier} in {UserRegion}",
-            action,
-            safeContext.GetType().GetProperty("user_tier")?.GetValue(safeContext),
-            safeContext.GetType().GetProperty("user_region")?.GetValue(safeContext));
-    }
-
-    public void LogError(Exception ex, string operation, object? context = null)
-    {
-        var safeContext = context is not null ? _redactor.Redact(context) : null;
-
-        // Do NOT reconstruct the exception — pass it directly so the logger captures
-        // the original stack trace. Keep PII out of the message template parameters.
-        _logger.LogError(
-            ex,
-            "Operation {Operation} failed with {ErrorType}",
-            operation,
-            ex.GetType().Name);
-
-        // If the exception message itself may contain PII (e.g., from a third-party
-        // library that includes user input), log it as a separate scrubbed field
-        // rather than re-creating the exception.
-        if (safeContext is not null)
-        {
-            _logger.LogDebug("Error context: {@SafeContext}", safeContext);
-        }
-    }
-}
-```
-
-**Do not** reconstruct `Exception` objects to scrub their messages:
-```csharp
-// ❌ Discards exception type, corrupts stack trace formatting
-return new Exception($"{scrubbedMessage}\n{ex.StackTrace}");
-
-// ✅ Pass the original exception; keep PII out of structured fields separately
-_logger.LogError(ex, "Operation {Operation} failed", operation);
-```
-
-## Data Minimisation
-
-The most effective PII protection is not collecting PII in the first place. Log the minimum data that serves the diagnostic purpose:
-
-```csharp
-public class DataMinimisationLogger
-{
-    private readonly ILogger _logger;
-
-    public void LogBusinessEvent(string eventType, object rawContext)
-    {
-        var minimised = MinimiseForEvent(eventType, rawContext);
-        _logger.LogInformation(
-            "Business event {EventType}",
-            eventType);
-        // Log the minimised context as a structured object
-        _logger.LogDebug("Event context {@EventContext}", minimised);
-    }
-
-    private static object MinimiseForEvent(string eventType, object raw) =>
-        eventType switch
-        {
-            "user_login" => new
-            {
-                login_method    = ExtractLoginMethod(raw),   // "password", "oauth", "sso"
-                success         = ExtractSuccess(raw),
-                geographic_market = ExtractMarket(raw),      // "EU", "US", "APAC"
-                device_category = ExtractDeviceCategory(raw), // "mobile", "desktop"
-                // Not logged: username, email, IP address, user agent
-            },
-            "purchase_completed" => new
-            {
-                order_value_range    = ExtractValueRange(raw),   // "0-50", "50-200", "200+"
-                product_categories   = ExtractCategories(raw),
-                payment_method_type  = ExtractPaymentType(raw),  // "card", "wallet"
-                customer_tier        = ExtractCustomerTier(raw),
-                // Not logged: order ID (hash it), customer name, shipping address
-            },
-            _ => new { event_type = eventType }
-        };
-}
-```
-
-## Audit Logging
-
-GDPR and CCPA require audit trails for personal data access. Log the access event, not the data itself:
-
-```csharp
-public class PIIAccessAuditLogger
-{
-    private readonly ILogger<PIIAccessAuditLogger> _audit;
-
-    public void RecordAccess(string requestId, string accessorRole,
-        string dataSubjectToken, string[] dataCategories, string legalBasis)
-    {
-        _audit.LogInformation(
-            "PII access: request={RequestId} role={AccessorRole} " +
-            "subject={DataSubjectToken} categories={DataCategories} basis={LegalBasis}",
-            requestId,
-            accessorRole,
-            dataSubjectToken,        // Hashed/tokenised, not raw identifier
-            string.Join(",", dataCategories),
-            legalBasis);             // "legitimate_interest", "consent", "contract"
-    }
-
-    public void RecordDeletion(string requestId, string dataSubjectToken,
-        int logsAffected, bool succeeded)
-    {
-        _audit.LogInformation(
-            "PII deletion: request={RequestId} subject={DataSubjectToken} " +
-            "records={LogsAffected} result={Result}",
-            requestId,
-            dataSubjectToken,
-            logsAffected,
-            succeeded ? "fulfilled" : "failed");
-    }
-}
-```
-
-## Regulatory Quick Reference
-
-| Regulation | Scope | Key log obligations | Right to erasure |
-|---|---|---|---|
-| GDPR | EU residents | No sensitive-category data without legal basis; data minimisation; third-party sink agreements required | 30 days |
-| CCPA | California residents | Disclose what personal data is logged; honour deletion requests | 45 days |
-| HIPAA | US health data | PHI prohibited in application logs; Business Associate Agreement required for third-party sinks | No |
-| PCI DSS | Cardholder data | No full PAN in logs; no CVV; BIN (first 6) + last 4 digits are permissible | N/A |
-
-For the Collector-side controls that implement these obligations uniformly across services, see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
+The `!` flips grep's exit code, so the command succeeds when nothing matches and fails, printing the leaked lines, when something does. That makes it a CI step as it stands. Put the same seeded lines in an integration test, point the OTLP exporter at a Collector with the `debug` exporter in staging, and the build fails the day someone adds a new leak.
 
 ## Common Pitfalls
 
-**The development data problem.** Production data in development environments means developers see real customer PII. Apply `RedactionPolicy.ForEnvironment("development")` in all environments — lower-fidelity redaction in dev is fine, but the policy must exist everywhere.
+**Other log providers skip step 4.** `Host.CreateApplicationBuilder` registers console, debug and EventSource providers by default. They get step 3's redaction, but the OTel processor never sees their output. In testing, the console provider printed the raw card number, email address and IP from step 5's free-text line. In a container, stdout usually ends up in a log shipper. That's why step 4 clears the providers. If you need console output, give it the same scrubbing or keep it out of production.
 
-**The exception message leak.** Third-party libraries and ORMs sometimes include user input or query parameters in exception messages. The most common offender is a validation exception that echoes the input value:
+**Exception messages start at the throw.** The processor cleans up after the fact, but the cheapest fix is at the source. Put the field name in the message, not the value: `throw new ValidationException("Invalid email format")`, not one that echoes `submittedEmail`.
 
-```csharp
-// ❌ Exception message contains the submitted value
-throw new ValidationException($"Invalid email format: {submittedEmail}");
+**Audit events don't belong in this pipeline.** A record of who accessed personal data is evidence, not a debugging aid. It can't be sampled, and your redaction rules shouldn't be allowed to change it. [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) covers giving it a pipeline of its own.
 
-// ✅ Use a structured exception that separates code from data
-throw new ValidationException("Invalid email format")
-{
-    Data = { ["field"] = "email" }  // Not the value — the field name only
-};
-```
+**Classification works one field at a time.** Postcode, birth date and gender aren't personal on their own, but together they can single out one person:
 
-**The third-party sink leak.** Sending raw structured log objects to an external sink (DataDog, Splunk, third-party APM) without a scrubbing filter sends PII to a system you don't fully control. Register a `PIIFilteringProcessor` or configure the scrubbing enricher before the external exporter, not just before your own backend.
+{{< obs-quasi-id-risk >}}
 
-## What Not to Use: The OTel Processor Trap
-
-The obvious place to scrub PII in an OTel-instrumented service is a `BaseProcessor<LogRecord>`. It is not a safe option. In the OTel .NET SDK, `LogRecord.Attributes` and `LogRecord.FormattedMessage` are read-only — you cannot assign to them in `OnEnd`. Attempts to do so will silently fail or throw at runtime.
-
-Scrub before the record is created — at the `ILogger` call site using `BeginScope`, Serilog destructuring policies, or a wrapper like the `PrivacySafeLogger` above — or after the record reaches the Collector, using OTTL `delete_key` and `set` transforms as documented in [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/).
-
-<!-- TODO: Add Serilog destructuring policy example showing how to register a custom IDestructuringPolicy that calls SmartRedactor on matched types -->
-<!-- TODO: Add integration test pattern for verifying PII detection coverage: property-based tests that generate realistic log strings and assert no matches reach the sink -->
+The redactors can't see that combination, because each field looks harmless. Generalise before you log: a postcode prefix instead of the full code, an age band instead of a birth date, or just leave the field out.
 
 ## See Also
 
-- [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the OTel Collector approach: the primary control, covering spans and logs across all services
-- [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) — transformation techniques: hashing, tokenisation, coarsening, and quality gates
-- [Structured Logging in .NET](/howtos/implement-structured-logging-dotnet/) — the logging patterns that application-level PII controls integrate with
+- [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the Collector pipeline, your primary control across every service
+- [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) — when to erase, hash or tokenise, and why emails never get hashed
+- [Observability Under Compliance](/guides/compliance-observability/) — what GDPR, HIPAA, SOC 2 and PCI DSS each ask of your telemetry
+- [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — the separate pipeline access records need

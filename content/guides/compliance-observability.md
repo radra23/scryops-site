@@ -132,3 +132,4 @@ Step 1 is where most of the surprises live, and it's the step teams skip because
 - [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the Collector pipeline that implements most of the controls above
 - [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) — hashing, tokenisation, coarsening, and which to use when
 - [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — the access-recording control for SOC 2 CC6 and PCI 10.3.1
+- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — the application-level layer
