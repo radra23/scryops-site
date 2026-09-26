@@ -176,4 +176,3 @@ A good masking process turns sensitive data into safe, useful signals. The trick
 - [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — which fields carry risk and why, before you decide how to transform them
 - [Observability Under Compliance](/guides/compliance-observability/) — where hashing vs deletion sits in the GDPR, HIPAA, SOC 2, and PCI DSS picture
 - [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — tokenising identifiers inside a record you can't delete
-- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — the application-level layer that applies these same techniques before the Collector ever sees the data
