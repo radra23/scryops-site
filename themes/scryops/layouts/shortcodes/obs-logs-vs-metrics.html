@@ -2,8 +2,8 @@
      The same incident from the metric view and the log view. Salvaged from
      stg with hard-coded hexes; ported to tokens. The two panels differ by
      value and weight, not hue, so the point survives html.pref-mono: the
-     metric side has a thin dim top rule and a column of "???" unknowns,
-     the log side a heavy bright rule and every field answered. The panel
+     metric side has a thin, low-ramp top rule and a column of "???" unknowns,
+     the log side a heavy, higher-ramp rule and every field answered. The panel
      titles say which is which.
 
      Sizing is measured, not assumed: the 760-unit viewBox renders at
@@ -27,17 +27,20 @@
   (dict "k" "scope:"       "v" "stripe · expired cards only" "y" 186)
 -}}
 
+{{- /* .Ordinal keeps the title/desc ids unique if the figure appears twice on a page. */ -}}
+{{- $id := printf "lvm-%d" .Ordinal -}}
+
 <figure class="diagram">
   <div class="diag-card" style="padding:0.9rem 0.9rem 0.6rem;">
     <svg viewBox="0 0 760 274" xmlns="http://www.w3.org/2000/svg"
-         role="img" aria-labelledby="lvm-title lvm-desc"
+         role="img" aria-labelledby="{{ $id }}-title {{ $id }}-desc"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
-      <title id="lvm-title">Metrics vs logs: the same incident from two vantage points</title>
-      <desc id="lvm-desc">Left panel shows the metric view of an incident: error rate climbed from 0.8% to 4.2% between 14:20 and 14:35 UTC, but gateway, endpoint, customer segment, and root cause are all unknown, shown as question marks. Right panel shows the log view of the same incident: service payment-api, endpoint /checkout/confirm, gateway stripe, HTTP status 422, error type card_expired, first seen 14:22 UTC, scoped to Stripe expired cards only. The log view identifies a specific condition rather than a cascade, so an alert on it fires with zero false positives.</desc>
+      <title id="{{ $id }}-title">Metrics vs logs: the same incident from two vantage points</title>
+      <desc id="{{ $id }}-desc">Left panel shows the metric view of an incident: error rate climbed from 0.8% to 4.2% between 14:20 and 14:35 UTC, but gateway, endpoint, customer segment, and root cause are all unknown, shown as question marks. Right panel shows the log view of the same incident: service payment-api, endpoint /checkout/confirm, gateway stripe, HTTP status 422, error type card_expired, first seen 14:22 UTC, scoped to Stripe expired cards only. The log view identifies a specific condition rather than a cascade, so an alert on it fires with zero false positives.</desc>
 
       <rect width="760" height="274" fill="var(--fig-bg)"/>
 
-      {{- /* LEFT PANEL: METRIC VIEW, a thin dim rule: less to act on */}}
+      {{- /* LEFT PANEL: METRIC VIEW, a thin low-ramp rule: less to act on */}}
       <rect x="8" y="8" width="310" height="258" fill="var(--surface)" stroke="var(--fig-bd)" stroke-width="1" rx="1"/>
       <rect x="8" y="8" width="310" height="2" fill="var(--mc-ramp-4)"/>
       <text x="163" y="28" fill="var(--mc-ink-secondary)" font-size="11.5" text-anchor="middle"
@@ -61,7 +64,7 @@
       <text x="363" y="160" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">same</text>
       <text x="363" y="176" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">incident</text>
 
-      {{- /* RIGHT PANEL: LOG VIEW, a heavy bright rule: actionable */}}
+      {{- /* RIGHT PANEL: LOG VIEW, a heavy high-ramp rule: actionable */}}
       <rect x="408" y="8" width="344" height="258" fill="var(--surface)" stroke="var(--fig-bd)" stroke-width="1" rx="1"/>
       <rect x="408" y="8" width="344" height="4" fill="var(--mc-ramp-1)"/>
       <text x="580" y="28" fill="var(--mc-ink)" font-size="11.5" text-anchor="middle"

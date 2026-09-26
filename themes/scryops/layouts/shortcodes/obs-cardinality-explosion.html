@@ -2,9 +2,9 @@
      Bounded vs unbounded label cardinality: one metric, two label
      strategies. Salvaged from stg with hard-coded hexes; ported to tokens.
      Each small box is one time series. The unbounded side reads as the
-     explosion through density (40 small boxes vs 12 large ones), brighter
-     box strokes, and a heavy bright top rule, not through red, so it
-     survives html.pref-mono.
+     explosion through density (40 small boxes vs 12 large ones),
+     higher-contrast box strokes (a higher --mc-ramp step), and a heavy
+     top rule, not through red, so it survives html.pref-mono.
      The stg version wrote "ts" inside all 52 boxes at 7-8 units in
      near-invisible ink; at the size floor that repeated label only added
      noise, so the boxes stand on their own and the SVG description says
@@ -18,13 +18,16 @@
      No overflow:hidden on the card: it outranks .diag-card{overflow-x:auto}
      and would clip the figure on phones. */ -}}
 
+{{- /* .Ordinal keeps the title/desc ids unique if the figure appears twice on a page. */ -}}
+{{- $id := printf "ce-%d" .Ordinal -}}
+
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg" role="img"
-         aria-labelledby="ce-title ce-desc"
+         aria-labelledby="{{ $id }}-title {{ $id }}-desc"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
-      <title id="ce-title">Bounded vs unbounded label cardinality</title>
-      <desc id="ce-desc">Two-panel comparison where each small box is one time series. Left panel shows bounded labels — tier, channel, status — producing 12 time series in a tidy 4 by 3 grid: manageable and predictable. Right panel shows unbounded labels — user_id — producing 100,000 time series for a single metric: a dense grid of 40 visible boxes plus 99,960 more, growing with every new user.</desc>
+      <title id="{{ $id }}-title">Bounded vs unbounded label cardinality</title>
+      <desc id="{{ $id }}-desc">Two-panel comparison where each small box is one time series. Left panel shows bounded labels — tier, channel, status — producing 12 time series in a tidy 4 by 3 grid: manageable and predictable. Right panel shows unbounded labels — user_id — producing 100,000 time series for a single metric: a dense grid of 40 visible boxes plus 99,960 more, growing with every new user.</desc>
 
       <rect width="760" height="270" fill="var(--fig-bg)"/>
 
