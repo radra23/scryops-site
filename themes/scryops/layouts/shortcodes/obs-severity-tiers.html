@@ -25,13 +25,15 @@
 -}}
 {{- /* row tops: P0/P1 above the paging line, P2-P4 below it */ -}}
 {{- $rowY := slice 66 120 188 242 296 -}}
+{{- /* .Ordinal keeps the title/desc ids unique if the figure appears twice on a page. */ -}}
+{{- $id := printf "sv-%d" .Ordinal -}}
 
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
-    <svg viewBox="0 0 760 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="sv-t sv-d" shape-rendering="crispEdges"
+    <svg viewBox="0 0 760 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-t {{ $id }}-d" shape-rendering="crispEdges"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
-      <title id="sv-t">Severity levels as game threat tiers</title>
-      <desc id="sv-d">Five severity levels shown as a descending threat-tier ladder, each driven by SLO burn rate. P0, The Clock Is Running, 14x burn, budget gone in about 2 days, routed to PagerDuty plus a phone call, acknowledge under 5 minutes, 24/7, threat 5 of 5. P1, Significant and worsening, 6x, about 5 days, PagerDuty, under 30 minutes, 24/7, threat 4 of 5. A dashed line marks the boundary: P0 and P1 wake on-call 24/7, everything below is business hours. P2, Real but not urgent, 2x, about 15 days, incident channel, under 2 hours, business hours, threat 3 of 5. P3, Low and stable, under 1x, no budget pressure, ticket, under 8 hours, business hours, threat 2 of 5. P4, Informational, no impact, documentation, next cycle, no page, threat 1 of 5. Each tier's left rail and badge border get lighter and thinner as severity drops.</desc>
+      <title id="{{ $id }}-t">Severity levels as game threat tiers</title>
+      <desc id="{{ $id }}-d">Five severity levels shown as a descending threat-tier ladder, each driven by SLO burn rate. P0, The Clock Is Running, 14x burn, budget gone in about 2 days, routed to PagerDuty plus a phone call, acknowledge under 5 minutes, 24/7, threat 5 of 5. P1, Significant and worsening, 6x, about 5 days, PagerDuty, under 30 minutes, 24/7, threat 4 of 5. A dashed line marks the boundary: P0 and P1 wake on-call 24/7, everything below is business hours. P2, Real but not urgent, 2x, about 15 days, incident channel, under 2 hours, business hours, threat 3 of 5. P3, Low and stable, under 1x, no budget pressure, ticket, under 8 hours, business hours, threat 2 of 5. P4, Informational, no impact, documentation, next cycle, no page, threat 1 of 5. Each tier's left rail and badge border get fainter and thinner as severity drops.</desc>
       <rect x="0" y="0" width="760" height="392" fill="var(--fig-bg)"/>
 
       {{- /* arcade frame: ink border, inner hairline, corner studs */}}

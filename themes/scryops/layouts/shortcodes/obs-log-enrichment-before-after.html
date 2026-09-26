@@ -21,7 +21,7 @@
   (dict "k" "\"timestamp\":" "v" "\"2026-06-10T14:32:01Z\"")
   (dict "k" "\"level\":"     "v" "\"Error\"")
   (dict "k" "\"message\":"   "v" "\"Payment processing failed\"")
-  (dict "k" "\"exception\":" "v" "\"GatewayTimeout\"")
+  (dict "k" "\"exception\":" "v" "\"PaymentGatewayException\"")
 -}}
 {{- $enriched := slice
   (dict "k" "\"customer.tier\":"      "v" "\"enterprise\"")
@@ -31,13 +31,15 @@
   (dict "k" "\"experiment.variant\":" "v" "\"streamlined\"")
 -}}
 {{- $slotW := slice 240 260 210 250 230 -}}
+{{- /* .Ordinal keeps the title/desc/marker ids unique if the figure appears twice on a page. */ -}}
+{{- $id := printf "leb-%d" .Ordinal -}}
 
 <figure class="diagram">
   <div class="diag-card" style="padding:0.9rem;">
-    <svg viewBox="0 0 760 318" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="leb-title leb-desc"
+    <svg viewBox="0 0 760 318" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-title {{ $id }}-desc"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
-      <title id="leb-title">Log event enrichment: before and after</title>
-      <desc id="leb-desc">Two panels. The left panel, without enrichment, shows a sparse log event with only four fields (timestamp, level, message, exception) followed by five empty dashed placeholder slots; its footer says it tells you: IT broke. The right panel, with enrichment, shows the same four fields plus five filled rows of enriched fields (customer.tier enterprise, customer.segment high, customer.id, experiment.id checkout-v2, experiment.variant streamlined); its footer says it tells you: WHO it matters to. An arrow labelled enrich points from left to right. A note below reads: enricher runs once per request, and context flows into every log event automatically.</desc>
+      <title id="{{ $id }}-title">Log event enrichment: before and after</title>
+      <desc id="{{ $id }}-desc">Two panels. The left panel, without enrichment, shows a sparse log event with only four fields (timestamp, level, message, exception) followed by five empty dashed placeholder slots; its footer says it tells you: something broke. The right panel, with enrichment, shows the same four fields plus five filled rows of enriched fields (customer.tier enterprise, customer.segment high, customer.id, experiment.id checkout-v2, experiment.variant streamlined); its footer says it tells you: WHO it matters to. An arrow labelled enrich points from left to right. A note below reads: enricher runs once per request, and context flows into every log event automatically.</desc>
       <rect width="760" height="318" fill="var(--fig-bg)"/>
 
       {{- /* LEFT PANEL: sparse */}}
@@ -55,7 +57,7 @@
       {{- end }}
       <line x1="8" y1="246" x2="348" y2="246" stroke="var(--fig-bd)" stroke-width="1"/>
       <text x="178" y="262" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">tells you:</text>
-      <text x="178" y="280" fill="var(--mc-ink-secondary)" font-size="15" font-weight="700" text-anchor="middle">IT broke</text>
+      <text x="178" y="280" fill="var(--mc-ink-secondary)" font-size="15" font-weight="700" text-anchor="middle">SOMETHING broke</text>
 
       {{- /* RIGHT PANEL: enriched */}}
       <rect x="412" y="10" width="340" height="276" fill="var(--surface)" stroke="var(--fig-bd)" stroke-width="1" rx="2"/>
@@ -78,11 +80,11 @@
 
       {{- /* CENTER ARROW */}}
       <defs>
-        <marker id="leb-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+        <marker id="{{ $id }}-arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
           <path d="M0,0 L0,6 L8,3 z" fill="var(--mc-ink)"/>
         </marker>
       </defs>
-      <line x1="356" y1="148" x2="400" y2="148" stroke="var(--mc-ink)" stroke-width="2" marker-end="url(#leb-arr)"/>
+      <line x1="356" y1="148" x2="400" y2="148" stroke="var(--mc-ink)" stroke-width="2" marker-end="url(#{{ $id }}-arr)"/>
       <text x="380" y="138" fill="var(--mc-ink)" font-size="13.5" text-anchor="middle">enrich</text>
 
       <text x="380" y="308" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">enricher runs once per request — context flows into every log event automatically</text>
