@@ -183,5 +183,3 @@ The failure mode of an audit trail is silence. It does not crash, page anyone, o
 
 - [Observability Under Compliance](/guides/compliance-observability/) — the four frameworks and where audit trails sit in each
 - [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — why the redaction pipeline must not touch the audit pipeline
-- [Telemetry Data Sovereignty](/guides/data-sovereignty-and-residency/) — audit records are personal data, and they have a jurisdiction
-- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — the `PIIAccessAuditLogger` pattern in application code

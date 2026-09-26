@@ -111,7 +111,7 @@ Three places, worth knowing before someone points them out in a review.
 
 **Audit trails versus erasure.** An audit record proving that user X's data was deleted necessarily names user X. GDPR Article 17(3)(b) provides the exit: erasure doesn't apply where processing is necessary for compliance with a legal obligation. Retention of the audit record is that obligation. Keep the record; tokenise the subject identifier inside it.
 
-**Cross-border transfer versus centralised observability.** A single global trace backend is operationally ideal and, for EU personal data, a transfer question. That one is large enough to have its own guide: see [Telemetry Data Sovereignty](/guides/data-sovereignty-and-residency/).
+**Cross-border transfer versus centralised observability.** A single global trace backend is operationally ideal and, for EU personal data, a transfer question. That one is large enough to need its own guide.
 
 ## Where to Start
 
@@ -132,5 +132,3 @@ Step 1 is where most of the surprises live, and it's the step teams skip because
 - [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the Collector pipeline that implements most of the controls above
 - [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) — hashing, tokenisation, coarsening, and which to use when
 - [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) — the access-recording control for SOC 2 CC6 and PCI 10.3.1
-- [Telemetry Data Sovereignty](/guides/data-sovereignty-and-residency/) — where telemetry may legally live
-- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — the application-level layer
