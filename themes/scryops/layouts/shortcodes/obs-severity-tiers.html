@@ -24,25 +24,25 @@
   (dict "p" "P4" "title" "INFORMATIONAL"          "burn" "burn no impact"         "route" "Docs · next cycle · no page"            "pips" 1 "rail" 3 "bw" "1")
 -}}
 {{- /* row tops: P0/P1 above the paging line, P2-P4 below it */ -}}
-{{- $rowY := slice 66 120 188 242 296 -}}
+{{- $rowY := slice 66 120 196 250 304 -}}
 {{- /* .Ordinal keeps the title/desc ids unique if the figure appears twice on a page. */ -}}
 {{- $id := printf "sv-%d" .Ordinal -}}
 
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
-    <svg viewBox="0 0 760 392" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-t {{ $id }}-d" shape-rendering="crispEdges"
+    <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-t {{ $id }}-d" shape-rendering="crispEdges"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="{{ $id }}-t">Severity levels as game threat tiers</title>
       <desc id="{{ $id }}-d">Five severity levels shown as a descending threat-tier ladder, each driven by SLO burn rate. P0, The Clock Is Running, 14x burn, budget gone in about 2 days, routed to PagerDuty plus a phone call, acknowledge under 5 minutes, 24/7, threat 5 of 5. P1, Significant and worsening, 6x, about 5 days, PagerDuty, under 30 minutes, 24/7, threat 4 of 5. A dashed line marks the boundary: P0 and P1 wake on-call 24/7, everything below is business hours. P2, Real but not urgent, 2x, about 15 days, incident channel, under 2 hours, business hours, threat 3 of 5. P3, Low and stable, under 1x, no budget pressure, ticket, under 8 hours, business hours, threat 2 of 5. P4, Informational, no impact, documentation, next cycle, no page, threat 1 of 5. Each tier's left rail and badge border get fainter and thinner as severity drops.</desc>
-      <rect x="0" y="0" width="760" height="392" fill="var(--fig-bg)"/>
+      <rect x="0" y="0" width="760" height="400" fill="var(--fig-bg)"/>
 
       {{- /* arcade frame: ink border, inner hairline, corner studs */}}
-      <rect x="6" y="6" width="748" height="380" fill="var(--fig-bg)" stroke="var(--mc-ink)" stroke-width="2"/>
-      <rect x="12" y="12" width="736" height="368" fill="none" stroke="var(--fig-bd)" stroke-width="1"/>
+      <rect x="6" y="6" width="748" height="388" fill="var(--fig-bg)" stroke="var(--mc-ink)" stroke-width="2"/>
+      <rect x="12" y="12" width="736" height="376" fill="none" stroke="var(--fig-bd)" stroke-width="1"/>
       <rect x="6" y="6" width="8" height="8" fill="var(--mc-ink)"/>
       <rect x="746" y="6" width="8" height="8" fill="var(--mc-ink)"/>
-      <rect x="6" y="378" width="8" height="8" fill="var(--mc-ink)"/>
-      <rect x="746" y="378" width="8" height="8" fill="var(--mc-ink)"/>
+      <rect x="6" y="386" width="8" height="8" fill="var(--mc-ink)"/>
+      <rect x="746" y="386" width="8" height="8" fill="var(--mc-ink)"/>
 
       {{- /* header band */}}
       <rect x="22" y="22" width="716" height="32" fill="var(--surface)" stroke="var(--fig-bd)" stroke-width="1"/>
@@ -70,7 +70,7 @@
       {{- if eq $i 1 }}
       <line x1="38" y1="174" x2="722" y2="174" stroke="var(--mc-ink)" stroke-width="1" stroke-dasharray="4 3"/>
       {{- /* end-anchored so it right-aligns under the line's end (#85) */}}
-      <text x="722" y="185" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">▲ wake on-call 24/7 / ▼ business hours</text>
+      <text x="722" y="191" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">▲ wake on-call 24/7 / ▼ business hours</text>
       {{- end }}
       {{- end }}
     </svg>

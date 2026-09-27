@@ -38,7 +38,7 @@
             font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">BOUNDED LABELS</text>
       <text x="180" y="46" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">tier &#215; channel &#215; status</text>
       {{- range $r := seq 0 2 }}{{ range $c := seq 0 3 }}
-      <rect x="{{ add 38 (mul $c 58) }}" y="{{ add 56 (mul $r 34) }}" width="52" height="28" fill="var(--fig-bg)" stroke="var(--mc-ramp-3)" stroke-width="1"/>
+      <rect x="{{ add 67 (mul $c 58) }}" y="{{ add 56 (mul $r 34) }}" width="52" height="28" fill="var(--fig-bg)" stroke="var(--mc-ramp-3)" stroke-width="1"/>
       {{- end }}{{ end }}
       <text x="180" y="196" text-anchor="middle" fill="var(--mc-ink)" font-size="20" font-weight="700">12 series</text>
       <text x="180" y="214" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">manageable, predictable</text>
@@ -55,7 +55,7 @@
             font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">UNBOUNDED LABELS</text>
       <text x="580" y="46" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">user_id &#215; status</text>
       {{- range $r := seq 0 4 }}{{ range $c := seq 0 7 }}
-      <rect x="{{ add 418 (mul $c 36) }}" y="{{ add 56 (mul $r 20) }}" width="34" height="18" fill="var(--fig-bg)" stroke="var(--mc-ramp-1)" stroke-width="1"/>
+      <rect x="{{ add 437 (mul $c 36) }}" y="{{ add 56 (mul $r 20) }}" width="34" height="18" fill="var(--fig-bg)" stroke="var(--mc-ramp-1)" stroke-width="1"/>
       {{- end }}{{ end }}
       <text x="580" y="174" text-anchor="middle" fill="var(--mc-ink)" font-size="13.5">... &#215; 99,960 more</text>
       <text x="580" y="196" text-anchor="middle" fill="var(--mc-ink)" font-size="20" font-weight="700">100,000 series</text>
