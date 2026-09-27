@@ -36,6 +36,53 @@ GOOGLE_URL = (
 UA = ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
       "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120 Safari/537.36")
 
+# Glyph patches applied after download, keyed by the downloaded filename.
+# Pixelify Sans 700 draws C as an O with a 34-unit (0.034em) notch on the
+# right, and G the same plus a spur — at label sizes (10-13px) the notch is a
+# third of a pixel and antialiases shut, so "CLOCK" reads "OLOCK" and "LOGS"
+# reads "LOOS". Each patch moves the notch's edge points apart to cut a real
+# aperture; advance widths are untouched, so no measured label moves. The
+# patched cut ships under its own filename (OFL: no Reserved Font Name, but a
+# modified version still shouldn't pose as the original) — which also busts
+# sw.js's cache-first static cache for returning visitors.
+GLYPH_PATCHES = {
+    "pixelify-sans-700.woff2": ("pixelify-sans-scry-700.woff2", "Pixelify Sans Scry", {
+        # C: open the right side from y=190 to y=440 (was 297..331)
+        "C": {(542, 331): (542, 440), (414, 331): (414, 440),
+              (414, 297): (414, 190), (542, 297): (542, 190)},
+        # G: raise the upper-right stub so the mouth opens above the spur
+        "G": {(542, 331): (542, 440), (414, 331): (414, 440)},
+    }),
+}
+
+
+def patch_glyphs(blob, family, moves):
+    """Return blob with each glyph's on-curve points remapped per `moves`."""
+    import io
+    from fontTools.ttLib import TTFont
+    font = TTFont(io.BytesIO(blob))
+    glyf = font["glyf"]
+    for name, remap in moves.items():
+        g = glyf[name]
+        hits = 0
+        for i, pt in enumerate(g.coordinates):
+            if tuple(pt) in remap:
+                g.coordinates[i] = remap[tuple(pt)]
+                hits += 1
+        # Upstream redrew the glyph if the points aren't where we expect —
+        # fail loudly rather than ship a half-moved outline.
+        if hits != len(remap):
+            raise SystemExit(f"patch {name}: matched {hits}/{len(remap)} points")
+        g.recalcBounds(glyf)
+    for rec in font["name"].names:
+        if rec.nameID in (1, 3, 4, 16):
+            rec.string = rec.toUnicode().replace("Pixelify Sans", family)
+        elif rec.nameID == 6:
+            rec.string = rec.toUnicode().replace("PixelifySans", family.replace(" ", ""))
+    out = io.BytesIO()
+    font.save(out)
+    return out.getvalue()
+
 
 def fetch(url, binary=False):
     # curl, not urllib: this machine's python.org framework build has no
@@ -76,9 +123,14 @@ def main():
         url = re.search(r"src:\s*url\(([^)]+)\)", body).group(1)
         suffix = "" if style == "normal" else f"-{style}"
         fname = f"{slug(fam)}{suffix}-{weight}.woff2"
+        patch = GLYPH_PATCHES.get(fname)
+        if patch:
+            fname = patch[0]
         dest = os.path.join(FONT_DIR, fname)
         if fname not in downloaded:
             blob = fetch(url, binary=True)
+            if patch:
+                blob = patch_glyphs(blob, patch[1], patch[2])
             with open(dest, "wb") as f:
                 f.write(blob)
             downloaded[fname] = len(blob)
