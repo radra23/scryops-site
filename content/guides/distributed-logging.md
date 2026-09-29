@@ -318,4 +318,4 @@ The practical next step is threading trace IDs through log emission so cross-ser
 
 - [Wiring Trace IDs into Logs](/howtos/wire-trace-ids-into-logs/) — the practical implementation of log-trace correlation
 - [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — how to structure log output for automated analysis
-- [Your Sampling Strategy Is Lying to You](/guides/sampling-strategy/) — why not all log data should be kept at equal fidelity
+- [Your Sampling Strategy Is Lying to You](/articles/sampling-strategy/) — why a flat trace sample keeps the wrong traces, and what tail sampling keeps instead
