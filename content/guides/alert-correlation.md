@@ -109,7 +109,7 @@ Start with the lowest-effort technique that covers your highest-pain alert patte
 
 The goal is not zero noise — it is the minimum noise consistent with catching every real incident. Correlation does not make alerts disappear; it makes the structure of incidents legible.
 
-- [Alert Design Principles](/guides/alert-design-principles/) — what every alert must contain before correlation can help
+- [Alert Design Principles](/articles/alert-design-principles/) — what every alert must contain before correlation can help
 - [Alert Severity Levels](/guides/alert-severity-levels/) — burn-rate-based severity framework
 - [On-Call Procedures](/guides/on-call-procedures/) — how correlated incidents flow into the incident response process
 - [Runbook Authoring](/guides/runbook-authoring/) — writing the runbooks that correlation output points to

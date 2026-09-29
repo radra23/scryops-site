@@ -138,5 +138,5 @@ Runbooks decay. The service changes; the runbook doesn't. Treat runbook accuracy
 <!-- TODO: Add guidance on runbook templates for different alert types (latency SLO burn, error rate SLO burn, saturation) -->
 
 - [On-Call Procedures](/guides/on-call-procedures/) — escalation paths, handoff procedures, postmortem process
-- [Alert Design Principles](/guides/alert-design-principles/) — what every alert body should include before it points to a runbook
+- [Alert Design Principles](/articles/alert-design-principles/) — what every alert body should include before it points to a runbook
 - [Automated Remediation](/guides/automated-remediation-playbooks/) — when and how to encode runbook steps as automation
