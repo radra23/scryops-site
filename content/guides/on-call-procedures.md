@@ -74,7 +74,7 @@ flowchart LR
     B -->|Informational / P3-P4| E[Email or dashboard annotation<br/>review at next standup]
 {{< /mermaid >}}
 
-The alert routing policy and severity definitions are covered in [Alert Severity Levels](/guides/alert-severity-levels/) and [Alert Design Principles](/guides/alert-design-principles/). The key constraint: if an alert fires and no action is required, it should not be in the paging channel. Every page trains the on-call engineer on what a page means. Page noise is learned helplessness.
+The alert routing policy and severity definitions are covered in [Alert Severity Levels](/guides/alert-severity-levels/) and [Alert Design Principles](/articles/alert-design-principles/). The key constraint: if an alert fires and no action is required, it should not be in the paging channel. Every page trains the on-call engineer on what a page means. Page noise is learned helplessness.
 
 ## Incident Response
 
@@ -151,5 +151,5 @@ A postmortem action item without an owner and a due date is decorative. Assign e
 <!-- TODO: Define what constitutes a "significant incident" requiring a postmortem vs. a brief incident note -->
 
 - [Alert Severity Levels](/guides/alert-severity-levels/) — burn rate–based P0–P4 framework
-- [Alert Design Principles](/guides/alert-design-principles/) — what every alert must answer before it fires
+- [Alert Design Principles](/articles/alert-design-principles/) — what every alert must answer before it fires
 - [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/) — why the right fix is signal quality, not quieter thresholds

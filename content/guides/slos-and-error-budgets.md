@@ -153,6 +153,6 @@ graph TD
 <!-- TODO: Add guidance on SLO measurement for non-HTTP services (queues, batch jobs, streaming pipelines) -->
 <!-- TODO: Cover composite SLOs — services with multiple SLIs that each contribute to one error budget -->
 
-- [Alert Design Principles](/guides/alert-design-principles/) — how burn rate alerts fit into a broader alerting strategy
+- [Alert Design Principles](/articles/alert-design-principles/) — how burn rate alerts fit into a broader alerting strategy
 - [Alert Correlation](/guides/alert-correlation/) — grouping burn rate alerts with upstream symptoms
 - [On-Call Procedures](/guides/on-call-procedures/) — how error budget status affects incident response and handoffs
