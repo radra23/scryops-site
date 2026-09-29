@@ -20,8 +20,8 @@
   (dict "p" "P0" "title" "THE CLOCK IS RUNNING"   "burn" "burn 14× / ~2d"         "route" "PagerDuty + CALL · <5m · 24/7"          "pips" 5 "rail" 8 "bw" "2.5")
   (dict "p" "P1" "title" "SIGNIFICANT, WORSENING" "burn" "burn 6× / ~5d"          "route" "PagerDuty · <30m · 24/7"                "pips" 4 "rail" 6 "bw" "2")
   (dict "p" "P2" "title" "REAL, NOT URGENT"       "burn" "burn 2× / ~15d"         "route" "Incident channel · <2h · business hrs"  "pips" 3 "rail" 5 "bw" "1.5")
-  (dict "p" "P3" "title" "LOW & STABLE"           "burn" "burn <1× / no pressure" "route" "Ticket · <8h · business hrs"            "pips" 2 "rail" 4 "bw" "1.5")
-  (dict "p" "P4" "title" "INFORMATIONAL"          "burn" "burn no impact"         "route" "Docs · next cycle · no page"            "pips" 1 "rail" 3 "bw" "1")
+  (dict "p" "P3" "title" "LOW & STABLE"           "burn" "burn 1–2× / 15–30d"    "route" "Ticket · <8h · business hrs"            "pips" 2 "rail" 4 "bw" "1.5")
+  (dict "p" "P4" "title" "INFORMATIONAL"          "burn" "burn <1× / no impact"   "route" "Docs · next cycle · no page"            "pips" 1 "rail" 3 "bw" "1")
 -}}
 {{- /* row tops: P0/P1 above the paging line, P2-P4 below it */ -}}
 {{- $rowY := slice 66 120 196 250 304 -}}
@@ -33,7 +33,7 @@
     <svg viewBox="0 0 760 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-t {{ $id }}-d" shape-rendering="crispEdges"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="{{ $id }}-t">Severity levels as game threat tiers</title>
-      <desc id="{{ $id }}-d">Five severity levels shown as a descending threat-tier ladder, each driven by SLO burn rate. P0, The Clock Is Running, 14x burn, budget gone in about 2 days, routed to PagerDuty plus a phone call, acknowledge under 5 minutes, 24/7, threat 5 of 5. P1, Significant and worsening, 6x, about 5 days, PagerDuty, under 30 minutes, 24/7, threat 4 of 5. A dashed line marks the boundary: P0 and P1 wake on-call 24/7, everything below is business hours. P2, Real but not urgent, 2x, about 15 days, incident channel, under 2 hours, business hours, threat 3 of 5. P3, Low and stable, under 1x, no budget pressure, ticket, under 8 hours, business hours, threat 2 of 5. P4, Informational, no impact, documentation, next cycle, no page, threat 1 of 5. Each tier's left rail and badge border get fainter and thinner as severity drops.</desc>
+      <desc id="{{ $id }}-d">Five severity levels shown as a descending threat-tier ladder, each driven by SLO burn rate. P0, The Clock Is Running, 14x burn, budget gone in about 2 days, routed to PagerDuty plus a phone call, acknowledge under 5 minutes, 24/7, threat 5 of 5. P1, Significant and worsening, 6x, about 5 days, PagerDuty, under 30 minutes, 24/7, threat 4 of 5. A dashed line marks the boundary: P0 and P1 wake on-call 24/7, everything below is business hours. P2, Real but not urgent, 2x, about 15 days, incident channel, under 2 hours, business hours, threat 3 of 5. P3, Low and stable, 1 to 2x, budget gone in 15 to 30 days, ticket, under 8 hours, business hours, threat 2 of 5. P4, Informational, under 1x, no impact, documentation, next cycle, no page, threat 1 of 5. Each tier's left rail and badge border get fainter and thinner as severity drops.</desc>
       <rect x="0" y="0" width="760" height="400" fill="var(--fig-bg)"/>
 
       {{- /* arcade frame: ink border, inner hairline, corner studs */}}
