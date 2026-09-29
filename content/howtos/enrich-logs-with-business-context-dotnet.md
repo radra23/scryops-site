@@ -1,271 +1,273 @@
 ---
 title: "Enrich Logs with Business Context in .NET"
-date: 2026-06-10
-draft: true
-excerpt: "Log lines that say 'payment failed' tell you something broke. Log lines that say 'payment failed, enterprise customer, £12,400 basket' tell you what to do about it. Here is how to inject business context automatically into every log event using Serilog enrichers."
-readtime: 7
-tags: ["Logs", "Structured Logging", "OpenTelemetry", "Best Practices"]
+date: 2026-09-29
+draft: false
+excerpt: "A log line that says 'payment failed' tells you something broke. One that says 'payment failed, enterprise customer, checkout-v2 experiment' tells you what to do about it. Here's how to add that context to every log event in a .NET service, safely, with Serilog."
+readtime: 9
+tags: ["Logs", "Structured Logging", "OpenTelemetry", "Best Practices", "How-to"]
 ---
 
-> "The difference between a log line and a clue is context."
-> — Anonymous
+Your service knows things your logs don't. It knows the customer's tier. It knows whether the failing request belongs to a trial account or an enterprise contract. It knows the request is part of an A/B experiment.
 
-Your service knows things that your logs don't. It knows the customer's tier. It knows whether the failing request belongs to a trial account or an enterprise contract. It knows the request is part of an A/B experiment. It knows the user's preferred language and region.
+None of that shows up in most log lines. So when something breaks, your logs tell you *that* it broke, but not *who it matters to*.
 
-None of that appears in most log lines. So when something breaks, your logs tell you *that* it broke — but not *who it matters to* or *how much*.
-
-Adding that context manually to every log call is the wrong approach. It is inconsistent, it is forgotten under pressure, and it bloats every call site with concern-crossing noise. The right approach is to add it automatically, at the framework level, so that every log event your service emits carries the business context that makes it useful — without anyone having to remember to include it.
-
-That is what Serilog enrichers are for.
+Adding that context by hand to every log call is the wrong fix. It's inconsistent, it gets forgotten under pressure, and it clutters every call site. The right fix is to look the context up once per request and let it flow into every log event automatically, so nobody has to remember it.
 
 {{< obs-log-enrichment-before-after >}}
 
-## What Enrichers Do
+## Before You Start
 
-Serilog's enricher pipeline runs before every log event is written to any sink. An enricher is a class that implements `ILogEventEnricher`, receives the `LogEvent` and a `LogEventPropertyFactory`, and can add, modify, or remove properties. The enricher runs once per log call. The properties it adds appear in every log event for the lifetime of the enrichment scope.
+You need:
 
-The pattern is exactly right for business context: resolve the context once (from the HTTP request, from a service call, from the ambient DI container), attach it to the logger, and let it flow into every log line that follows.
+- An ASP.NET Core service on .NET 8 or later
+- `Serilog.AspNetCore`, plus `Serilog.Sinks.OpenTelemetry` to export over OTLP
+- A random 32-byte key, base64-encoded, stored wherever you keep secrets
 
-## Building the Enricher
+Every sample below was compiled and run against `Serilog.AspNetCore` 10.0.0 and `Serilog.Sinks.OpenTelemetry` 4.2.0 on `net8.0`, and the test in step 5 passes.
 
-The enricher resolves business context from the current HTTP request. It reads a few key attributes — customer tier, revenue segment, experiment assignment — and attaches them as structured properties.
+## Step 1: Decide What the Context Is
+
+Start with the shape of the context and where it comes from:
 
 ```csharp
-using Microsoft.AspNetCore.Http;
-using Serilog.Core;
-using Serilog.Events;
+using System.Security.Cryptography;
+using System.Text;
 
-public class BusinessContextEnricher : ILogEventEnricher
+public record CustomerContext(
+    string Tier,            // "enterprise", "growth", "starter", "trial"
+    string RevenueSegment); // "high", "mid", "low": a band, never an amount
+
+public interface ICustomerContextService
 {
-    private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ICustomerContextService _customerContext;
+    Task<CustomerContext?> GetAsync(string userId, CancellationToken cancellationToken);
+}
 
-    public BusinessContextEnricher(
-        IHttpContextAccessor httpContextAccessor,
-        ICustomerContextService customerContext)
+public sealed class Pseudonymizer(byte[] key)
+{
+    // Keyed HMAC: stable for correlation, useless without the key.
+    public string For(string value) =>
+        Convert.ToHexString(HMACSHA256.HashData(key, Encoding.UTF8.GetBytes(value)))[..16].ToLowerInvariant();
+}
+```
+
+`ICustomerContextService` is yours to implement. Look the customer up in whatever already holds their tier and segment: a database, a cache, a claims transform.
+
+The `Pseudonymizer` is there because you'll want to follow one customer across log lines without logging who they are. A plain hash won't do for that: anyone can hash a list of known IDs and match them. A keyed HMAC gives you the same stable value every time, and it's useless to anyone without the key. It's the same approach [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) takes. If you've set up its HMAC redactor, use that here instead, so both produce the same pseudonyms.
+
+## Step 2: Resolve It Once per Request
+
+A piece of middleware looks the context up once and pushes it into Serilog's `LogContext`, which every log event in the request picks up:
+
+```csharp
+using Serilog.Context;
+using Serilog.Core;
+using Serilog.Core.Enrichers;
+
+public sealed class BusinessContextMiddleware(RequestDelegate next, Pseudonymizer pseudonymizer)
+{
+    // Only these experiments and variants ever reach your logs.
+    private static readonly Dictionary<string, string[]> KnownExperiments = new()
     {
-        _httpContextAccessor = httpContextAccessor;
-        _customerContext = customerContext;
-    }
+        ["checkout-v2"] = ["control", "streamlined"],
+    };
 
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+    public async Task InvokeAsync(HttpContext context, ICustomerContextService customers)
     {
-        var httpContext = _httpContextAccessor.HttpContext;
-        if (httpContext is null) return;
+        var properties = new List<ILogEventEnricher>();
 
-        // Resolve customer context — cached per request via ICustomerContextService
-        var customer = _customerContext.GetCurrentCustomer(httpContext);
-        if (customer is null) return;
-
-        logEvent.AddPropertyIfAbsent(
-            propertyFactory.CreateProperty("customer.tier", customer.Tier));
-
-        logEvent.AddPropertyIfAbsent(
-            propertyFactory.CreateProperty("customer.segment", customer.RevenueSegment));
-
-        logEvent.AddPropertyIfAbsent(
-            propertyFactory.CreateProperty("customer.id", customer.AnonymisedId));
-
-        // Feature flag / experiment context
-        var experiment = _customerContext.GetExperimentContext(httpContext);
-        if (experiment is not null)
+        var userId = context.User.FindFirst("sub")?.Value;
+        if (userId is not null &&
+            await customers.GetAsync(userId, context.RequestAborted) is { } customer)
         {
-            logEvent.AddPropertyIfAbsent(
-                propertyFactory.CreateProperty("experiment.id", experiment.Id));
-            logEvent.AddPropertyIfAbsent(
-                propertyFactory.CreateProperty("experiment.variant", experiment.Variant));
+            properties.Add(new PropertyEnricher("customer.tier", customer.Tier));
+            properties.Add(new PropertyEnricher("customer.segment", customer.RevenueSegment));
+            properties.Add(new PropertyEnricher("customer.ref", pseudonymizer.For(userId)));
+        }
+
+        // Header format: "<experiment>:<variant>", e.g. "checkout-v2:streamlined"
+        var header = context.Request.Headers["X-Experiment-Context"].ToString().Split(':');
+        if (header is [var id, var variant] &&
+            KnownExperiments.TryGetValue(id, out var variants) && variants.Contains(variant))
+        {
+            properties.Add(new PropertyEnricher("experiment.id", id));
+            properties.Add(new PropertyEnricher("experiment.variant", variant));
+        }
+
+        using (LogContext.Push(properties.ToArray()))
+        {
+            await next(context);
         }
     }
 }
 ```
 
-The enricher uses `AddPropertyIfAbsent` throughout. This means that if a specific log call explicitly sets `customer.tier`, the explicit value wins — the enricher does not overwrite deliberate callsite decisions.
+Doing the lookup here, once, instead of inside a Serilog enricher saves you three headaches. An enricher runs on *every* log call, so it would repeat the lookup every time. If the lookup itself logs (EF Core does), an enricher calls back into itself. And an enricher registered at startup can't safely use request-scoped services. The middleware sidesteps all three. It runs once, before anything in the request logs, and gets `ICustomerContextService` from the request's own scope.
 
-### The Customer Context Service
+The experiment header comes from the client, so treat it as untrusted. Only values you've listed make it into your logs. Anything else, including someone's idea of a clever payload, is ignored.
 
-The enricher delegates resolution to `ICustomerContextService`, which owns the caching logic. Without caching, every log call would trigger a service lookup — a tax you do not want to pay per log line.
+## Step 3: Wire It Up
 
-```csharp
-public interface ICustomerContextService
-{
-    CustomerContext? GetCurrentCustomer(HttpContext httpContext);
-    ExperimentContext? GetExperimentContext(HttpContext httpContext);
-}
-
-public class CustomerContextService : ICustomerContextService
-{
-    private readonly ICustomerRepository _repository;
-
-    // Cache on the HttpContext items dictionary — lives exactly one request
-    private const string CacheKey = "business_context_customer";
-
-    public CustomerContext? GetCurrentCustomer(HttpContext httpContext)
-    {
-        if (httpContext.Items.TryGetValue(CacheKey, out var cached))
-            return cached as CustomerContext;
-
-        var userId = httpContext.User.FindFirst("sub")?.Value;
-        if (userId is null) return null;
-
-        var customer = _repository.GetByUserId(userId);
-        httpContext.Items[CacheKey] = customer;
-        return customer;
-    }
-
-    public ExperimentContext? GetExperimentContext(HttpContext httpContext)
-    {
-        // Feature flag assignments typically arrive as claims or headers
-        var experimentHeader = httpContext.Request.Headers["X-Experiment-Context"].ToString();
-        if (string.IsNullOrEmpty(experimentHeader)) return null;
-
-        return ExperimentContext.ParseFromHeader(experimentHeader);
-    }
-}
-
-public record CustomerContext(
-    string Tier,           // "enterprise", "growth", "starter", "trial"
-    string RevenueSegment, // "high", "mid", "low"
-    string AnonymisedId    // hashed — never the raw customer ID
-);
-
-public record ExperimentContext(string Id, string Variant);
-```
-
-The cache key on `HttpContext.Items` is a deliberate choice. It ties the cache lifetime to the request — no risk of stale data leaking between requests, no manual invalidation needed.
-
-## Wiring It Up
-
-Register the enricher and its dependencies in `Program.cs`:
+Register everything in `Program.cs`, and add the middleware *after* authentication so `context.User` is filled in:
 
 ```csharp
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ICustomerContextService, CustomerContextService>();
-builder.Services.AddScoped<BusinessContextEnricher>();
+using Serilog;
 
-builder.Host.UseSerilog((context, services, configuration) =>
-{
-    configuration
-        .MinimumLevel.Information()
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.With(services.GetRequiredService<BusinessContextEnricher>())
-        .WriteTo.OpenTelemetry(options =>
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddSerilog(logging => logging
+    .MinimumLevel.Information()
+    .Enrich.FromLogContext()
+    .WriteTo.OpenTelemetry(options =>
+    {
+        options.Endpoint = builder.Configuration["Otlp:Endpoint"] ?? "http://localhost:4317";
+        options.ResourceAttributes = new Dictionary<string, object>
         {
-            options.Endpoint = context.Configuration["Otlp:Endpoint"];
-            options.ResourceAttributes = new Dictionary<string, object>
-            {
-                ["service.name"] = context.Configuration["ServiceName"] ?? "unknown",
-                ["service.version"] = context.Configuration["ServiceVersion"] ?? "unknown"
-            };
-        });
-});
+            ["service.name"] = builder.Configuration["ServiceName"] ?? "checkout",
+            ["service.version"] = builder.Configuration["ServiceVersion"] ?? "unknown",
+        };
+    }));
+
+builder.Services.AddSingleton(new Pseudonymizer(
+    Convert.FromBase64String(builder.Configuration["Logging:PseudonymKey"]
+        ?? throw new InvalidOperationException("Logging:PseudonymKey is not configured"))));
+builder.Services.AddScoped<ICustomerContextService, CustomerContextService>();
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseMiddleware<BusinessContextMiddleware>();
+app.UseAuthorization();
 ```
 
-The enricher is registered as `Scoped` because it depends on `IHttpContextAccessor`, which is request-scoped. Serilog resolves the enricher from the DI container per log call when you use `Enrich.With(services.GetRequiredService<>())` — this works correctly with scoped dependencies inside ASP.NET Core's request pipeline.
+`Enrich.FromLogContext()` is the line that makes the middleware's properties appear on log events. Leave it out and nothing happens, silently. A missing key stops the service at startup, which beats logging unhashed IDs because a secret didn't load.
 
-## What the Output Looks Like
+## Step 4: Add Context for One Operation
 
-Before enrichment, a payment failure looks like this:
-
-```json
-{
-  "timestamp": "2026-06-10T14:32:01Z",
-  "level": "Error",
-  "message": "Payment processing failed",
-  "exception": "PaymentGatewayException: Gateway timeout"
-}
-```
-
-After enrichment, the same event carries enough context for triage:
-
-```json
-{
-  "timestamp": "2026-06-10T14:32:01Z",
-  "level": "Error",
-  "message": "Payment processing failed",
-  "exception": "PaymentGatewayException: Gateway timeout",
-  "customer.tier": "enterprise",
-  "customer.segment": "high",
-  "customer.id": "cus_8f2a9c3d",
-  "experiment.id": "checkout-v2",
-  "experiment.variant": "streamlined"
-}
-```
-
-The difference is the difference between "the payment service is broken" and "the payment service is broken for enterprise customers on the streamlined checkout experiment." One of those is a 2am page. The other is a 2am page *with a theory*.
-
-## Scoping Enrichment to a Block
-
-Sometimes you want to add business context for a specific operation — not for all logs in the request. Serilog's `LogContext.PushProperty` creates a scoped enrichment that cleans itself up on disposal:
+Some context only matters inside one operation. `LogContext.PushProperty` adds it for a block and takes it away again when the block ends:
 
 ```csharp
 public async Task ProcessOrderAsync(Order order)
 {
-    using var _ = LogContext.PushProperty("order.id", order.Id);
-    using var __ = LogContext.PushProperty("order.value", order.TotalAmount);
-    using var ___ = LogContext.PushProperty("order.item_count", order.Items.Count);
-
-    _logger.LogInformation("Starting order processing");
-
-    await ValidateInventoryAsync(order);
-    await ChargePaymentAsync(order);
-    await DispatchFulfillmentAsync(order);
-
-    _logger.LogInformation("Order processing complete");
-    // All three logs above carry order.id, order.value, order.item_count
+    using (LogContext.PushProperty("order.item_count", order.Items.Count))
+    using (LogContext.PushProperty("order.value_band", ValueBand(order.Total)))
+    {
+        _logger.LogInformation("Starting order processing");
+        await ValidateInventoryAsync(order);
+        await ChargePaymentAsync(order);
+        _logger.LogInformation("Order processing complete");
+    }
 }
-// Properties are removed from context here
+
+private static string ValueBand(decimal total) => total switch
+{
+    < 50m => "0-50",
+    < 200m => "50-200",
+    _ => "200+",
+};
 ```
 
-This is composable with the request-level enricher: the per-request context (customer tier, experiment) is always present; the per-operation context (order ID, basket value) is present only within that block.
+This stacks with the request-level context. Customer tier and experiment are on every line in the request. The order's item count and value band are only there inside the block. The band is deliberate: a range tells you what kind of order failed without putting financial figures in your logs.
+
+## Step 5: Test It
+
+This test runs the middleware against a fake request and checks what reaches the log. It also checks that an unknown experiment value is dropped:
+
+```csharp
+using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
+
+public class BusinessContextMiddlewareTests
+{
+    [Fact]
+    public async Task Every_log_event_in_the_request_carries_business_context()
+    {
+        var sink = new ListSink();
+        using var logger = new LoggerConfiguration()
+            .Enrich.FromLogContext()
+            .WriteTo.Sink(sink)
+            .CreateLogger();
+
+        var middleware = new BusinessContextMiddleware(
+            next: _ => { logger.Error("Payment processing failed"); return Task.CompletedTask; },
+            pseudonymizer: new Pseudonymizer(new byte[32]));
+
+        var context = new DefaultHttpContext
+        {
+            User = new ClaimsPrincipal(new ClaimsIdentity([new Claim("sub", "user_123")], "test"))
+        };
+        context.Request.Headers["X-Experiment-Context"] = "checkout-v2:<script>";
+
+        await middleware.InvokeAsync(context, new StubCustomers(new("enterprise", "high")));
+
+        var properties = sink.Events.Single().Properties;
+        Assert.Equal("\"enterprise\"", properties["customer.tier"].ToString());
+        Assert.DoesNotContain("user_123", properties["customer.ref"].ToString());
+        Assert.False(properties.ContainsKey("experiment.variant")); // unknown variant: dropped
+    }
+
+    private sealed class ListSink : ILogEventSink
+    {
+        public List<LogEvent> Events { get; } = [];
+        public void Emit(LogEvent logEvent) => Events.Add(logEvent);
+    }
+
+    private sealed class StubCustomers(CustomerContext customer) : ICustomerContextService
+    {
+        public Task<CustomerContext?> GetAsync(string userId, CancellationToken cancellationToken) =>
+            Task.FromResult<CustomerContext?>(customer);
+    }
+}
+```
+
+Try breaking it: remove the `KnownExperiments` check from the middleware and this test fails, which is how you know it's testing something.
+
+## What the Output Looks Like
+
+To see events locally, add `.WriteTo.Console(new RenderedCompactJsonFormatter())` (from `Serilog.Formatting.Compact`) next to the OpenTelemetry sink. Here's the payment failure from the service above, during a request from an enterprise customer on the `streamlined` checkout variant, trimmed to the interesting fields:
+
+```json
+{
+  "@l": "Error",
+  "@m": "Payment processing failed",
+  "customer.tier": "enterprise",
+  "customer.segment": "high",
+  "customer.ref": "36bb095813943f38",
+  "experiment.id": "checkout-v2",
+  "experiment.variant": "streamlined",
+  "order.item_count": 3,
+  "order.value_band": "50-200"
+}
+```
+
+That's the difference between "the payment service is broken" and "the payment service is broken for enterprise customers on the streamlined checkout". One of those is a 2am page. The other is a 2am page *with a theory*.
 
 ## What to Put in Business Context
 
-Good candidates for automatic enrichment:
+Good candidates:
 
-- **Customer tier / plan** — tells you whether a failure affects paying customers and at what level
-- **Revenue segment** — high/mid/low grouping rather than raw ARR (avoid logging financial figures)
-- **Feature flag or experiment assignment** — essential for diagnosing regressions introduced by experiments
-- **Anonymised customer ID** — hashed, not raw, so correlated logs can be queried by customer without raw PII in logs
+- **Customer tier or plan**, so you can see whether a failure hits paying customers
+- **Revenue segment**, as a band (high, mid, low), never an amount
+- **Experiment or feature-flag assignment**, checked against a list you control
+- **A pseudonymous customer reference**, keyed, so you can follow one customer without logging who they are
 
 What to leave out:
 
-- **Raw customer PII** — names, emails, phone numbers do not belong in logs. Use an anonymised or hashed ID for correlation, and retrieve the human-readable form from your CRM at investigation time.
-- **Session tokens or auth credentials** — never, under any circumstances.
-- **High-cardinality unbounded values** — if a field has millions of distinct values (raw product SKUs, full URL paths), it will blow up your log index cardinality. Categorise or cap these first.
+- **Personal data.** Names, email addresses and phone numbers don't belong in logs. Correlate on the pseudonym and look the person up in your CRM when you need to.
+- **Session tokens and credentials.** Never.
+- **Unbounded values.** A field with millions of distinct values, like raw product SKUs or full URL paths, blows up your log index. Group or cap it first.
 
-## Verifying the Enrichment Is Working
+## Common Pitfalls
 
-A quick unit test to confirm the enricher attaches the right properties:
+**This context skips .NET's logging redaction.** Properties you push into Serilog's `LogContext` never pass through the redaction set up with `EnableRedaction()` in the PII how-to. Whatever you push has to be safe already. That's why the customer reference is hashed in the middleware and the order total goes in as a band.
 
-```csharp
-[Fact]
-public async Task BusinessContextEnricher_AttachesCustomerTier()
-{
-    // Arrange
-    var sink = new ListSink();
-    var logger = new LoggerConfiguration()
-        .Enrich.With(new BusinessContextEnricher(
-            httpContextAccessor: BuildFakeContextAccessor("user_123"),
-            customerContext: new StubCustomerContextService(
-                tier: "enterprise", segment: "high")))
-        .WriteTo.Sink(sink)
-        .CreateLogger();
+**Background work has no request.** Hosted services and queue consumers never run your middleware, so their logs won't carry this context. Push the same properties with `LogContext.Push` at the start of each message or job, from whatever that work knows about the customer.
 
-    // Act
-    logger.Information("Test event");
+**A missing `Enrich.FromLogContext()` fails silently.** Everything compiles and runs. The properties just never show up. If your enriched fields go missing, check that line first.
 
-    // Assert
-    var logged = sink.Events.Single();
-    Assert.Equal("enterprise", logged.Properties["customer.tier"].ToString().Trim('"'));
-    Assert.Equal("high", logged.Properties["customer.segment"].ToString().Trim('"'));
-}
-```
+## See Also
 
-For the `ListSink` and full test patterns, see the companion how-to on [testing structured log output](/howtos/test-structured-logging-dotnet/).
-
-Every log event your service emits now carries the business context that makes it actionable — without anyone at a call site having to remember to include it. That is the kind of observability that pays off at 2am.
-
-<!-- TODO: Add section on enrichment for background workers / hosted services (no HttpContext) -->
-<!-- TODO: Add example using W3C Baggage for cross-service business context propagation -->
-<!-- TODO: Cross-reference to wire-trace-ids-into-logs.md for trace context enrichment -->
+- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) — classifying and redacting personal data before it reaches your logs
+- [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — the Collector-side controls for everything the application misses
