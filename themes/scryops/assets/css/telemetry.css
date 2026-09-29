@@ -94,8 +94,8 @@
   /* Pixel voice, split in two: 'scry' is dot-matrix Doto (scrying — discrete
      points you infer across), 'ops' is solid Pixelify Sans (built practice).
      --font-pixel aliases the ops face — it's denser, so it holds at label
-     sizes (its C and G are a local re-cut with open apertures; stock
-     Pixelify's shut at 10-13px and read as O — see
+     sizes (it's a local re-cut with open apertures; stock Pixelify's
+     C/G/S/Z/2/3/5/6/9 shut and B loses to 8 at 10-13px — see
      scripts/selfhost-fonts.py), and it's the workhorse for every pixel label besides the
      wordmark's first half. Press Start 2P is retained only so pages that
      still name it directly keep rendering; new pixel-voice work uses
