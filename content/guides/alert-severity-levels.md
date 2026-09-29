@@ -54,7 +54,7 @@ flowchart LR
 
 ## Let the Burn Rate Set the Level
 
-The cleanest way to drive severity from observability data is to wire it to your SLO burn rate, not to individual metric thresholds. Burn rate is how fast you're spending the error budget relative to the pace that would use it up exactly at the end of the SLO window. At 1×, a 30-day budget lasts 30 days. Days to exhaustion is simply the window divided by the burn rate.
+The cleanest way to drive severity from observability data is to wire it to your [SLO burn rate](/guides/slos-and-error-budgets/), not to individual metric thresholds. Burn rate is how fast you're spending the error budget relative to the pace that would use it up exactly at the end of the SLO window. At 1×, a 30-day budget lasts 30 days. Days to exhaustion is simply the window divided by the burn rate.
 
 All the numbers below assume a 30-day window. A burn rate of 14× sustained over one hour empties the budget in roughly two days — act now. That's a P0. A 6× burn over six hours empties it in about five days — P1. A 2× burn sustained over three days is P2: two weeks of runway, real and worth fixing, but not worth anyone's night. Between 1× and 2× is P3. Below 1× you're living inside the budget — P4 at most.
 

@@ -1,7 +1,7 @@
 ---
 title: "SLOs and Error Budgets"
-date: 2026-06-11
-draft: true
+date: 2026-09-29
+draft: false
 excerpt: "Service Level Objectives and error budgets give reliability a quantitative shape — a target, a budget for deviation, and burn rate signals that tell you when to stop shipping and start fixing."
 readtime: 8
 tags: ["SLOs", "Alerting", "Reliability", "Observability", "On-Call"]
@@ -15,9 +15,9 @@ Service Level Objectives (SLOs) translate reliability from a vague aspiration in
 
 **Service Level Objective (SLO)** — a target level of reliability expressed as a percentage over a rolling time window. Examples: "99.9% of requests complete in under 200ms over 30 days"; "99.95% of API calls return successfully over 28 days."
 
-**Error Budget** — the inverse of the SLO. A 99.9% SLO means 0.1% of requests may fail — that 0.1% is the error budget. When the budget runs out, the team cannot absorb more risk until it resets.
+**Error Budget** — the complement of the SLO: 100% minus the target. A 99.9% SLO means 0.1% of requests may fail — that 0.1% is the error budget. When it runs out, the team cannot absorb more risk until it recovers. On a rolling window that happens gradually, as old failures age out of the window; on a calendar window it resets on a fixed date.
 
-**Burn Rate** — the rate at which the error budget is being consumed relative to the pace that would exhaust it exactly at the end of the window. A burn rate of 1× means you'll exhaust the budget in exactly 30 days. A burn rate of 14.4× means you'll exhaust it in about 2.1 days.
+**Burn Rate** — the rate at which the error budget is being consumed relative to the pace that would exhaust it exactly at the end of the window. For a 30-day window, a burn rate of 1× means you'll exhaust the budget in exactly 30 days. A burn rate of 14.4× means you'll exhaust it in about 2.1 days.
 
 {{< mermaid caption="Fig. — An SLI feeds an SLO target, which defines the error budget; burn rate tracks how fast that budget is spent and triggers alerts and actions." >}}
 graph LR
@@ -39,7 +39,7 @@ For a 99.95% SLO over 28 days:
 - Error budget = 0.05%
 - Allowed downtime = 0.0005 × 28 × 24 × 60 = **20.2 minutes**
 
-{{< mermaid caption="Fig. — A 99.9% target over a 30-day window leaves just 43.2 of the window's 43,157 minutes as allowed downtime." >}}
+{{< mermaid caption="Fig. — A 99.9% target over a 30-day window allows just 43.2 of the window's 43,200 minutes of downtime." >}}
 graph TD
     A[30-day window] --> B[99.9% uptime target]
     A --> C[0.1% error budget]
@@ -66,7 +66,7 @@ At 14.4× burn, the budget exhausts in 30 ÷ 14.4 ≈ 2.1 days. The 1-hour windo
 {{< obs-burn-rate-triage >}}
 
 {{< insight >}}
-At 14.4× burn rate, you exhaust a 30-day budget in ~51 hours — not 2 hours. The common misreading of burn rate is treating the multiplier as a time divisor applied to the window length. The correct formula is: days to exhaustion = window_days ÷ burn_rate.
+A 14.4× alert on the 1-hour window doesn't mean the budget is gone in an hour. It means that if the last hour's error rate held, a 30-day budget would last about 50 hours. The alert window is how long you measured, not how long you have left: days to exhaustion = SLO window days ÷ burn rate.
 {{< /insight >}}
 
 ## Defining Good SLIs
@@ -123,9 +123,9 @@ graph TD
 
 **Consumption rules** define what draws from the budget: unplanned outages, degraded performance events, and — critically — planned changes that cause errors. A deployment that causes a 10-minute error spike draws from the same budget as an unplanned incident.
 
-**Reset policy** defines what happens when the budget runs out. The standard response is a feature freeze: no new deployments until the budget resets or until the team has made targeted reliability improvements. Define this in advance, not during an incident.
+**Reset policy** defines what happens when the budget runs out. The standard response is a feature freeze: no new deployments until the budget recovers or until the team has made targeted reliability improvements. Define this in advance, not during an incident.
 
-**Response thresholds** should match the burn rate alert tiers: at 50% budget consumed, increased review; at 75%, no non-critical deployments; at 100%, feature freeze. These thresholds need to be agreed across engineering and product before they're ever invoked.
+**Response thresholds** sit alongside the burn rate alerts: burn rate says how fast the budget is going, consumption says how much is left. A common ladder is: at 50% budget consumed, increased review; at 75%, no non-critical deployments; at 100%, feature freeze. These thresholds need to be agreed across engineering and product before they're ever invoked.
 
 ## Integration with Business Processes
 
@@ -153,6 +153,7 @@ graph TD
 <!-- TODO: Add guidance on SLO measurement for non-HTTP services (queues, batch jobs, streaming pipelines) -->
 <!-- TODO: Cover composite SLOs — services with multiple SLIs that each contribute to one error budget -->
 
+## See Also
+
+- [Alert Severity Levels, Rebuilt for Burn Rate](/guides/alert-severity-levels/) — mapping these burn rate tiers onto P0–P4 and who gets woken up
 - [Alert Design Principles](/articles/alert-design-principles/) — how burn rate alerts fit into a broader alerting strategy
-- [Alert Correlation](/guides/alert-correlation/) — grouping burn rate alerts with upstream symptoms
-- [On-Call Procedures](/guides/on-call-procedures/) — how error budget status affects incident response and handoffs
