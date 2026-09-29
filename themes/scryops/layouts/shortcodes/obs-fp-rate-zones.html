@@ -6,13 +6,15 @@
        glyph      disc -> triangle -> square           (the Callout set)
      Previously TARGET used --green and FATIGUE used --warn; both resolve to
      --mc-ramp-2 under html.pref-mono, so the good zone and the fatigue zone
-     rendered IDENTICALLY. Ramp steps are now referenced directly. */ -}}
+     rendered IDENTICALLY. Ramp steps are now referenced directly.
+     Text: ticks and the subtitle sit on --mc-ink-secondary (not the muted
+     step, which is for marks), 13.5 units with a 680px min-width → ≥12px. */ -}}
 <figure class="diagram"
   aria-label="False positive rate calibration zones. The bar runs from 0 to 100 percent and is divided into three zones that differ by texture and shape, not colour. Zero to 20 percent, marked with a circle on a plain fill, is the target zone: on-call trusts the alert. 20 to 50 percent, marked with a triangle on a hatched fill, is the alert fatigue zone: on-call learns to ignore it. Above 50 percent, marked with a square on a dense cross-hatched fill, is the broken zone: delete the alert and rebuild from scratch.">
   <div class="diag-card" style="padding:0.9rem;">
     <svg viewBox="0 0 760 220" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="fpr-title fpr-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="fpr-title">False Positive Rate — Calibration Zones</title>
       <desc id="fpr-desc">A horizontal bar from 0 to 100 percent divided into three zones, separated by texture and marker shape rather than colour. Below 20 percent, plain fill marked with a circle, is healthy: on-call trusts the signal. Between 20 and 50 percent, hatched fill marked with a triangle, alert fatigue sets in. Above 50 percent, dense cross-hatch marked with a square, the alert should be deleted and rebuilt.</desc>
 
@@ -33,8 +35,8 @@
 
       <!-- eyebrow -->
       <text x="80" y="30" fill="var(--mc-ink)" font-family="var(--font-pixel)"
-            font-size="11" letter-spacing="0.04em">FALSE POSITIVE RATE</text>
-      <text x="80" y="48" fill="var(--mc-ink-muted)" font-size="12">// what your false-positive rate does to on-call trust</text>
+            font-size="11.5" letter-spacing="0.04em">FALSE POSITIVE RATE</text>
+      <text x="80" y="50" fill="var(--mc-ink-secondary)" font-size="13.5">// what your false-positive rate does to on-call trust</text>
 
       <!-- ─── Zone fills (0-20 / 20-50 / 50-100) · texture + value + rail weight ───
            bar spans x=80–700 (620px), y=86–126 (40px tall) -->
@@ -54,31 +56,31 @@
 
       <!-- zone labels · glyph + word, on a surface plate so the texture
            behind them never degrades the text -->
-      <rect x="98" y="97" width="94" height="19" fill="var(--fig-bg)"/>
+      <rect x="96" y="97" width="98" height="19" fill="var(--fig-bg)"/>
       <circle cx="110" cy="106.5" r="5.5" fill="var(--mc-ramp-3)"/>
-      <text x="124" y="111" fill="var(--mc-ink)" font-size="13" font-weight="700" letter-spacing="0.06em">TARGET</text>
+      <text x="124" y="111" fill="var(--mc-ink)" font-size="13.5" font-weight="700" letter-spacing="0.06em">TARGET</text>
 
-      <rect x="247" y="97" width="98" height="19" fill="var(--fig-bg)"/>
+      <rect x="245" y="97" width="104" height="19" fill="var(--fig-bg)"/>
       <polygon points="259,100.5 265.5,112.5 252.5,112.5" fill="var(--mc-ramp-2)"/>
-      <text x="273" y="111" fill="var(--mc-ink)" font-size="13" font-weight="700" letter-spacing="0.06em">FATIGUE</text>
+      <text x="273" y="111" fill="var(--mc-ink)" font-size="13.5" font-weight="700" letter-spacing="0.06em">FATIGUE</text>
 
-      <rect x="499" y="97" width="92" height="19" fill="var(--fig-bg)"/>
+      <rect x="497" y="97" width="98" height="19" fill="var(--fig-bg)"/>
       <rect x="506" y="101" width="11" height="11" fill="var(--mc-ramp-1)"/>
-      <text x="525" y="111" fill="var(--mc-ink)" font-size="13" font-weight="700" letter-spacing="0.06em">BROKEN</text>
+      <text x="525" y="111" fill="var(--mc-ink)" font-size="13.5" font-weight="700" letter-spacing="0.06em">BROKEN</text>
 
       <!-- threshold tick labels above bar -->
-      <text x="204" y="76" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">20%</text>
-      <text x="390" y="76" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">50%</text>
+      <text x="204" y="77" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">20%</text>
+      <text x="390" y="77" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">50%</text>
 
       <!-- axis labels below bar -->
-      <text x="80"  y="146" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">0%</text>
-      <text x="204" y="146" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">20%</text>
-      <text x="390" y="146" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">50%</text>
-      <text x="700" y="146" text-anchor="middle" fill="var(--mc-ink-muted)" font-size="11">100%</text>
+      <text x="80"  y="148" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">0%</text>
+      <text x="204" y="148" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">20%</text>
+      <text x="390" y="148" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">50%</text>
+      <text x="700" y="148" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">100%</text>
 
       <!-- footer separator + note -->
       <line x1="80" y1="170" x2="700" y2="170" stroke="var(--mc-border)" stroke-width="1"/>
-      <text x="390" y="192" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="12">above 20%: on-call learns to ignore &#183; above 50%: delete it and start over</text>
+      <text x="390" y="192" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">above 20%: on-call learns to ignore &#183; above 50%: delete it and start over</text>
     </svg>
   </div>
   <figcaption>Fig. &#8212; A false positive rate above 20% trains the team to tune out real alerts. Above 50%, the rule itself is broken.</figcaption>
