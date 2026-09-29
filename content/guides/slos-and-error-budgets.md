@@ -53,15 +53,15 @@ The budget is not a ceiling for incidents — it is a risk allocation. Planned c
 
 A single threshold alert on the SLO catches incidents too slowly. By the time you've failed enough to violate a 30-day SLO target, you've already had a significant outage. Multi-window, multi-burn-rate alerting detects incidents at different severities while they can still be contained.
 
-Standard thresholds for a 30-day SLO (from Google SRE):
+Standard thresholds for a 30-day SLO, from the [Google SRE Workbook](https://sre.google/workbook/alerting-on-slos/):
 
-| Burn Rate | Window | Budget Consumed | Action |
-|---|---|---|---|
-| 14.4× | 1 hour | 2% | Page immediately |
-| 6× | 6 hours | 5% | Page |
-| 2× | 3 days | 20% | Create ticket |
+| Burn Rate | Long window | Short window | Budget Consumed | Action |
+|---|---|---|---|---|
+| 14.4× | 1 hour | 5 minutes | 2% | Page immediately |
+| 6× | 6 hours | 30 minutes | 5% | Page |
+| 1× | 3 days | 6 hours | 10% | Create ticket |
 
-At 14.4× burn, the budget exhausts in 30 ÷ 14.4 ≈ 2.1 days. The 1-hour window is short enough to catch fast-moving incidents early; the 6-hour window catches sustained moderate burns that the 1-hour window misses.
+At 14.4× burn, the budget exhausts in 30 ÷ 14.4 ≈ 2.1 days. The 1-hour window is short enough to catch fast-moving incidents early; the 6-hour window catches sustained moderate burns that the 1-hour window misses. The ticket tier catches the slow leak: at 1× for three days you've spent a tenth of the month's budget with no headroom left for anything else to go wrong. An alert fires only when both its windows are over the threshold. The short window is what lets it stop firing minutes after the burn does, instead of hours later.
 
 {{< obs-burn-rate-triage >}}
 
