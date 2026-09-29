@@ -14,7 +14,7 @@
          aria-labelledby="brt-title brt-desc"
          style="width:100%;display:block;font-family:var(--font-code);">
       <title id="brt-title">Burn-rate triage</title>
-      <desc id="brt-desc">Burn-rate triage as two questions. First: is the SLO error budget burning? If not, monitor and log it. If yes, ask how fast it is burning, which sets a proportional response. Three outcomes, least to most severe, each marked by a distinct shape rather than a colour. Marked with a circle: a slow burn, under 2 times the sustainable rate, weeks of budget left, becomes a ticket to investigate this week. Marked with a triangle: a moderate burn, around 6 times, on the one-hour and six-hour windows, notifies the team and escalates cross-functionally if on-call cannot resolve it. Marked with a square: a fast burn, 14 times on the one-hour window, pages on-call and is declared a major incident if users are severely hit. Severity is carried by shape, line weight and line style, so the figure reads the same in greyscale and with any colour vision.</desc>
+      <desc id="brt-desc">Burn-rate triage as two questions. First: is the SLO error budget burning? If not, monitor and log it. If yes, ask how fast it is burning, which sets a proportional response. Three outcomes, least to most severe, each marked by a distinct shape rather than a colour. Marked with a circle: a slow burn, 1 times the sustainable rate or more on the three-day window, weeks of budget left, becomes a ticket to investigate this week. Marked with a triangle: a moderate burn, 6 times on the six-hour window, notifies the team and escalates cross-functionally if on-call cannot resolve it. Marked with a square: a fast burn, 14 times on the one-hour window, pages on-call and is declared a major incident if users are severely hit. Severity is carried by shape, line weight and line style, so the figure reads the same in greyscale and with any colour vision.</desc>
 
       <rect x="0" y="0" width="760" height="244" fill="var(--fig-bg)"/>
 
@@ -51,14 +51,14 @@
       <rect x="300" y="56" width="444" height="46" fill="var(--mc-ramp-3)" fill-opacity="0.06" stroke="var(--mc-border)" stroke-width="1"/>
       <rect x="300" y="56" width="1.5" height="46" fill="var(--mc-ramp-3)"/>
       <circle cx="320" cy="79" r="5" fill="var(--mc-ramp-3)"/>
-      <text x="338" y="76" fill="var(--mc-ink)" font-size="12.5">SLOW &#183; under 2&#215; &#183; weeks of budget left</text>
+      <text x="338" y="76" fill="var(--mc-ink)" font-size="12.5">SLOW &#183; 1&#215; &#183; 3-day window &#183; weeks left</text>
       <text x="338" y="94" fill="var(--mc-ink-secondary)" font-size="12.5">Ticket / Slack &#8212; investigate this week</text>
 
       <!-- MODERATE · triangle · mid -->
       <rect x="300" y="118" width="444" height="46" fill="var(--mc-ramp-2)" fill-opacity="0.07" stroke="var(--mc-border)" stroke-width="1"/>
       <rect x="300" y="118" width="2.5" height="46" fill="var(--mc-ramp-2)"/>
       <polygon points="320,135 326.5,147 313.5,147" fill="var(--mc-ramp-2)"/>
-      <text x="338" y="138" fill="var(--mc-ink)" font-size="12.5">MODERATE &#183; ~6&#215; &#183; 1h + 6h windows</text>
+      <text x="338" y="138" fill="var(--mc-ink)" font-size="12.5">MODERATE &#183; 6&#215; &#183; 6h window</text>
       <text x="338" y="156" fill="var(--mc-ink-secondary)" font-size="12.5">Notify the team &#8212; escalate if on-call can&rsquo;t resolve</text>
 
       <!-- FAST · square · brightest · thickest -->
