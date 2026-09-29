@@ -26,7 +26,7 @@
 {{- $enriched := slice
   (dict "k" "\"customer.tier\":"      "v" "\"enterprise\"")
   (dict "k" "\"customer.segment\":"   "v" "\"high\"")
-  (dict "k" "\"customer.id\":"        "v" "\"cus_8f2a9c3d\"")
+  (dict "k" "\"customer.ref\":"       "v" "\"36bb095813943f38\"")
   (dict "k" "\"experiment.id\":"      "v" "\"checkout-v2\"")
   (dict "k" "\"experiment.variant\":" "v" "\"streamlined\"")
 -}}
@@ -39,7 +39,7 @@
     <svg viewBox="0 0 760 318" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-title {{ $id }}-desc"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="{{ $id }}-title">Log event enrichment: before and after</title>
-      <desc id="{{ $id }}-desc">Two panels. The left panel, without enrichment, shows a sparse log event with only four fields (timestamp, level, message, exception) followed by five empty dashed placeholder slots; its footer says it tells you: something broke. The right panel, with enrichment, shows the same four fields plus five filled rows of enriched fields (customer.tier enterprise, customer.segment high, customer.id, experiment.id checkout-v2, experiment.variant streamlined); its footer says it tells you: WHO it matters to. An arrow labelled enrich points from left to right. A note below reads: enricher runs once per request, and context flows into every log event automatically.</desc>
+      <desc id="{{ $id }}-desc">Two panels. The left panel, without enrichment, shows a sparse log event with only four fields (timestamp, level, message, exception) followed by five empty dashed placeholder slots; its footer says it tells you: something broke. The right panel, with enrichment, shows the same four fields plus five filled rows of enriched fields (customer.tier enterprise, customer.segment high, customer.ref as a pseudonym, experiment.id checkout-v2, experiment.variant streamlined); its footer says it tells you: WHO it matters to. An arrow labelled enrich points from left to right. A note below reads: enricher runs once per request, and context flows into every log event automatically.</desc>
       <rect width="760" height="318" fill="var(--fig-bg)"/>
 
       {{- /* LEFT PANEL: sparse */}}
