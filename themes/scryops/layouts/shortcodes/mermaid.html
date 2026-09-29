@@ -3,11 +3,11 @@
 {{- $svg := resources.Get (printf "diagrams/%s.svg" $hash) -}}
 {{- $alt := .Get "alt" | default (.Get "caption") | default "Diagram" -}}
 {{- if $svg -}}
-{{- /* Legibility floor for narrow viewports: every pre-rendered diagram's
+{{- /* Legibility floor: every pre-rendered diagram's
      smallest label box is 18.5px (flowchart) to 21px (sequence) at scale 1.0,
      so rendering at >= 0.6x the viewBox width keeps labels >= 11px. telemetry.css
-     applies it as min-width under 840px; narrow TD diagrams stay below the card
-     width, so the floor never kicks in for them. */ -}}
+     applies it as min-width at every width; narrow TD diagrams stay below the
+     card width, so the floor never kicks in for them. */ -}}
 {{- $vb := index (findRESubmatch `viewBox="[-\d.]+ [-\d.]+ ([\d.]+)` $svg.Content 1) 0 -}}
 {{- $floor := math.Ceil (mul (float (index $vb 1)) 0.6) -}}
 <figure class="diagram">
