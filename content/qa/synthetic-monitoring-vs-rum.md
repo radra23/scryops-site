@@ -2,6 +2,7 @@
 title: "What is synthetic monitoring, and how does it differ from RUM?"
 date: 2026-09-27
 draft: false
+answer: "Synthetic monitoring runs scripted user journeys on a schedule, so it catches outages even when nobody is using the service. RUM records what real users experience on their own devices and networks. Synthetic tells you the service is up. RUM tells you the experience is good. You need both."
 excerpt: "Synthetic monitoring runs scripted tests on a schedule. RUM captures what real users actually experience. They answer different questions, and you need both."
 readtime: 3
 tags: ["Observability", "RUM", "Monitoring", "Reliability"]
