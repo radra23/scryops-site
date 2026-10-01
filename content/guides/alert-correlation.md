@@ -1,7 +1,7 @@
 ---
 title: "Alert Correlation: Finding the Signal in the Flood"
-date: 2026-06-11
-draft: true
+date: 2026-10-01
+draft: false
 excerpt: "A single failure in a distributed system can trigger dozens of alerts across every layer it touches. Correlation groups the symptoms back into one cause — so the on-call engineer sees a problem, not a storm."
 readtime: 6
 tags: ["Alerting", "Observability", "Reliability", "On-Call", "AIOps"]
@@ -9,7 +9,7 @@ tags: ["Alerting", "Observability", "Reliability", "On-Call", "AIOps"]
 
 In a system with any meaningful depth, a single failure propagates. A database that stops responding makes the services querying it slow. Slow services make their upstream callers time out. Timed-out callers trigger their own circuit breakers, which fire their own alerts. One root cause; a dozen pages.
 
-Without correlation, the on-call engineer receives that dozen pages and must manually reconstruct the causal chain under pressure. With correlation, they receive one grouped incident: "Database connectivity failure — 9 downstream services affected." That is not a minor UX improvement. It is the difference between a five-minute diagnosis and a forty-five-minute one.
+Without correlation, the on-call engineer receives that dozen pages and must manually reconstruct the causal chain under pressure. With correlation, they receive one grouped incident: "Database connectivity failure — 9 downstream services affected." That is not a minor UX improvement. The engineer starts from the likely cause instead of reconstructing it from twelve symptoms, at 3am, while the pager keeps going off.
 
 {{< mermaid >}}
 flowchart TD
@@ -39,11 +39,11 @@ flowchart LR
 
 If `Database` and `Application Server` both alert within a short window, topology-based correlation assigns them to the same incident. The on-call engineer sees the root node — `Database` — rather than every downstream symptom separately.
 
-This technique requires a service dependency map, which should already exist as part of your infrastructure-as-code or service mesh configuration. Many alerting platforms (PagerDuty, OpsGenie, Prometheus Alertmanager) can be configured to use topology data for grouping.
+This technique requires a service dependency map, which should already exist as part of your infrastructure-as-code or service mesh configuration. Incident platforms such as PagerDuty can model service dependencies directly. Prometheus Alertmanager has no dependency map, but you can encode the same idea in labels and inhibition rules, shown below.
 
 ### Temporal Correlation
 
-Alerts that fire within a short time window often share a cause. Define a grouping window (typically 2–10 minutes) and combine alerts that fall within it into a single incident.
+Alerts that fire within a short time window often share a cause. Combine alerts that arrive close together into a single incident instead of paging for each one as it lands.
 
 {{< mermaid >}}
 flowchart TD
@@ -75,9 +75,7 @@ flowchart TD
     E --> H[Incident Group:<br/>Latency Degradation]
 {{< /mermaid >}}
 
-Semantic correlation requires consistent alert naming conventions. An alert called `PaymentServiceErrorRate` and one called `InventoryHighErrorCount` will not be recognisably similar to a naive correlator. OTel semantic conventions for metrics names — combined with standardised alert rule naming — make semantic grouping tractable.
-
-<!-- TODO: Add example Alertmanager route/group_by configuration for semantic correlation -->
+Semantic correlation requires consistent alert naming conventions. An alert called `PaymentServiceErrorRate` and one called `InventoryHighErrorCount` will not be recognisably similar to a naive correlator. Give the same failure mode the same alert name everywhere, with the service as a label (`HighErrorRate{service="payments"}`), and grouping becomes a one-line config change.
 
 ## Using Correlation Output
 
@@ -94,7 +92,6 @@ flowchart TD
 
 The pattern-matching layer is where AIOps platforms add value: building a model of "what alert groups have appeared together historically, and what was the resolution?" That model makes the correlation output increasingly actionable over time. For teams without an AIOps platform, the same effect can be achieved manually: maintain a decision table in the runbook repository mapping known alert group signatures to runbooks.
 
-<!-- TODO: Add configuration examples for Alertmanager group_by + group_wait + group_interval -->
 <!-- TODO: Cover ML-based correlation approaches and when they add value over rule-based systems -->
 <!-- TODO: Cover correlation in managed platforms (Datadog Event Correlation, PagerDuty Intelligent Alert Grouping) -->
 
@@ -102,12 +99,46 @@ The pattern-matching layer is where AIOps platforms add value: building a model 
 
 Start with the lowest-effort technique that covers your highest-pain alert patterns:
 
-1. **Start with temporal correlation** at the alerting platform level. Prometheus Alertmanager's `group_by` and `group_wait` settings implement this natively. Pick a 2–5 minute window and group by service label.
+1. **Start with grouping** at the alerting platform level. In Prometheus Alertmanager, `group_by` decides which alerts share a notification, and `group_wait` is how long a new group waits for more alerts before the first page goes out.
 2. **Add topology once you have a dependency map.** Even a manually maintained CMDB or service catalogue YAML file is enough to seed topology-based rules.
 3. **Add semantic grouping** once alert naming is consistent across services. This requires enforcing naming conventions — ideally via alert rule linting in CI.
 4. **Iteratively refine** based on false positives (unrelated alerts grouped) and false negatives (related alerts not grouped). Each incident postmortem should note whether the correlation was helpful, unhelpful, or missing.
 
+Here's what the first three steps look like in Alertmanager:
+
+```yaml
+route:
+  receiver: oncall-pager
+  # Semantic: one notification per alert type per cluster, however many
+  # services fire it. Grouping by service would split one cascade into
+  # one page per service.
+  group_by: ['alertname', 'cluster']
+  # Temporal: wait this long for related alerts before the first page.
+  # It delays every new page, so keep it short.
+  group_wait: 30s
+  # Then batch alerts that join an existing group.
+  group_interval: 5m
+  repeat_interval: 4h
+
+inhibit_rules:
+  # Topology: while the orders database is down, mute alerts from the
+  # services that depend on it, in the same cluster. The dependency is
+  # a depends_on label you set on those services' alert rules.
+  - source_matchers:
+      - alertname = "OrdersDatabaseDown"
+    target_matchers:
+      - depends_on = "orders-db"
+    equal: ['cluster']
+
+receivers:
+  - name: oncall-pager
+```
+
+Two settings in that file are easy to get wrong. `group_wait` isn't a correlation window you can stretch to five minutes: it's the delay before the first page of every new group, P0s included. And inhibition only mutes the dependents. The database alert itself still pages, and it's the one with the cause in it.
+
 The goal is not zero noise — it is the minimum noise consistent with catching every real incident. Correlation does not make alerts disappear; it makes the structure of incidents legible.
+
+## See Also
 
 - [Alert Design Principles](/articles/alert-design-principles/) — what every alert must contain before correlation can help
 - [Alert Severity Levels](/guides/alert-severity-levels/) — burn-rate-based severity framework
