@@ -1,286 +1,256 @@
 ---
 title: "Log Levels: When to Whisper, Speak, or Shout"
-date: 2026-06-07
-draft: true
-excerpt: "Log levels are the emotional register of your system's voice. The definitive guide to using ERROR, WARN, INFO, DEBUG, and TRACE correctly — with real examples, anti-patterns, and cost impact."
-readtime: 10
+date: 2026-10-01
+draft: false
+excerpt: "Log levels are the emotional register of your system's voice. How to use ERROR, WARN, INFO, DEBUG and TRACE consistently, how they map onto OpenTelemetry's severity numbers, and what each one costs you."
+readtime: 12
 tags: ["Logs", "Observability", "Best Practices"]
 ---
 
 It's 3am, the pager just went off, and you're scrolling a wall of logs where a routine startup trace sits right next to the payment failure that actually woke you. Nothing tells them apart, so neither gets the response it deserves. That is what log levels are for: a contract between the code that emits a log and the person — or system — that has to read it under pressure.
 
-## RFC 5424: The Numeric Severity Scale
-RFC 5424 (the IETF syslog standard) defines eight severity levels, numbered 0–7, with 0 being most severe. Most application frameworks map to a subset of these, typically collapsing the top three into FATAL or CRITICAL.
+## One Scale, Many Dialects
 
-{{< mermaid caption="Fig. — RFC 5424 defines eight numbered severity levels, 0 (Emergency) as most severe down to 7 (Debug), each mapped to what it means for the system." >}}
-graph TD
-    A[RFC 5424 Severity Levels] --> B[0 - Emergency]
-    A --> C[1 - Alert] 
-    A --> D[2 - Critical]
-    A --> E[3 - Error]
-    A --> F[4 - Warning]
-    A --> G[5 - Notice]
-    A --> H[6 - Informational]
-    A --> I[7 - Debug]
-    
-    B --> J[System Unusable]
-    C --> K[Immediate Action Required]
-    D --> L[Critical Conditions]
-    E --> M[Error Conditions]
-    F --> N[Warning Conditions]
-    G --> O[Normal but Significant]
-    H --> P[Informational Messages]
-    I --> Q[Debug-level Messages]
-    
-    style A fill:#4ecdc4,stroke-width:1.5px,stroke-dasharray:2 2
-    style E fill:#ff6b6b,stroke-width:3px
-    style F fill:#ffa726,stroke-width:2.5px,stroke-dasharray:5 3
-    style H fill:#66bb6a,stroke-width:1.5px
-{{< /mermaid >}}
+Every logging framework has levels, and no two spell them the same way. Two reference scales sit underneath them.
 
-| Level | Name | Use Case | Example Scenario |
-|-------|------|----------|------------------|
-| 0 | Emergency | System unusable | Kernel panic, total system failure |
-| 1 | Alert | Immediate action required | Security breach detected |
+The older one is **RFC 5424**, the IETF syslog standard. It defines eight severities numbered 0–7, with 0 the most severe:
+
+| Level | Name | Meaning | Example |
+|-------|------|---------|---------|
+| 0 | Emergency | System unusable | Total system failure |
+| 1 | Alert | Action required immediately | Security breach detected |
 | 2 | Critical | Critical conditions | Primary database down |
 | 3 | Error | Error conditions | Payment processing failed |
-| 4 | Warning | Warning conditions | Memory usage high |
+| 4 | Warning | Warning conditions | Retry needed to succeed |
 | 5 | Notice | Normal but significant | Configuration changed |
-| 6 | Informational | Informational messages | User logged in |
-| 7 | Debug | Debug-level messages | Variable values during execution |
+| 6 | Informational | Informational messages | Order completed |
+| 7 | Debug | Debug-level messages | Branch taken, values used |
 
-## ERROR - The Operation Failed
-ERROR means the operation failed and a human needs to know. It should be rare enough that every occurrence warrants attention. If an operator sees an ERROR and has no clear next step, either the log lacks context or the level is wrong.
+The one that matters for anything flowing through OpenTelemetry is the log data model's **`SeverityNumber`**. It runs the other way, from 1 (least severe) to 24, in six ranges of four. Each language bridge maps its own levels onto the first number of each range:
 
-Use ERROR when the failure affects a user or degrades a business process — a payment that didn't go through, a database connection that dropped, an external integration that returned an unrecoverable status. Do not use ERROR for expected failures like a user entering a wrong password; those are application flow, not system errors.
+| OTel range | `SeverityNumber` | .NET `LogLevel` | Java (SLF4J) | Go `slog` | Python `logging` |
+|---|---|---|---|---|---|
+| TRACE | 1–4 | `Trace` | `TRACE` | — | — |
+| DEBUG | 5–8 | `Debug` | `DEBUG` | `Debug` (−4) | `DEBUG` (10) |
+| INFO | 9–12 | `Information` | `INFO` | `Info` (0) | `INFO` (20) |
+| WARN | 13–16 | `Warning` | `WARN` | `Warn` (4) | `WARNING` (30) |
+| ERROR | 17–20 | `Error` | `ERROR` | `Error` (8) | `ERROR` (40) |
+| FATAL | 21–24 | `Critical` | — | — | `CRITICAL` (50) |
+
+Query and alert on `SeverityNumber`, not on the text. `severity_number >= 17` finds every error from every service, whatever the service wrote in `SeverityText`: `Error`, `ERROR`, `error` or `err`. The finer steps inside each range (`INFO2`, `WARN3`) exist for frameworks with more levels than six. Most code never needs them.
+
+## ERROR — The Operation Failed
+
+ERROR means the operation failed and a human needs to know. It should be rare enough that every occurrence deserves attention. If an operator sees an ERROR and has no clear next step, either the log lacks context or the level is wrong.
+
+Use ERROR when a failure affects a user or breaks a business process: a payment that didn't go through, a dependency that returned an unrecoverable status, data that couldn't be written. Don't use it for expected outcomes like a wrong password or a declined card. Those are the application working as designed, and logging them at ERROR trains everyone to ignore ERROR.
 
 **Use ERROR for:**
-- System failures that affect users
-- Database connection failures  
-- Payment processing failures
-- Security incidents
+- Failures that affect a user or a business process
+- Lost connections to a dependency the request needed
 - Integration failures with external services
+- Data that could not be persisted or was rejected as corrupt
 
-**Perfect ERROR Log Example:**
+**A good ERROR log:**
 ```json
 {
-  "timestamp": "2024-03-21T13:45:30Z",
-  "level": "ERROR",
-  "service": "payment-api",
-  "trace_id": "abc123def456",
-  "message": "Payment processing failed - gateway timeout after 30 seconds",
-  "error": {
-    "type": "GatewayTimeoutException",
-    "gateway": "stripe",
-    "response_time_ms": 30000,
-    "retry_count": 3,
-    "error_code": "GATEWAY_TIMEOUT"
-  },
-  "business_impact": {
-    "affected_orders": 1,
-    "revenue_at_risk": 299.99,
-    "customer_tier": "premium"
-  },
-  "context": {
-    "order_id": "ord_12345",
-    "customer_id": "cust_789"
-  }
+  "timestamp": "2026-05-21T13:45:30Z",
+  "severity_text": "ERROR",
+  "severity_number": 17,
+  "service.name": "payment-api",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "event.name": "payment.failed",
+  "message": "Payment failed: gateway timeout after 30s and 3 retries",
+  "error.type": "gateway_timeout",
+  "payment.provider": "stripe",
+  "payment.retry_count": 3,
+  "order.id": "ord_12345",
+  "order.value": 299.99,
+  "customer.tier": "premium",
+  "customer.ref": "36bb095813943f38"
 }
 ```
 
-## WARN - Degraded but Not Broken
-WARN signals that something is wrong but the system is still functioning. The operation succeeded, or recovered, but in a way that may not hold. The distinction from ERROR is operational: an ERROR demands investigation now; a WARN demands investigation before it becomes an ERROR.
+It answers what failed, why, for which request and for whom. The customer is a pseudonymous reference, not an ID or an email; see [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) for why.
 
-Good WARN logs are actionable on a schedule. Memory at 85% of threshold, a retry that eventually succeeded, a deprecated API call that will break in the next version — these belong at WARN. If left unaddressed they become errors; addressed proactively, they never do.
+**FATAL / CRITICAL** sits above ERROR for the cases where the process itself can't continue: a missing required configuration value at startup, or corrupted state the service refuses to run with. If the service carries on serving traffic afterwards, it wasn't FATAL.
+
+## WARN — Degraded but Not Broken
+
+WARN signals that something is wrong but the system is still working. The operation succeeded, or recovered, but in a way that may not hold. The difference from ERROR is operational: an ERROR needs investigating now, a WARN needs investigating before it turns into an ERROR.
+
+Good WARN logs can be acted on during working hours. A retry that eventually succeeded, a fallback that served stale data, a call to an API that's being retired: these belong at WARN. Left alone they become errors; handled early, they never do.
 
 **Use WARN for:**
-- Performance degradation
-- Deprecated feature usage
-- Resource constraints approaching thresholds
-- Retry attempts that succeeded
-- Configuration mismatches (non-fatal)
+- Operations that succeeded only after retries or a fallback
+- Deprecated features or APIs still in use
+- Configuration that's wrong but survivable
+- Inputs rejected by validation in volumes that suggest a broken client
 
-**Perfect WARN Log Example:**
+**A good WARN log:**
 ```json
 {
-  "timestamp": "2024-03-21T13:45:30Z",
-  "level": "WARN",
-  "service": "inventory-service",
-  "message": "Memory usage at 85% - approaching configured threshold of 90%",
-  "system_health": {
-    "memory_used_mb": 6800,
-    "memory_total_mb": 8000,
-    "threshold_percent": 90,
-    "trend": "increasing"
-  },
-  "alerts": {
-    "should_scale": true,
-    "estimated_time_to_critical": "15_minutes"
-  }
+  "timestamp": "2026-05-21T13:45:30Z",
+  "severity_text": "WARN",
+  "severity_number": 13,
+  "service.name": "inventory-service",
+  "trace_id": "0af7651916cd43dd8448eb211c80319c",
+  "span_id": "b7ad6b7169203331",
+  "event.name": "inventory.reserve.retried",
+  "message": "Stock reservation succeeded after 2 retries (warehouse API 503)",
+  "retry.count": 2,
+  "retry.total_wait_ms": 1400,
+  "upstream.name": "warehouse-api",
+  "http.response.status_code": 503
 }
 ```
 
-## INFO - Significant Events in Normal Operation
-INFO records events that matter for understanding what the system did, without recording every step of how it did it. A completed order, a user login, a configuration reload — these belong at INFO. An operator reading INFO logs should get a coherent picture of system activity without drowning in implementation detail.
+What WARN is *not* for is resource levels. "Memory at 85%" is a measurement, and measurements belong in metrics, where they can be graphed, compared over time and alerted on with a threshold you can change without redeploying. A log line per crossing is a poor copy of a metric.
 
-The test: would you want this event in a daily summary? If yes, it's INFO. If it appears dozens of times per second under normal load, it's too frequent for INFO unless the volume is genuinely meaningful. High-frequency INFO logging has real cost implications at scale — route it to cold storage or sample it.
+## INFO — Significant Events in Normal Operation
+
+INFO records events that matter for understanding what the system did, without recording every step of how it did it. A completed order, a user signing in, a configuration reload: these belong at INFO. Someone reading only the INFO logs should get a coherent picture of system activity without drowning in implementation detail.
+
+The test: would you want this event in a summary of what happened today? If yes, it's INFO. If it fires dozens of times a second under normal load, it's probably too frequent for INFO unless each one genuinely matters. High-volume INFO is where most log bills come from; [sampling](#sampling-high-frequency-events) is covered below.
 
 **Use INFO for:**
-- Successful business operations
-- State changes and milestones
-- Configuration changes
-- Important system lifecycle events
+- Business operations that completed
+- State changes and lifecycle events (startup, shutdown, config reload, leadership change)
 - User actions with business significance
 
-**Perfect INFO Log Example:**
+**A good INFO log:**
 ```json
 {
-  "timestamp": "2024-03-21T13:45:30Z",
-  "level": "INFO",
-  "service": "order-service",
-  "trace_id": "order_trace_456",
-  "message": "Order #12345 processed successfully - payment captured, inventory updated, notification sent",
-  "order_flow": {
-    "payment_captured": true,
-    "inventory_reserved": true,
-    "customer_notified": true,
-    "total_processing_time_ms": 847
-  },
-  "business_metrics": {
-    "order_value": 299.99,
-    "customer_tier": "premium",
-    "fulfillment_center": "warehouse_west"
-  }
+  "timestamp": "2026-05-21T13:45:30Z",
+  "severity_text": "INFO",
+  "severity_number": 9,
+  "service.name": "order-service",
+  "trace_id": "5b8efff798038103d269b633813fc60c",
+  "span_id": "eee19b7ec3c1b174",
+  "event.name": "order.completed",
+  "message": "Order ord_12345 completed: payment captured, stock reserved, customer notified",
+  "order.id": "ord_12345",
+  "order.value": 299.99,
+  "customer.tier": "premium",
+  "duration_ms": 847
 }
 ```
 
-## DEBUG - Internal State for Development and Incident Investigation
-DEBUG captures the internal state and decision points that explain why the system behaved as it did. It is disabled in production by default because it generates high volume and the overhead adds up in tight loops. Enable it per-service when actively investigating a problem, then disable it again.
+## DEBUG — Why the Code Did What It Did
 
-A DEBUG log should answer "why did this code take this path?" — variable values, decision branch outcomes, intermediate computation results. If you find yourself reaching for DEBUG to understand normal operation, that's a signal the INFO logs need work.
+DEBUG captures the internal state and decision points that explain why the system behaved as it did: values used, branches taken, intermediate results. It's off in production by default because of its volume. Turn it on for one service or one component while you investigate, then turn it off again; [changing levels at runtime](#changing-levels-at-runtime) shows how.
+
+A DEBUG log should answer "why did this code take this path?" If you find yourself turning on DEBUG just to understand normal operation, your INFO logs need work.
 
 **Use DEBUG for:**
-- Detailed operation flow
-- Variable values and decision points
-- Performance measurements
-- Integration points
-- Algorithm decision reasoning
+- Decision points and the values that drove them
+- Feature-flag evaluations and which variant was served
+- Choices an algorithm made, and why
 
-**Perfect DEBUG Log Example:**
+**A good DEBUG log:**
 ```json
 {
-  "timestamp": "2024-03-21T13:45:30Z",
-  "level": "DEBUG",
-  "service": "recommendation-engine",
-  "trace_id": "rec_trace_789",
-  "message": "Processing payment: amount=$99.99, customer_tier=premium, payment_method=credit_card, gateway_response_time=245ms",
-  "debug_context": {
-    "validation_steps": ["amount_check", "fraud_check", "limits_check"],
-    "gateway_selection_reason": "lowest_fees_for_premium",
-    "algorithm_version": "v2.3.1",
-    "feature_flags": {
-      "enhanced_fraud_detection": true,
-      "premium_fast_track": true
-    }
-  }
+  "timestamp": "2026-05-21T13:45:30Z",
+  "severity_text": "DEBUG",
+  "severity_number": 5,
+  "service.name": "payment-api",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "event.name": "payment.gateway.selected",
+  "message": "Selected gateway stripe: lowest fee for tier premium; adyen skipped (circuit open)",
+  "payment.provider": "stripe",
+  "selection.reason": "lowest_fee_for_tier",
+  "selection.skipped": ["adyen"],
+  "feature_flag.key": "premium-fast-track",
+  "feature_flag.result.variant": "on"
 }
 ```
 
-## TRACE - Step-by-Step Execution Detail
-TRACE records method-level execution: entry and exit points, loop iterations, granular timing. It is the most expensive level by volume and belongs only in development or during targeted debugging sessions. Leaving TRACE enabled in production generates enough noise to mask the signal you're trying to find.
+## TRACE — Step-by-Step Execution
 
-**Use TRACE for:**
-- Method entry/exit points
-- Loop iterations and detailed processing steps
-- Variable state changes
-- Granular performance timing
+TRACE records execution step by step: method entry and exit, loop iterations, fine-grained timing. It's the noisiest level and belongs only in development or a short, targeted session. If you leave TRACE on in production, it buries the signal you're looking for.
 
-**Perfect TRACE Log Example:**
+Before reaching for TRACE, check whether a span would answer the question better. Entry, exit and duration of an operation are exactly what tracing records, with the parent-child structure that a stream of log lines loses.
+
+**A good TRACE log:**
 ```json
 {
-  "timestamp": "2024-03-21T13:45:30Z",
-  "level": "TRACE", 
-  "service": "payment-validator",
-  "trace_id": "validation_trace_123",
-  "message": "Entering ValidatePayment() -> checking format -> validating checksum -> calling gateway -> result: valid",
-  "execution_flow": {
-    "method": "ValidatePayment",
-    "step": "gateway_validation",
-    "duration_microseconds": 1247,
-    "memory_allocated_bytes": 1024,
-    "cpu_cycles": 45123
-  }
+  "timestamp": "2026-05-21T13:45:30Z",
+  "severity_text": "TRACE",
+  "severity_number": 1,
+  "service.name": "payment-api",
+  "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
+  "span_id": "00f067aa0ba902b7",
+  "message": "ValidatePayment: checksum ok, calling gateway",
+  "code.function.name": "PaymentValidator.ValidatePayment",
+  "step": "gateway_call",
+  "elapsed_us": 1247
 }
 ```
 
-## Cost Impact: Criticality-Based Routing
+## A Log Level Is Not an Incident Severity
 
-You rarely need every level in the same place at the same cost. DEBUG and TRACE are usually the bulk of raw log lines, so routing them to local-only — or dropping them in production — removes most of your shipped volume before it ever reaches central storage. Route what is left by how fast you will actually read it:
+It's tempting to page on ERROR logs. Don't. A log level describes one event in one process. An [incident severity](/guides/alert-severity-levels/) describes the impact on users, and that is better measured by an SLO burn rate than by a count of lines. A single ERROR during a dependency blip is normal. A thousand ERRORs from a batch job nobody depends on may not matter. A silent outage may produce no ERRORs at all. Use ERROR rates to *explain* an alert, and SLOs to *raise* one.
 
-{{< mermaid caption="Fig. — Routing log volume by level sends ERROR to hot real-time storage, WARN to a one-hour warm tier, INFO to daily cold batches, and DEBUG/TRACE nowhere past the local environment." >}}
-graph TD
-    A[Original Log Volume] --> B{Criticality-Based Routing}
-    
-    B -->|ERROR/CRITICAL| C[Hot Storage: Real-time]
-    B -->|WARN| D[Warm Storage: 1hr delay]
-    B -->|INFO| E[Cold Storage: Daily batch]
-    B -->|DEBUG/TRACE| F[Local Only / Discard]
-    
-    C --> G[Immediate alerting]
-    D --> H[Trend analysis]
-    E --> I[Historical reports]
-    F --> J[Dev environment only]
-    
-    style A fill:#ff6b6b,stroke-width:3px
-    style C fill:#ff9999,stroke-width:3px
-    style D fill:#ffcc99,stroke-width:2.5px,stroke-dasharray:5 3
-    style E fill:#99ccff,stroke-width:1.5px,stroke-dasharray:2 2
-    style F fill:#cccccc
+## Cost: Route by How Long You'll Need It
+
+DEBUG and TRACE are usually the bulk of raw log lines, so turning them off in production removes most of your volume before it reaches central storage. What's left should be routed by how long you'll need to search it, not by delaying it. INFO is what you use to reconstruct what a user experienced during an incident, so it has to be searchable as soon as the incident starts. Putting INFO in a daily cold batch saves money right up until the outage where you need it.
+
+{{< mermaid caption="Fig. — Every level that ships is searchable immediately; levels differ in how long they are kept and whether high-volume events are sampled. DEBUG and TRACE stay off unless someone turns them on to investigate." >}}
+flowchart LR
+    A[Log event] --> B{Level}
+    B -->|ERROR / FATAL| C[Searchable now<br/>long retention]
+    B -->|WARN| D[Searchable now<br/>long retention]
+    B -->|INFO| E[Searchable now<br/>shorter retention<br/>sample high-volume events]
+    B -.->|DEBUG / TRACE| F[Off in production<br/>on demand, scoped]
 {{< /mermaid >}}
 
-**Implementation Strategy:**
-- **Critical/Error**: Immediate storage for real-time alerting
-- **Warning**: 1-hour delayed ingestion for trend analysis
-- **Info**: Daily batch processing for historical reports
-- **Debug/Trace**: Local environment only, not shipped to central logging
+Retention periods depend on your incident-review cycle and any compliance obligations; the shape is what matters. A typical starting point is ERROR and WARN kept for the length of your longest incident review plus a margin, and INFO for a week or two. Anything beyond that is aggregated into metrics before the raw lines are dropped.
 
-## Performance Impact
-Verbosity has a cost. The relative processing overhead increases sharply as you move to more verbose levels — debug and trace logging can add substantial overhead in tight loops:
+## Performance: Don't Pay for Logs You Don't Write
 
-{{< mermaid caption="Fig. — Overhead falls as levels get less verbose: TRACE costs the most, ERROR costs the least." >}}
-graph LR
-    A[TRACE] --> B[Highest Overhead]
-    C[DEBUG] --> D[High Overhead]
-    E[INFO] --> F[Moderate Overhead]
-    G[WARN] --> H[Low Overhead]
-    I[ERROR] --> J[Minimal Overhead]
-    
-    style A fill:#ff6b6b,stroke-width:3px
-    style C fill:#ff9999,stroke-width:3px
-    style E fill:#ffcc99,stroke-width:2.5px,stroke-dasharray:5 3
-    style G fill:#99ccff,stroke-width:1.5px,stroke-dasharray:2 2
-    style I fill:#66bb6a,stroke-width:1.5px
-{{< /mermaid >}}
+A disabled log call is cheap but not free. In .NET, `_logger.LogDebug("Processing {ItemId}", item.Id)` still allocates the argument array and boxes value types before the logger decides the level is off. In a tight loop that adds up. Two fixes:
 
-The fix is cheap and worth making a habit: gate verbose calls behind a level check — `if (logger.IsEnabled(LogLevel.Debug))` — so the string formatting and allocation never run when the level is off. In a tight loop, that one guard is the difference between free and expensive.
+```csharp
+// 1. Guard expensive arguments: BuildDetailedReport() runs even when Debug is disabled.
+if (_logger.IsEnabled(LogLevel.Debug))
+{
+    _logger.LogDebug("Analysis: {@Report}", BuildDetailedReport(order));
+}
 
-## Anti-Pattern Analysis
-These are the most common logging anti-patterns seen in production codebases:
+// 2. For hot paths, let the source generator write the check for you:
+//    no boxing, no params array, and the level test happens first.
+static partial class Log
+{
+    [LoggerMessage(Level = LogLevel.Error, Message = "Payment failed for order {OrderId}: {ErrorType}")]
+    public static partial void PaymentFailed(ILogger logger, string orderId, string errorType);
+
+    [LoggerMessage(Level = LogLevel.Debug, Message = "Processed item {ItemId}")]
+    public static partial void ItemProcessed(ILogger logger, int itemId);
+}
+```
+
+The same idea exists elsewhere. SLF4J's `{}` placeholders defer formatting, and `log.atDebug().addArgument(() -> expensive())` defers computing the value. Python's `logger.debug("x=%s", x)` defers formatting, but not computing `x`. Go's `slog` checks `Enabled` before building the record. For keeping the logging call itself off the request path at very high volumes, see [High-Throughput Logging: Keeping the Hot Path Fast](/guides/high-throughput-logging/).
+
+## Anti-Patterns
+
+These are the logging anti-patterns that turn up most often in production codebases.
 
 ### 1. Log-and-Throw
 ```csharp
-// ❌ Don't do this - logs the same error multiple times
+// ❌ Logged here, then caught and logged again by every layer above
 try
 {
     ProcessPayment(order);
 }
 catch (PaymentException ex)
 {
-    _logger.LogError(ex, "Payment failed");  // Logged here
-    throw;  // And caught and logged again upstream
+    _logger.LogError(ex, "Payment failed");
+    throw;
 }
 
-// ✅ Do this - log once at the appropriate level
+// ✅ Log once, where the exception is handled
 try
 {
     ProcessPayment(order);
@@ -292,288 +262,155 @@ catch (PaymentException ex)
 }
 ```
 
+The rule: either handle the exception and log it, or rethrow it and don't. One failure should produce one ERROR, written by the code that decided what to do about it.
+
 ### 2. Exception Swallowing
 ```csharp
-// ❌ Silent failures without logging
+// ❌ Silent failure: nobody knows this happened
 try
 {
     SendNotification(user);
 }
 catch
 {
-    // Swallowed - nobody knows this failed
 }
 
-// ✅ Log the failure appropriately
+// ✅ The failure is handled (retried later), so WARN, not ERROR
 try
 {
     SendNotification(user);
 }
 catch (Exception ex)
 {
-    _logger.LogWarning(ex, "Failed to send notification to user {UserId} - will retry later", user.Id);
+    _logger.LogWarning(ex, "Notification for user {UserRef} failed; queued for retry", user.Ref);
 }
 ```
 
-### 3. Flooding Patterns
+### 3. Flooding
 ```csharp
-// ❌ Logging in tight loops without rate limiting
+// ❌ One line per item in a loop over millions of items
 foreach (var item in millionsOfItems)
 {
-    _logger.LogDebug("Processing item {ItemId}", item.Id);  // Flooding!
+    _logger.LogDebug("Processing item {ItemId}", item.Id);
 }
 
-// ✅ Use sampling or batch logging
-var processedCount = 0;
+// ✅ Report progress, not every step
+var processed = 0;
 foreach (var item in millionsOfItems)
 {
-    // Log every 1000th item
-    if (++processedCount % 1000 == 0)
+    if (++processed % 10_000 == 0)
     {
-        _logger.LogDebug("Processed {Count} items, current: {ItemId}", processedCount, item.Id);
+        _logger.LogDebug("Processed {Count} items, current {ItemId}", processed, item.Id);
     }
 }
 ```
 
-## Dynamic Level Management Implementation
-```csharp
-public class SmartLogLevelManager
-{
-    private readonly ILogger<SmartLogLevelManager> _logger;
-    private readonly IOptionsMonitor<LoggingOptions> _options;
-    private LogLevel _currentLevel = LogLevel.Information;
-    
-    public async Task<OrderResult> ProcessOrder(Order order)
-    {
-        // Adapt log level based on system pressure
-        AdaptLogLevel();
-        
-        if (ShouldLog(LogLevel.Trace))
-        {
-            _logger.LogTrace("Entering ProcessOrder for order {OrderId}", order.Id);
-        }
-        
-        try
-        {
-            if (ShouldLog(LogLevel.Debug))
-            {
-                _logger.LogDebug("Validating order {OrderId} with amount {Amount}", 
-                    order.Id, order.Amount);
-            }
-            
-            await ValidateOrder(order);
-            
-            // Always log important business events
-            _logger.LogInformation("Order {OrderId} validated successfully, processing payment", 
-                order.Id);
-            
-            var paymentResult = await ProcessPayment(order);
-            
-            if (!paymentResult.IsSuccess)
-            {
-                _logger.LogWarning("Payment failed for order {OrderId}, attempt {Attempt}: {Reason}", 
-                    order.Id, paymentResult.AttemptCount, paymentResult.FailureReason);
-                return OrderResult.PaymentFailed(paymentResult.FailureReason);
-            }
-            
-            _logger.LogInformation("Order {OrderId} completed successfully", order.Id);
-            return OrderResult.Success(order.Id);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Critical error processing order {OrderId}", order.Id);
-            throw;
-        }
-        finally
-        {
-            if (ShouldLog(LogLevel.Trace))
-            {
-                _logger.LogTrace("Exiting ProcessOrder for order {OrderId}", order.Id);
-            }
-        }
-    }
-    
-    private void AdaptLogLevel()
-    {
-        var systemLoad = GetSystemLoad();
-        _currentLevel = systemLoad switch
-        {
-            > 0.9 => LogLevel.Error,      // High load - only errors
-            > 0.7 => LogLevel.Warning,    // Medium load - warnings and above
-            > 0.5 => LogLevel.Information, // Normal load - info and above
-            _ => LogLevel.Debug           // Low load - detailed logging
-        };
-    }
-    
-    private bool ShouldLog(LogLevel level) => level >= _currentLevel;
-}
-```
+## Changing Levels at Runtime
 
-## Choosing the Right Level Under Pressure
-When an incident is active and you need more signal, the instinct is to turn everything up to DEBUG or TRACE. Resist it. Verbose logging under load adds CPU and I/O pressure to a system that's already struggling, and the extra volume makes it harder to find the relevant lines — not easier.
-
-Instead, enable DEBUG scoped to the specific service or request path you're investigating. RFC 5424's numeric scale is a useful anchor here: if you're unsure between two levels, pick the one closer to 0. Emitting too little at a given level is better than log flooding.
-
-A well-structured INFO log from a streaming service demonstrates what level-appropriate context looks like:
+You'll want DEBUG for one component during an investigation without redeploying. In .NET the host already supports this: `appsettings.json` is reloaded when it changes, and the logging filters are re-applied with it. Raise the level for one category, not the whole service:
 
 ```json
 {
-  "level": "INFO",
-  "service": "content-delivery",
-  "event_type": "stream_quality_adjusted",
-  "user_session": "session_abc123",
-  "quality_change": {
-    "from": "1080p",
-    "to": "720p",
-    "reason": "bandwidth_constraints"
-  },
-  "adaptive_streaming": {
-    "algorithm_version": "v3.2",
-    "buffer_health": "low"
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "Checkout.Payments": "Debug"
+    }
   }
 }
 ```
 
+Logback can rescan its config the same way (`<configuration scan="true">`), Python can change a logger's level at runtime with `logging.getLogger("checkout.payments").setLevel(logging.DEBUG)`, and Go's `slog.LevelVar` can be changed while the program runs. Whichever you use, put an expiry on it — a reminder, a ticket, a timer — because temporary DEBUG has a way of becoming permanent.
+
+One thing *not* to automate: lowering verbosity when the system is under load. It sounds sensible, but it means the moment the system starts struggling is the moment it stops telling you why. If logging volume threatens the service under load, fix the logging path (async, sampled, bounded), not the information.
+
+## Choosing the Right Level Under Pressure
+
+When an incident is active and you need more signal, the instinct is to turn everything up to DEBUG or TRACE. Resist it. Verbose logging under load adds CPU and I/O pressure to a system that's already struggling, and the extra volume makes the relevant lines harder to find, not easier. Turn on DEBUG only for the component you're investigating.
+
+When you're unsure which level an event deserves while writing code, ask what the reader should *do* about it. Act now: ERROR. Act soon: WARN. Nothing to do, but it explains what happened: INFO. Only useful while debugging: DEBUG. If in doubt, go less severe. An over-promoted ERROR does more damage, because it teaches people to ignore ERRORs, than a WARN that should have been an ERROR does by being read an hour later.
+
 A practical level-to-impact mapping that reflects how on-call teams actually triage:
-- **ERROR**: Anything that directly affects user experience
-- **WARN**: Anything that might affect user experience if left unaddressed
-- **INFO**: Anything that helps reconstruct what a user experienced
-- **DEBUG**: Anything that helps diagnose why it happened
+- **ERROR**: anything that directly affects what a user experienced
+- **WARN**: anything that might, if left alone
+- **INFO**: anything that helps reconstruct what a user experienced
+- **DEBUG**: anything that helps explain why
 
-## Automated Log Level Optimization
-```csharp
-public class AutoLogLevelOptimizer
-{
-    private readonly IMetrics _metrics;
-    private readonly Dictionary<string, LogLevelStats> _serviceStats = new();
-    
-    public void OptimizeLogLevels()
-    {
-        foreach (var (service, stats) in _serviceStats)
-        {
-            var recommendation = CalculateOptimalLevel(stats);
-            
-            _logger.LogInformation("Log level optimization for {Service}", new
-            {
-                service = service,
-                current_level = stats.CurrentLevel,
-                recommended_level = recommendation.Level,
-                reasoning = recommendation.Reasoning,
-                cost_impact = recommendation.EstimatedCostReduction,
-                performance_impact = recommendation.EstimatedPerformanceGain
-            });
-        }
-    }
-    
-    private LogLevelRecommendation CalculateOptimalLevel(LogLevelStats stats)
-    {
-        // Algorithm considers:
-        // - Log volume vs value ratio
-        // - Error detection effectiveness  
-        // - Performance impact
-        // - Storage costs
-        // - Team debugging needs
-        
-        if (stats.DebugLogsPercentage > 80 && stats.DebugUtilization < 5)
-        {
-            return new LogLevelRecommendation
-            {
-                Level = LogLevel.Information,
-                Reasoning = "High debug volume with low utilization",
-                EstimatedCostReduction = 0.65,
-                EstimatedPerformanceGain = 0.25
-            };
-        }
-        
-        return new LogLevelRecommendation { Level = stats.CurrentLevel };
-    }
-}
-```
+## Sampling High-Frequency Events
 
-## High-Frequency Event Sampling
-
-Guard expensive debug payloads with `IsEnabled` before building them — the construction cost is paid even when the level is filtered out:
-
-```csharp
-// ❌ BuildDetailedReport() runs even when Debug is disabled
-_logger.LogDebug("Analysis: {@Report}", BuildDetailedReport(order));
-
-// ✅ Guard before the expensive computation
-if (_logger.IsEnabled(LogLevel.Debug))
-{
-    _logger.LogDebug("Analysis: {@Report}", BuildDetailedReport(order));
-}
-```
-
-For high-frequency INFO events, probabilistic sampling avoids logging every occurrence while retaining statistical coverage. Include the sample rate so downstream consumers can reconstruct true volume:
+For high-frequency INFO events, logging a sample keeps statistical coverage at a fraction of the volume. Record the rate on the line, so that anything counting these lines can scale the count back up:
 
 ```csharp
 // 1.0 = always log; fractional = sample rate
 private static readonly Dictionary<string, double> _sampleRates = new()
 {
-    ["payment_processed"] = 1.00,  // Always — every payment matters
-    ["order_placed"]      = 1.00,
-    ["api_call"]          = 0.10,  // 10% sample
-    ["cache_hit"]         = 0.01,  // 1% sample
-    ["health_check"]      = 0.001, // 0.1% sample
+    ["payment.processed"] = 1.00,  // always: every payment matters
+    ["order.placed"]      = 1.00,
+    ["api.call"]          = 0.10,  // 10% sample
+    ["cache.hit"]         = 0.01,  // 1% sample
+    ["health.check"]      = 0.001, // 0.1% sample
 };
 
-public void LogSampled(ILogger logger, string eventType, string message, params object[] args)
+public void LogSampled(ILogger logger, string eventName, string message, params object[] args)
 {
-    var rate = _sampleRates.GetValueOrDefault(eventType, 0.05);
+    var rate = _sampleRates.GetValueOrDefault(eventName, 0.05);
 
-    // Random.Shared is thread-safe; new Random() is not
+    // Random.Shared is thread-safe; a shared new Random() is not
     if (Random.Shared.NextDouble() < rate)
     {
         using var scope = logger.BeginScope(
-            new Dictionary<string, object> { ["sampling.rate"] = rate });
+            new Dictionary<string, object> { ["event.name"] = eventName, ["sampling.rate"] = rate });
         logger.LogInformation(message, args);
     }
 }
 ```
 
-`sampling.rate` lets aggregation pipelines extrapolate: N observations at rate 0.01 represent ~100N actual occurrences. Without it, sampled logs look like complete counts and mislead rate-of-change alerts.
+`sampling.rate` lets a pipeline extrapolate: N lines at rate 0.01 represent about 100N events. Without it, sampled logs look like complete counts and mislead every rate-of-change query built on them.
 
-## Circuit Breaker Log Level Integration
+Random sampling per line has one weakness: the lines of a single request are sampled independently, so a request's story arrives with gaps. If your traces are already sampled, keeping all the logs of sampled traces and few of the rest gives you whole stories instead of fragments. [Your Sampling Strategy Is Lying to You](/articles/sampling-strategy/) covers the trade-offs.
 
-When a circuit breaker handles retries, the log level should reflect what the breaker is observing — a single transient failure isn't `Error`; a 50% error rate is. Separating the level decision into its own method keeps both the level logic and the logging call independently testable:
+## Circuit Breakers: Log the Transition, Not Every Failure
+
+A circuit breaker sees every failure of the call it protects, which makes it tempting to log each one, at a level based on how bad things look. Don't log per failure. The exception already goes to the caller, and logging it in the breaker too is log-and-throw again. What the breaker knows that nobody else does is the *trend*. Log when that changes:
 
 ```csharp
-internal static LogLevel DetermineLogLevel(
-    double errorRate, int consecutiveFailures) =>
+private LogLevel _lastLevel = LogLevel.Information;
+
+internal static LogLevel DetermineLogLevel(double errorRate, int consecutiveFailures) =>
     (errorRate, consecutiveFailures) switch
     {
-        (> 0.5, _)    => LogLevel.Error,    // High error rate: circuit should open
-        (_, > 10)     => LogLevel.Error,    // Many consecutive failures
-        (> 0.1, > 3)  => LogLevel.Warning,  // Moderate degradation
-        _             => LogLevel.Information // Isolated failure
+        (> 0.5, _)   => LogLevel.Error,       // high error rate: the circuit should open
+        (_, > 10)    => LogLevel.Error,       // long run of consecutive failures
+        (> 0.1, > 3) => LogLevel.Warning,     // moderate degradation
+        _            => LogLevel.Information  // isolated failures
     };
-```
 
-Use it in the catch block of the breaker's execute method:
-
-```csharp
-catch (Exception ex)
+public void RecordOutcome(double errorRate, int consecutiveFailures)
 {
     var level = DetermineLogLevel(errorRate, consecutiveFailures);
-    _logger.Log(level, ex,
-        "Operation {Operation} failed: consecutive={ConsecutiveFailures} rate={ErrorRate:P1}",
-        operationName, consecutiveFailures, errorRate);
-    throw;
+    if (level == _lastLevel) return;   // one line per change, not per failure
+
+    _logger.Log(level,
+        "{Operation} health changed {From} -> {To}: consecutive={ConsecutiveFailures} rate={ErrorRate:P1}",
+        _operation, _lastLevel, level, consecutiveFailures, errorRate);
+    _lastLevel = level;
 }
 ```
 
-The thresholds (0.5, 10, 0.1, 3) are a starting point. Calibrate them against your service's normal error baseline and the SLO error budget it has available. Unit-test `DetermineLogLevel` directly — pass (errorRate, consecutiveFailures) pairs and assert the expected level.
+A burst that goes from healthy to degraded to failing and back produces four lines (`Information → Warning`, `Warning → Error`, `Error → Information`) instead of thousands. The thresholds (0.5, 10, 0.1, 3) are a starting point. Calibrate them against your service's normal error rate and its SLO error budget. `DetermineLogLevel` is a pure function, so unit-test it directly with (errorRate, consecutiveFailures) pairs. The breaker itself is covered in [High-Throughput Logging: Keeping the Hot Path Fast](/guides/high-throughput-logging/#circuit-breakers).
 
 ## Quick Reference
-| Level | Trigger | Operator action | Production default |
-|-------|---------|-----------------|-------------------|
-| ERROR | Operation failed, user impact | Investigate now | Always on |
-| WARN | Degraded or at-risk, system still up | Investigate soon | Always on |
-| INFO | Significant business event completed | Read during review | Always on |
-| DEBUG | Internal state for diagnosis | Enable when investigating | Off |
-| TRACE | Method-level execution steps | Enable in dev or targeted sessions | Off |
+
+| Level | `SeverityNumber` | Trigger | Operator action | Production default |
+|-------|---|---------|-----------------|-------------------|
+| FATAL | 21–24 | The process can't continue | Restart, then investigate | Always on |
+| ERROR | 17–20 | Operation failed, user impact | Investigate now | Always on |
+| WARN | 13–16 | Degraded or at risk, still working | Investigate soon | Always on |
+| INFO | 9–12 | Significant event completed | Read during review | On, high-volume events sampled |
+| DEBUG | 5–8 | Internal state for diagnosis | Turn on while investigating | Off |
+| TRACE | 1–4 | Step-by-step execution | Dev or targeted sessions | Off |
 
 ---
 
-**Next**: [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/)
+**Next**: [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/) — the field names that go alongside the level.
