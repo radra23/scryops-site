@@ -17,7 +17,9 @@ import tempfile
 
 import mermaid_lib as m
 
-OUT_DIR = os.path.join("themes", "scryops", "assets", "diagrams")
+# SCRYOPS_DIAGRAM_OUT_DIR redirects output (the render test uses it so it
+# never overwrites committed SVGs)
+OUT_DIR = os.environ.get("SCRYOPS_DIAGRAM_OUT_DIR") or os.path.join("themes", "scryops", "assets", "diagrams")
 CONFIG = os.path.join("scripts", "mermaid-config.json")
 PUPPETEER = os.path.join("scripts", "puppeteer-config.json")
 GREEN, RED, OFF = "\033[32m", "\033[31m", "\033[0m"
