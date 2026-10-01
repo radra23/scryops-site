@@ -15,6 +15,11 @@
   --bg:#141210;             /* warm charcoal — softened near-black (body still ~12.6:1) */
   --surface:#1C1915;        /* card elevation above the page */
   --border:#2B2620;
+  /* --frame is a container's OUTER edge (diagram card, figure, insight, inline
+     code chip); --border stays the subtle hairline for dividers. At ~1.25:1
+     --border let cards dissolve into the page (their fill is only ~1.07:1
+     off it); ~1.7–1.9:1 reads as an edge without ruling the page. */
+  --frame:#453E33;
   --heading:#ECE6D9;
   --text:#D7D0C4;
   --muted:#9B9382;
@@ -47,7 +52,7 @@
   --mascot-barbarian:#D2894F;
 
   /* inline code chip */
-  --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:#241F18;
+  --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:var(--frame);
 
   /* code well — STAYS DARK in all three themes */
   --code-bg:#100E0B; --code-text:#CEC8BC; --code-bd:#8E8574;
@@ -69,8 +74,10 @@
 
   /* figures */
   --fig-bg:#17130E;
-  --fig-grid:linear-gradient(rgba(155,147,130,.06) 1px,transparent 1px),
-             linear-gradient(90deg,rgba(155,147,130,.06) 1px,transparent 1px);
+  /* no graph-paper texture behind figures, in any theme: it sat only in the
+     frame's margin and ran behind captions — decoration, not a reading aid.
+     Static-SVG diagrams (.diag-card) never had it. Light/calm inherit this. */
+  --fig-grid:none;
   --fig-bd:#2B2620;
   --node-fill:#16120C; --node-stroke:var(--muted); --edge:var(--cyan); --nlab:var(--heading);
 
@@ -151,6 +158,7 @@ html.light {
   --bg:#F6F3EC;
   --surface:#FFFDF7;
   --border:#E6DFD2;
+  --frame:#C9BFAD;
   --heading:#1E1811;
   --text:#2C261E;
   --muted:#6F6556;
@@ -180,7 +188,7 @@ html.light {
   --mascot-oracle:#8260D3;
   --mascot-barbarian:#AA642C;
 
-  --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:#DED6C7;
+  --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:var(--frame);
 
   /* code well intentionally NOT overridden — stays dark */
 
@@ -195,8 +203,6 @@ html.light {
   --dgr-lb:color-mix(in srgb,var(--danger) 80%,var(--heading));
 
   --fig-bg:#FFFDF7;
-  --fig-grid:linear-gradient(#EDE7DB 1px,transparent 1px),
-             linear-gradient(90deg,#EDE7DB 1px,transparent 1px);
   --fig-bd:#E6DFD2;
   --node-fill:#F0EBE0;
   /* node-stroke / edge / nlab and all callout -bg/-bd tokens are derived in :root */
@@ -208,6 +214,7 @@ html.calm {
   --bg:#17140E;
   --surface:#1F1B13;
   --border:#332C20;
+  --frame:#4A4232;
   --heading:#F2EAD8;
   --text:#E6DECE;
   --muted:#AA9D84;
@@ -238,12 +245,11 @@ html.calm {
   --mascot-oracle:#A78FE0;
   --mascot-barbarian:#D2894F;
 
-  --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:#3A3324;
+  --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:var(--frame);
 
   /* code well still dark — keep syntax constant */
 
   --fig-bg:#1A160F;
-  --fig-grid:none;            /* no background pattern — less distraction */
   --fig-bd:#332C20;
   --node-fill:#221D14;
   /* node-stroke / edge / nlab and all callout tokens are derived in :root */
@@ -576,8 +582,8 @@ pre code{background:none;border:none;padding:0;color:inherit;font-size:inherit}
    figures — obs-* shortcodes + mermaid
    ============================================================ */
 .obs-fig{
-  background:var(--fig-bg);background-image:var(--fig-grid);background-size:26px 26px;
-  border:1px solid var(--fig-bd);border-radius:var(--radius);padding:22px 20px 8px;
+  background:var(--fig-bg);
+  border:1px solid var(--frame);border-radius:var(--radius);padding:22px 20px 8px;
 }
 .obs-fig svg{display:block;width:100%;height:auto}
 .obs-fig .node{fill:var(--node-fill);stroke:var(--node-stroke)}
@@ -588,8 +594,8 @@ figcaption,.obs-cap{font-family:var(--font-code);font-size:12px;line-height:1.45
 
 /* mermaid: pre-rendered static SVG, themed via CSS vars; container just frames it */
 .mermaid{
-  background:var(--fig-bg);background-image:var(--fig-grid);background-size:26px 26px;
-  border:1px solid var(--fig-bd);border-radius:var(--radius);padding:18px;
+  background:var(--fig-bg);
+  border:1px solid var(--frame);border-radius:var(--radius);padding:18px;
 }
 
 /* ============================================================
@@ -760,7 +766,21 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 /* shared figure wrapper + flat diagram card (neutral frame, no chromatic accent) */
 figure.diagram,figure.knt-fig,.obs-fig{margin:34px 0}
 figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:10px;padding-left:2px}
-.diag-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
+.diag-card{background:var(--surface);border:1px solid var(--frame);border-radius:var(--radius);padding:20px 20px 16px;overflow-x:auto}
+/* Scroll cue for diagrams wider than the card (the legibility floor below
+   makes that common): an ink shade on whichever edge hides content. CSS only —
+   the `local` covers scroll with the content and mask the `scroll`-attached
+   shades once an edge is reached, so a diagram that fits shows nothing.
+   --heading ink lightens the edge on dark and darkens it on light. */
+.diag-card{
+  --diag-shade:color-mix(in srgb,var(--heading) 22%,transparent);
+  background:
+    linear-gradient(to right,var(--surface) 40%,transparent) left / 48px 100% no-repeat local,
+    linear-gradient(to left,var(--surface) 40%,transparent) right / 48px 100% no-repeat local,
+    linear-gradient(to right,var(--diag-shade),transparent) left / 16px 100% no-repeat scroll,
+    linear-gradient(to left,var(--diag-shade),transparent) right / 16px 100% no-repeat scroll,
+    var(--surface);
+}
 /* Hand-built figures carry no inline max-width, so they take the 636px floor.
    Mermaid emits its own inline max-width pinning the SVG to its natural size;
    min-width previously beat that in the cascade and upscaled it (e.g. 277px
@@ -791,7 +811,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .scry-table-wrap{overflow-x:auto}
 
 /* insight callout (insight shortcode) */
-.scry-insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin:24px 0}
+.scry-insight{display:flex;gap:14px;align-items:flex-start;background:var(--surface);border:1px solid var(--frame);border-radius:var(--radius);padding:14px 18px;margin:24px 0}
 .scry-insight.lightbulb{border-left:3px solid var(--green)}
 .scry-insight.bookmark{border-left:3px solid var(--cyan)}
 .scry-insight__icon{flex-shrink:0;margin-top:3px;width:16px;height:16px}
