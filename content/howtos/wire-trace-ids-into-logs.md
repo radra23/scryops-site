@@ -272,7 +272,7 @@ Paste that `trace_id` into your tracing backend and you should see the trace. Pa
 The log call ran without an active span on its context. Common causes:
 - It ran outside the span: before the request span started, or after it ended.
 - In Go, it used `slog.Info` instead of `slog.InfoContext(ctx, …)`.
-- The work hopped to another thread, goroutine or queue without carrying the context.
+- The work hopped to another thread, goroutine or queue without carrying the context. [Context Propagation](/guides/otel-context-propagation/#where-propagation-breaks-inside-a-service) has a table of which hand-offs lose it in each runtime.
 - No SDK `TracerProvider` was registered, so every span is a no-op with an invalid context.
 
 ❌ **If the IDs are present but the UI won't link logs to traces:**
