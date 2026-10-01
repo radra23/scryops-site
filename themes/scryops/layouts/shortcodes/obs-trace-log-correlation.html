@@ -7,41 +7,49 @@
      --mc-ramp-3/4 (trace_id brighter than span_id, matching their original
      opacity hierarchy); --mc-ramp-1 is reserved for the two takeaway labels
      (✗ / ✓), which never need to be distinguished from each other since
-     they're sequential panels, not compared side by side. */ -}}
+     they're sequential panels, not compared side by side.
+     Text never carries the ramp: the trace_id/span_id values and the right
+     header sit on --mc-ink, the highlight stays on the boxes (trace_id's
+     outline heavier and higher on the ramp than span_id's). The "not present"
+     labels used --border as a text colour (1.2:1) and now sit on
+     --mc-ink-secondary; the dashed empty boxes still say "absent".
+     Sizing: the 760-unit viewBox renders at ~686px on desktop (x0.903) and
+     the inline min-width:680px holds phones at x0.895, so 13.5-unit labels
+     land at >=12.1px and 11.5-unit pixel headers at >=10.3px. */ -}}
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 270" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-labelledby="tlc-title tlc-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="tlc-title">A log line without and with trace context</title>
-      <desc id="tlc-desc">Two-panel diagram. Left panel — WITHOUT TRACE ID — shows a log line with timestamp, level, message, and order ID, but the trace_id and span_id slots are absent (shown as dashed empty boxes). Bottom label: search all services by timestamp. Right panel — WITH TRACE ID — shows the same log line with trace_id and span_id fields present and highlighted in blue. Bottom label: click trace_id to open correlated spans.</desc>
+      <desc id="tlc-desc">Two-panel diagram. Left panel — WITHOUT TRACE ID — shows a log line with timestamp, level, message, and order ID, but the trace_id and span_id slots are absent (shown as dashed empty boxes). Bottom label: search all services by timestamp. Right panel — WITH TRACE ID — shows the same log line with trace_id and span_id fields present, each in an outlined box, trace_id with the heavier outline. Bottom label: click trace_id to open correlated spans.</desc>
 
       <rect width="760" height="270" fill="var(--fig-bg)"/>
 
       <!-- ── LEFT PANEL: without trace ID ─────────────────────────────── -->
       <rect x="8" y="8" width="344" height="254" fill="var(--fig-bg)" rx="1"/>
       <rect x="8" y="8" width="344" height="2" fill="var(--border)"/>
-      <text x="180" y="27" fill="var(--muted)" font-size="11" text-anchor="middle"
+      <text x="180" y="27" fill="var(--mc-ink-secondary)" font-size="11.5" text-anchor="middle"
             font-family="var(--font-pixel)" letter-spacing="0.06em">WITHOUT TRACE ID</text>
 
-      <rect x="24" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="56" fill="var(--muted)" font-size="12.5">[02:14:33] ERROR payment.process</text>
+      <rect x="20" y="38" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="30" y="56" fill="var(--mc-ink-secondary)" font-size="13.5">[02:14:33] ERROR payment.process</text>
 
-      <rect x="24" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="90" fill="var(--muted)" font-size="12.5">msg="Payment failed: gateway timeout"</text>
+      <rect x="20" y="72" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="30" y="90" fill="var(--mc-ink-secondary)" font-size="13.5">msg="Payment failed: gateway timeout"</text>
 
-      <rect x="24" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="36" y="124" fill="var(--muted)" font-size="12.5">order_id=ord_9f3b2a4c</text>
+      <rect x="20" y="106" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="30" y="124" fill="var(--mc-ink-secondary)" font-size="13.5">order_id=ord_9f3b2a4c</text>
 
       <!-- absent trace_id — dashed outline -->
-      <rect x="24" y="140" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="158" fill="var(--border)" font-size="12.5" text-anchor="middle">trace_id — not present</text>
+      <rect x="20" y="140" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
+      <text x="180" y="158" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">trace_id — not present</text>
 
       <!-- absent span_id — dashed outline -->
-      <rect x="24" y="174" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
-      <text x="180" y="192" fill="var(--border)" font-size="12.5" text-anchor="middle">span_id — not present</text>
+      <rect x="20" y="174" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1" stroke-dasharray="5 3"/>
+      <text x="180" y="192" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">span_id — not present</text>
 
-      <text x="180" y="234" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">&#10007; search all services by timestamp</text>
+      <text x="180" y="234" fill="var(--mc-ramp-1)" font-size="13.5" text-anchor="middle">&#10007; search all services by timestamp</text>
 
       <!-- ── CENTER GAP ARROW ──────────────────────────────────────────── -->
       <text x="380" y="141" fill="var(--mc-ink-muted)" font-size="18" text-anchor="middle">&#8594;</text>
@@ -49,27 +57,27 @@
       <!-- ── RIGHT PANEL: with trace ID ───────────────────────────────── -->
       <rect x="408" y="8" width="344" height="254" fill="var(--fig-bg)" rx="1"/>
       <rect x="408" y="8" width="344" height="2" fill="var(--mc-ramp-4)" opacity="0.8"/>
-      <text x="580" y="27" fill="var(--mc-ramp-4)" font-size="11" text-anchor="middle"
+      <text x="580" y="27" fill="var(--mc-ink)" font-size="11.5" text-anchor="middle"
             font-family="var(--font-pixel)" letter-spacing="0.06em">WITH TRACE ID</text>
 
-      <rect x="424" y="38" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="56" fill="var(--text)" font-size="12.5">[02:14:33] ERROR payment.process</text>
+      <rect x="420" y="38" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="430" y="56" fill="var(--text)" font-size="13.5">[02:14:33] ERROR payment.process</text>
 
-      <rect x="424" y="72" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="90" fill="var(--text)" font-size="12.5">msg="Payment failed: gateway timeout"</text>
+      <rect x="420" y="72" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="430" y="90" fill="var(--text)" font-size="13.5">msg="Payment failed: gateway timeout"</text>
 
-      <rect x="424" y="106" width="312" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="436" y="124" fill="var(--text)" font-size="12.5">order_id=ord_9f3b2a4c</text>
+      <rect x="420" y="106" width="324" height="28" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="430" y="124" fill="var(--text)" font-size="13.5">order_id=ord_9f3b2a4c</text>
 
       <!-- trace_id — present, highlighted (brighter of the two) -->
-      <rect x="424" y="140" width="312" height="28" fill="var(--mc-ramp-3)" fill-opacity="0.14" stroke="var(--mc-ramp-3)" stroke-width="1.5"/>
-      <text x="436" y="158" fill="var(--mc-ramp-3)" font-size="12.5">trace_id=4bf92f3577b34da6&#8230;</text>
+      <rect x="420" y="140" width="324" height="28" fill="var(--mc-ramp-3)" fill-opacity="0.14" stroke="var(--mc-ramp-3)" stroke-width="1.5"/>
+      <text x="430" y="158" fill="var(--mc-ink)" font-size="13.5">trace_id=4bf92f3577b34da6&#8230;</text>
 
       <!-- span_id — present (secondary to trace_id) -->
-      <rect x="424" y="174" width="312" height="28" fill="var(--mc-ramp-4)" fill-opacity="0.08" stroke="var(--mc-ramp-4)" stroke-width="1"/>
-      <text x="436" y="192" fill="var(--mc-ramp-4)" font-size="12.5">span_id=a2fb4a1d1a96d312</text>
+      <rect x="420" y="174" width="324" height="28" fill="var(--mc-ramp-4)" fill-opacity="0.08" stroke="var(--mc-ramp-4)" stroke-width="1"/>
+      <text x="430" y="192" fill="var(--mc-ink)" font-size="13.5">span_id=a2fb4a1d1a96d312</text>
 
-      <text x="580" y="234" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
+      <text x="580" y="234" fill="var(--mc-ramp-1)" font-size="13.5" text-anchor="middle">&#10003; click trace_id &#8594; open correlated spans</text>
 
     </svg>
   </div>
