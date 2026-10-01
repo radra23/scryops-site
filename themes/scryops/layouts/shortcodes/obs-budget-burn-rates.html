@@ -1,17 +1,27 @@
+{{- /* layouts/shortcodes/obs-budget-burn-rates.html
+     Error budget remaining over 30 days at 1x, 6x and 14x burn. The three
+     lines differ by dash (dotted / dashed / solid) and weight as well as hue,
+     so the legend text sits on --mc-ink rather than --danger/--warn (those
+     reach only ~5.6:1 in light, short of the ~10:1 figure-label target).
+     Sizing: the 760-unit viewBox renders at ~686px on desktop (x0.903) and
+     the inline min-width:680px holds phones at x0.895, so 13.5-unit labels
+     land at >=12.1px and the 11.5-unit pixel eyebrow at >=10.3px. Line
+     labels live in a legend below the 1x line, not inline, so no line
+     crosses a label; legend rows are 18 units apart. */ -}}
 <figure class="diagram">
   <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 288" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="bbr-title bbr-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="bbr-title">Error budget consumption by burn rate over 30 days</title>
-      <desc id="bbr-desc">A line chart showing error budget percentage remaining over a 30-day window for three burn rates. At 1&#215; burn the budget reaches zero exactly at day 30, shown as a thin dotted line ending in an open circle. At 6&#215; burn the budget is exhausted by day 5, shown as a dashed line ending in a square — the P1 threshold. At 14&#215; burn the budget is gone in roughly two days, shown as the heaviest solid line ending in a filled dot — the P0 threshold demanding immediate action. The multiplier is not an abstraction: it is a deadline.</desc>
+      <desc id="bbr-desc">A line chart showing error budget percentage remaining over a 30-day window for three burn rates. At 1&#215; burn the budget reaches zero exactly at day 30, shown as a thin dotted line ending in an open circle. At 6&#215; burn the budget is exhausted by day 5, shown as a dashed line ending in a square — the P1 threshold. At 14&#215; burn the budget is gone in roughly two days, shown as the heaviest solid line ending in a filled dot — the P0 threshold demanding immediate action. A legend below the 1&#215; line keys each line by its dash pattern: 14&#215; burn, empty in about 2 days; 6&#215; burn, about 5 days; 1&#215; burn, lasts 30 days. The multiplier is not an abstraction: it is a deadline.</desc>
 
       <!-- background -->
       <rect x="0" y="0" width="760" height="288" fill="var(--fig-bg)"/>
 
       <!-- eyebrow -->
-      <text x="380" y="22" text-anchor="middle" fill="var(--muted)"
-            font-family="var(--font-pixel)" font-size="11" letter-spacing="0.06em">ERROR BUDGET CONSUMPTION BY BURN RATE</text>
+      <text x="380" y="22" text-anchor="middle" fill="var(--mc-ink-secondary)"
+            font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.06em">ERROR BUDGET CONSUMPTION BY BURN RATE</text>
 
       <!-- zone shading: P0 (day 0–2.14, x=80–126) -->
       <rect x="80" y="40" width="46" height="200" fill="var(--danger)" opacity="0.05"/>
@@ -31,34 +41,34 @@
       <!-- Y axis -->
       <line x1="80" y1="40"  x2="80"  y2="240" stroke="var(--border)" stroke-width="1"/>
 
-      <!-- Y axis labels (right-aligned at x=72) -->
+      <!-- Y axis labels (right-aligned at x=68, clear of the x-axis "0d") -->
       <!-- y(100%)=40, y(75%)=90, y(50%)=140, y(25%)=190, y(0%)=240 -->
-      <g fill="var(--muted)" font-size="12.5" text-anchor="end">
-        <text x="72" y="44">100%</text>
-        <text x="72" y="94">75%</text>
-        <text x="72" y="144">50%</text>
-        <text x="72" y="194">25%</text>
-        <text x="72" y="244">0%</text>
+      <g fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">
+        <text x="68" y="44">100%</text>
+        <text x="68" y="94">75%</text>
+        <text x="68" y="144">50%</text>
+        <text x="68" y="194">25%</text>
+        <text x="68" y="244">0%</text>
       </g>
 
       <!-- Y axis title (rotated) -->
-      <text x="14" y="140" text-anchor="middle" fill="var(--muted)" font-size="12.5"
+      <text x="14" y="140" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5"
             transform="rotate(-90 14 140)">Error budget remaining</text>
 
       <!-- X axis labels -->
       <!-- x(0)=80, x(5)=187, x(10)=293, x(15)=400, x(20)=507, x(25)=613, x(30)=720 -->
-      <g fill="var(--muted)" font-size="12.5" text-anchor="middle">
-        <text x="80"  y="253">0d</text>
-        <text x="187" y="253">5d</text>
-        <text x="293" y="253">10d</text>
-        <text x="400" y="253">15d</text>
-        <text x="507" y="253">20d</text>
-        <text x="613" y="253">25d</text>
-        <text x="720" y="253">30d</text>
+      <g fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">
+        <text x="80"  y="256">0d</text>
+        <text x="187" y="256">5d</text>
+        <text x="293" y="256">10d</text>
+        <text x="400" y="256">15d</text>
+        <text x="507" y="256">20d</text>
+        <text x="613" y="256">25d</text>
+        <text x="720" y="256">30d</text>
       </g>
 
       <!-- X axis title -->
-      <text x="400" y="268" text-anchor="middle" fill="var(--muted)" font-size="12.5">Days</text>
+      <text x="400" y="274" text-anchor="middle" fill="var(--mc-ink-secondary)" font-size="13.5">Days</text>
 
       <!-- Vertical marker at day 2.14 (x=126) -->
       <line x1="126" y1="40" x2="126" y2="240" stroke="var(--danger)" stroke-width="1"
@@ -82,17 +92,16 @@
             stroke="var(--danger)" stroke-width="2.5"/>
       <circle cx="126" cy="240" r="4.5" fill="var(--danger)"/>
 
-      <!-- Annotation: 14x burn -->
-      <text x="130" y="80"  fill="var(--danger)" font-size="12.5">14&#215; burn</text>
-      <text x="130" y="93"  fill="var(--danger)" font-size="12.5">~2d</text>
-
-      <!-- Annotation: 6x burn -->
-      <text x="200" y="100" fill="var(--warn)" font-size="12.5">6&#215; burn</text>
-      <text x="200" y="113" fill="var(--warn)" font-size="12.5">~5d</text>
-
-      <!-- Annotation: 1x burn -->
-      <text x="680" y="150" fill="var(--muted)" font-size="12.5">1&#215; burn</text>
-      <text x="680" y="163" fill="var(--muted)" font-size="12.5">30d</text>
+      <!-- Legend: keyed by the same stroke and dash as each line (mono-safe),
+           placed in the empty lower band so no line crosses a label -->
+      <g font-size="13.5" fill="var(--mc-ink)">
+        <line x1="205" y1="176" x2="237" y2="176" stroke="var(--danger)" stroke-width="2.5"/>
+        <text x="245" y="180">14&#215; burn &#183; empty in ~2d</text>
+        <line x1="205" y1="194" x2="237" y2="194" stroke="var(--warn)" stroke-width="2" stroke-dasharray="6 3"/>
+        <text x="245" y="198">6&#215; burn &#183; ~5d</text>
+        <line x1="205" y1="212" x2="237" y2="212" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="2 3"/>
+        <text x="245" y="216">1&#215; burn &#183; lasts 30d</text>
+      </g>
     </svg>
   </div>
   <figcaption>Fig. &#8212; At 14&#215; burn rate, a 30-day error budget exhausts in roughly two days. The multiplier is not an abstraction &#8212; it&#8217;s a deadline.</figcaption>
