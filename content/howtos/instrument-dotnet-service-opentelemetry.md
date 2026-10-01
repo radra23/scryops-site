@@ -1,377 +1,236 @@
 ---
 title: "How to Instrument a .NET Service with OpenTelemetry"
-date: 2026-06-10
-draft: true
-excerpt: "Add OpenTelemetry to an ASP.NET Core service — auto-instrumentation for HTTP, Entity Framework, and gRPC, manual spans for business logic, and correlated logs via ILogger — all routed through a local Collector."
+date: 2026-10-01
+draft: false
+excerpt: "Add OpenTelemetry to an ASP.NET Core service: traces, metrics and logs in one setup block, manual spans and metrics for business logic, Serilog, and the zero-code agent for services you can't change. All verified against a local Collector."
 readtime: 8
 tags: ["OpenTelemetry", "Tracing", "Observability", "How-to"]
 ---
 
-OpenTelemetry has first-class .NET support. The SDK covers traces, metrics, and logs, and the auto-instrumentation packages cover ASP.NET Core, Entity Framework Core, HttpClient, gRPC, and more with no manual code changes required.
+.NET has the most complete OpenTelemetry support of any runtime. Traces, metrics and logs are all stable, ASP.NET Core and `HttpClient` emit spans and metrics natively, and one setup block in `Program.cs` sends all three signals to a Collector. This guide sets that up, adds your own spans and metrics on top, and checks what arrives.
 
-## Dependencies
+Everything below was run against an ASP.NET Core service on .NET 10, with OpenTelemetry .NET 1.19 and Collector 0.161.0.
 
-Add the core packages to your project:
+There are two ways in:
+
+- **The SDK in code** (most of this guide). A few NuGet packages and one block in `Program.cs`. Use it for any service you own.
+- **The zero-code agent** ([at the end](#services-you-cant-change-the-zero-code-agent)). Environment variables and a startup hook, with no code or package changes. Use it for services you can't rebuild.
+
+## Packages
 
 ```xml
-<PackageReference Include="OpenTelemetry" Version="1.9.0" />
-<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
-<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
-
-<!-- Auto-instrumentation packages -->
-<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
-<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
-<PackageReference Include="OpenTelemetry.Instrumentation.EntityFrameworkCore" Version="1.0.0-beta.12" />
-<PackageReference Include="OpenTelemetry.Instrumentation.GrpcNetClient" Version="1.9.0" />
-<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.19.1" />
+<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.19.1" />
+<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.19.0" />
+<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.19.0" />
+<PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.19.0" />
 ```
 
-## SDK Initialisation
+Add instrumentation for the libraries you use, but check the version suffix: `OpenTelemetry.Instrumentation.EntityFrameworkCore` and `OpenTelemetry.Instrumentation.GrpcNetClient` are still pre-release (`1.19.1-beta.1` at the time of writing), so their span names and attributes can change between versions.
 
-Configure all three signals in `Program.cs`. The important pattern: the `TracerProvider`, `MeterProvider`, and `LoggerProvider` are configured once at startup using the `IServiceCollection` extensions — never instantiated directly with `new`.
+## Setup: One Block, Three Signals
 
 ```csharp
+using OpenTelemetry;              // UseOtlpExporter lives here — easy to miss
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Logs;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Resource attributes — the identity of this service
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(
-        serviceName: "checkout-api",
-        serviceNamespace: "commerce",
-        serviceVersion: "1.4.2")
-    .AddAttributes(new Dictionary<string, object>
-    {
-        ["deployment.environment"] = builder.Environment.EnvironmentName.ToLower()
-    });
-
-// Traces
 builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(serviceName: "checkout-api", serviceNamespace: "commerce", serviceVersion: "1.4.2")
+        .AddAttributes([new("deployment.environment.name",
+            builder.Environment.EnvironmentName.ToLowerInvariant())]))
     .WithTracing(tracing => tracing
-        .SetResourceBuilder(resourceBuilder)
-        .AddAspNetCoreInstrumentation(opts =>
-        {
-            // RecordException controls whether unhandled exceptions are recorded as
-            // exception events on the span — it has no effect on HTTP status codes.
-            // Leave it off unless you want exception stack traces attached to spans.
-            opts.RecordException = false;
-            // Note: 404s are not marked as span errors by default — only 5xx responses
-            // are, per HTTP semantic conventions — so no extra config is needed for that.
-            opts.Filter = ctx => ctx.Request.Path != "/health";
-        })
+        .AddAspNetCoreInstrumentation(o => o.Filter = ctx => ctx.Request.Path != "/health")
         .AddHttpClientInstrumentation()
-        .AddEntityFrameworkCoreInstrumentation()
-        .AddGrpcClientInstrumentation()
-        .AddOtlpExporter(opts =>
-        {
-            opts.Endpoint = new Uri("http://localhost:4317");
-        }))
-
-    // Metrics
+        .AddSource("Commerce.*"))           // your own ActivitySources, by wildcard
     .WithMetrics(metrics => metrics
-        .SetResourceBuilder(resourceBuilder)
         .AddAspNetCoreInstrumentation()
         .AddHttpClientInstrumentation()
-        .AddRuntimeInstrumentation()        // GC, thread pool, heap
-        .AddOtlpExporter(opts =>
-        {
-            opts.Endpoint = new Uri("http://localhost:4317");
-        }));
-
-// Logs — bridge existing ILogger output into OTel
-builder.Logging.AddOpenTelemetry(logging =>
-{
-    logging.SetResourceBuilder(resourceBuilder);
-    logging.AddOtlpExporter(opts =>
-    {
-        opts.Endpoint = new Uri("http://localhost:4317");
-    });
-    // TraceId and SpanId are injected into every log record automatically from
-    // Activity.Current — no toggle required. IncludeTraceState instead controls
-    // whether the W3C tracestate string is attached to log records.
-    logging.IncludeTraceState = true;
-    logging.IncludeScopes = true;
-});
+        .AddRuntimeInstrumentation()        // GC, heap, thread pool
+        .AddMeter("Commerce.*"))            // your own Meters
+    .WithLogging()                          // bridges ILogger into OpenTelemetry
+    .UseOtlpExporter();                     // one exporter for all three signals
 ```
 
-## Manual Spans for Business Logic
+A few things this does that older examples do by hand:
 
-Auto-instrumentation covers framework boundaries. For business logic operations, add spans manually using an `ActivitySource` — the .NET equivalent of the OTel `Tracer`:
+- **`ConfigureResource` once.** Every signal gets the same `service.name`, `service.version` and `deployment.environment.name`. Calling `SetResourceBuilder` per signal is the older pattern, and an easy way to end up with traces and metrics from what looks like two different services.
+- **`UseOtlpExporter` once.** It configures traces, metrics and logs together. It can't be mixed with per-signal `AddOtlpExporter` calls; pick one style.
+- **No endpoint in code.** The exporter reads the standard variables, so the same build works locally and in every environment:
+
+```bash
+OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317   # the default; set it per environment
+OTEL_EXPORTER_OTLP_PROTOCOL=grpc                     # or http/protobuf (port 4318)
+```
+
+With this in place, the service exports:
+
+- a `SERVER` span for every request, named after its route (`POST /checkout/{orderId}`);
+- a `CLIENT` span for every outgoing `HttpClient` call;
+- `http.server.request.duration` and `http.client.request.duration` histograms, plus the `dotnet.gc.*` runtime metrics;
+- every `ILogger` record with the trace and span IDs of the request that wrote it.
+
+The `/health` filter keeps probe traffic out of your traces.
+
+One detail of the log records: by default the body is the message *template* (`Payment charged for order {OrderId}`), with `OrderId` as a separate attribute. That's what you want for grouping and querying. Set `IncludeFormattedMessage = true` in `WithLogging` if you also want the rendered sentence.
+
+## Minimal APIs and Controllers Report Routes Differently
+
+Both are instrumented the same way, but they don't name their routes the same way. In testing, the same shape of endpoint produced:
+
+- A minimal API, `app.MapGet("/orders/{id}", …)`, reported the span name `GET /orders/{id}` and the route `/orders/{id}`.
+- A controller, `OrdersController` with `[Route("api/[controller]")]` and `[HttpGet("{id}")]`, reported `GET api/Orders/{id}` and the route `api/Orders/{id}`.
+
+Controller routes are reported as the template after token replacement: no leading slash, and `[controller]` expanded with the class's capitalisation. Neither is wrong, but a dashboard or alert that groups by `http.route` treats them as different shapes. If a service mixes both styles, or you migrate from one to the other, check your queries against the new names.
+
+## Your Own Spans
+
+Instrumentation covers the framework boundaries. For business operations, use an `ActivitySource`, .NET's equivalent of an OpenTelemetry tracer. Its name must match an `AddSource` pattern (`Commerce.*` above) or its spans go nowhere:
 
 ```csharp
-public class PaymentService
+public class PaymentService(ILogger<PaymentService> logger, IPaymentGateway gateway)
 {
-    // One ActivitySource per assembly, shared across the class
-    private static readonly ActivitySource ActivitySource =
-        new ActivitySource("Commerce.PaymentService");
-
-    private readonly ILogger<PaymentService> _logger;
-
-    public PaymentService(ILogger<PaymentService> logger) => _logger = logger;
+    private static readonly ActivitySource Source = new("Commerce.Payments");
 
     public async Task<PaymentResult> ChargeAsync(Order order)
     {
-        // Start a span. using ensures it ends when the block exits.
-        using var activity = ActivitySource.StartActivity("payment.charge");
-
-        // Add attributes that describe this specific operation
-        activity?.SetTag("payment.amount", order.TotalAmount);
-        activity?.SetTag("payment.currency", order.Currency);
-        activity?.SetTag("payment.provider", "stripe");
+        using var activity = Source.StartActivity("payment.charge");
         activity?.SetTag("order.id", order.Id);
+        activity?.SetTag("payment.amount", (double)order.Total);
 
         try
         {
-            var result = await _stripeClient.ChargeAsync(order);
-
-            activity?.SetTag("payment.charge_id", result.ChargeId);
-            // Explicit OK is optional — UNSET is fine for success
-            activity?.SetStatus(ActivityStatusCode.Ok);
-
-            _logger.LogInformation(
-                "Payment charged successfully for order {OrderId}", order.Id);
-
+            var result = await gateway.ChargeAsync(order);
+            if (result.Declined)
+            {
+                // A declined card is a business outcome, not a system error: no Error status
+                activity?.SetTag("payment.decline_code", result.DeclineCode);
+                return result;
+            }
+            logger.LogInformation("Payment charged for order {OrderId}", order.Id);
             return result;
-        }
-        catch (StripeException ex) when (ex.StripeError?.Type == "card_error")
-        {
-            // Card declined: a business outcome, not a system error
-            activity?.SetTag("payment.decline_code", ex.StripeError.Code);
-            activity?.AddEvent(new ActivityEvent("payment.declined",
-                tags: new ActivityTagsCollection
-                {
-                    ["payment.decline_code"] = ex.StripeError.Code
-                }));
-            // Do NOT set ERROR — this is expected behaviour
-            return PaymentResult.Declined(ex.StripeError.Code);
         }
         catch (Exception ex)
         {
-            // System failure: set ERROR and record the exception
-            activity?.RecordException(ex);
+            activity?.AddException(ex);                              // an "exception" event on the span
             activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-
-            _logger.LogError(ex,
-                "Payment charge failed for order {OrderId}", order.Id);
+            logger.LogError(ex, "Payment failed for order {OrderId}", order.Id);
             throw;
         }
     }
 }
 ```
 
-Register the `ActivitySource` with the tracer so its spans are captured:
+`Activity.AddException` is built into .NET 9 and later, so you don't need an extension method for it. In the test, the failing call produced a `payment.charge` span with status `Error` and an `exception` event, as a child of the request span. The matching log record carried the same trace ID plus `exception.type`, `exception.message` and `exception.stacktrace`.
+
+## Your Own Metrics
+
+Business metrics use `System.Diagnostics.Metrics`, with a `Meter` whose name matches an `AddMeter` pattern:
 
 ```csharp
-.WithTracing(tracing => tracing
-    // ... existing config ...
-    .AddSource("Commerce.PaymentService"))   // matches the name in new ActivitySource(...)
-```
-
-## Custom Metrics
-
-For business metrics, use the `Meter` class directly. The .NET OTel metrics API uses the same instrument types as the spec: `Counter`, `Histogram`, `UpDownCounter`, and observable variants.
-
-```csharp
-public class OrderMetrics
+public class PaymentMetrics
 {
-    private static readonly Meter Meter = new Meter("Commerce.Orders");
+    private static readonly Meter Meter = new("Commerce.Payments");
 
-    // Counter: only goes up, counts occurrences
-    private static readonly Counter<long> OrdersCreated =
-        Meter.CreateCounter<long>("orders.created",
-            unit: "{orders}",
-            description: "Total number of orders created");
+    private static readonly Histogram<double> Duration = Meter.CreateHistogram<double>(
+        "payment.duration", unit: "s", description: "Duration of payment processing");
 
-    // Histogram: records distribution of values (latency, sizes)
-    private static readonly Histogram<double> PaymentDuration =
-        Meter.CreateHistogram<double>("payment.duration",
-            unit: "ms",
-            description: "Duration of payment processing");
+    private static readonly Counter<long> Charges = Meter.CreateCounter<long>(
+        "payment.charges", unit: "{charge}", description: "Payment charge attempts");
 
-    // UpDownCounter: can go up and down (queue depth, active connections)
-    private static readonly UpDownCounter<long> ActiveCheckouts =
-        Meter.CreateUpDownCounter<long>("checkouts.active",
-            unit: "{checkouts}",
-            description: "Number of checkout sessions currently in progress");
-
-    public void RecordOrderCreated(string currency) =>
-        OrdersCreated.Add(1, new TagList { { "currency", currency } });
-
-    public void RecordPaymentDuration(double ms, string provider) =>
-        PaymentDuration.Record(ms, new TagList { { "provider", provider } });
-
-    public void CheckoutStarted() => ActiveCheckouts.Add(1);
-    public void CheckoutEnded() => ActiveCheckouts.Add(-1);
+    public void Record(TimeSpan elapsed, string provider, string outcome)
+    {
+        Duration.Record(elapsed.TotalSeconds, new TagList { { "payment.provider", provider } });
+        Charges.Add(1, new TagList { { "payment.provider", provider }, { "payment.outcome", outcome } });
+    }
 }
 ```
 
-Register the Meter the same way as the ActivitySource:
+Record durations in **seconds**, the unit the semantic conventions use for every `*.duration` histogram, so yours line up with `http.server.request.duration` on the same dashboard. Keep tag values to a small, known set: `payment.outcome` with three values is fine; an order ID as a tag creates a new time series per order.
+
+## Serilog
+
+If your service logs through Serilog rather than the plain `ILogger` pipeline, `.WithLogging()` won't see those events. Use Serilog's OpenTelemetry sink instead:
 
 ```csharp
-.WithMetrics(metrics => metrics
-    // ... existing config ...
-    .AddMeter("Commerce.Orders"))
+// Serilog.AspNetCore + Serilog.Sinks.OpenTelemetry; using Serilog; using Serilog.Events;
+builder.Services.AddSerilog(lc => lc
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .WriteTo.Console()
+    .WriteTo.OpenTelemetry(o =>
+    {
+        o.Endpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"] ?? "http://localhost:4317";
+        o.ResourceAttributes = new Dictionary<string, object> { ["service.name"] = "checkout-api" };
+    }));
 ```
 
-## Background Services and Workers
+Serilog captures the current trace and span IDs on every event by itself, so the sink exports them with no enricher. In testing, each log record arrived with the trace ID of its request span, the rendered message as the body, the template in `message_template.text`, and properties such as `OrderId` as attributes.
 
-A `BackgroundService` runs outside the HTTP pipeline, so no incoming request starts a trace for it. Give each iteration of the worker loop its own root span:
+The level override matters. Without it, ASP.NET Core's own per-request Information logs (`Request starting…`, `Executing endpoint…`) go to your backend too, four extra records per request. Keep the tracing and metrics setup from above; the sink only replaces the logging half.
+
+## Background Work and Message Queues
+
+A `BackgroundService` runs outside any request, so nothing starts a trace for it. Start a span per unit of work, such as one batch or one message, rather than one for the whole loop:
 
 ```csharp
-public class OrderProcessingWorker : BackgroundService
+protected override async Task ExecuteAsync(CancellationToken stoppingToken)
 {
-    private static readonly ActivitySource ActivitySource = new("Commerce.OrderWorker");
-    private readonly ILogger<OrderProcessingWorker> _logger;
-    private readonly IOrderRepository _orders;
-
-    public OrderProcessingWorker(ILogger<OrderProcessingWorker> logger, IOrderRepository orders)
+    while (!stoppingToken.IsCancellationRequested)
     {
-        _logger = logger;
-        _orders = orders;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        while (!stoppingToken.IsCancellationRequested)
+        var pending = await _orders.GetPendingAsync(stoppingToken);
+        if (pending.Count > 0)
         {
-            // No parent in scope, so this starts a new trace for the cycle
-            using (var activity = ActivitySource.StartActivity("worker.process_pending_orders"))
-            {
-                try
-                {
-                    var pending = await _orders.GetPendingAsync();
-                    activity?.SetTag("orders.pending_count", pending.Count);
-
-                    foreach (var order in pending)
-                    {
-                        using var orderActivity = ActivitySource.StartActivity("worker.process_order");
-                        orderActivity?.SetTag("order.id", order.Id);
-                        await _orders.ProcessAsync(order);
-                    }
-                }
-                catch (Exception ex)
-                {
-                    activity?.RecordException(ex);
-                    activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
-                    _logger.LogError(ex, "Worker cycle failed");
-                }
-            }
-
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            using var activity = Source.StartActivity("orders.process_pending");   // a new root trace
+            activity?.SetTag("orders.pending_count", pending.Count);
+            await _orders.ProcessAsync(pending, stoppingToken);
         }
+        await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
     }
 }
 ```
 
-The cycle span is disposed before the delay, so the 30-second wait is not counted as part of the work. Register the source alongside the others:
+Starting the span only when there's work keeps idle polls from filling your backend with empty traces: one every 30 seconds is 2,880 a day per replica.
 
-```csharp
-.WithTracing(tracing => tracing
-    // ... existing config ...
-    .AddSource("Commerce.OrderWorker"))
+Work that a request hands to a background worker through a `Channel<T>` or a message broker loses the request's trace context on the way, unless you carry it. [Context Propagation](/guides/otel-context-propagation/) shows the inject-and-extract pattern for both, tested in .NET and four other runtimes. Check your broker client before writing it by hand: RabbitMQ.Client 7, for example, creates producer and consumer spans itself.
+
+## Services You Can't Change: The Zero-Code Agent
+
+For a service you can't rebuild, [OpenTelemetry .NET Automatic Instrumentation](https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation) attaches at startup through a CLR profiler and startup hook. On Linux:
+
+```bash
+curl -sSfL https://github.com/open-telemetry/opentelemetry-dotnet-instrumentation/releases/download/v1.17.0/otel-dotnet-auto-install.sh -O
+sh ./otel-dotnet-auto-install.sh          # verifies the release with the GitHub CLI (see below)
+. $HOME/.otel-dotnet-auto/instrument.sh   # sets the CORECLR_* and DOTNET_* variables
+
+export OTEL_SERVICE_NAME=checkout-api
+export OTEL_RESOURCE_ATTRIBUTES=deployment.environment.name=production
+export OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+dotnet checkout.dll
 ```
 
-A worker that polls every 30 seconds emits 2,880 cycle traces a day per replica, most of them empty when the queue is idle. If that is noise for you, filter out cycles where `orders.pending_count` is `0` in the Collector (tail sampling), or only start the span once a poll has found work.
+The current install script (v1.17.0 when this was tested) verifies the release's signed attestation before installing, and it needs the [GitHub CLI](https://cli.github.com/) (`gh`), with a token, to do it. Install `gh` in your build image and give it a `GH_TOKEN`. The script offers `SKIP_RELEASE_VERIFICATION=true` as an escape hatch, but that skips exactly the supply-chain check you want for something that injects itself into every process.
 
-### Work handed to a queue in-process
+Pointed at a plain ASP.NET Core app with no OpenTelemetry packages or code, the agent produced the same `SERVER` and `CLIENT` spans, HTTP and runtime metrics, and trace-correlated `ILogger` records as the SDK setup above. What it can't do is know about your business operations. For those, the app needs its own `ActivitySource` and `Meter` code, and you're back to the SDK.
 
-`Activity.Current` is stored in an `AsyncLocal`, so it carries across `await` and into `Task.Run` automatically. A span started inside `Task.Run` is already a child of the request span, even if the request finishes first.
+## Verify Against a Local Collector
 
-Context is lost when work passes through something that does not carry the execution context with it: a `Channel<T>` or `BlockingCollection<T>` read by a hosted service, a database outbox table, or a custom job queue. The consumer runs on its own loop, where `Activity.Current` is whatever that loop has, not the request that queued the work. Capture the context when you enqueue and pass it along with the work item:
-
-```csharp
-public record EmailJob(int OrderId, ActivityContext Parent);
-
-// In the request handler: capture the context while the request span is current
-await _emailQueue.Writer.WriteAsync(
-    new EmailJob(order.Id, Activity.Current?.Context ?? default));
-
-// In the hosted service that drains the channel
-await foreach (var job in _emailQueue.Reader.ReadAllAsync(stoppingToken))
-{
-    using var activity = ActivitySource.StartActivity(
-        "notifications.send_confirmation",
-        ActivityKind.Internal,
-        parentContext: job.Parent);
-
-    activity?.SetTag("order.id", job.OrderId);
-    await _notifications.SendConfirmationAsync(job.OrderId);
-}
-```
-
-Without `job.Parent`, the email span becomes a disconnected root trace that you cannot reach from the originating request. If the job may run long after the request has returned, you can use `links:` in place of `parentContext:`. The job then gets a trace of its own that still links back to the request, instead of stretching the request's trace out by minutes.
-
-## Message Queue Instrumentation
-
-HTTP instrumentation propagates trace context automatically through the `traceparent` header. A message broker only carries what you put in the message. Inject the context into message headers when you publish, and extract it when you consume. (RabbitMQ.Client 7 and several other broker clients now emit these spans themselves; check your client before writing this by hand.)
-
-**Producer**: inject before publishing.
-
-```csharp
-using OpenTelemetry;                              // Baggage
-using OpenTelemetry.Context.Propagation;          // Propagators, PropagationContext
-
-public async Task PublishOrderCreatedAsync(Order order)
-{
-    using var activity = ActivitySource.StartActivity("send order-events", ActivityKind.Producer);
-    activity?.SetTag("messaging.system", "rabbitmq");
-    activity?.SetTag("messaging.operation.type", "send");
-    activity?.SetTag("messaging.destination.name", "order-events");
-    activity?.SetTag("order.id", order.Id);
-
-    var message = new OrderCreatedMessage { OrderId = order.Id, Headers = new() };
-
-    // Write traceparent (and baggage) into the message headers
-    Propagators.DefaultTextMapPropagator.Inject(
-        new PropagationContext(Activity.Current?.Context ?? default, Baggage.Current),
-        message.Headers,
-        (headers, key, value) => headers[key] = value);
-
-    await _bus.PublishAsync("order-events", message);
-}
-```
-
-**Consumer**: extract before processing.
-
-```csharp
-public async Task HandleOrderCreatedAsync(OrderCreatedMessage message)
-{
-    var parent = Propagators.DefaultTextMapPropagator.Extract(
-        default,
-        message.Headers,
-        (headers, key) => headers.TryGetValue(key, out var value)
-            ? new[] { value }
-            : Array.Empty<string>());
-    Baggage.Current = parent.Baggage;
-
-    using var activity = ActivitySource.StartActivity(
-        "process order-events",
-        ActivityKind.Consumer,
-        parent.ActivityContext);
-    activity?.SetTag("messaging.system", "rabbitmq");
-    activity?.SetTag("messaging.operation.type", "process");
-    activity?.SetTag("messaging.destination.name", "order-events");
-    activity?.SetTag("order.id", message.OrderId);
-
-    await _orders.HandleCreatedAsync(message.OrderId);
-}
-```
-
-Span names follow the messaging semantic conventions' `{operation} {destination}` pattern, and `ActivityKind.Producer` / `ActivityKind.Consumer` let backends draw the hop across the broker. The messaging conventions are still marked Development, so attribute names can change between releases; pin the version you follow. `DefaultTextMapPropagator` writes W3C `traceparent` by default, the same header HTTP uses, so the consumer span appears as a child of the producer span in the same trace with no extra configuration.
-
-## Verifying the Setup
-
-Run a local Collector and check signals are arriving:
+Run a Collector that prints what it receives:
 
 ```yaml
 # docker-compose.yml
 services:
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.161.0   # pin it; :latest changes under you
     ports:
       - "4317:4317"   # OTLP gRPC
       - "4318:4318"   # OTLP HTTP
     volumes:
-      - ./collector-config.yaml:/etc/otelcol-contrib/config.yaml
+      - ./collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
 ```
 
 ```yaml
@@ -381,29 +240,30 @@ receivers:
     protocols:
       grpc:
         endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 exporters:
   debug:
-    verbosity: detailed   # logs spans to stdout for local dev
+    verbosity: detailed
 
 service:
   pipelines:
-    traces:
-      receivers: [otlp]
-      exporters: [debug]
-    metrics:
-      receivers: [otlp]
-      exporters: [debug]
-    logs:
-      receivers: [otlp]
-      exporters: [debug]
+    traces:  { receivers: [otlp], exporters: [debug] }
+    metrics: { receivers: [otlp], exporters: [debug] }
+    logs:    { receivers: [otlp], exporters: [debug] }
 ```
 
-Send a request to your service and check the Collector output for spans with your `service.name`, `deployment.environment`, and custom attributes.
+Then send a few requests, including one that fails, and check the Collector's output for:
 
-- [OTel Context Propagation](/guides/otel-context-propagation/): W3C traceparent, B3, and where propagation breaks across async boundaries
-- [How to Configure Prometheus for Your Service](/howtos/configure-prometheus/): adding the metrics pipeline to the setup above
+- **Resource:** `service.name`, `service.version` and `deployment.environment.name` on spans, metrics *and* logs, not just one of them
+- **Spans:** a `SERVER` span per request with an `http.route`, `CLIENT` spans as its children, your `payment.charge` span under it, and `Error` status only where something actually failed
+- **Metrics:** `http.server.request.duration` and your own metrics, after the first export interval (60 seconds by default; set `OTEL_METRIC_EXPORT_INTERVAL=5000` locally)
+- **Logs:** the same trace ID as the request's spans
 
-<!-- TODO: Add section on the .NET zero-code instrumentation agent (for legacy services you cannot modify) -->
-<!-- TODO: Add section on ASP.NET Core Minimal API vs Controller instrumentation differences -->
-<!-- TODO: Add section on connecting trace context to Serilog structured logs (if not using ILogger bridge) -->
+From here:
+
+- [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/): what the trace IDs look like in each kind of log output, and how to fix them when they're missing
+- [Enrich Logs with Business Context in .NET](/howtos/enrich-logs-with-business-context-dotnet/): who-was-affected fields on every log line
+- [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/): before any of this leaves the process
+- [Context Propagation](/guides/otel-context-propagation/): keeping traces connected across queues, threads and services
