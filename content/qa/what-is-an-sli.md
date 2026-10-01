@@ -26,7 +26,7 @@ An SLI is a number that says how well your service is treating its users right n
 | | Correctness | Output record is right |
 | Storage | Durability | Written data can be read back |
 
-Most request-driven services need just two: availability and latency. Start there.
+Most request-driven services need just two: availability and latency. Start there. For pipelines, batch jobs, queues and the rest, [the SLI matrix](/guides/sli-selection-by-service-type/) has a PromQL example for each.
 
 **Measure as close to the user as you can.** Your load balancer sees failures your app never logs, like timeouts and crashed pods. So a ratio from load balancer metrics beats one from a single service's logs. Client-side measurement gets closer still, but it's noisier. Pick the closest point you can measure reliably.
 
