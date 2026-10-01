@@ -74,10 +74,10 @@
 
   /* figures */
   --fig-bg:#17130E;
-  /* no graph-paper texture behind figures, in any theme: it sat only in the
-     frame's margin and ran behind captions — decoration, not a reading aid.
-     Static-SVG diagrams (.diag-card) never had it. Light/calm inherit this. */
-  --fig-grid:none;
+  /* no graph-paper texture behind figures (the old --fig-grid): it sat only
+     in the frame's margin and ran behind captions — decoration, not a
+     reading aid. --fig-bd is for rules INSIDE a figure; a figure's outer
+     edge uses --frame. */
   --fig-bd:#2B2620;
   --node-fill:#16120C; --node-stroke:var(--muted); --edge:var(--cyan); --nlab:var(--heading);
 
