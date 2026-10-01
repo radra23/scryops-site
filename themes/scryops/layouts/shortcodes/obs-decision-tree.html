@@ -38,7 +38,7 @@
      (cond $ladder "Ranked tiers" "Decision tree") (cond (.Get "title") (printf ", %s" (lower (.Get "title"))) "") (delimit $desc "; ") -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-dt" role="img" aria-label="{{ $aria }}">
       {{- with .Get "title" }}<div class="obs-dt__hd">{{ . }}</div>{{ end }}
       {{- with .Get "subtitle" }}<div class="obs-dt__sub">{{ . }}</div>{{ end }}

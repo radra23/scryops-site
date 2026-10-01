@@ -48,7 +48,7 @@
      (cond (.Get "title") (printf " of %s" (lower (.Get "title"))) "") (delimit $desc ", ") -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     {{- with .Get "title" }}<div class="obs-dt__hd" style="font-family:var(--font-read);font-size:15px;font-weight:500;margin-bottom:4px">{{ . }}</div>{{ end }}
     {{- with .Get "units" }}<div class="obs-dt__sub" style="margin-bottom:16px">{{ . }}</div>{{ end }}
     <div class="obs-bars" role="img" aria-label="{{ $aria }}">

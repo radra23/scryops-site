@@ -32,7 +32,7 @@
 {{- $aria := printf "Decision tree for certificate check cadence. Two questions — is there a clear owner, and is renewal automated — fan out to three outcomes least to most severe: %s. Severity is carried by shape and rail weight, not colour." (delimit $desc "; ") -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-dt" role="img" aria-label="{{ $aria }}">
       <div class="obs-dt__hd">CHECK CADENCE, NOT GUESSWORK</div>
       <div class="obs-dt__sub">// match the interval to who can actually act on it</div>

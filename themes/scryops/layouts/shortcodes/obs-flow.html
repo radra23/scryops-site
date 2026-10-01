@@ -44,7 +44,7 @@
      (cond (.Get "title") (printf ", %s" (lower (.Get "title"))) "") (delimit $parts ", ")) -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-flow-wrap">
       {{- with .Get "title" }}<div class="obs-flow__hd">{{ . }}</div>{{ end }}
       {{- with .Get "subtitle" }}<div class="obs-flow__sub">{{ . }}</div>{{ end }}
