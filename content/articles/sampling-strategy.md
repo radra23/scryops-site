@@ -21,8 +21,8 @@ The information you need to make a good sampling decision doesn't exist yet at t
 {{< mermaid >}}
 flowchart LR
     A[Request Arrives] --> B{Sample?}
-    B -->|5% keep| C[Trace Recorded]
-    B -->|95% drop| D[Trace Discarded]
+    B --->|5% keep| C[Trace Recorded]
+    B --->|95% drop| D[Trace Discarded]
     C --> E[Request Completes]
     D --> F[Request Completes]
     E --> G{Was it interesting?}
