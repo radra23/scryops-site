@@ -17,7 +17,7 @@
 {{- /* .Ordinal keeps the title/desc ids unique if the figure appears twice on a page. */ -}}
 {{- $id := printf "sr-%d" .Ordinal -}}
 <figure class="diagram">
-  <div class="diag-card" style="padding:1.2rem 1rem 1rem;">
+  <div class="diag-card" tabindex="0" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 452" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-t {{ $id }}-d"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="{{ $id }}-t">Synthetic monitoring versus RUM as an arcade VS screen</title>

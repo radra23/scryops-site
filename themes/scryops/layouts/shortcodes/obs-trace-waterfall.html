@@ -1,6 +1,6 @@
 <figure class="diagram"
   aria-label="A distributed trace for one GET /checkout request, drawn as a waterfall of six spans across 240 milliseconds. The root request span runs the full width. Nested beneath it: auth.verify (16ms) and a SELECT cart_items query (32ms), both auto-instrumented, marked with a thin solid border. Then payment.process (152ms), a manual business span marked with a heavier solid border, holding most of the request's time. Nested under it, an outbound POST to api.stripe.com/charge (130ms), also auto-instrumented. Finally an UPDATE orders query (20ms) that failed, marked with a dashed border and a cross. Most of the latency lives inside the manual payment span, waiting on the outbound Stripe call.">
-  <div class="diag-card" style="padding:0.9rem;">
+  <div class="diag-card" tabindex="0" style="padding:0.9rem;">
     <svg viewBox="0 0 760 360" xmlns="http://www.w3.org/2000/svg" role="img"
          aria-labelledby="tw-title tw-desc" shape-rendering="crispEdges"
          style="width:100%;display:block;font-family:var(--font-code);">

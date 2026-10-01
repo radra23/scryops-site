@@ -52,7 +52,7 @@
 {{- $aria := printf "Bar chart of series count added by five log fields if used as a metric label, against a 240-series baseline for a reference service with 4 endpoints, 5 status codes and 12 pods. %s. Bars are shaded from strongest to faintest in rank order, and the worst offender, request_id, carries a heavier outline." (delimit $desc "; ") -}}
 
 <figure class="diagram" aria-label="{{ $aria }}">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-dt__hd" style="font-family:var(--font-read);font-size:15px;font-weight:500;margin-bottom:4px">What one bad label does to a {{ $baseline }}-series metric</div>
     <div class="obs-dt__sub" style="margin-bottom:16px">estimated distinct series added per day &middot; baseline {{ $baseline }} (4 endpoints &times; 5 status codes &times; 12 pods) &middot; reasoned estimate, not measured</div>
     <div class="obs-bars">

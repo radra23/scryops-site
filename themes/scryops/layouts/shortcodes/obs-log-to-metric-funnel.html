@@ -77,7 +77,7 @@
 {{- $bw := cond (lt (mul $slot 0.54) 104.0) (mul $slot 0.54) 104.0 -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-col__hd">{{ $title }}</div>
     <div class="obs-col__sub">{{ $units }}</div>
     <svg class="obs-col" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">

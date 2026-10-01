@@ -11,7 +11,11 @@
 {{- $vb := index (findRESubmatch `viewBox="[-\d.]+ [-\d.]+ ([\d.]+)` $svg.Content 1) 0 -}}
 {{- $floor := math.Ceil (mul (float (index $vb 1)) 0.6) -}}
 <figure class="diagram">
-  <div class="diag-card" role="img" aria-label="{{ $alt }}" style="--diag-min:{{ $floor }}px">{{ $svg.Content | safeHTML }}</div>
+  {{- /* tabindex=0: the card scrolls when the diagram passes the legibility
+       floor, and Safari never makes overflow scrollers keyboard-focusable on
+       its own. Same pattern as render-table.html; the global :focus-visible
+       ring covers it, and focus announces the aria-label. */}}
+  <div class="diag-card" role="img" aria-label="{{ $alt }}" tabindex="0" style="--diag-min:{{ $floor }}px">{{ $svg.Content | safeHTML }}</div>
   <div class="mermaid">{{ .Inner }}</div>
   {{ with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
 </figure>

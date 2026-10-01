@@ -41,7 +41,7 @@
 {{- $ticks := 5 -}} {{- /* 0/1/2/3/4/5 — divides evenly into hi=5, unlike 4 (which rounds 2.5 to 3 and silently skips "2") */ -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     <div class="obs-ser__hd">Error rate around an incident</div>
     <div class="obs-ser__sub">percent of requests failing &middot; illustrative, not measured</div>
     <svg class="obs-ser" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">

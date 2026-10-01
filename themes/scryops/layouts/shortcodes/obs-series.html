@@ -85,7 +85,7 @@
      (cond (gt (len $ed) 0) (printf " Marked events: %s." (delimit $ed ", ")) "") -}}
 
 <figure class="diagram">
-  <div class="diag-card">
+  <div class="diag-card" tabindex="0">
     {{- with .Get "title" }}<div class="obs-ser__hd">{{ . }}</div>{{ end }}
     {{- with .Get "units" }}<div class="obs-ser__sub">{{ . }}</div>{{ end }}
     <svg class="obs-ser" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">

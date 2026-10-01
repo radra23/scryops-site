@@ -35,7 +35,7 @@
 {{- $id := printf "leb-%d" .Ordinal -}}
 
 <figure class="diagram">
-  <div class="diag-card" style="padding:0.9rem;">
+  <div class="diag-card" tabindex="0" style="padding:0.9rem;">
     <svg viewBox="0 0 760 318" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="{{ $id }}-title {{ $id }}-desc"
          style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
       <title id="{{ $id }}-title">Log event enrichment: before and after</title>
