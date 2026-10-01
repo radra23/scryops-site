@@ -37,7 +37,9 @@
       {{- range $stats }}
       <div class="pii-card" style="border-top-color:{{ .step | safeCSS }}">
         <span style="color:{{ .step | safeCSS }}">{{ partial "obs-glyph.html" (dict "rank" .rank "fill" .step) }}</span>
-        <div class="pii-num" style="color:{{ .step | safeCSS }}">{{ .n }}</div>
+        {{- /* rank rides on the glyph and the card's top border; the number itself
+             stays on --mc-ink, since ramp-3/4 as text falls to 2.2-4.0:1 */}}
+        <div class="pii-num" style="color:var(--mc-ink)">{{ .n }}</div>
         <div class="pii-desc">{{ .l1 | safeHTML }}<br>{{ .l2 | safeHTML }}</div>
       </div>
       {{- end }}
