@@ -13,6 +13,9 @@ PALETTE = {
     "#f02a02": "var(--node-stroke)",
     "#f03a03": "var(--nlab)",
     "#f04a04": "var(--edge)",
+    # also the edge-label halo stroke in mermaid-config.json's themeCSS,
+    # which overrides mermaid's hardcoded `.edgeLabel rect{opacity:0.5}`
+    # so edge lines stop at the label instead of running through its text
     "#f05a05": "var(--surface)",
     "#f06a06": "var(--border)",
     # Mermaid's flowchart stylesheet hardcodes `.node .katex path { fill:
