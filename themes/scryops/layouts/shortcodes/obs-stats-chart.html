@@ -55,7 +55,7 @@
     card.style.borderTopColor = s.color;
     card.innerHTML =
       '<div style="color:' + s.color + '">' + GLYPH[s.glyph] + '</div>' +
-      '<div class="obs-stat-num" style="color:' + s.color + '">' + s.pct + '%</div>' +
+      '<div class="obs-stat-num" style="color:var(--mc-ink)">' + s.pct + '%</div>' +
       '<div class="obs-stat-desc">' + s.lines.join('<br>') + '</div>' +
       '<div class="obs-stat-src">'  + s.source + '</div>';
     cardsEl.appendChild(card);
@@ -68,11 +68,11 @@
     var pct = (d.min / MAX_MIN * 100).toFixed(2) + '%';
     var badge = i === 0
       ? '<div class="obs-mttd-badge" style="color:var(--mc-ramp-1)" aria-label="Threshold-only alerting: 45 minutes">45&nbsp;min<small>threshold only</small></div>'
-      : '<div class="obs-mttd-badge" style="color:var(--mc-ramp-3)" aria-label="ML-assisted detection: 8 minutes, 5.6 times faster than threshold alerting">8&nbsp;min<small>5.6× faster</small></div>';
+      : '<div class="obs-mttd-badge" style="color:var(--mc-ink)" aria-label="ML-assisted detection: 8 minutes, 5.6 times faster than threshold alerting">8&nbsp;min<small>5.6× faster</small></div>';
     var row = document.createElement('div');
     row.className = 'obs-mttd-row';
     row.innerHTML =
-      '<div class="obs-mttd-lbl" style="color:' + d.color + '">' + MTTD_GLYPH[d.glyph] + d.label + '</div>' +
+      '<div class="obs-mttd-lbl" style="color:var(--mc-ink-secondary)"><span style="color:' + d.color + '">' + MTTD_GLYPH[d.glyph] + '</span>' + d.label + '</div>' +
       '<div class="obs-mttd-track">' +
         '<div class="obs-mttd-bar" data-w="' + pct + '" style="width:' + (prefersReducedMotion ? pct : '0') + '"' +
             ' role="progressbar" aria-valuenow="' + d.min + '" aria-valuemin="0" aria-valuemax="' + MAX_MIN + '"' +
