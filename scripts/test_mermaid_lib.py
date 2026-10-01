@@ -94,3 +94,23 @@ def test_normalize_strips_size_adds_role_keeps_viewbox_and_title():
     assert 'viewBox="0 0 820 410"' in out
     assert 'role="img"' in out
     assert "<title>x</title>" in out   # a11y title passes through
+
+def test_unescape_collapses_double_escaped_label_text():
+    # mermaid's label sanitizer entity-encodes &, <, > for multi-line
+    # (<br/>) labels, then the SVG serializer escapes the & again.
+    svg = ('<svg><text><tspan class="row">Latency &amp;gt; 5s?</tspan>'
+           '<tspan class="row">a &amp;lt; b &amp;amp; c</tspan></text></svg>')
+    out = m.unescape_label_text(svg)
+    assert '>Latency &gt; 5s?<' in out
+    assert '>a &lt; b &amp; c<' in out
+    assert m.double_escaped(out) == []
+
+def test_unescape_leaves_single_escapes_and_attributes_alone():
+    svg = ('<svg aria-label="x &amp;gt; y"><text>'
+           '<tspan>Analysis &amp; Visualization &gt; 1</tspan></text></svg>')
+    out = m.unescape_label_text(svg)
+    assert out == svg
+
+def test_double_escaped_flags_leftovers():
+    assert m.double_escaped('<tspan>a &amp;gt; b</tspan>') == ["&amp;gt;"]
+    assert m.double_escaped('<tspan>a &gt; b &amp; c</tspan>') == []
