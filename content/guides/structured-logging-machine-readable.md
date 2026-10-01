@@ -15,6 +15,8 @@ That scenario is no longer the main one. Most log lines are now read first by a 
 
 This isn't about prettier log output. It's about whether your logs can take part in automated analysis at all: cross-service queries, correlation with traces and metrics, and anomaly detection.
 
+If you want the wider picture first — what logs are for, where they go and what belongs in them — start with [Logging Foundations](/guides/logging-foundations/).
+
 ## The Difference a Machine Cares About
 
 Unstructured logging looks like this:

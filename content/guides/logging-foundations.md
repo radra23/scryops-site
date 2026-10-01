@@ -1,239 +1,175 @@
 ---
 title: "Logging Foundations"
-date: 2026-06-07
-draft: true
-excerpt: "What logging actually is, why it matters beyond debugging, and how it fits into the broader observability stack — the mental model every engineer should have before touching a logging framework."
+date: 2026-10-01
+draft: false
+excerpt: "What logging is for, how it fits next to metrics and traces, and what to log, where and how. The mental model to have before touching a logging framework, and the starting point for the rest of the logging guides."
 readtime: 9
 tags: ["Logs", "Observability", "OpenTelemetry"]
 ---
 
-Without a disciplined logging foundation, your observability stack is a collection of dashboards that can't explain anything. Metrics tell you something is wrong. Traces show you where. Logs tell you why — but only if you've captured the right context at the right moments. Most teams don't. They end up grep-ing through walls of unstructured text at 2am, reconstructing what happened from output that was never designed to be queried.
+Without a disciplined logging foundation, your observability stack is a collection of dashboards that can't explain anything. Metrics tell you something is wrong. Traces show you where. Logs tell you why — but only if you've captured the right context at the right moments. Most teams don't. They end up grepping through walls of unstructured text at 2am, reconstructing what happened from output that was never designed to be queried.
+
+This guide is the mental model. The guides it links to at the end cover each part in depth.
 
 ## Logs Are the Connective Tissue, Not Just the Debug Stream
 
-Logs sit alongside metrics, traces, and state data in the observability stack, but they carry something the others can't: event-level narrative. A metric tells you that error rate spiked at 10:03. A log tells you which customer, which order, which downstream call failed, and why it failed at the application level. That distinction matters when you're trying to correlate a symptom to a cause across service boundaries.
+OpenTelemetry names the signals: traces, metrics and logs, with profiles joining them as a newer, still-maturing fourth. Logs carry something the others can't, which is the narrative of a single occurrence. A metric tells you the error rate spiked at 10:03. A log tells you which customer, which order and which downstream call failed, and why it failed at the application level. That difference matters when you're trying to connect a symptom to its cause across service boundaries.
 
-{{< mermaid caption="Fig. — Observability data splits into five types: event, time series, request, state, and business. Logs are one branch under event data, not the whole picture." >}}
-graph TD
-    A[Observability] --> B[Event Data]
-    A --> C[Time Series Data]
-    A --> D[Request Data]
-    A --> E[State Data]
-    A --> F[Business Data]
-    
-    B --> B1[Logs]
-    B --> B2[Events]
-    B --> B3[Audit Trails]
-    
-    C --> C1[Metrics]
-    C --> C2[Counters]
-    C --> C3[Gauges]
-    
-    D --> D1[Traces]
-    D --> D2[Profiles]
-    D --> D3[Flows]
-    
-    E --> E1[Configurations]
-    E --> E2[Deployments]
-    E --> E3[Resources]
-    
-    F --> F1[Transactions]
-    F --> F2[User Actions]
-    F --> F3[Business Metrics]
-    
-    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
-    style B fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style C fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style D fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style E fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style F fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-{{< /mermaid >}}
+Each signal covers ground the others can't. Logs don't replace metrics or traces; they make them actionable.
 
-Each signal type covers ground the others can't. Logs don't replace metrics or traces — they make them actionable.
+1. **Logs and metrics**
+   - Logs: one record per occurrence, rich in context, expensive to store at volume
+   - Metrics: numbers aggregated over time, cheap to store, blind to individual causes
+   - Together: a metric tells you the error rate spiked at 10:03; the logs from that window tell you why
 
-1. **Logs and Event Data**
-   - Logs — narrate what happened and why, with full context attached to a single occurrence
-   - Events — mark that something specific occurred, often without the surrounding narrative
-   - Together — a log gives an event its "why," turning a bare occurrence into an explained one
+2. **Logs and traces**
+   - Logs: what happened at a step, including values and outcomes
+   - Traces: the shape of a request as it moves across services, with timing
+   - Together: a trace shows which span was slow; the logs carrying that span's ID show what it was doing
 
-2. **Logs and Time Series Data**
-   - Logs — one record per occurrence, rich in context, expensive to store at volume
-   - Metrics — aggregated numbers over time, cheap to store, blind to individual causes
-   - Together — a metric tells you error rate spiked at 10:03; the logs from that window tell you why
+3. **Logs and events**
+   - Events: something specific happened, such as an order placed or a deploy finished
+   - In OpenTelemetry an event *is* a log record, one with a name that says what kind of event it is
+   - Together: a stable event name turns a stream of log lines into something you can count, compare across releases and alert on
 
-3. **Logs and Request Data**
-   - Logs — what happened at each step, including values and outcomes
-   - Traces — the shape of a request as it moves across services, with timing
-   - Together — a trace shows which span was slow; the log attached to that span shows what it was doing
+4. **Logs and state**
+   - Logs: a record of each transition, what changed and from what to what
+   - Configuration and state stores: where the system is now, with no history of how it got there
+   - Together: state shows where the system is; logs show the sequence of changes that got it there
 
-4. **Logs and State Data**
-   - Logs — a record of the transition: what changed, from what, to what
-   - Configuration and state stores — the system's current state, with no history of how it got there
-   - Together — state data shows where the system is now; logs show the sequence of transitions that got it there
-
-5. **Logs and Business Data**
-   - Logs — the technical event: which order, which payment, which failure
-   - Business data (transactions, revenue records) — the business meaning of that event
-   - Together — connecting the two turns "payment gateway returned an error" into "this outage cost $4,200 in failed premium-tier checkouts"
+5. **Logs and business data**
+   - Logs: the technical event, such as which order, which payment and which failure
+   - Business records (transactions, revenue): what that event meant to the business
+   - Together: joined on a shared ID, "payment gateway returned an error" becomes "this outage cost $4,200 in failed premium-tier checkouts"
 
 ## Logging Philosophy
 
 ### Context Is What Separates a Log From a Line of Text
 
-An uncontextualized log entry answers nothing. "Payment failed" tells you a failure occurred. It doesn't tell you which user, which payment method, which downstream dependency, or whether this is the first failure or the third retry. Every log must carry enough context that it can be read in isolation — without cross-referencing a separate system — and still convey what happened and to whom.
+A log entry without context answers nothing. "Payment failed" tells you a failure occurred. It doesn't tell you which user, which payment method, which downstream dependency, or whether this was the first failure or the third retry. Every log should carry enough context to be read on its own and still say what happened and to whom, without a lookup in another system.
 
 ### The Maturity Progression: From Noise to Signal
 
-Most teams start at Level 1 and stay there longer than they should. Moving up the progression isn't about adding more logs — it's about adding the right fields at the right moments. The difference between Level 1 and Level 3 is not volume; it's the ability to answer "what was the business impact and which trace does this belong to?" without a manual investigation.
+Most teams start at level 1 and stay there longer than they should. Moving up isn't about adding more logs. It's about adding the right fields at the right moments. The difference between levels 1 and 3 isn't volume. At level 3 you can answer "which trace does this belong to, and who was affected?" without a manual investigation.
 
-#### Level 1: Basic Logging
-- Simple text logs
-- Basic error logging
-- Manual log analysis
-- Limited context
+#### Level 1: Text With a Timestamp
+
+Free text, read by people, searched with grep. Fine for one process on one host; useless across twenty services.
 
 ```json
 {
-  "timestamp": "2024-03-21T10:00:00Z",
+  "timestamp": "2026-05-21T10:00:00Z",
   "level": "ERROR",
   "message": "Payment failed"
 }
 ```
 
-#### Level 2: Enhanced Logging
-- Structured logging
-- Contextual information
-- Basic correlation
-- Automated analysis
+#### Level 2: Structured Fields
+
+The same event, with the facts pulled out of the sentence into fields you can filter and group by. This is where queries like "all payment failures for provider X in the last hour" become possible.
 
 ```json
 {
-  "timestamp": "2024-03-21T10:00:00Z",
-  "level": "ERROR",
+  "timestamp": "2026-05-21T10:00:00Z",
+  "severity_text": "ERROR",
   "message": "Payment failed",
-  "context": {
-    "order_id": "12345",
-    "amount": 99.99,
-    "payment_method": "credit_card"
-  },
-  "error": {
-    "type": "PaymentGatewayError",
-    "code": "PG_001"
-  }
+  "order.id": "ord_12345",
+  "order.amount": 99.99,
+  "payment.method": "card",
+  "error.type": "gateway_timeout"
 }
 ```
 
-#### Level 3: Advanced Logging
-- Full observability integration
-- Cross-service correlation
-- Business context
-- Predictive analysis
+#### Level 3: Correlated and Shared
+
+The fields follow names every service agrees on, the event has a name, and the trace context links it to the request that caused it. Business context is there too, carried as a pseudonymous reference rather than personal data.
 
 ```json
 {
-  "timestamp": "2024-03-21T10:00:00Z",
-  "level": "ERROR",
-  "message": "Payment failed",
-  "context": {
-    "order_id": "12345",
-    "amount": 99.99,
-    "payment_method": "credit_card",
-    "customer_tier": "premium",
-    "business_unit": "ecommerce"
-  },
-  "error": {
-    "type": "PaymentGatewayError",
-    "code": "PG_001",
-    "retry_count": 2
-  },
-  "observability": {
-    "trace_id": "0af7651916cd43dd8448eb211c80319c",
-    "span_id": "b9c7c989f97918e1",
-    "service": "payment-api",
-    "environment": "production"
-  },
-  "business_impact": {
-    "affected_customers": 1,
-    "revenue_impact": 99.99,
-    "sla_breach": false
-  }
+  "timestamp": "2026-05-21T10:00:00Z",
+  "severity_text": "ERROR",
+  "severity_number": 17,
+  "service.name": "payment-api",
+  "service.version": "2.14.0",
+  "deployment.environment.name": "production",
+  "trace_id": "0af7651916cd43dd8448eb211c80319c",
+  "span_id": "b9c7c989f97918e1",
+  "event.name": "payment.failed",
+  "message": "Payment failed after 2 retries",
+  "order.id": "ord_12345",
+  "order.amount": 99.99,
+  "payment.method": "card",
+  "payment.retry_count": 2,
+  "error.type": "gateway_timeout",
+  "customer.tier": "premium",
+  "customer.ref": "36bb095813943f38"
 }
 ```
 
-## Logs Carry Business Value That Metrics Can't
+[Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/) explains each of these field choices, and which names to borrow from OpenTelemetry instead of inventing.
 
-Logging is not just an operational tool. A well-structured log stream is also a record of what your system did on behalf of users — which makes it the primary source of truth for compliance, audit, and business analysis. Teams that treat logs as debug-only output leave that value on the floor.
+## What Logs Are For, Beyond Debugging
 
-### Beyond Debugging
+A well-structured log stream is also a record of what your system did on behalf of its users. Teams that treat logs as debug-only output leave value on the table. Teams that treat logs as the answer to everything end up with a log bill that grows faster than their traffic. Know what logs are good for, and what they're not:
 
-- **Business intelligence** — which features get used, in what sequence, by which customer segment. The same event stream that helps you debug also answers what your product actually does in the field.
-- **Compliance and audit** — a queryable record of who accessed what and when, which is exactly what auditors and regulators ask for after the fact, not before.
-- **Performance optimization** — logs pinpoint which specific code path or dependency is slow, where a metric only tells you that something got slower.
-- **Customer experience** — a support ticket plus the matching log trail turns "the user says it broke" into "here's exactly what broke, for this user, at this timestamp."
+- **Incident response and support.** A support ticket plus the matching log trail turns "the user says it broke" into "here's exactly what broke, for this user, at this time." This is the job logs do best.
+- **Explaining performance.** A metric says the p99 got worse. The logs and spans from slow requests say which code path or dependency made them slow.
+- **Product questions, in a pinch.** The event stream can answer "how often does anyone use the export button?" But if product analytics matters, give it its own event pipeline with its own schema and consent rules, rather than mining operational logs.
+- **Compliance, with care.** Application logs aren't an audit trail. An audit trail has to be complete, tamper-evident and kept for a defined period; application logs are sampled, dropped under pressure and rotated. Keep the two separate, as [Implementing Audit Trails with OpenTelemetry](/guides/audit-trail-implementation/) explains. The compliance question application logs *do* raise is the opposite one: what [personal data](/guides/pii-in-telemetry/) they're carrying that they shouldn't.
 
-## Integration with Observability Stack
+## Where Logs Go After You Write Them
 
-Logs don't deliver value sitting in a file on a single host. They need to flow through a collection layer, get enriched and correlated, and land somewhere queryable. The architecture below shows how logs connect to the broader observability platform — and where correlation with traces and metrics happens.
+Logs don't deliver value sitting in a file on one host. They need to flow through a collection layer, get enriched, cleaned and correlated, and land somewhere you can query them alongside traces and metrics.
 
-{{< mermaid caption="Fig. — Logs and the other signal types flow from the application through a shared collection and enrichment layer before reaching the platform, where they feed analysis, alerting, and business intelligence." >}}
-graph LR
-    A[Application] --> B[Event Data]
-    A --> C[Time Series Data]
-    A --> D[Request Data]
-    A --> E[State Data]
-    A --> F[Business Data]
-    
-    B --> G[Data Collection]
-    C --> G
-    D --> G
-    E --> G
-    F --> G
-    
-    G --> H[Observability Platform]
-    
-    H --> I[Analysis & Visualization]
-    H --> J[Alerting]
-    H --> K[Business Intelligence]
-    
-    style A fill:#1C1C1C,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
-    style H fill:#161616,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
+{{< mermaid caption="Fig. — A log line leaves the application through the logging library and its OpenTelemetry bridge, is parsed, enriched, redacted and sampled in the Collector, and lands in a backend where it can be queried next to the traces and metrics from the same request." >}}
+flowchart LR
+    A[Application<br/>logging library] --> B[OTel bridge<br/>or file / stdout]
+    B --> C[Collector<br/>parse, enrich,<br/>redact, sample]
+    C --> D[Backend<br/>logs, traces, metrics]
+    D --> E[Query and<br/>investigation]
+    D --> F[Alerts on<br/>derived metrics]
 {{< /mermaid >}}
 
 ### Key Integration Points
 
-- **Data collection** — aggregate from every host and container into one pipeline, propagate trace and request context along with the log line, and sample the high-volume, low-value paths rather than storing every entry at full fidelity.
-- **Processing and enrichment** — parse unstructured lines into fields, attach context that wasn't available at emission time (service version, deployment ID), and correlate entries that belong to the same request or trace.
-- **Storage and retention** — hot storage for what's actively queried, cold storage for what's kept for compliance, and a retention schedule tied to how long each data class is actually useful.
-- **Analysis and visualization** — full-text and field-level search, pattern detection across large volumes, and dashboards that turn raw entries into business-readable signal.
+- **Collection.** Ship every host's and container's logs into one pipeline. Logs sent through an OpenTelemetry bridge carry the trace context with them. Logs scraped from files only correlate if the trace ID is in the line and the Collector knows where to find it; [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/) covers both.
+- **Processing and enrichment.** Parse unstructured lines into fields, and add context the application couldn't know, such as the Kubernetes pod, node or cloud region. This is also the last safe place to [mask sensitive data](/guides/data-masking-in-telemetry/) before it is stored anywhere.
+- **Sampling and volume.** Sample the high-volume, low-value paths rather than storing every line at full fidelity, and keep the logging call itself off the request path; see [High-Throughput Logging: Sampling, Collectors, and the Wire](/guides/high-throughput-log-pipelines/).
+- **Storage and retention.** Keep what you search during incidents searchable straight away, and decide retention per level and per data class rather than once for everything; [Log Levels](/guides/log-levels-and-severity/#cost-route-by-how-long-youll-need-it) shows one way to split it.
+- **Alerting.** Alert on metrics derived from logs (an error *rate*, not individual lines), and better still on SLOs; use the logs to explain the alert rather than to raise it.
 
 ## Log at the Point of Consequence, Not at Every Entry and Exit
 
-The most common logging mistake is wrapping every function in entry/exit logs. This produces volume without coverage — you get a trail of execution, but nothing about the state that actually matters. Log at the point of state change: when a payment transitions from pending to failed, when a retry limit is hit, when a circuit breaker trips. Log decisions and outcomes, not footsteps.
+The most common logging mistake is wrapping every function in entry and exit logs. That gives you volume without coverage: a trail of execution, and nothing about the state that actually mattered. Tracing already records entry, exit and timing, with structure a stream of log lines loses. Log at the point of consequence instead: when a payment moves from pending to failed, when a retry limit is hit, when a circuit breaker opens. Log decisions and outcomes, not footsteps.
 
-### What to Log
+### What, How and When
 
-1. **What to Log**
-   - Business events — the things a product manager would recognize: an order placed, a subscription cancelled, a payment retried
-   - State changes — a resource moving from one state to another, not the fact that a function was called
-   - Error conditions — anything that required a decision (retry, fallback, give up), not just anything that returned non-200
-   - Performance data — the numbers you'd actually reach for during an incident: latency, queue depth, retry counts
+1. **What to log**
+   - Business events: the things a product manager would recognise, such as an order placed, a subscription cancelled or a payment retried
+   - State changes: a resource moving from one state to another, not the fact that a function was called
+   - Decisions under failure: anything that made the code choose (retry, fallback, give up), not just anything that returned an error code
+   - Not measurements: latency, queue depth and memory belong in metrics, where they can be graphed and alerted on; a log line can *quote* a number that explains a decision
 
-2. **How to Log**
-   - Use structured format — free-text logs collapse under any serious query load
-   - Include context at emission time, not during post-hoc enrichment
-   - Follow standards (OpenTelemetry Semantic Conventions for field names)
-   - Consider sampling for high-volume, low-value paths
+2. **How to log**
+   - Use a structured format; free text collapses under any serious query load
+   - Attach what the code knows (order, customer reference, outcome) when you emit the line; let the pipeline add what only it knows (pod, region, version)
+   - Use the [message template, not string building](/qa/structured-logging-antipatterns/), so the values arrive as fields rather than baked into a sentence
+   - Follow OpenTelemetry semantic conventions for field names, and keep personal data out
 
-3. **When to Log**
-   - At meaningful points — state changes, decisions, failures
-   - With the severity level that reflects actual impact
-   - With enough detail that the log is actionable without a follow-up investigation
-   - With awareness of cost — debug-level logs in production at high throughput add up fast
+3. **When to log**
+   - At meaningful points: state changes, decisions, failures
+   - At the [level](/guides/log-levels-and-severity/) that reflects what the reader should do about it
+   - With enough detail that the line is actionable without a follow-up investigation
+   - With an eye on cost; debug-level logging at production throughput adds up fast
 
-Good logs are an investment in your own future incident response. The fields you skip today are the fields you'll wish existed at 2am next month. Start structured, keep context close to the event, and tie every log to the trace it belongs to.
+Good logs are an investment in your own future incident response. The fields you skip today are the ones you'll wish you had at 2am next month. Start structured, keep the context close to the event, and tie every log to the trace it belongs to.
 
-- [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — how to move from free-text to queryable, structured output
-- [Log Levels: When to Whisper, Speak, or Shout](/guides/log-levels-and-severity/) — choosing the right verbosity for each event
-- [Wiring Trace IDs into Logs](/howtos/wire-trace-ids-into-logs/) — connecting logs to the distributed trace they belong to
+## Where to Go Next
+
+- [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/): the schema, and which field names to use
+- [Log Levels: When to Whisper, Speak, or Shout](/guides/log-levels-and-severity/): choosing the level for each event, and what each one costs
+- [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/): connecting each log line to its trace, in .NET, Java, Go and Python
+- [Enrich Logs with Business Context in .NET](/howtos/enrich-logs-with-business-context-dotnet/): adding who-was-affected fields without leaking personal data
+- [High-Throughput Logging: Keeping the Hot Path Fast](/guides/high-throughput-logging/): when the logging call itself becomes the bottleneck
 
 {{< obs-mascot class="bard" quip="Sing, O Cucco, of the NullPointerException — of the stack trace that launched a thousand pages, and the lone engineer who grepped it at dawn." >}}
