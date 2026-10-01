@@ -1,7 +1,7 @@
 ---
 title: "On-Call Procedures: From Page to Postmortem"
-date: 2026-06-11
-draft: true
+date: 2026-10-01
+draft: false
 excerpt: "A page is just the starting gun. What happens between the alert firing and the postmortem closing determines whether your team gets better or just gets tired."
 readtime: 6
 tags: ["On-Call", "Alerting", "Reliability", "Observability", "Operations"]
@@ -35,8 +35,8 @@ flowchart TD
 
 The boundary between the roles should be written down, not negotiated during an incident. Common conventions:
 
-- Primary acknowledges all pages within the SLA (typically 5–15 minutes depending on severity); secondary covers if primary doesn't acknowledge within a grace window
-- Primary drives communication — status page updates, stakeholder pings, postmortem authorship
+- Primary acknowledges each page within its severity's target (under 5 minutes for P0, under 30 for P1, per [Alert Severity Levels](/guides/alert-severity-levels/)); secondary covers if primary doesn't acknowledge within a grace window
+- Primary drives communication on small incidents — status page updates, stakeholder pings, postmortem authorship. On a P0, split the jobs: an incident commander coordinates, the primary works the problem, and someone else owns updates. One person fixing and narrating at once does both badly
 - Secondary does not self-activate; primary explicitly hands off or requests backup
 - Both roles rotate on the same schedule so secondary experience is real, not theoretical
 
@@ -44,15 +44,16 @@ Document the expectations in the team runbook. Engineers who haven't read the ex
 
 ## Rotation Schedule
 
-A fair rotation balances on-call load across the team and accounts for time zones, weekends, and holidays. The standard pattern is a weekly primary/secondary flip with a one-week offset between the two roles:
+A fair rotation balances on-call load across the team and accounts for time zones, weekends, and holidays. The standard pattern is a weekly rotation with a one-week offset between the two roles: this week's secondary becomes next week's primary.
 
 | Week | Primary | Secondary |
 |------|---------|-----------|
 | 1 | Engineer A | Engineer B |
-| 2 | Engineer B | Engineer A |
+| 2 | Engineer B | Engineer C |
 | 3 | Engineer C | Engineer D |
-| 4 | Engineer D | Engineer C |
-{title="On-call rotation, 4-person team"}
+| 4 | Engineer D | Engineer A |
+
+The offset is the point. Whoever takes over as primary has just spent a week as secondary, watching the same pages, so they start the week with context instead of a cold handover.
 
 Practical notes:
 - Publish the schedule at least two rotation cycles in advance
@@ -69,9 +70,10 @@ Not every alert warrants a page. Route based on the urgency of required action, 
 {{< mermaid >}}
 flowchart LR
     A[Alert fires] --> B{Severity}
-    B -->|Critical / P0-P1| C[Page via PagerDuty<br/>immediate response required]
-    B -->|Warning / P2| D[Slack notification<br/>next business hour response]
-    B -->|Informational / P3-P4| E[Email or dashboard annotation<br/>review at next standup]
+    B --> C[P0 / P1: page via PagerDuty<br/>immediate response, 24/7]
+    B --> D[P2: incident channel<br/>business-hours response]
+    B --> E[P3: ticket<br/>handled in the sprint]
+    B --> F[P4: documentation or dashboard<br/>no notification]
 {{< /mermaid >}}
 
 The alert routing policy and severity definitions are covered in [Alert Severity Levels](/guides/alert-severity-levels/) and [Alert Design Principles](/articles/alert-design-principles/). The key constraint: if an alert fires and no action is required, it should not be in the paging channel. Every page trains the on-call engineer on what a page means. Page noise is learned helplessness.
@@ -97,8 +99,15 @@ flowchart TD
 
 Keep the triage step deliberate and short — under five minutes. The most common triage mistake is jumping to mitigation before establishing severity, which leads to P0-level urgency applied to a P2 problem (or the reverse).
 
-<!-- TODO: Add concrete triage questions (how many users affected? is revenue impacted? is there a known workaround?) and link to runbook templates -->
-<!-- TODO: Add incident communication templates (status page wording per severity, internal Slack update cadence) -->
+Five questions get you to a severity fast:
+
+- **Who's affected?** All users, a region, one customer tier, or nobody yet?
+- **How fast is the error budget burning?** The burn rate on the alert usually answers this before you've opened a dashboard. See [SLOs and Error Budgets](/guides/slos-and-error-budgets/).
+- **Is revenue or data at risk?** Failed payments and data loss raise the severity regardless of scope.
+- **Is there a workaround?** A usable workaround is often the difference between P1 and P2.
+- **Is it getting worse?** A spreading failure gets the higher severity now, not after it has spread.
+
+Once the severity is set, communication follows one rule: every update says what's affected, what you're doing, and when the next update comes, and then you keep that promise. A status page that goes quiet for an hour reads as an outage nobody is handling, even when the fix is ten minutes away.
 
 ## Handoffs and Escalation
 
@@ -147,9 +156,19 @@ flowchart TD
 
 A postmortem action item without an owner and a due date is decorative. Assign each item at the postmortem meeting; review open items at the next team sync. The loop closes when the monitoring layer reflects what you learned — a new alert, a tighter threshold, a runbook step that would have halved the time to detect.
 
-<!-- TODO: Add postmortem template (timeline format, contributing factors section, action item table) -->
-<!-- TODO: Define what constitutes a "significant incident" requiring a postmortem vs. a brief incident note -->
+Decide what counts as "significant" before you need to. Google's [SRE book](https://sre.google/sre-book/postmortem-culture/) lists common triggers: user-visible downtime or degradation beyond a threshold, any data loss, an on-call intervention such as a rollback or traffic reroute, a resolution time over a threshold, and a monitoring failure, which usually means a human found the incident before the alerts did. Anything below those lines gets a short incident note instead. Anyone can still ask for a full postmortem.
+
+A postmortem doesn't need a long template. It needs five sections:
+
+- **Summary** — what happened and who it affected, in two or three sentences
+- **Timeline** — timestamped events from first signal to resolution, including when the alert fired relative to when users were hurt
+- **Contributing factors** — the conditions that let it happen, plural; there is rarely one root cause
+- **What went well** — the parts of detection and response worth keeping
+- **Action items** — each with an owner and a due date
+
+## See Also
 
 - [Alert Severity Levels](/guides/alert-severity-levels/) — burn rate–based P0–P4 framework
+- [SLOs and Error Budgets](/guides/slos-and-error-budgets/) — the burn rates that decide which alerts page
 - [Alert Design Principles](/articles/alert-design-principles/) — what every alert must answer before it fires
 - [Alert Fatigue Is an Observability Problem](/articles/alert-fatigue-is-an-observability-problem/) — why the right fix is signal quality, not quieter thresholds
