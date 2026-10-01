@@ -87,6 +87,8 @@ graph LR
 
 Prefer SLIs measured at the edge of the system (from the user's perspective) over internal measurements. A p99 latency measured at the load balancer is a better SLI than p99 measured at a single microservice — it captures the whole user experience, including infrastructure above and below your code.
 
+Which SLIs fit depends on the service type. A batch job or a queue consumer needs different ones from an API. [Choosing SLIs for Your Service](/guides/sli-selection-by-service-type/) has the matrix.
+
 **Time windows:** 28–30 days for most services (aligns with billing cycles, long enough to absorb weekday/weekend variance). 7 days for services with very high change rates where a 30-day window obscures recent trends.
 
 ## Setting SLO Targets
@@ -155,6 +157,7 @@ graph TD
 
 ## See Also
 
+- [Choosing SLIs for Your Service](/guides/sli-selection-by-service-type/) — which SLIs fit APIs, queues, pipelines, batch jobs, storage, models and CDNs
 - [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) — the Prometheus recording and alert rules for all three tiers, step by step
 - [Alert Severity Levels, Rebuilt for Burn Rate](/guides/alert-severity-levels/) — mapping these burn rate tiers onto P0–P4 and who gets woken up
 - [Alert Design Principles](/articles/alert-design-principles/) — how burn rate alerts fit into a broader alerting strategy
