@@ -36,7 +36,7 @@ def render_one(source):
         if r.returncode != 0 or not os.path.exists(svg_path):
             raise RuntimeError(r.stdout + r.stderr)
         raw = open(svg_path, encoding="utf-8").read()
-    svg = m.normalize_svg(m.tokenize_svg(raw))
+    svg = m.unescape_label_text(m.normalize_svg(m.tokenize_svg(raw)))
     leftover = m.untokenized_colors(svg)
     if leftover:
         raise RuntimeError(

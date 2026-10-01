@@ -111,8 +111,14 @@ def check_diagram_svgs(articles):
     for md, source in mermaid_lib.iter_mermaid_blocks(articles):
         h = mermaid_lib.diagram_hash(source)
         referenced.add(h)
-        if os.path.exists(os.path.join(out_dir, f"{h}.svg")):
-            ok(f"{md} [{h}]: SVG present")
+        path = os.path.join(out_dir, f"{h}.svg")
+        if os.path.exists(path):
+            esc = mermaid_lib.double_escaped(open(path, encoding="utf-8").read())
+            if esc:
+                fail(f"{md} [{h}]: double-escaped label text {sorted(set(esc))} — re-run scripts/render-diagrams.py")
+                hard = True
+            else:
+                ok(f"{md} [{h}]: SVG present")
         else:
             fail(f"{md} [{h}]: missing SVG — run scripts/render-diagrams.py")
             hard = True

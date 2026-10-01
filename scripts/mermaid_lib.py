@@ -206,3 +206,23 @@ def normalize_svg(svg):
     else:
         new = new[:4] + ' role="img"' + new[4:]           # after "<svg"
     return svg[:m.start()] + new + svg[m.end():]
+
+
+# mermaid's label sanitizer entity-encodes &, < and > in some labels (any
+# with a <br/>, both < and >, or a #gt;-style entity), and the SVG
+# serializer then escapes the leading & again, so "Latency > 5s?" ships as
+# the literal text "Latency &gt; 5s?". Collapse the extra escape, but only
+# in text between tags: attribute values aren't touched.
+_DOUBLE_ESC = re.compile(r"&amp;(amp|lt|gt);")
+_TEXT_NODE = re.compile(r">([^<]+)<")
+
+
+def unescape_label_text(svg):
+    return _TEXT_NODE.sub(
+        lambda t: ">" + _DOUBLE_ESC.sub(r"&\1;", t.group(1)) + "<", svg)
+
+
+def double_escaped(svg):
+    # double-escaped entities left in text nodes (guard for render + CI)
+    return [e.group(0) for t in _TEXT_NODE.finditer(svg)
+            for e in _DOUBLE_ESC.finditer(t.group(1))]
