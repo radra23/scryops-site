@@ -18,6 +18,10 @@ import tempfile
 import mermaid_lib as m
 
 OUT_DIR = os.path.join("themes", "scryops", "assets", "diagrams")
+# mermaid-config.json's themeCSS forces edge-label backgrounds opaque: mermaid's
+# stock flowchart/state stylesheets bake `.edgeLabel rect{opacity:0.5}` under
+# the #my-svg id, which no site CSS can outrank, so edge paths showed through
+# label text. mermaid prepends themeCSS before its own rules, hence !important.
 CONFIG = os.path.join("scripts", "mermaid-config.json")
 PUPPETEER = os.path.join("scripts", "puppeteer-config.json")
 GREEN, RED, OFF = "\033[32m", "\033[31m", "\033[0m"

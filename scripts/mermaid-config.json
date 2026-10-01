@@ -2,6 +2,7 @@
   "theme": "base",
   "htmlLabels": false,
   "flowchart": { "htmlLabels": false, "useMaxWidth": true },
+  "themeCSS": ".edgeLabel rect, .edgeLabel .label rect { opacity: 1 !important; }",
   "themeVariables": {
     "background": "transparent",
     "primaryColor": "#f01a01",
