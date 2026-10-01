@@ -1,20 +1,17 @@
 ---
 title: "How to Set Up Your First SLO and Burn Rate Alerts"
-date: 2026-05-26
-draft: true
+date: 2026-10-01
+draft: false
 excerpt: "A step-by-step walkthrough: define an SLI, calculate your error budget, write Prometheus recording rules, and wire up multi-window burn rate alerts that page you before users notice."
-readtime: 7
+readtime: 9
 tags: ["SLOs", "Alerting", "Prometheus", "Grafana", "How-to"]
 ---
-
-> "The best time to set up burn rate alerts was the day you shipped your service. The second best time is now."
-> — An SRE, Paged at 2:47am
 
 Static threshold alerts tell you when a number crossed a line. Burn rate alerts tell you when you're heading for an outage — before you've arrived. The difference matters most at 3am, when you want enough warning to act, not just a notification that it's already too late.
 
 The result is recording rules that track your error budget consumption and alert rules that fire in proportion to how fast you're burning it — before the budget is gone.
 
-The examples use Prometheus and Alertmanager. If you're on Datadog or Grafana Cloud, the recording rule concepts translate directly; the PromQL syntax will differ slightly.
+The examples use Prometheus and Alertmanager. Grafana Cloud and Mimir run the same PromQL rules as-is; on Datadog the concepts carry over, but you'll rewrite the queries in its own query language.
 
 ## What you'll need
 
@@ -57,7 +54,7 @@ With a 99.9% SLO over a 30-day window, you're allowed 0.1% of requests to fail. 
 
 - 30 days × 24 hours × 60 minutes × 0.001 = **43.2 minutes** of allowed error budget
 
-Write this number down explicitly. It becomes the denominator for every burn rate calculation that follows.
+Write both numbers down. The 43.2 minutes is the budget in human terms. The 0.001 error ratio is the one the rules use: burn rate is your observed error ratio divided by 0.001.
 
 {{< obs-budget-burn-rates >}}
 
@@ -74,34 +71,43 @@ groups:
   - name: slo_checkout_api
     interval: 1m
     rules:
-      # 5-minute window — responsive to fast burns
+      # 5m — short window for the fast-burn page
       - record: slo:error_rate:checkout_api:5m
         expr: |
           sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[5m]))
           /
           sum(rate(http_requests_total{job="checkout-api"}[5m]))
 
-      # 30-minute window — for the moderate burn alert
+      # 30m — short window for the moderate-burn page
       - record: slo:error_rate:checkout_api:30m
         expr: |
           sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[30m]))
           /
           sum(rate(http_requests_total{job="checkout-api"}[30m]))
 
-      # 1-hour window — confirms fast burns are sustained
+      # 1h — long window for the fast-burn page
       - record: slo:error_rate:checkout_api:1h
         expr: |
           sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[1h]))
           /
           sum(rate(http_requests_total{job="checkout-api"}[1h]))
 
-      # 6-hour window — catches slow bleeds
+      # 6h — long window for the moderate-burn page, short window for the ticket
       - record: slo:error_rate:checkout_api:6h
         expr: |
           sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[6h]))
           /
           sum(rate(http_requests_total{job="checkout-api"}[6h]))
+
+      # 3d — long window for the slow-leak ticket
+      - record: slo:error_rate:checkout_api:3d
+        expr: |
+          sum(rate(http_requests_total{job="checkout-api", status=~"5.."}[3d]))
+          /
+          sum(rate(http_requests_total{job="checkout-api"}[3d]))
 ```
+
+The 3-day rule reads three days of raw samples on every evaluation. That's fine for one service; with many, give that group a slower `interval` (5m is plenty for a ticket) or build it from the 6h rule.
 
 Reload Prometheus to pick up the new rules:
 
@@ -119,50 +125,65 @@ curl 'http://localhost:9090/api/v1/query?query=slo:error_rate:checkout_api:5m'
 
 ## Step 4 — The Alerts That Actually Tell You Something
 
-The multi-window approach is what separates burn rate alerting from glorified threshold alerting. Each alert requires *two* windows to exceed the threshold simultaneously: a short window for responsiveness, a long window for confidence that the burn is real and not a transient spike. Both must be true at once.
+The multi-window approach is what separates burn rate alerting from glorified threshold alerting. Each alert requires *two* windows to exceed the threshold at the same time. The long window is the real condition: it only crosses the threshold once a meaningful slice of the budget is gone. The short window checks the burn is still happening, so the alert clears minutes after you fix it instead of hours later. The thresholds and window pairs are the ones in Google's [SRE Workbook](https://sre.google/workbook/alerting-on-slos/).
 
 ```yaml
 groups:
   - name: slo_alerts_checkout_api
     rules:
       # P0 — Fast burn: error budget exhausted in ~2 days
-      # 14x burn rate = 14 × 0.001 = 1.4% error rate
+      # 14.4x burn rate = 14.4 × 0.001 = 1.44% error rate (2% of budget in 1h)
       - alert: CheckoutAPI_FastBurn
         expr: |
-          slo:error_rate:checkout_api:5m  > (14 * 0.001)
+          slo:error_rate:checkout_api:1h  > (14.4 * 0.001)
           and
-          slo:error_rate:checkout_api:1h  > (14 * 0.001)
-        for: 2m
+          slo:error_rate:checkout_api:5m  > (14.4 * 0.001)
         labels:
           severity: critical
           slo: checkout_api
         annotations:
-          summary: "Checkout API burning error budget at 14x — exhausted in ~2d"
+          summary: "Checkout API burning error budget at 14.4x — exhausted in ~2d"
           description: >
-            Error rate {{ $value | humanizePercentage }} over both 5m and 1h windows.
+            Error rate {{ $value | humanizePercentage }} over the last hour, still burning in the last 5m.
             At this rate, monthly error budget exhausted in approximately two days.
           runbook: "https://runbooks.example.com/checkout-api#fast-burn"
 
       # P1 — Moderate burn: budget exhausted in ~5 days
-      # 6x burn rate = 6 × 0.001 = 0.6% error rate
+      # 6x burn rate = 6 × 0.001 = 0.6% error rate (5% of budget in 6h)
       - alert: CheckoutAPI_ModerateBurn
         expr: |
-          slo:error_rate:checkout_api:30m > (6 * 0.001)
-          and
           slo:error_rate:checkout_api:6h  > (6 * 0.001)
-        for: 15m
+          and
+          slo:error_rate:checkout_api:30m > (6 * 0.001)
         labels:
           severity: warning
           slo: checkout_api
         annotations:
           summary: "Checkout API burning error budget at 6x — exhausted in ~5 days"
           description: >
-            Error rate {{ $value | humanizePercentage }} sustained over 30m and 6h windows.
+            Error rate {{ $value | humanizePercentage }} over the last 6h, still burning in the last 30m.
           runbook: "https://runbooks.example.com/checkout-api#moderate-burn"
+
+      # Ticket — Slow leak: on pace to spend the whole budget (10% of it in 3d)
+      - alert: CheckoutAPI_SlowBurn
+        expr: |
+          slo:error_rate:checkout_api:3d  > (1 * 0.001)
+          and
+          slo:error_rate:checkout_api:6h  > (1 * 0.001)
+        labels:
+          severity: ticket
+          slo: checkout_api
+        annotations:
+          summary: "Checkout API spending error budget at 1x+ for 3 days"
+          description: >
+            Error rate {{ $value | humanizePercentage }} over the last 3d, still above budget pace in the last 6h.
+          runbook: "https://runbooks.example.com/checkout-api#slow-burn"
 ```
 
+There's no `for:` clause on purpose. A `for:` would hold the page back while the condition persists, but the long window already demands a sustained burn: 14.4× for a full hour has spent 2% of the month's budget. Route `severity: ticket` to your ticket queue, not to the pager.
+
 {{< insight lightbulb >}}
-**Why two windows per alert?** The short window (5m or 30m) catches fast-moving incidents quickly. The long window (1h or 6h) filters out transient spikes that resolve on their own. If only the short window fires, it was probably a blip. When both windows exceed the threshold simultaneously, something real is happening — and that's when you want the page.
+**Why two windows per alert?** A long window alone is slow to forgive: after you fix the bug, the 1h error ratio stays over threshold for most of an hour, and the page keeps firing. A short window alone fires on every blip. Together, the long window says enough budget is gone to matter, and the short window says it's still going. Fix the problem and the short window drops within minutes, taking the alert with it.
 {{< /insight >}}
 
 ## Step 5 — Make Sure It Fires Before You Need It To
@@ -171,21 +192,30 @@ A misconfigured alert discovered during an actual incident means debugging your 
 
 Navigate to `http://localhost:9090/alerts` in your browser.
 
-You should see `CheckoutAPI_FastBurn` transition:
-`inactive` → `pending` (during the `for: 2m` window) → `firing`
+You should see `CheckoutAPI_FastBurn` go from `inactive` to `firing` as soon as both windows cross 1.44%. With no `for:` clause there's no `pending` stage. If you return only errors, that takes a few minutes; at a lower injected error rate, it takes longer for the 1-hour ratio to climb.
 
-If it stays in `pending` and never fires, check that both recording rules are returning values above the threshold. The `and` clause requires both conditions to be simultaneously true — if either window is below the threshold, the alert won't fire.
+If it never fires, check that both recording rules are returning values above the threshold. The `and` clause requires both conditions to be simultaneously true — if either window is below the threshold, the alert won't fire.
 
 {{< insight bookmark >}}
-**The error budget dashboard.** Once your recording rules are in place, add a Grafana panel showing budget consumption: `43.2 * avg_over_time(slo:error_rate:checkout_api:5m[30d]) / 0.001`. This divides the rolling 30-day average error rate by the 0.1% SLO budget rate to get the effective burn rate, then scales it to budget minutes — giving you "at the rate you've been burning, this is how much of your 43.2-minute budget has been consumed." Seeing the budget expressed as a concrete number — "you've consumed 7 of your 43.2 minutes this month" — makes the SLO model feel real in a way that percentage graphs don't.
+**The error budget dashboard.** Add a Grafana panel showing budget consumed over the rolling 30 days, in minutes:
+
+```
+43.2 * (
+  sum(increase(http_requests_total{job="checkout-api", status=~"5.."}[30d]))
+  /
+  sum(increase(http_requests_total{job="checkout-api"}[30d]))
+) / 0.001
+```
+
+That's the 30-day error ratio divided by the 0.1% budget ratio, scaled to the 43.2-minute budget. It reads raw counters rather than averaging the 5m recording rule, so it weights every request equally and doesn't wait 30 days for the rule's history to fill. Seeing "you've consumed 7 of your 43.2 minutes this month" makes the SLO feel real in a way that percentage graphs don't.
 {{< /insight >}}
 
-## Error Budget Burn Is Now Observable at Four Time Windows
+## Error Budget Burn Is Now Observable at Five Time Windows
 
-Your service now has recording rules computing error rates at four time windows, a P0 alert that fires when the error budget will be exhausted in approximately two days, and a P1 alert for sustained moderate burns. Both alerts carry burn rate context and runbook links in their annotations.
+Your service now has recording rules computing error rates at five time windows, a P0 page that fires when the error budget will be exhausted in about two days, a P1 page for sustained moderate burns, and a ticket for the slow leak. All three carry burn rate context and runbook links in their annotations.
 
 The next piece: making sure these alerts route to the right people via the right channels. That mapping — which severity wakes someone up and which waits until morning — is in [Alert Severity Levels, Rebuilt for Burn Rate](/guides/alert-severity-levels/). And for the thinking behind *why* this model works better than threshold alerting, [SLOs and Error Budgets](/guides/slos-and-error-budgets/) has the full argument.
 
 Pages now carry burn rate context and a runbook link — the information needed to act, not just a notification that something is wrong.
 
-{{< obs-mascot class="wizard" quip="Two windows must align before I name the omen real — the short for speed, the long for truth. A single flicker is a moth, not a fire. But when both burn at 14×, I foresee it plainly: two days to ruin. I page. Heed the rune." >}}
+{{< obs-mascot class="wizard" quip="Two windows must align before I name the omen real — the long to prove the wound is deep, the short to prove it still bleeds. A single flicker is a moth, not a fire. But when both burn at 14.4×, I foresee it plainly: two days to ruin. I page. Heed the rune." >}}

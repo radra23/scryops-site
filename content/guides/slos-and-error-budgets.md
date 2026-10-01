@@ -155,5 +155,6 @@ graph TD
 
 ## See Also
 
+- [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) — the Prometheus recording and alert rules for all three tiers, step by step
 - [Alert Severity Levels, Rebuilt for Burn Rate](/guides/alert-severity-levels/) — mapping these burn rate tiers onto P0–P4 and who gets woken up
 - [Alert Design Principles](/articles/alert-design-principles/) — how burn rate alerts fit into a broader alerting strategy
