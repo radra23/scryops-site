@@ -1,7 +1,7 @@
 ---
 title: "Writing Runbooks That Work at 3am"
-date: 2026-06-11
-draft: true
+date: 2026-10-01
+draft: false
 excerpt: "A runbook that's hard to follow under pressure is not a runbook — it's a liability. This guide covers the anatomy of a runbook that actually shortens incident response time."
 readtime: 6
 tags: ["On-Call", "Reliability", "Observability", "Operations", "Best Practices"]
@@ -33,12 +33,12 @@ A runbook for a specific alert should contain the following sections in order. E
 What alert triggers this runbook, and what does the triggering condition mean in plain language?
 
 ```
-Alert: checkout-service ErrorRateBudgetBurn
-Fires when: 1-hour burn rate > 14× (fast-burn threshold)
-Means: Error budget will exhaust in ≤ 2.1 days at current rate
+Alert: CheckoutAPI_FastBurn
+Fires when: burn rate > 14.4× over the last 1h, and still > 14.4× over the last 5m
+Means: at this rate, the 30-day error budget is gone in about 2 days
 ```
 
-Include the exact alert name as it appears in the paging system. The on-call engineer will land on this runbook from a paged alert; make that link explicit.
+Include the exact alert name as it appears in the paging system. The on-call engineer will land on this runbook from a paged alert; make that link explicit. The alert in this example is the fast-burn page from [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/).
 
 ### 2. Potential Causes
 
@@ -76,13 +76,14 @@ Good diagnostic steps reference exact dashboard panels, log queries, or CLI comm
 ```
 Step 1: Check payment gateway latency
   → Grafana: Checkout Service dashboard, "External Gateway Latency" panel
-  → Or: kubectl logs -n checkout -l app=checkout-api | grep "gateway" | tail -50
-  
+  → Or: kubectl logs -n checkout -l app=checkout-api --since=15m --prefix \
+          | grep -i gateway | tail -50
+
 Step 2: Check DB connection pool
   → Metric: checkout_db_pool_utilisation (current value vs 90% threshold)
 ```
 
-Ambiguous diagnostic instructions ("check the logs", "look at the metrics") create work instead of saving it.
+Ambiguous diagnostic instructions ("check the logs", "look at the metrics") create work instead of saving it. Test the commands, too. With a label selector (`-l`), `kubectl logs` prints only the last 10 lines per pod unless you pass `--since` or `--tail`, so a runbook step without one greps almost nothing and reports "no gateway errors" with total confidence.
 
 ### 4. Remediation Steps
 
@@ -92,14 +93,31 @@ Each remediation should specify: the exact command or action, the expected outco
 
 ```
 4.1 Gateway Timeout
-  Action: The gateway has a circuit breaker — check if it has tripped:
-    kubectl get configmap payment-gateway -n checkout -o yaml | grep circuit
-  If open: it will self-recover in 5 minutes. Monitor error rate.
-  If not tripped: escalate to #payments-oncall — this is a gateway-side issue.
+  Action: The gateway client has a circuit breaker. Check whether it's open:
+    Grafana: Checkout Service dashboard, "Gateway circuit breaker" panel
+    (metric: checkout_gateway_circuit_open, 1 = open)
+  If open: it retries after its 5-minute cool-down. Monitor the error rate.
+  If closed: escalate to #payments-oncall — this is a gateway-side issue.
   Verify: Error rate in Grafana should return below 1% within 10 minutes.
+
+4.2 Connection Pool Exhausted
+  Action: Find what's holding connections before adding more:
+    Grafana: Checkout DB dashboard, "Longest-running queries" panel
+  If one query or lock dominates: kill it, then file a ticket for the query.
+  If load is simply higher: raise the pool max only if the database has
+    connection headroom, then redeploy. Restarting pods frees connections
+    for a few minutes and hides the cause; use it as a last resort.
+  Verify: checkout_db_pool_utilisation back under 70%; error rate falling.
+
+4.3 Regression From a Recent Deploy
+  Action: Roll back first, debug after:
+    kubectl rollout undo deployment/checkout-api -n checkout
+    kubectl rollout status deployment/checkout-api -n checkout
+  Verify: error rate back under the alert threshold within 10 minutes.
+  Then: block the release and attach the deploy to the incident.
 ```
 
-<!-- TODO: Add example remediation steps for DB pool exhaustion and regression rollback -->
+Notice the config check that didn't make it in. A ConfigMap holds the breaker's settings, not whether it's tripped right now, so `kubectl get configmap` can't answer the question this step asks. Point diagnostic steps at runtime state: a metric, a health endpoint, a dashboard panel.
 
 ### 5. Escalation Points
 
@@ -125,8 +143,10 @@ Recovery:
 3. Notify #incidents: "CheckoutService payment errors resolved at HH:MM UTC. 
    Impact: ~N users, ~M minutes. Postmortem to follow."
 4. Revert any temporary config changes applied during incident
-5. File postmortem if incident duration > 30 minutes or P0/P1 severity
+5. File a postmortem if the incident meets your postmortem triggers
 ```
+
+The postmortem triggers, and what a postmortem should contain, are in [On-Call Procedures](/guides/on-call-procedures/). Link them from the runbook rather than restating them, so there's one definition to keep current.
 
 ## Runbook Storage and Maintenance
 
@@ -134,9 +154,20 @@ A runbook that is hard to find is nearly as bad as one that doesn't exist. Store
 
 Runbooks decay. The service changes; the runbook doesn't. Treat runbook accuracy as an output of your incident process: every time a diagnostic step turns out to be wrong or missing, update it before closing the ticket. A single-line addition per incident compounds into a genuinely reliable runbook over time.
 
-<!-- TODO: Cover runbook-as-code patterns (encoding runbooks as automatable playbooks, linking to automated-remediation-playbooks.md) -->
-<!-- TODO: Add guidance on runbook templates for different alert types (latency SLO burn, error rate SLO burn, saturation) -->
+The most reliable way to keep the link one click away is to put it in the alert itself. Prometheus alert rules carry annotations, and a runbook URL there travels with every page. Keep the runbook in the same repository as the alert rule, and a pull request that changes the alert's threshold can't forget the runbook next to it.
 
-- [On-Call Procedures](/guides/on-call-procedures/) — escalation paths, handoff procedures, postmortem process
+## One Template Per Alert Type
+
+You don't need a blank page for every alert. Most alerts fall into a few types, and each type's runbook starts from the same skeleton:
+
+- **Error-rate burn** — causes lean towards dependencies, deploys and bad input. Diagnostics start with "what changed?" and which dependency is failing.
+- **Latency burn** — causes lean towards saturation and slow dependencies. Diagnostics start with which hop got slower, and whether traffic went up.
+- **Saturation** (queue depth, pool usage, disk) — the question is time to exhaustion, not error rate. The runbook should say how long you have at the current growth rate, and what buys more time.
+
+<!-- TODO: Cover runbook-as-code patterns (encoding runbooks as automatable playbooks, linking to automated-remediation-playbooks.md once it's published) -->
+
+## See Also
+
+- [On-Call Procedures](/guides/on-call-procedures/) — escalation paths, handoffs, and the postmortem triggers
 - [Alert Design Principles](/articles/alert-design-principles/) — what every alert body should include before it points to a runbook
-- [Automated Remediation](/guides/automated-remediation-playbooks/) — when and how to encode runbook steps as automation
+- [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) — the alert rules this guide's example runbook answers
