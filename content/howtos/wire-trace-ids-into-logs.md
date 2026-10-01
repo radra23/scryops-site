@@ -43,7 +43,7 @@ flowchart LR
 
 ## What you'll need
 
-- A service that already creates spans, with a tracing SDK initialised. Trace IDs in logs are only meaningful when there are traces to correlate them with. If you're not there yet, start with the [OpenTelemetry getting-started docs](https://opentelemetry.io/docs/languages/) for your language.
+- A service that already creates spans, with a tracing SDK initialised. Trace IDs in logs are only meaningful when there are traces to correlate them with. If you're not there yet, start with [How to Instrument a .NET Service](/howtos/instrument-dotnet-service-opentelemetry/) or [a Java Spring Boot Service](/howtos/instrument-java-service-opentelemetry/), or the [OpenTelemetry getting-started docs](https://opentelemetry.io/docs/languages/) for other languages.
 - Your platform's standard logger: `ILogger` or Serilog (.NET), SLF4J with Logback (Java), `slog` (Go), or `logging`/`structlog` (Python).
 
 Every snippet below was run against OpenTelemetry .NET 1.19.1, the Java agent 2.31.1, the Go `otelslog` bridge v0.20.1 and `opentelemetry-instrumentation-logging` 0.66b0 for Python.
