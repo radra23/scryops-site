@@ -61,7 +61,6 @@ Practical notes:
 - Track holiday coverage explicitly; do not assume "the calendar handles it"
 - If the team is globally distributed across more than two time zones, a follow-the-sun model reduces unsociable hours — but requires clean handoff documentation at each shift boundary
 
-<!-- TODO: Add specific tooling configuration (PagerDuty schedule setup, Opsgenie escalation policies) -->
 
 ## Alert Routing by Severity
 
@@ -86,9 +85,9 @@ When a page fires, the first step is triage — establishing severity before com
 flowchart TD
     A[Incident Detected] --> B[Assess Severity]
     B --> C{Severity Level}
-    C -->|Sev1 / P0| D[Activate Incident Response<br/>bridge, incident commander,<br/>status page update]
-    C -->|Sev2 / P1| E[Investigate and Mitigate<br/>primary + secondary engaged]
-    C -->|Sev3 / P2| F[Monitor and Resolve<br/>primary only, escalate if needed]
+    C -->|P0| D[Activate Incident Response<br/>bridge, incident commander,<br/>status page update]
+    C -->|P1| E[Investigate and Mitigate<br/>one on-call engineer starts,<br/>team pulled in if not contained]
+    C -->|P2| F[Resolve in Business Hours<br/>from the incident channel,<br/>nobody woken up]
     D --> G[Communicate to stakeholders]
     D --> H[Escalate if unresolved in SLA]
     D --> I[Resolve]
