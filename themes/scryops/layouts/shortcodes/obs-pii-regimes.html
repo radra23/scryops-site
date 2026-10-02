@@ -33,7 +33,6 @@
 
 <figure class="obs-fig pii-reg" aria-label="Three regulatory regimes and what each asks of a span. GDPR requires data minimisation and is the most settled, carrying the heaviest rail and a decided 91 million euro case. CCPA and CPRA require deletion from all systems within 45 days. HIPAA's minimum necessary standard covers 18 identifiers, several of which appear in every span; the 2022 tracking-technologies bulletin was vacated in June 2024, so it carries the lightest rail.">
   <style>
-    .pii-reg .reg-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .pii-reg .reg-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .pii-reg .reg-lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:136px 1fr 1fr 118px;gap:.9rem;align-items:center;padding:.95rem .8rem;margin-bottom:.7rem;}
     @media(max-width:760px){.pii-reg .reg-lane{grid-template-columns:1fr;gap:.5rem;}}
@@ -47,7 +46,7 @@
     .pii-reg .reg-foot b{color:var(--mc-ink);}
     .pii-reg figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="reg-wrap">
+  <div class="reg-wrap obs-panel">
     <div class="reg-hdr">WHAT EACH REGIME ASKS OF A SPAN</div>
     {{- range $lanes }}
     <div class="reg-lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">

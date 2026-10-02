@@ -15,7 +15,6 @@
 
 <figure class="obs-fig mgt" aria-label="Three quality checks run over every transformed record before export: a format check that the field still matches its schema type, a pattern check that nothing still matches a PII regex, and a value check that the result is inside the range the transform promised. All three must pass. One failing check fails the whole record, which returns for adjustment rather than being exported partially masked.">
   <style>
-    .mgt .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .mgt .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .mgt .g{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--mc-ramp-2);padding:.9rem .85rem;margin-bottom:.6rem;}
     .mgt .n{font-size:.85rem;color:var(--mc-ink);margin-bottom:.3rem;}
@@ -30,7 +29,7 @@
     .mgt .foot b{color:var(--mc-ink);}
     .mgt figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hdr">THREE CHECKS &nbsp;&middot;&nbsp; ALL MUST PASS &nbsp;&middot;&nbsp; PER RECORD</div>
     {{- range $gates }}
     <div class="g">

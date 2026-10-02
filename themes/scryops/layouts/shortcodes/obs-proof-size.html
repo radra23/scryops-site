@@ -31,7 +31,6 @@
 
 <figure class="obs-fig prf" aria-label="Steps required to prove that a single record belongs to an audit log. The bars show the Merkle history tree on a linear axis from zero to twenty-four: ten steps at one thousand entries, seventeen at one hundred thousand, twenty-four at ten million. The flat hash chain is printed above each row rather than drawn, because it needs one thousand, one hundred thousand and ten million steps respectively — a ratio no shared axis can show honestly.">
   <style>
-    .prf .w{background:var(--fig-bg);border:1px solid var(--frame);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .prf .hd{font-family:var(--font-read);font-size:15px;font-weight:500;color:var(--mc-ink);margin-bottom:4px;}
     .prf .sub{font-size:var(--mc-text-tick,12px);color:var(--mc-ink-muted);margin-bottom:1.3rem;}
     .prf .grp{margin-bottom:1rem;}
@@ -48,7 +47,7 @@
     .prf .src{margin-top:.9rem;font-family:var(--font-pixel);font-size:.65rem;line-height:1.8;color:var(--mc-ink-muted);letter-spacing:.03em;}
     .prf figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hd">Steps to prove one record is in the log</div>
     <div class="sub">Merkle steps on a linear axis, 0&ndash;24 &middot; the flat chain is printed rather than drawn, because at these ratios no shared axis shows both</div>
     {{- range $rows }}
