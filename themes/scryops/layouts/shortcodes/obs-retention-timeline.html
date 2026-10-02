@@ -57,7 +57,7 @@
   <div class="diag-card" tabindex="0">
     {{- with .Get "title" }}<div class="obs-wf__hd">{{ . }}</div>{{ end }}
     {{- with .Get "units" }}<div class="obs-wf__sub">{{ . }}</div>{{ end }}
-    <svg class="obs-wf" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}">
+    <svg class="obs-wf" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}" style="min-width:680px">
       <defs>
         <pattern id="{{ $hatchID }}" width="9" height="9" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
           <rect x="-4" y="-4" width="17" height="17" fill="var(--surface)"/>

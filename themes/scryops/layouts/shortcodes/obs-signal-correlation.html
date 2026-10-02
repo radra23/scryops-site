@@ -11,36 +11,36 @@
   <div class="diag-card" tabindex="0" style="padding:1.2rem 1rem;">
     <svg viewBox="0 0 720 180" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-labelledby="corr-title corr-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="min-width:680px;width:100%;display:block;font-family:var(--font-code);">
       <title id="corr-title">Signal correlation: Observability 1.0 vs 2.0</title>
       <desc id="corr-desc">Left panel shows Observability 1.0 with three isolated data sources — logs, metrics, and traces — each in separate silos with no connection between them. Right panel shows Observability 2.0 where the same three sources feed into a correlation engine, which produces a predicted risk score output, each on its own value step.</desc>
 
       <rect width="720" height="180" fill="var(--fig-bg)"/>
 
       <!-- Left panel: Siloed (1.0) -->
-      <rect x="8" y="8" width="272" height="164" fill="var(--fig-bg)" rx="1"/>
-      <rect x="8" y="8" width="272" height="2" fill="var(--border)"/>
+      <rect x="8" y="8" width="256" height="164" fill="var(--fig-bg)" rx="1"/>
+      <rect x="8" y="8" width="256" height="2" fill="var(--border)"/>
       <!-- Header: muted — intentionally less vibrant than 2.0, but meets 4.5:1 AA -->
-      <text x="144" y="24" fill="var(--muted)" font-size="11" text-anchor="middle"
+      <text x="136" y="24" fill="var(--muted)" font-size="11" text-anchor="middle"
             font-family="var(--font-pixel)" letter-spacing="0em">OBSERVABILITY 1.0 — SILOED</text>
 
       <!-- Signal boxes: neutral — readable while clearly less vibrant than the colored 2.0 panel -->
-      <rect x="84" y="34" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="144" y="51" fill="var(--muted)" font-size="12.5" text-anchor="middle">LOGS</text>
+      <rect x="76" y="34" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="136" y="51" fill="var(--muted)" font-size="13" text-anchor="middle">LOGS</text>
 
-      <rect x="84" y="77" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="144" y="94" fill="var(--muted)" font-size="12.5" text-anchor="middle">METRICS</text>
+      <rect x="76" y="77" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="136" y="94" fill="var(--muted)" font-size="13" text-anchor="middle">METRICS</text>
 
-      <rect x="84" y="120" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
-      <text x="144" y="137" fill="var(--muted)" font-size="12.5" text-anchor="middle">TRACES</text>
+      <rect x="76" y="120" width="120" height="26" fill="var(--bg)" stroke="var(--border)" stroke-width="1"/>
+      <text x="136" y="137" fill="var(--muted)" font-size="13" text-anchor="middle">TRACES</text>
 
       <!-- Isolation annotations -->
-      <text x="144" y="73"  fill="var(--muted)" font-size="12.5" text-anchor="middle" font-style="italic">// isolated</text>
-      <text x="144" y="116" fill="var(--muted)" font-size="12.5" text-anchor="middle" font-style="italic">// isolated</text>
+      <text x="136" y="73"  fill="var(--muted)" font-size="13" text-anchor="middle" font-style="italic">// isolated</text>
+      <text x="136" y="116" fill="var(--muted)" font-size="13" text-anchor="middle" font-style="italic">// isolated</text>
 
       <!-- Center arrow — visible, matches correlation theme -->
-      <text x="313" y="97"  fill="var(--mc-ramp-1)" font-size="28" text-anchor="middle">→</text>
-      <text x="313" y="113" fill="var(--mc-ramp-1)" font-size="12.5"   text-anchor="middle">correlate</text>
+      <text x="303" y="97"  fill="var(--mc-ramp-1)" font-size="28" text-anchor="middle">→</text>
+      <text x="303" y="113" fill="var(--mc-ramp-1)" font-size="13"   text-anchor="middle">correlate</text>
 
       <!-- Right panel: Unified (2.0) -->
       <rect x="342" y="8" width="370" height="164" fill="var(--fig-bg)" rx="1"/>
@@ -50,13 +50,13 @@
 
       <!-- Signal boxes: coloured, active -->
       <rect x="350" y="34" width="90" height="26" fill="var(--bg)" stroke="var(--mc-ramp-1)" stroke-width="1"/>
-      <text x="395" y="51" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">LOGS</text>
+      <text x="395" y="51" fill="var(--mc-ramp-1)" font-size="13" text-anchor="middle">LOGS</text>
 
       <rect x="350" y="77" width="90" height="26" fill="var(--bg)" stroke="var(--mc-ramp-2)" stroke-width="1"/>
-      <text x="395" y="94" fill="var(--mc-ramp-2)" font-size="12.5" text-anchor="middle">METRICS</text>
+      <text x="395" y="94" fill="var(--mc-ramp-2)" font-size="13" text-anchor="middle">METRICS</text>
 
       <rect x="350" y="120" width="90" height="26" fill="var(--bg)" stroke="var(--mc-ramp-3)" stroke-width="1"/>
-      <text x="395" y="137" fill="var(--mc-ink-secondary)" font-size="12.5" text-anchor="middle">TRACES</text>
+      <text x="395" y="137" fill="var(--mc-ink-secondary)" font-size="13" text-anchor="middle">TRACES</text>
 
       <!-- Converging paths — increased stroke, higher opacity -->
       <path d="M 440,47 H 462 V 76 H 480"    fill="none" stroke="var(--mc-ramp-1)" stroke-width="2" opacity="0.8"/>
@@ -64,17 +64,16 @@
       <path d="M 440,133 H 462 V 104 H 480"  fill="none" stroke="var(--mc-ramp-3)" stroke-width="2" opacity="0.8"/>
 
       <!-- Correlation engine -->
-      <rect x="480" y="65" width="130" height="50" fill="var(--mc-ramp-1)" fill-opacity="0.14" stroke="var(--mc-ramp-1)" stroke-width="1.5" rx="1"/>
-      <text x="545" y="86"  fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">CORRELATION</text>
-      <text x="545" y="100" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">ENGINE</text>
+      <rect x="480" y="65" width="112" height="50" fill="var(--mc-ramp-1)" fill-opacity="0.14" stroke="var(--mc-ramp-1)" stroke-width="1.5" rx="1"/>
+      <text x="536" y="86"  fill="var(--mc-ramp-1)" font-size="13" text-anchor="middle">CORRELATION</text>
+      <text x="536" y="100" fill="var(--mc-ramp-1)" font-size="13" text-anchor="middle">ENGINE</text>
 
       <!-- Output arrow + box -->
-      <path d="M 610,90 L 630,90" fill="none" stroke="var(--mc-ramp-4)" stroke-width="2"/>
-      <polygon points="630,86 640,90 630,94" fill="var(--mc-ramp-4)"/>
-      <rect x="643" y="68" width="62" height="44" fill="var(--mc-ramp-4)" fill-opacity="0.10" stroke="var(--mc-ramp-4)" stroke-width="1.5" rx="1"/>
-      <text x="674" y="86"  fill="var(--mc-ink-secondary)" font-size="12.5" text-anchor="middle">PREDICTED</text>
-      <text x="674" y="98"  fill="var(--mc-ink-secondary)" font-size="12.5" text-anchor="middle">RISK</text>
-      <text x="674" y="110" fill="var(--mc-ink-secondary)" font-size="12.5" text-anchor="middle">SCORE</text>
+      <path d="M 592,90 L 612,90" fill="none" stroke="var(--mc-ramp-4)" stroke-width="2"/>
+      <polygon points="612,86 622,90 612,94" fill="var(--mc-ramp-4)"/>
+      <rect x="625" y="68" width="82" height="44" fill="var(--mc-ramp-4)" fill-opacity="0.10" stroke="var(--mc-ramp-4)" stroke-width="1.5" rx="1"/>
+      <text x="666" y="87"  fill="var(--mc-ink-secondary)" font-size="13" text-anchor="middle">PREDICTED</text>
+      <text x="666" y="102"  fill="var(--mc-ink-secondary)" font-size="13" text-anchor="middle">RISK SCORE</text>
     </svg>
   </div>
   <figcaption>Fig. 3 — Siloed signals give you three partial pictures. A unified model sees the connections between them.</figcaption>

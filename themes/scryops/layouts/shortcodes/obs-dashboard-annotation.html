@@ -10,7 +10,7 @@
   <div class="diag-card" tabindex="0" style="padding:1.2rem 1rem 1rem;">
     <svg viewBox="0 0 760 230" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-labelledby="ann-title ann-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="min-width:680px;width:100%;display:block;font-family:var(--font-code);">
       <title id="ann-title">Time series panel without and with a deployment annotation</title>
       <desc id="ann-desc">Two-panel diagram. Left panel — WITHOUT ANNOTATIONS — shows a P99 latency time series with a visible spike but no contextual marker. A label at the bottom reads "spike — cause unknown." Right panel — WITH ANNOTATIONS — shows the same latency curve with a dashed vertical line at the deployment moment, labelled "DEPLOY v2.1.4" above and "14:32" at the baseline. A brighter label reads "deployment confirmed as cause."</desc>
 
@@ -19,13 +19,13 @@
       <!-- ── LEFT PANEL: without annotation ───────────────────────────── -->
       <rect x="8" y="8" width="344" height="214" fill="var(--surface)" rx="1"/>
       <rect x="8" y="8" width="344" height="2" fill="var(--border)"/>
-      <text x="180" y="26" fill="var(--muted)" font-size="11" text-anchor="middle"
+      <text x="180" y="26" fill="var(--muted)" font-size="11.5" text-anchor="middle"
             font-family="var(--font-pixel)" letter-spacing="0.06em">WITHOUT ANNOTATIONS</text>
 
       <!-- axes -->
       <line x1="30" y1="44" x2="30" y2="184" stroke="var(--border)" stroke-width="1"/>
       <line x1="30" y1="184" x2="340" y2="184" stroke="var(--border)" stroke-width="1"/>
-      <text x="22" y="114" fill="var(--muted)" font-size="12.5" text-anchor="middle"
+      <text x="22" y="114" fill="var(--muted)" font-size="13.5" text-anchor="middle"
             transform="rotate(-90,22,114)">P99</text>
 
       <!-- faint grid lines -->
@@ -37,7 +37,7 @@
         points="30,157 72,155 114,159 156,156 188,157 204,155 215,132 229,94 243,72 261,97 281,122 308,131 332,129 340,128"/>
 
       <!-- bottom label -->
-      <text x="185" y="203" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">↗ spike — cause unknown</text>
+      <text x="185" y="203" fill="var(--mc-ramp-1)" font-size="13.5" text-anchor="middle">↗ spike — cause unknown</text>
 
       <!-- ── CENTER ARROW ───────────────────────────────────────────────── -->
       <text x="380" y="118" fill="var(--mc-ink-muted)" font-size="18" text-anchor="middle">→</text>
@@ -45,13 +45,13 @@
       <!-- ── RIGHT PANEL: with annotation ─────────────────────────────── -->
       <rect x="408" y="8" width="344" height="214" fill="var(--surface)" rx="1"/>
       <rect x="408" y="8" width="344" height="2" fill="var(--mc-ramp-4)" opacity="0.8"/>
-      <text x="580" y="26" fill="var(--mc-ramp-4)" font-size="11" text-anchor="middle"
+      <text x="580" y="26" fill="var(--mc-ramp-4)" font-size="11.5" text-anchor="middle"
             font-family="var(--font-pixel)" letter-spacing="0.06em">WITH ANNOTATIONS</text>
 
       <!-- axes -->
       <line x1="430" y1="44" x2="430" y2="184" stroke="var(--border)" stroke-width="1"/>
       <line x1="430" y1="184" x2="740" y2="184" stroke="var(--border)" stroke-width="1"/>
-      <text x="422" y="114" fill="var(--muted)" font-size="12.5" text-anchor="middle"
+      <text x="422" y="114" fill="var(--muted)" font-size="13.5" text-anchor="middle"
             transform="rotate(-90,422,114)">P99</text>
 
       <!-- faint grid lines -->
@@ -69,11 +69,11 @@
       <polygon points="603,44 597,37 603,30 609,37" fill="var(--mc-ramp-2)"/>
 
       <!-- annotation labels -->
-      <text x="608" y="55" fill="var(--mc-ramp-2)" font-size="12.5">DEPLOY v2.1.4</text>
-      <text x="608" y="180" fill="var(--mc-ramp-2)" font-size="12.5">14:32</text>
+      <text x="608" y="55" fill="var(--mc-ramp-2)" font-size="13.5">DEPLOY v2.1.4</text>
+      <text x="608" y="180" fill="var(--mc-ramp-2)" font-size="13.5">14:32</text>
 
       <!-- bottom label (brightest — the resolution) -->
-      <text x="580" y="203" fill="var(--mc-ramp-1)" font-size="12.5" text-anchor="middle">↗ deployment confirmed as cause</text>
+      <text x="580" y="203" fill="var(--mc-ramp-1)" font-size="13.5" text-anchor="middle">↗ deployment confirmed as cause</text>
 
     </svg>
   </div>
