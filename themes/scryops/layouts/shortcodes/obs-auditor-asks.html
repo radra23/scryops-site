@@ -14,7 +14,6 @@
 
 <figure class="obs-fig aud" aria-label="Five requests auditors reasonably make about a telemetry pipeline, paired with the answer most teams actually have. Who can query production traces; evidence that someone reviewed alert output; which span attributes contain personal data; the lawful basis for collection; and restoring a log record from fourteen months ago. Each pairing shows a gap between the question and the available answer.">
   <style>
-    .aud .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .aud .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .aud .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 1fr 1fr;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
     .aud .lane svg.obs-g{width:13px;height:13px;display:block;}
@@ -29,7 +28,7 @@
     .aud figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
     .aud code{font-size:max(12px,.85em);}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hdr">THINGS AUDITORS ASK FOR &nbsp;&middot;&nbsp; ALL OF THEM REASONABLE</div>
     <div class="hh"><span></span><span>the question</span><span>the answer most teams have</span></div>
     {{- range $rows }}

@@ -6,7 +6,6 @@
 
 <figure class="obs-fig ctn" aria-label="Two opposing pressures on a telemetry pipeline. Debugging pushes toward keeping more data for longer at higher cardinality. Compliance pushes toward collecting less, keeping it briefly, and deleting on request. The resolution is that diagnostic value lives in structure while compliance risk lives in identity, and the two can be separated at ingest.">
   <style>
-    .ctn .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .ctn .g{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
     @media(max-width:640px){.ctn .g{grid-template-columns:1fr;}}
     .ctn .col{background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--mc-ramp-2);padding:1rem .9rem;}
@@ -18,7 +17,7 @@
     .ctn .res b{color:var(--mc-ink);}
     .ctn figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="g">
       <div class="col"><div class="h">debugging wants</div><ul>
         <li>more attributes per span</li>

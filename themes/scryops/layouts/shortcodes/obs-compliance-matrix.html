@@ -35,7 +35,6 @@
 
 <figure class="obs-fig cmx" aria-label="Four compliance frameworks and what each demands of a telemetry pipeline. PCI DSS is the most prescriptive about telemetry, drawn with the heaviest rail: no full card number in retrievable form, no CVV after authorisation, twelve months of log retention. HIPAA requires audit controls over systems holding health data and treats four of its eighteen identifiers as present in every span by default. GDPR requires a lawful basis, minimisation, erasure within a month, and protection by design. SOC 2 tests controls you define yourself, and its failures are usually administrative rather than technical.">
   <style>
-    .cmx .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .cmx .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .cmx .stand{font-size:.82rem;color:var(--mc-ink-muted);text-align:center;line-height:1.55;margin:-.9rem auto 1.3rem;max-width:56ch;}
     .cmx .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;padding:.9rem .95rem;margin-bottom:.7rem;}
@@ -51,7 +50,7 @@
     .cmx .foot b{color:var(--mc-ink);}
     .cmx figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hdr">WHAT EACH FRAMEWORK ASKS OF A TELEMETRY PIPELINE</div>
     <div class="stand">Ordered by how far each one reaches into a span. PCI names individual fields; SOC 2 only tests what you claimed.</div>
     {{- range $rows }}

@@ -48,7 +48,6 @@
 
 <figure class="obs-fig rxs" aria-label="Four regular expressions and what they did. Cloudflare's 2019 outage came from catastrophic backtracking in a WAF rule containing dot-star dot-star equals dot-star, exhausting CPU across their global network for about 27 minutes. Stack Overflow's 2016 outage came from a trim regex meeting a post with twenty thousand consecutive whitespace characters, taking the site down for 34 minutes. Two patterns from this guide's own detector are also listed: a character class where a pipe was a literal rather than alternation, and an IP address pattern that also matches version strings and impossible addresses.">
   <style>
-    .rxs .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .rxs .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .rxs .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 168px 1fr 78px;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
     .rxs .lane svg.obs-g{width:13px;height:13px;display:block;}
@@ -66,7 +65,7 @@
     .rxs figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
     .rxs code{font-size:max(11px,.85em);}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hdr">REGEX HALL OF SHAME &nbsp;&middot;&nbsp; TWO OF THESE ARE OURS</div>
     {{- range $rows }}
     <div class="lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">

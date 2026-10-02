@@ -31,7 +31,6 @@
 
 <figure class="obs-fig pii-bingo" aria-label="A sixteen-square audit card of attribute keys to search your telemetry backend for, each labelled with the treatment it needs: remove, coarsen, hash, inspect, or blind spot. Followed by a three-step terminal readout: list every attribute key the backend has seen, grep it against this list, and treat whatever prints as your transform configuration.">
   <style>
-    .pii-bingo .bg-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .pii-bingo .bg-top{display:flex;justify-content:space-between;align-items:baseline;gap:.9rem;flex-wrap:wrap;margin-bottom:1.2rem;}
     .pii-bingo .bg-hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;}
     .pii-bingo .bg-dek{font-size:.78rem;color:var(--mc-ink-muted);}
@@ -51,7 +50,7 @@
     @media(prefers-reduced-motion:reduce){.pii-bingo .bg-cur{animation:none;}}
     .pii-bingo figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="bg-wrap">
+  <div class="bg-wrap obs-panel">
     <div class="bg-top">
       <span class="bg-hdr">ATTRIBUTE-KEY BINGO</span>
       <span class="bg-dek">grep your backend&rsquo;s key list. a line is a bad afternoon.</span>

@@ -19,7 +19,6 @@
 
 <figure class="obs-fig svr" aria-label="Data residency regimes grouped by the shape of the constraint rather than by severity. China's PIPL and Russia's localisation law are storage restrictions: data must be held domestically and export is a separate approval. The GDPR is a transfer restriction: data may leave under an approved mechanism. Germany's BSI rules add sector requirements on top of GDPR. Public-sector procurement imposes residency by contract, which is legally weaker but operationally identical.">
   <style>
-    .svr .w{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
     .svr .hdr{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;color:var(--mc-ink-muted);letter-spacing:.1em;text-align:center;margin-bottom:1.3rem;}
     .svr .lane{background:var(--surface);border:1px solid var(--border);border-left-style:solid;display:grid;grid-template-columns:24px 176px 96px 1fr;gap:.9rem;align-items:center;padding:.9rem .8rem;margin-bottom:.7rem;}
     .svr .lane svg.obs-g{width:13px;height:13px;display:block;}
@@ -32,7 +31,7 @@
     .svr .foot b{color:var(--mc-ink);}
     .svr figcaption{font-family:var(--font-code);font-size:12px;line-height:1.45;color:var(--muted);margin-top:.7rem;padding-left:.2rem;}
   </style>
-  <div class="w">
+  <div class="w obs-panel">
     <div class="hdr">RESIDENCY REGIMES, BY SHAPE OF CONSTRAINT</div>
     {{- range $rows }}
     <div class="lane" style="border-left-width:{{ .rail }};border-left-color:{{ .step | safeCSS }}">
