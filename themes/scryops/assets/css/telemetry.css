@@ -1689,7 +1689,7 @@ html.calm {
 @media(max-width:640px){.af-axis{margin-left:calc(110px + .8rem);font-size:.64rem;}}
 .af-src{margin-top:1.1rem;font-family:var(--font-code);font-size:0.6875rem;line-height:1.7;color:var(--mc-ink-muted);letter-spacing:.03em;}
 figure.af-fig{margin:2.5rem 0 2rem;}
-figure.af-fig figcaption{font-size:.7rem;color:var(--mc-ink-muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+figure.af-fig figcaption{font-size:12px;color:var(--mc-ink-muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
 
 /* obs-alert-routing.html */
 .rt-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
@@ -1715,7 +1715,7 @@ figure.af-fig figcaption{font-size:.7rem;color:var(--mc-ink-muted);font-style:it
 .rt-foot{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--border);font-size:.8rem;color:var(--mc-ink-muted);line-height:1.5;}
 .rt-foot b{color:var(--mc-ink);}
 figure.rt-fig{margin:2.5rem 0 2rem;}
-figure.rt-fig figcaption{font-size:.7rem;color:var(--mc-ink-muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+figure.rt-fig figcaption{font-size:12px;color:var(--mc-ink-muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
 
 /* obs-knowledge-tiers.html */
 .knt-wrap{background:var(--fig-bg);border:1px solid var(--border);border-top:3px solid var(--mc-ink);padding:1.4rem 1.4rem 1.2rem;font-family:var(--font-code);}
@@ -1762,7 +1762,7 @@ figure.rt-fig figcaption{font-size:.7rem;color:var(--mc-ink-muted);font-style:it
 @media(max-width:640px){.obs-mttd-axis{margin-left:calc(90px + .8rem);font-size:.7rem;}}
 .obs-src{margin-top:1.2rem;font-family:var(--font-code);font-size:.6875rem;color:var(--muted);letter-spacing:.04em;}
 figure.obs-fig{margin:2.5rem 0 2rem;}
-figure.obs-fig figcaption{font-size:.7rem;color:var(--muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
+figure.obs-fig figcaption{font-size:12px;color:var(--muted);font-style:italic;margin-top:.6rem;padding-left:.2rem;}
 
 /* party-gallery.html */
 .party-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.1rem;margin:1.5rem 0;}
