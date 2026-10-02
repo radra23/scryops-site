@@ -1,240 +1,224 @@
 ---
 title: "Set Up Log-Based Alerting with Loki and Grafana"
 date: 2026-06-10
-draft: true
-excerpt: "Wire a Loki log stream into a Grafana alert rule that fires on error rate, specific error codes, or a pattern your metrics don't capture. Covers ingestion verification, LogQL query patterns, notification routing, and end-to-end testing."
-readtime: 7
+draft: false
+excerpt: "Turn a LogQL query into a Grafana-managed alert rule that fires on error volume, a specific error type or a failing dependency. Covers the query, the rule settings that trip people up, routing to PagerDuty and Slack, and an end-to-end test."
+readtime: 8
 tags: ["Logs", "Observability", "Alerting", "Grafana", "How-to"]
 ---
 
-Metrics alert on rates. Logs alert on specifics. If you need to fire when a particular error code appears more than N times per minute — or when a specific dependency starts failing — and you don't have a metric for it, the log stream is what you have.
+Metrics alert on rates. Logs alert on specifics. If you need to fire when one error type shows up more than N times a minute, or when one dependency starts failing, and no metric exists for it, the log stream is what you have.
 
-The result is a Grafana alert rule backed by a LogQL query, routing to PagerDuty or Slack based on severity labels, with a tested notification payload that includes a runbook link.
+The result is a Grafana-managed alert rule backed by a LogQL query, routed to PagerDuty or Slack by a `severity` label, with a notification that carries a runbook link. [Log-Based Monitoring](/guides/log-based-monitoring/) is the conceptual companion: why these queries work, and when a log-derived metric is the better choice.
 
-{{< mermaid caption="Fig. — A LogQL threshold rule in Grafana routes critical errors to PagerDuty and warnings to Slack, based on severity labels set at alert-rule time." >}}
+{{< mermaid caption="Fig. — Logs arrive in Loki over OTLP. A Grafana alert rule evaluates a LogQL query, and the notification policy routes on the rule's severity label." >}}
 flowchart LR
-    app["Service logs<br/>(structured JSON)"] --> agent["Promtail<br/>(log shipper)"]
-    agent --> loki[("Loki")]
-    loki --> rule["Grafana alert rule<br/>LogQL + threshold"]
-    rule -->|severity=critical| pd["PagerDuty (P1)"]
-    rule -->|severity=warning| slack["Slack"]
-    style rule fill:#1A1A2E,stroke:#3A6FAF,color:#5B8DEF,stroke-width:1.5px,stroke-dasharray:2 2
-    style pd fill:#2A1414,stroke:#CD384B,color:#FF6060,stroke-width:3px
-    style slack fill:#2A2410,stroke:#D4820A,color:#F5A623,stroke-width:2.5px,stroke-dasharray:5 3
+    app["Service<br/>(OTel SDK)"] -->|OTLP| loki[("Loki")]
+    loki --> rule["Alert rule<br/>LogQL + threshold"]
+    rule --> policy["Notification<br/>policy"]
+    policy -->|critical| pd["PagerDuty"]
+    policy -->|warning| slack["Slack"]
 {{< /mermaid >}}
 
-## Prerequisites
+## What you'll need
 
-- Loki running and receiving logs (Docker Compose setup below if you need it)
-- Grafana with the Loki data source configured
-- Logs are structured JSON with at minimum a `level` field and a `service` field
+- Loki 3.x receiving logs over OTLP at its `/otlp` endpoint, and Grafana with Loki added as a data source. The [quickstart at the end](#docker-compose-quickstart) gives you both locally.
+- Structured logs with OpenTelemetry field names: `service.name` as a resource attribute, a numeric severity, and `error.type` on failures. [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/) covers the schema.
 
-## Verify Log Ingestion
+Loki promotes `service.name` to the index label `service_name`. Severity, trace IDs and log attributes land as structured metadata, with dots turned into underscores (`error.type` becomes `error_type`), so you filter on them without a parser. If you ship JSON lines instead of OTLP, add `| json` after the stream selector and the same field names come out.
 
-Open Grafana → Explore → select Loki as the data source. Run a label query to confirm streams exist:
+## Step 1 — Confirm the Logs Are There
 
-```logql
-{service="payment-api"}
-```
-
-If no results come back, Promtail or Alloy is not running, or the target path in the scrape config does not match where your application writes logs. The stream selector must match labels in your scrape config exactly — `service` not `app` if your config uses `service`.
-
-To confirm JSON parsing works, add the `json` parser:
+Open Grafana → **Explore**, pick the Loki data source and run:
 
 ```logql
-{service="payment-api"} | json
+{service_name="payment-api"}
 ```
 
-Fields parsed from JSON appear in the log line detail panel on the right. If you see `level`, `error_type`, and other structured fields listed as detected fields, parsing is working. If you see nothing, the logs are not valid JSON — check whether your application is writing structured output or mixing plain text with JSON lines.
+No results means nothing is arriving under that name. Check the exporter's endpoint and that the service sets `service.name` at startup. A service that never sets it lands under an `unknown_service` name instead.
 
-## Write the LogQL Detection Query
+Expand any line. The detail panel lists the structured metadata, and you want to see `severity_number`, `error_type` and `trace_id` there. If `severity_number` is missing, the logging bridge isn't mapping levels. Alert rules filter on that number, so fix it before going further. [Log Levels](/guides/log-levels-and-severity/#one-scale-many-dialects) has the mapping: 17 and above is ERROR.
 
-Pick the pattern that matches your failure condition.
+## Step 2 — Write the Detection Query
 
-**Pattern 1: Error rate threshold**
+Pick the pattern that matches your failure.
+
+**Error volume:**
 
 ```logql
-sum(count_over_time({service="payment-api"} | json | level="error" [1m]))
+sum(count_over_time({service_name="payment-api"} | severity_number >= 17 [1m]))
 ```
 
-This counts error log lines per minute across all instances of `payment-api`. Use it when you want to alert on sustained error volume — for example, more than 10 errors per minute for two consecutive minutes.
+Error records per minute across every instance of `payment-api`. Filtering on the number catches `Error`, `ERROR` and `err` alike.
 
-**Pattern 2: Specific error type**
+**A specific error type:**
 
 ```logql
-sum(count_over_time({service="payment-api"} | json | error_type="gateway_timeout" [5m]))
+sum(count_over_time({service_name="payment-api"} | error_type="gateway_timeout" [5m]))
 ```
 
-Replace `error_type="gateway_timeout"` with any field-value pair from your log schema. This fires on a specific failure condition, not just any error — useful when one error type carries more operational weight than others. A single `gateway_timeout` may warrant a page where a hundred `validation_error` entries do not.
+One `gateway_timeout` may deserve a page where a hundred `validation_error` records don't. Swap in any bounded field from your schema.
 
-**Pattern 3: Dependency failure**
+**A failing dependency:**
 
 ```logql
-sum(count_over_time({service="checkout"} | json | upstream_service="inventory" | level="error" [5m]))
+sum(count_over_time({service_name="checkout"} | upstream_service="inventory" | severity_number >= 17 [5m]))
 ```
 
-Scopes to errors attributed to a specific upstream. Fire this when inventory is down, not when anything in checkout is misbehaving. The distinction keeps checkout on-call from chasing a problem that belongs to the inventory team.
+This fires when inventory is failing, not when anything in checkout misbehaves, so checkout's on-call isn't chasing a problem that belongs to another team.
 
-Test each query in Grafana Explore before wiring it into an alert rule. Switch from "Logs" to "Metrics" mode using the toggle in the query builder — the graph view shows you the rate over time and lets you tune the time window and threshold before committing to an alert definition.
+Leave the comparison (`> 5`) out of the query. The threshold goes in the rule, and Step 3 explains why that matters. Run each query in Explore over the last few hours first, to see what the normal level looks like before you pick a number.
 
-## Create the Alert Rule in Grafana
+*Queries checked against the Loki LogQL docs and Loki's OTLP ingestion source (v3.7); not run against a live Loki.*
 
-Navigate to Grafana → Alerting → Alert Rules → New Alert Rule.
+## Step 3 — Create the Alert Rule
 
-**Query:** Paste your LogQL query from the previous step. Set the data source to Loki.
+Go to **Alerts & IRM → Alert rules → + New alert rule**.
 
-**Expression:** Add a "Threshold" expression. Set the condition to `IS ABOVE 5`. Adjust the threshold to your failure tolerance — for a specific error type you never expect to see, even `IS ABOVE 0` is appropriate.
+**Query and condition.** Select the Loki data source and paste the query. Set the query **Type** to **Instant**. A range query returns many points per series, and the rule can only compare one number. Instant gives you that number without a separate Reduce step. Then set the alert condition to **Is above 5**. For an error type you never expect to see, **Is above 0** is fine.
 
-**Evaluation group:** Set the evaluation interval to `1m`. Set the pending period to `2m`. The pending period requires the condition to hold continuously before the alert transitions to Firing — it absorbs transient spikes that resolve on their own. For critical failures where any occurrence matters, set the pending period to `0`.
+**No data handling.** This is the setting most log alerts get wrong. A LogQL metric query returns *no series* when no lines match, not a `0`. For an error count, no matching lines is the healthy case. Left on the default, a quiet service sends the rule to the No Data state instead of resolving. Under **Configure no data and error handling**, set the no-data state to **Normal**.
 
-**Labels:** Add `service=payment-api` and either `severity=warning` or `severity=critical`. These labels drive notification routing in the next step — they are not cosmetic.
+**Evaluation.** Choose a folder and an evaluation group with a `1m` interval. Set the **pending period** to `2m`, so the condition has to hold across consecutive evaluations before the alert fires. That absorbs one-off spikes. For a failure where a single occurrence matters, set it to `0s`.
 
-**Annotations:** Add a `summary` annotation describing what fired, for example:
+**Labels.** Add `severity=critical` or `severity=warning`, plus `service=payment-api`. The notification policy routes on these, so they are not cosmetic. [Alert Severity Levels](/guides/alert-severity-levels/) covers which failures earn which level.
 
-```
-payment-api error rate exceeded threshold ({{ $value }} errors in last 1m)
-```
+**Annotations.** Fill in **Summary** and **Runbook URL**. Template the summary from the query's own value:
 
-Add a `runbook_url` annotation pointing to the runbook for this alert. Both annotations appear in the notification body. A notification without a runbook link forces the on-call engineer to hunt for context at 3am.
-
-Save the rule.
-
-## Configure the Notification Channel
-
-Navigate to Grafana → Alerting → Contact Points → Add Contact Point.
-
-**PagerDuty:**
-
-- Integration: PagerDuty
-- Integration Key: your Events API v2 service integration key
-- Severity: use the "Override severity" option to map the `severity=critical` label to P1 and `severity=warning` to P2
-
-**Slack:**
-
-- Integration: Slack
-- Webhook URL: your Slack app incoming webhook URL
-- Title template:
-
-```
-{{ .Labels.service }} — {{ .Annotations.summary }}
+```text
+payment-api logged {{ $values.A.Value }} error records in the last minute
 ```
 
-- Message body: include `{{ .Annotations.runbook_url }}` so the runbook link appears in every notification without requiring the engineer to navigate anywhere
+`$values` holds the result of each instant query and expression by its Ref ID. The query is `A` unless you renamed it. Grafana's docs recommend it over `$value`, which renders every query and expression as one long string. [Alert Design Principles](/articles/alert-design-principles/#the-four-questions-every-alert-must-answer) covers what else belongs in the body.
 
-After creating the contact points, set a notification policy that routes by severity label. Navigate to Alerting → Notification Policies and add two matchers:
+**Notifications.** Route through the notification policy tree rather than picking a single contact point. Routing by label is what Step 4 sets up. Save the rule.
 
-- `severity=critical` → PagerDuty contact point
-- `severity=warning` → Slack contact point
+*Checked against Grafana's alert rule, Loki alerting and template reference docs; not run.*
 
-Without this policy, all alerts go to the default contact point regardless of severity. The label-based routing is what makes the PagerDuty escalation intentional rather than universal.
+## Step 4 — Route to PagerDuty and Slack
 
-## Test the Alert End to End
+Create two contact points under **Alerts & IRM → Alerting → Contact points**.
 
-Generate a log line that matches your query condition. The simplest path is injecting directly into Loki via the push API:
+**PagerDuty.** In PagerDuty, add an **Events API V2** integration to the service and copy its integration key. In Grafana, pick the PagerDuty integration and paste the key. The **Severity** field is optional and defaults to `critical`. It accepts a template, such as `{{ .CommonLabels.severity }}`, and must resolve to `critical`, `error`, `warning` or `info`. Anything else falls back to `critical`. Grafana can't set incident priority (P1, P2). Configure that on the PagerDuty side.
+
+**Slack.** Paste an incoming-webhook URL (`https://hooks.slack.com/services/...`), or use a bot token with a channel ID as the recipient. Either way, one contact point posts to one channel. Under the optional settings, template the title and text body:
+
+```text
+{{ .CommonLabels.service }}: {{ .CommonAnnotations.summary }}
+```
+
+```text
+{{ range .Alerts.Firing }}{{ .Annotations.summary }}
+Runbook: {{ .Annotations.runbook_url }}
+{{ end }}
+```
+
+`$values` and `$labels` belong to the rule's annotations. Notification templates see different data: the grouped alerts, each with its own `.Labels` and `.Annotations`. That's why the body loops over `.Alerts.Firing`.
+
+Then open **Notification policies** and add two child policies under the default policy:
+
+- matcher `severity = critical` → PagerDuty contact point
+- matcher `severity = warning` → Slack contact point
+
+Anything that matches neither falls through to the default policy's contact point. Labels are what make the page deliberate rather than universal.
+
+*Checked against Grafana's PagerDuty, Slack and notification template docs and the PagerDuty receiver source; not run.*
+
+## Step 5 — Test It End to End
+
+Push error records straight into Loki's OTLP endpoint. This loop sends one every two seconds for three minutes, enough to clear a threshold of 5 per minute for longer than the 2-minute pending period:
 
 ```bash
-curl -X POST http://localhost:3100/loki/api/v1/push \
-  -H "Content-Type: application/json" \
-  -d '{
-    "streams": [{
-      "stream": {"service": "payment-api"},
-      "values": [[
-        "'"$(date +%s%N)"'",
-        "{\"level\":\"error\",\"error_type\":\"gateway_timeout\",\"message\":\"test\"}"
-      ]]
-    }]
-  }'
+for i in $(seq 1 90); do
+  ts="$(date +%s)000000000"   # nanoseconds; macOS date has no %N
+  curl -s -X POST http://localhost:3100/otlp/v1/logs \
+    -H "Content-Type: application/json" \
+    -d '{"resourceLogs":[{"resource":{"attributes":[
+          {"key":"service.name","value":{"stringValue":"payment-api"}}]},
+        "scopeLogs":[{"logRecords":[{
+          "timeUnixNano":"'"$ts"'",
+          "severityNumber":17,"severityText":"ERROR",
+          "body":{"stringValue":"payment failed: gateway timeout ('"$i"')"},
+          "attributes":[{"key":"error.type","value":{"stringValue":"gateway_timeout"}}]
+        }]}]}]}'
+  sleep 2
+done
 ```
 
-Triggering a real error path confirms end-to-end log emission rather than just the alert pipeline.
+*Payload checked against the OTLP/JSON encoding and Loki's `/otlp/v1/logs` handler; the generated JSON was validated, the `curl` was not run.*
 
-In Grafana → Alerting → Alert Rules, watch the alert state transition: Normal → Pending (condition met, waiting for the pending period) → Firing. If the alert stays in Normal after the condition is met, check the rule's evaluation status in Alerting → Alert Rules and confirm the Loki data source connection is healthy (Connections → Data sources → Loki → Test). This is a Grafana-managed alert querying Loki as a data source — not a Loki-native ruler-based alert — so the Loki ruler component isn't involved; query load against the data source or a misconfigured evaluation interval is what causes evaluation lag that masks the state transition.
+On the rule list, watch the state move from **Normal** to **Pending** (condition met, pending period running) to **Firing**. If it stays Normal, open the rule's state history and run the query in Explore over the same window. Then check the data source with **Connections → Data sources → Loki → Save & test**. This is a Grafana-managed rule, so it evaluates in Grafana and the Loki ruler plays no part.
 
-Once the alert reaches Firing, confirm the notification arrived in your contact point. Check the payload for the `runbook_url` annotation and the `service` label. If they are missing, the annotation template has a syntax error — Grafana drops the field silently rather than failing the notification.
+Once it fires, check the notification. The summary should show the count and the runbook link should resolve. Then stop the loop and confirm the alert resolves rather than going to No Data. That's the no-data setting from Step 3 doing its job.
 
-## Adapting the Query to Your Stack
+The push proves the alert pipeline, not your service. Before you rely on the rule, trigger the real failure path once, in staging, so you know the service writes the record the query expects.
 
-**High-cardinality fields:** Do not filter on `user_id`, `trace_id`, or `request_id` in an alert query. These fields cause Loki to scan every log line against a unique value. Aggregate first, then alert on the aggregate:
+## Adapting the Query
+
+**Group by bounded fields only.** Filtering on a `user_id` or `request_id` is fine for an investigation. Grouping an alert by one isn't. `sum by (user_id)` creates a series, and potentially an alert, per user. Group by something with a handful of values instead:
 
 ```logql
 sum by (error_type) (
-  count_over_time({service="payment-api"} | json | level="error" [5m])
-) > 5
+  count_over_time({service_name="payment-api"} | severity_number >= 17 [5m])
+)
 ```
 
-**Multi-service correlation:** Two alert rules with a composite condition in Grafana (A AND B both firing) is the cleanest approach for cross-service alerts. Single-query cross-stream correlation in LogQL requires both services to emit to the same Loki stream, which undermines label-based partitioning and makes stream cardinality harder to control.
+Each `error_type` becomes its own alert instance, with the value in `$labels.error_type`. [Cardinality: Aggregate First](/guides/log-based-monitoring/#cardinality-aggregate-first-alert-on-the-aggregate) explains the stream-level side of the same trap.
 
-**Rate of change instead of absolute count:** When baseline request volume varies significantly, alerting on an absolute error count produces both false positives at high volume and false negatives at low volume. Alert on the error fraction instead:
+**Alert on a ratio when traffic varies.** A fixed count misfires both ways when volume swings. Divide by total requests instead:
 
 ```logql
-(
-  sum(count_over_time({service="payment-api"} | json | level="error" [5m]))
-  /
-  sum(count_over_time({service="payment-api"} [5m]))
-) > 0.05
+sum(count_over_time({service_name="checkout"} | http_response_status_code >= 500 [5m]))
+/
+sum(count_over_time({service_name="checkout"} | http_response_status_code != "" [5m]))
 ```
 
-This fires when more than 5% of log lines are errors — independent of request volume. Set the threshold based on your service's normal error floor.
+Set the rule's condition to **Is above 0.05**. This only works when each request writes exactly one record carrying `http.response.status_code`. Count every line and the denominator measures chattiness, not traffic. A ratio like this is also an SLI. Fed into multi-window burn-rate alerts, a 14.4× burn on a 30-day SLO exhausts the budget in about 2.1 days. [SLOs and Error Budgets](/guides/slos-and-error-budgets/#burn-rate-alerts) has the math, and [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) the rules.
+
+**Correlate services in one rule.** Add a second query (`B`) to the same rule, for example inventory's 503 count, and replace the threshold with a Math expression such as `$A > 0 && $B > 5`. Both queries need to be instant, or reduced, for that. The rule fires only when both conditions hold. [Multi-Condition Alerts](/guides/log-based-monitoring/#multi-condition-alerts) covers when that is worth the complexity.
 
 ## Docker Compose Quickstart
 
-Minimal local setup for Loki, Promtail, and Grafana:
+Loki and Grafana locally, with Loki already provisioned as a data source. Loki's image ships a config with structured metadata enabled and the `/otlp` endpoint on by default, so it needs no config file of its own. Anonymous admin access is for a laptop only.
 
 ```yaml
 # docker-compose.yaml
 services:
   loki:
-    image: grafana/loki:3.0.0
+    image: grafana/loki:3.7.8
     ports:
       - "3100:3100"
-    command: -config.file=/etc/loki/local-config.yaml
-
-  promtail:
-    image: grafana/promtail:3.0.0
-    volumes:
-      - /var/log:/var/log:ro
-      - ./promtail-config.yaml:/etc/promtail/config.yaml
-    command: -config.file=/etc/promtail/config.yaml
-    depends_on:
-      - loki
 
   grafana:
-    image: grafana/grafana:11.0.0
+    image: grafana/grafana:13.2.3
     ports:
       - "3000:3000"
     environment:
       - GF_AUTH_ANONYMOUS_ENABLED=true
       - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_FEATURE_TOGGLES_ENABLE=alertingSimplifiedRouting
+    volumes:
+      - ./loki-datasource.yaml:/etc/grafana/provisioning/datasources/loki.yaml:ro
     depends_on:
       - loki
 ```
 
 ```yaml
-# promtail-config.yaml
-server:
-  http_listen_port: 9080
-
-positions:
-  filename: /tmp/positions.yaml
-
-clients:
-  - url: http://loki:3100/loki/api/v1/push
-
-scrape_configs:
-  - job_name: app-logs
-    static_configs:
-      - targets:
-          - localhost
-        labels:
-          service: payment-api
-          __path__: /var/log/app/*.log
+# loki-datasource.yaml
+apiVersion: 1
+datasources:
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    isDefault: true
 ```
 
-The Promtail setup above is the legacy tool used in this walkthrough — it still runs, but ship new deployments with Alloy instead.
+Point your service's OTLP log exporter, or an OpenTelemetry Collector's `otlphttp` exporter, at `http://localhost:3100/otlp`. The exporter appends `/v1/logs` itself. Or use the test loop from Step 5 as your traffic.
+
+*Checked against the Loki v3.7.8 image's bundled config and Grafana's provisioning docs; YAML validated; not run.*
 
 {{< insight bookmark >}}
-**Promtail is end-of-life — ship new deployments with Grafana Alloy.** Promtail entered LTS in February 2025 and reached end-of-life on **March 2, 2026**: no further updates, fixes, or support. Grafana Alloy is the official replacement for sending logs to Loki. Migrate an existing Promtail config with `alloy convert --source-format=promtail --output=config.alloy promtail-config.yaml` — the scrape semantics carry over; the config language changes.
+**Still on Promtail? It reached end-of-life on March 2, 2026** and gets no further fixes. Grafana Alloy is the replacement for shipping logs to Loki. `alloy convert --source-format=promtail --output=config.alloy promtail-config.yaml` translates an existing config. The scrape semantics carry over and the config language changes. New services can skip the shipper entirely and send OTLP, as above.
 {{< /insight >}}
 
 {{< obs-mascot class="bard" quip="Every log line is a verse; every stack trace, a tragic ballad. I have arranged ten thousand gateway_timeout errors into a concept album. It pages at 2am. It is my finest work. On-call did not ask for a concept album." caption="Bawk Dylan, who swears the error rate has a rhythm if you'd just LISTEN." >}}
