@@ -17,7 +17,7 @@
   <div class="diag-card" tabindex="0" style="padding:1.2rem 1rem 0.8rem;">
     <svg viewBox="0 0 680 352" xmlns="http://www.w3.org/2000/svg"
          role="img" aria-labelledby="mem-title mem-desc"
-         style="width:100%;display:block;font-family:var(--font-code);">
+         style="min-width:680px;width:100%;display:block;font-family:var(--font-code);">
       <title id="mem-title">Memory leak p99 latency progression over 12 hours</title>
       <desc id="mem-desc">Line chart showing p99 latency rising from 70ms at hour 0 to 745ms at hour 12. At hour 4, a predictive flag is raised, marked with a hollow circle. At hour 10, the 500ms alert threshold is breached, marked with a filled square. The predictive model provides a 6-hour early warning window. Customer impact begins around hour 8, marked with a dashed boundary line rather than a tinted zone.</desc>
 
@@ -99,10 +99,10 @@
       <text x="99" y="324" fill="var(--mc-ink-secondary)" font-size="12.5">p99 latency</text>
       <line x1="200" y1="320" x2="222" y2="320" stroke="var(--mc-ramp-3)" stroke-width="1.6" stroke-dasharray="6,3"/>
       <text x="227" y="324" fill="var(--mc-ink-secondary)" font-size="12.5">alert threshold</text>
-      <circle cx="345" cy="320" r="4.5" fill="var(--fig-bg)" stroke="var(--mc-ramp-3)" stroke-width="1.8"/>
-      <text x="353" y="324" fill="var(--mc-ink-secondary)" font-size="12.5">predictive flag</text>
-      <rect x="472" y="316" width="8" height="8" fill="var(--mc-ramp-1)"/>
-      <text x="484" y="324" fill="var(--mc-ramp-1)" font-size="12.5">threshold breach</text>
+      <circle cx="359" cy="320" r="4.5" fill="var(--fig-bg)" stroke="var(--mc-ramp-3)" stroke-width="1.8"/>
+      <text x="370" y="324" fill="var(--mc-ink-secondary)" font-size="12.5">predictive flag</text>
+      <rect x="492" y="316" width="8" height="8" fill="var(--mc-ramp-1)"/>
+      <text x="506" y="324" fill="var(--mc-ramp-1)" font-size="12.5">threshold breach</text>
     </svg>
   </div>
   <figcaption>Fig. 2 — A predictive model flags the leak 6 hours before the alert threshold breaks. By then, customers were already calling.</figcaption>
