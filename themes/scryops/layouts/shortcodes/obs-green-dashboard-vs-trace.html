@@ -1,0 +1,87 @@
+{{- /* layouts/shortcodes/obs-green-dashboard-vs-trace.html
+     The opening incident of distributed-tracing-dashboard-was-green.md, shown
+     twice: the aggregate view (three tiles, all inside threshold) beside one
+     trace's span waterfall, where db.query returns null and the request still
+     ends 200 OK with a $0.00 total. Fixed data, no parameters, same convention
+     as the other fixed-data obs- figures. Span names, trace-id and the 847 ms
+     db.query match the article's sequence diagram, so the two figures agree.
+
+     Sizes are measured, not guessed: 760-unit viewBox with an inline
+     min-width of 680px, so 13.5-unit labels render >= 12.1px and 11.5-unit
+     pixel eyebrows >= 10.3px at phone width; ~689px on desktop is wider still.
+     The healthy tick uses --green as a mark only (graphic contrast), with the
+     word beside it on --mc-ink-secondary, so it reads under pref-mono.
+     The highlighted span is told apart by ramp step AND fill AND stroke
+     weight, never by hue. Plain characters only inside the SVG: an undeclared
+     named HTML entity there fails the well-formedness check. */ -}}
+{{- $tiles := slice
+      (dict "label" "error rate"    "value" "0.3%"  "limit" "alert at 1%")
+      (dict "label" "latency p50"   "value" "42 ms" "limit" "alert at 200 ms")
+      (dict "label" "health checks" "value" "4 / 4" "limit" "all passing") -}}
+{{- /* name, start ms, end ms; the last span is the silent failure */ -}}
+{{- $spans := slice
+      (slice "POST /checkout" 0 960)
+      (slice "cart.validate" 20 940)
+      (slice "promo.apply" 50 925)
+      (slice "db.query" 65 912) -}}
+{{- $x0 := 488.0 -}}{{- $pxPerMs := 0.24 -}}
+<figure class="diagram">
+  <div class="diag-card" tabindex="0" style="padding:0.9rem 0.9rem 0.6rem;">
+    <svg viewBox="0 0 760 292" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="gdt-title gdt-desc"
+         style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
+      <title id="gdt-title">The same incident: a green dashboard beside one broken trace</title>
+      <desc id="gdt-desc">Left panel: the dashboard at 2 a.m. shows an error rate of 0.3 percent against a 1 percent alert, latency p50 of 42 milliseconds against a 200 millisecond alert, and 4 of 4 health checks passing, so nothing pages. Right panel: one checkout trace, trace-id a1b2c3, drawn as a span waterfall. POST /checkout calls cart.validate, which calls promo.apply, which calls db.query. The db.query span takes 847 milliseconds and returns null without recording an error, and the request finishes 200 OK with a total of 0.00 dollars.</desc>
+      <rect x="0" y="0" width="760" height="292" fill="var(--fig-bg)"/>
+
+      <!-- left: the aggregate view -->
+      <text x="24" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">THE DASHBOARD, 02:04</text>
+      <text x="24" y="48" fill="var(--mc-ink-secondary)" font-size="13.5">// every aggregate inside its line</text>
+      {{- range $i, $t := $tiles }}
+      {{- $y := add 64 (mul $i 62) }}
+      <rect x="24" y="{{ $y }}" width="270" height="52" fill="none" stroke="var(--fig-bd)" stroke-width="1"/>
+      <text x="36" y="{{ add $y 20 }}" fill="var(--mc-ink-secondary)" font-size="13.5">{{ $t.label }}</text>
+      <text x="282" y="{{ add $y 20 }}" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">{{ $t.limit }}</text>
+      <text x="36" y="{{ add $y 43 }}" fill="var(--heading)" font-size="20">{{ $t.value }}</text>
+      <text x="258" y="{{ add $y 43 }}" fill="var(--green)" font-size="15" text-anchor="end">✓</text>
+      <text x="282" y="{{ add $y 43 }}" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">ok</text>
+      {{- end }}
+      <text x="24" y="268" fill="var(--mc-ink-secondary)" font-size="13.5">→ nothing pages. nobody looks.</text>
+
+      <!-- divider inside the card: an inner rule, so the border token, not frame -->
+      <line x1="318" y1="18" x2="318" y2="274" stroke="var(--border)" stroke-width="1"/>
+
+      <!-- right: one request -->
+      <text x="342" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">ONE TRACE, a1b2c3</text>
+      <text x="342" y="48" fill="var(--mc-ink-secondary)" font-size="13.5">// the request that actually broke</text>
+
+      {{- /* time axis: 0 / 500 ms / 1 s, gridlines are marks so --mc-ramp-5 */ -}}
+      {{- range $ms := slice 0 500 1000 }}
+      {{- $gx := add $x0 (mul $pxPerMs $ms) }}
+      <line x1="{{ $gx }}" y1="80" x2="{{ $gx }}" y2="192" stroke="var(--mc-ramp-5)" stroke-width="1" stroke-dasharray="2 3"/>
+      {{- end }}
+      <text x="{{ $x0 }}" y="74" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">0</text>
+      <text x="{{ add $x0 120 }}" y="74" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="middle">500 ms</text>
+      <text x="{{ add $x0 240 }}" y="74" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">1 s</text>
+
+      {{- range $i, $s := $spans }}
+      {{- $y := add 86 (mul $i 28) }}
+      {{- $bx := add $x0 (mul $pxPerMs (index $s 1)) }}
+      {{- $bw := mul $pxPerMs (sub (index $s 2) (index $s 1)) }}
+      <text x="{{ add 342 (mul $i 8) }}" y="{{ add $y 13 }}" fill="var(--heading)" font-size="13.5">{{ index $s 0 }}</text>
+      {{- if eq $i 3 }}
+      <rect x="{{ $bx }}" y="{{ $y }}" width="{{ $bw }}" height="16" fill="var(--mc-ramp-1)" stroke="var(--mc-ramp-1)" stroke-width="2"/>
+      {{- else }}
+      <rect x="{{ $bx }}" y="{{ add $y 3 }}" width="{{ $bw }}" height="10" fill="var(--mc-tint)" stroke="var(--mc-ramp-4)" stroke-width="1.2"/>
+      {{- end }}
+      {{- end }}
+
+      <!-- the silent failure, annotated on the span itself -->
+      <text x="358" y="214" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">SILENT FAIL</text>
+      <text x="472" y="214" fill="var(--heading)" font-size="13.5">db.query 847 ms → null</text>
+      <text x="472" y="231" fill="var(--mc-ink-secondary)" font-size="13.5">span status unset, no error</text>
+      <text x="342" y="268" fill="var(--heading)" font-size="13.5">→ 200 OK, total $0.00</text>
+    </svg>
+  </div>
+  <figcaption>Fig. — The dashboard averages this request away. The trace is the only view where the null discount shows up.</figcaption>
+</figure>

@@ -1,0 +1,74 @@
+{{- /* layouts/shortcodes/obs-head-vs-tail-sampling.html
+     Head- vs tail-based sampling on the same illustrative window of 400
+     requests (380 ok, 12 slow over 1 s, 8 errors). Both rows spend about the
+     same budget, ~40 kept traces. Head keeps 10% of everything (the expected
+     counts, rounded: 0.8 errors -> 1, 1.2 slow -> 1, 38 ok). Tail keeps every
+     error, every slow trace and 5% of the rest (19 ok), matching the
+     article's errors / slow-traces / baseline-sample policy config.
+     Illustrative, labelled as such in the subtitle and desc.
+
+     Each kept trace is one cell. Kind is carried by SHAPE plus ramp step
+     (boxed X = error, solid square = slow, hollow square = ok), never hue, so
+     the figure reads unchanged under pref-mono. Sizes as obs-threshold-
+     reality: 760-unit viewBox, inline min-width 680px, 13.5-unit labels and
+     11.5-unit pixel eyebrows hold the 12px / 10px floors at phone width. */ -}}
+{{- $rows := slice
+      (dict "y" 112 "err" 1 "slow" 1 "ok" 38
+            "tag" "HEAD-BASED, DECIDED AT THE FRONT DOOR"
+            "note" "keeps 10% of everything, before it knows which trace matters"
+            "s1" "~1 of 8 errors" "s2" "~1 of 12 slow")
+      (dict "y" 198 "err" 8 "slow" 12 "ok" 19
+            "tag" "TAIL-BASED, DECIDED AFTER DECISION_WAIT"
+            "note" "keeps every error, every slow trace, 5% of the rest"
+            "s1" "8 of 8 errors" "s2" "12 of 12 slow") -}}
+<figure class="diagram">
+  <div class="diag-card" tabindex="0" style="padding:0.9rem 0.9rem 0.6rem;">
+    <svg viewBox="0 0 760 296" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="hts-title hts-desc"
+         style="width:100%;min-width:680px;display:block;font-family:var(--font-code);">
+      <title id="hts-title">Head-based vs tail-based sampling on the same budget</title>
+      <desc id="hts-desc">An illustrative window of 400 requests: 380 ok, 12 slow, 8 errors. Head-based sampling at 10 percent keeps about 40 traces chosen blind, so roughly 1 error, 1 slow trace and 38 ok traces. Tail-based sampling keeps 39 traces: all 8 errors, all 12 slow traces, and 19 ok traces from a 5 percent baseline. The storage cost is about the same; the contents are not.</desc>
+      <rect x="0" y="0" width="760" height="296" fill="var(--fig-bg)"/>
+
+      <text x="24" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">SAME BUDGET, DIFFERENT TRACES</text>
+      <text x="24" y="48" fill="var(--mc-ink-secondary)" font-size="13.5">// 400 requests: 380 ok, 12 slow (over 1 s), 8 errors. illustrative.</text>
+
+      {{- range $rows }}
+      {{- $r := . }}
+      {{- $cells := slice }}
+      {{- range seq $r.err }}{{ $cells = $cells | append "err" }}{{ end }}
+      {{- range seq $r.slow }}{{ $cells = $cells | append "slow" }}{{ end }}
+      {{- range seq $r.ok }}{{ $cells = $cells | append "ok" }}{{ end }}
+      <text x="24" y="{{ sub $r.y 28 }}" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">{{ $r.tag }}</text>
+      <text x="24" y="{{ sub $r.y 11 }}" fill="var(--mc-ink-secondary)" font-size="13.5">{{ $r.note }}</text>
+      {{- range $i, $k := $cells }}
+      {{- $x := add 24 (mul $i 14) }}
+      {{- if eq $k "err" }}
+      <rect x="{{ $x }}" y="{{ $r.y }}" width="12" height="12" fill="none" stroke="var(--mc-ramp-1)" stroke-width="1.6"/>
+      <line x1="{{ add $x 2 }}" y1="{{ add $r.y 2 }}" x2="{{ add $x 10 }}" y2="{{ add $r.y 10 }}" stroke="var(--mc-ramp-1)" stroke-width="2"/>
+      <line x1="{{ add $x 10 }}" y1="{{ add $r.y 2 }}" x2="{{ add $x 2 }}" y2="{{ add $r.y 10 }}" stroke="var(--mc-ramp-1)" stroke-width="2"/>
+      {{- else if eq $k "slow" }}
+      <rect x="{{ $x }}" y="{{ $r.y }}" width="12" height="12" fill="var(--mc-ramp-2)"/>
+      {{- else }}
+      <rect x="{{ add $x 1 }}" y="{{ add $r.y 1 }}" width="10" height="10" fill="none" stroke="var(--mc-ramp-4)" stroke-width="1.2"/>
+      {{- end }}
+      {{- end }}
+      <text x="736" y="{{ add $r.y 2 }}" fill="var(--heading)" font-size="13.5" text-anchor="end">{{ $r.s1 }}</text>
+      <text x="736" y="{{ add $r.y 19 }}" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">{{ $r.s2 }}</text>
+      {{- end }}
+
+      <!-- legend: shape carries the kind -->
+      <line x1="24" y1="240" x2="736" y2="240" stroke="var(--border)" stroke-width="1"/>
+      <rect x="24" y="254" width="12" height="12" fill="none" stroke="var(--mc-ramp-1)" stroke-width="1.6"/>
+      <line x1="26" y1="256" x2="34" y2="264" stroke="var(--mc-ramp-1)" stroke-width="2"/>
+      <line x1="34" y1="256" x2="26" y2="264" stroke="var(--mc-ramp-1)" stroke-width="2"/>
+      <text x="44" y="265" fill="var(--mc-ink-secondary)" font-size="13.5">error</text>
+      <rect x="110" y="254" width="12" height="12" fill="var(--mc-ramp-2)"/>
+      <text x="130" y="265" fill="var(--mc-ink-secondary)" font-size="13.5">slow, over 1 s</text>
+      <rect x="265" y="255" width="10" height="10" fill="none" stroke="var(--mc-ramp-4)" stroke-width="1.2"/>
+      <text x="284" y="265" fill="var(--mc-ink-secondary)" font-size="13.5">ok</text>
+      <text x="736" y="265" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">one cell = one kept trace</text>
+    </svg>
+  </div>
+  <figcaption>Fig. — Both strategies store about forty traces. Head sampling spends them on the happy path; tail sampling spends them on the requests you'd page about.</figcaption>
+</figure>
