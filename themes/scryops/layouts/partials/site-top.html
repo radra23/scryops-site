@@ -2,11 +2,7 @@
      Sticky chrome: pixel wordmark + section nav + reading-preferences panel
      (theme dark/light/calm + reading toggles; behavior in prefs.js). */ -}}
 <header class="site-top">
-  {{- /* Lens mark: the wordmark's split drawn as a 16-unit pixel disc —
-       dotted half = scry (Doto), solid half = ops (Pixelify). Split by
-       shape as well as colour, so it survives pref-mono. Decorative: the
-       link's name comes from the text. */ -}}
-  <a class="scry-wordmark" href="/"><svg class="scry-mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><defs><pattern id="scry-mark-dot" width="1" height="1" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".4" fill="currentColor"/></pattern></defs><path fill="url(#scry-mark-dot)" d="M5 2h3v1H5zM3 3h5v2H3zM2 5h6v6H2zM3 11h5v2H3zM5 13h3v1H5z"/><path class="scry-mark__ops" shape-rendering="crispEdges" d="M8 2h3v1H8zM8 3h5v2H8zM8 5h6v6H8zM8 11h5v2H8zM8 13h3v1H8z"/></svg><span class="scry-wordmark__scry">scry</span><span class="scry-wordmark__ops">ops</span></a>
+  <a class="scry-wordmark" href="/">{{ partial "brand-mark.html" "top" }}<span class="scry-wordmark__scry">scry</span><span class="scry-wordmark__ops">ops</span></a>
   <span class="site-tagline">observability decoded</span>
   {{- /* Under 600px the six links wrapped to two rows plus a third for
        Reading (~190px of chrome). The nav sits in a <details> so phones get
