@@ -1156,8 +1156,11 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .scry-fp__fill{height:100%;width:0;background:linear-gradient(90deg,var(--code-eco),var(--code-eco));transition:width .4s ease}
 .scry-fp.over .scry-fp__fill{background:linear-gradient(90deg,var(--code-danger),var(--code-warn))}
 .scry-fp__note{font-family:var(--font-read);font-size:10.5px;color:var(--code-muted)}
-.scry-fp__method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid transparent}
-.scry-fp__method:hover{border-bottom-color:var(--code-cyan)}
+/* Scoped under .scry-fp (0,2,0) so it out-ranks .site-footer a (0,1,1): the
+   badge sits on the always-dark well, and the footer's theme --cyan went to
+   dark ink there in light theme (1.1:1). Keeps the base a{} hairline. */
+.scry-fp .scry-fp__method{color:var(--code-cyan);text-decoration:none;border-bottom:1px solid color-mix(in srgb,currentColor 72%,transparent)}
+.scry-fp .scry-fp__method:hover{border-bottom-color:currentColor}
 @media (prefers-reduced-motion:reduce){.scry-fp__fill{transition:none}}
 
 /* In the site footer the badge stays compact and centered. */
