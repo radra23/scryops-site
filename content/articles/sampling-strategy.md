@@ -19,7 +19,7 @@ The appeal of head-based sampling is real. You make one decision per trace at th
 The information you need to make a good sampling decision doesn't exist yet at the moment you're forced to make it.
 
 {{< mermaid >}}
-flowchart LR
+flowchart TD
     A[Request Arrives] --> B{Sample?}
     B --->|5% keep| C[Trace Recorded]
     B --->|95% drop| D[Trace Discarded]

@@ -47,7 +47,7 @@ governance:
 `monitoring-tier` is the tag that drives alert routing decisions downstream. `alert-routing` connects a resource to the right team queue in your on-call tool without hard-coding team names in the alerting rules themselves.
 
 {{< mermaid >}}
-flowchart LR
+flowchart TD
     A["IaC Resource<br/>(Terraform / Helm)"]
     B["Env Var Injection<br/>OTEL_RESOURCE_ATTRIBUTES<br/>=deployment.environment=prod"]
     C["OTel ResourceBuilder<br/>attaches attributes<br/>to SDK on startup"]

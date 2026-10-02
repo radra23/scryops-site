@@ -18,13 +18,13 @@ Every one of these outages had a fix that was available weeks in advance: a rene
 Effective certificate monitoring requires purpose-built tools for this specific observability domain.
 
 {{< mermaid caption="Fig. — Certificate monitoring splits into three approaches: dedicated tools, infrastructure-based validation, and automation-first prevention." >}}
-graph TD
-    A[Certificate Monitoring Approaches] --> B[Dedicated Tools]
+graph LR
+    A[Certificate Monitoring<br/>Approaches] --> B[Dedicated Tools]
     A --> C[Infrastructure-Based]
     A --> D[Automation-First]
-    B --> B1[Enterprise: AppViewX / Venafi / Keyfactor]
-    B --> B2[Open Source: cert-manager / Certbot / CFSSL]
-    B --> B3[Cloud: AWS ACM / Azure KV / GCP CM]
+    B --> B1[Enterprise:<br/>AppViewX / Venafi / Keyfactor]
+    B --> B2[Open Source:<br/>cert-manager / Certbot / CFSSL]
+    B --> B3[Cloud:<br/>AWS ACM / Azure KV / GCP CM]
     C --> C1[Load balancers and proxies]
     C --> C2[Agent-based inspection]
     D --> D1[ACME protocol]
@@ -35,15 +35,17 @@ graph TD
 
 {{< mermaid caption="Fig. — Swapping a minute-by-minute synthetic loop for a daily certificate-tool check into your observability backend cuts check volume without losing lead time." >}}
 graph TB
-    subgraph "Synthetic Monitor Approach"
-    A[Synthetic Monitor] -->|Every minute| B[Check Certificate]
-    B -->|Repeat| A
-    end
-
     subgraph "Certificate Management Tool Approach"
+    direction TB
     C[Certificate Management Tool] -->|Daily check| D[Certificate Status]
     D -->|Forward data| E[Observability backend]
     E -->|Alert on| F[Expiration thresholds]
+    end
+
+    subgraph "Synthetic Monitor Approach"
+    direction TB
+    A[Synthetic Monitor] -->|Every minute| B[Check Certificate]
+    B -->|Repeat| A
     end
 {{< /mermaid >}}
 

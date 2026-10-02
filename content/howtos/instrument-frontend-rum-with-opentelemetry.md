@@ -318,21 +318,21 @@ Wrap it at the application root or around any subtree that should be isolated:
 ## What This Instrumentation Covers
 
 {{< mermaid caption="Fig. — This instrumentation splits into three categories: performance, user interactions, and errors, each fed by its own auto or manual span source." >}}
-flowchart TD
+flowchart LR
     A[Frontend Telemetry] --> B[Performance]
     A --> C[User Interactions]
     A --> D[Errors]
 
-    B --> B1[Page load — DocumentLoadInstrumentation]
-    B --> B2[Component lifetime — useTraceComponentLifetime]
-    B --> B3[API round-trip — fetchFact span + histogram]
+    B --> B1["Page load<br/>DocumentLoadInstrumentation"]
+    B --> B2["Component lifetime<br/>useTraceComponentLifetime"]
+    B --> B3["API round-trip<br/>fetchFact span + histogram"]
 
-    C --> C1[Click events — UserInteractionInstrumentation]
-    C --> C2[Form submits — UserInteractionInstrumentation]
-    C --> C3[Custom actions — useTrackInteraction]
+    C --> C1["Click events<br/>UserInteractionInstrumentation"]
+    C --> C2["Form submits<br/>UserInteractionInstrumentation"]
+    C --> C3["Custom actions<br/>useTrackInteraction"]
 
-    D --> D1[React component errors — TelemetryErrorBoundary]
-    D --> D2[Fetch failures — FetchInstrumentation + manual span]
+    D --> D1["React component errors<br/>TelemetryErrorBoundary"]
+    D --> D2["Fetch failures<br/>FetchInstrumentation + manual span"]
 {{< /mermaid >}}
 
 <!-- TODO: Add step for capturing Core Web Vitals (LCP, CLS, FID/INP) using the web-vitals library -->
