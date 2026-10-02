@@ -156,7 +156,7 @@ Alert on `prometheus_tsdb_head_series` growth rate, not just absolute count. A P
 Before a metric ships, it should pass three distinct validation concerns:
 
 {{< mermaid caption="Fig. — Metric testing has three independent gates: accuracy, reliability, and performance. A metric can pass one and still fail the others." >}}
-graph TD
+graph LR
     A[Metric Testing] --> B[Accuracy]
     A --> C[Reliability]
     A --> D[Performance]

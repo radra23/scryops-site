@@ -96,7 +96,7 @@ Which SLIs fit depends on the service type. A batch job or a queue consumer need
 Set initial targets from observed performance, not aspirational performance:
 
 {{< mermaid caption="Fig. — Set the initial SLO below observed performance, then tighten it on a quarterly review cycle as the service's real variance becomes clear." >}}
-graph LR
+graph TD
     A[Measure current performance] --> B[Set target below current level]
     B --> C[Monitor 2-3 months]
     C --> D[Gather user feedback]
@@ -111,7 +111,7 @@ Setting the initial SLO below current performance gives you a buffer while you l
 The error budget only works as a decision-making tool if the policy around it is written down and enforced. Three areas need explicit policy:
 
 {{< mermaid caption="Fig. — A usable error budget policy defines three things in advance: what counts as consumption, when the budget resets, and what action each threshold requires." >}}
-graph TD
+graph LR
     A[Error Budget Policy] --> B[Consumption rules]
     A --> C[Reset policy]
     A --> D[Response actions]
@@ -132,7 +132,7 @@ graph TD
 ## Integration with Business Processes
 
 {{< mermaid caption="Fig. — The error budget feeds three business processes directly: deploy go/no-go decisions, capacity investment timing, and the feature-versus-reliability tradeoff." >}}
-graph TD
+graph LR
     A[SLO / Error Budget] --> B[Change management]
     A --> C[Capacity planning]
     A --> D[Product decisions]
