@@ -1002,7 +1002,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* footer */
 .site-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center}
-.foot-logo{font-size:.65rem;color:var(--muted);margin-bottom:.8rem}
+.foot-logo{font-size:.65rem;color:var(--muted);margin-bottom:.8rem;display:flex;justify-content:center;align-items:center;gap:var(--sp-2)}
 .foot-logo__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .foot-logo__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
 .site-footer p{font-family:var(--font-code);font-size:.8rem;color:var(--muted)}
