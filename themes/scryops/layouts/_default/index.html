@@ -3,7 +3,10 @@
 
   <!-- Identity statement + topics + CTAs -->
   <section class="front-hero">
-    <div class="scry-eyebrow">scrying + ops</div>
+    {{- /* Lens in ink only: the first screen already holds ~4 green marks
+         (header ops + lens, "understanding", Start reading), so the split
+         here rides on shape alone — dotted = scrying, solid = ops. */}}
+    <div class="scry-eyebrow front-hero__eyebrow">{{ partial "brand-mark.html" "hero" }}<span>scrying + ops</span></div>
     <h1 class="landing-statement">raw telemetry in. <b>understanding</b> out.</h1>
     <p class="landing-lede">{{ site.Params.description }}</p>
     {{ with site.Params.topics }}

@@ -1076,6 +1076,8 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    in dark / light / calm. Collapses to one column < 820px. */
 .front{max-width:1080px;margin:0 auto;padding:0 28px 90px;display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;min-height:62vh}
 .front-hero{display:flex;flex-direction:column;gap:18px;padding:48px 0}
+.front-hero__eyebrow{display:flex;align-items:center;gap:var(--sp-2)}
+.front-hero__eyebrow .scry-mark__ops{fill:currentColor}   /* ink-only: keeps the hero under the green budget */
 .landing-statement{font-family:var(--font-display);font-weight:400;font-size:clamp(32px,5vw,46px);line-height:1.12;letter-spacing:-.02em;color:var(--heading);text-transform:lowercase;margin:0;max-width:18ch}
 .landing-statement b{color:var(--green);font-weight:400}
 .landing-lede{font-family:var(--font-read);font-size:var(--fs-lede);line-height:var(--lh-lede);letter-spacing:var(--read-track);color:var(--text);max-width:60ch;margin:0}
