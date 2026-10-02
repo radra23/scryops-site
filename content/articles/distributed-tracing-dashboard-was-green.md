@@ -1,5 +1,5 @@
 ---
-Title: "The dashboard was green, but the request was broken."
+title: "The dashboard was green, but the request was broken."
 date: 2026-09-27
 draft: false
 excerpt: "Metrics show something is wrong; logs report what happened in a specific place, but distributed tracing tells you what the request actually went through, and that's a different question entirely."
