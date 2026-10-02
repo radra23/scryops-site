@@ -650,8 +650,10 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    chrome — eyebrow, pixel wordmark, mode toggle
    ============================================================ */
 .scry-wordmark{font-size:13px;line-height:1;color:var(--heading)}
-.site-top .scry-wordmark{display:inline-flex;align-items:center;gap:var(--sp-2)}
+.site-top .scry-wordmark{display:inline-flex;align-items:center}
 .scry-mark{display:block;flex-shrink:0}
+/* space after the mark only — a flex gap would also split the scry|ops spans */
+.site-top .scry-wordmark .scry-mark,.foot-logo .scry-mark{margin-right:var(--sp-2)}
 .scry-mark__ops{fill:var(--green)}
 .scry-wordmark__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .scry-wordmark__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
@@ -1002,7 +1004,7 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 
 /* footer */
 .site-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center}
-.foot-logo{font-size:.65rem;color:var(--muted);margin-bottom:.8rem;display:flex;justify-content:center;align-items:center;gap:var(--sp-2)}
+.foot-logo{font-size:.65rem;color:var(--muted);margin-bottom:.8rem;display:flex;justify-content:center;align-items:center}
 .foot-logo__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .foot-logo__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
 .site-footer p{font-family:var(--font-code);font-size:.8rem;color:var(--muted)}
