@@ -801,6 +801,10 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    in the card like the obs-* figures. Applies at every width, since the
    desktop card is too narrow for the widest diagrams too. */
 .diag-card > svg[style*="max-width"]{min-width:var(--diag-min,0)}
+/* Below the 720px measure the 0.6 floor still left 8.4px flowchart and 9.6px
+   sequence labels. --diag-min-phone = viewBox x 12/14 holds Mermaid's 14px
+   labels at the 12px figure floor; the card pans instead of shrinking. */
+@media (max-width:720px){.diag-card > svg[style*="max-width"]{min-width:var(--diag-min-phone,var(--diag-min,0))}}
 
 /* divider between stacked comparison flows (obs-reactive-loop) */
 .flow-divider{height:1px;background:var(--border);margin:19px 0}

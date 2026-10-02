@@ -3,19 +3,25 @@
 {{- $svg := resources.Get (printf "diagrams/%s.svg" $hash) -}}
 {{- $alt := .Get "alt" | default (.Get "caption") | default "Diagram" -}}
 {{- if $svg -}}
-{{- /* Legibility floor: every pre-rendered diagram's
-     smallest label box is 18.5px (flowchart) to 21px (sequence) at scale 1.0,
-     so rendering at >= 0.6x the viewBox width keeps labels >= 11px. telemetry.css
-     applies it as min-width at every width; narrow TD diagrams stay below the
-     card width, so the floor never kicks in for them. */ -}}
+{{- /* Legibility floors, as min-widths derived from the viewBox width.
+     --diag-min (0.6x) applies at every width; it only bites on desktop for
+     viewBoxes over ~1130px, so diagrams that fit the 678px card still don't
+     scroll there. --diag-min-phone is the brief's 12px label floor: the
+     smallest label Mermaid emits is the 14px fontSize in
+     scripts/mermaid-config.json (flowchart nodes and edges, sequence notes),
+     so the scale must stay >= 12/14. telemetry.css applies it under 720px,
+     where the card would otherwise shrink every diagram to ~8px labels.
+     min-width never exceeds the viewBox width, so nothing is upscaled. */ -}}
 {{- $vb := index (findRESubmatch `viewBox="[-\d.]+ [-\d.]+ ([\d.]+)` $svg.Content 1) 0 -}}
-{{- $floor := math.Ceil (mul (float (index $vb 1)) 0.6) -}}
+{{- $vbw := float (index $vb 1) -}}
+{{- $floor := math.Ceil (mul $vbw 0.6) -}}
+{{- $floorPhone := math.Ceil (mul $vbw (div 12.0 14.0)) -}}
 <figure class="diagram">
   {{- /* tabindex=0: the card scrolls when the diagram passes the legibility
        floor, and Safari never makes overflow scrollers keyboard-focusable on
        its own. Same pattern as render-table.html; the global :focus-visible
        ring covers it, and focus announces the aria-label. */}}
-  <div class="diag-card" role="img" aria-label="{{ $alt }}" tabindex="0" style="--diag-min:{{ $floor }}px">{{ $svg.Content | safeHTML }}</div>
+  <div class="diag-card" role="img" aria-label="{{ $alt }}" tabindex="0" style="--diag-min:{{ $floor }}px;--diag-min-phone:{{ $floorPhone }}px">{{ $svg.Content | safeHTML }}</div>
   <div class="mermaid">{{ .Inner }}</div>
   {{ with .Get "caption" }}<figcaption>{{ . | markdownify }}</figcaption>{{ end }}
 </figure>
