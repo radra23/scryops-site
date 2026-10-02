@@ -92,14 +92,14 @@ sequenceDiagram
     participant LB as Load Balancer
     participant Cert as Certificates
     participant API as Status API
-    participant NR as Observability Platform
+    participant NR as Observability
     participant Team as Response Team
 
     LB->>Cert: Ongoing validation
     Cert->>LB: Status information
-    LB->>API: Expose validation results
-    API->>NR: Forward certificate metadata
-    NR->>Team: Alert at appropriate thresholds
+    LB->>API: Expose results
+    API->>NR: Forward cert metadata
+    NR->>Team: Alert at thresholds
 
 {{< /mermaid >}}
 
