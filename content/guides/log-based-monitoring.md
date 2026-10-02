@@ -1,300 +1,257 @@
 ---
-title: "Log-Based Monitoring"
+title: "Log-Based Monitoring: Alerting on the Evidence"
 date: 2026-06-10
-draft: true
-excerpt: "Logs carry operational state at a resolution metrics can't match. Most teams archive them. This guide covers how to query them continuously and alert on what they surface."
-readtime: 10
+draft: false
+excerpt: "Logs carry operational state at a resolution metrics can't match. Most teams only open them after something breaks. This guide covers how to query them continuously, turn them into metrics, and alert on what they surface without blowing up cardinality or cost."
+readtime: 11
 tags: ["Logs", "Observability", "Alerting", "Structured Logging"]
 ---
 
-A metric tells you a rate changed. A log tells you which request failed, on which endpoint, for which user, with which error code, after which dependency returned a 503. Metrics are the summary; logs are the evidence. Log-based monitoring is the practice of treating that evidence stream as a continuous operational signal — not an archive you open after something goes wrong.
+A metric tells you a rate changed. A log tells you which request failed, on which endpoint, with which error, after which dependency returned a 503. Metrics are the summary; logs are the evidence. Log-based monitoring means treating that evidence as a continuous operational signal, not an archive you open after something goes wrong.
 
-## What Log-Based Monitoring Is (and Isn't)
+## Forensics Is Not Monitoring
 
-Most teams use logs in one mode: reactive forensics. An alert fires, someone opens the log browser, and they start searching. Logs are the autopsy tool. That is a valid use. It is not monitoring.
+Most teams use logs in one mode: forensics. An alert fires, someone opens the log browser, and the searching starts. That's a valid use. It isn't monitoring.
 
-Active monitoring means persistent queries running continuously against your log stream, thresholds configured, and alerts wired to fire when conditions are met. The difference between mode one and mode two is not the tool — you can do both in Grafana, Kibana, or CloudWatch. The difference is whether those queries exist as long-lived rules or only as one-off searches you run manually.
+Monitoring means long-lived queries evaluated on a schedule, with thresholds and alert rules attached. The tool doesn't decide which mode you're in. Grafana, Kibana and CloudWatch all do both. What decides it is whether your log queries exist as rules or only as one-off searches someone types at 2am.
 
-Log-based monitoring requires exactly three things, the same three things metric-based monitoring requires: a structured data source, a query layer, and an alerting rule. Swap time-series data for event streams and the architecture is identical. What makes it harder in practice is that logs arrive at the query layer in a form that resists aggregation — unstructured text, inconsistent field names, and missing fields — unless you enforce structure at the source.
+The architecture is the same one metric alerting uses: a data source, a query layer and an alert rule. The difference is that logs resist aggregation. Free text, inconsistent field names and missing fields all break the query layer, unless structure is enforced where the log is written.
 
-A useful test: if your monitoring system went dark at midnight and you had to reconstruct what happened at 2am from logs alone, could you answer "how many payment requests failed between 2:00am and 2:05am, broken down by failure type"? If the answer is no, you have reactive forensics, not monitoring.
+A quick test: could you answer "how many payment requests failed between 02:00 and 02:05, broken down by failure type" from your logs alone, in one query? If not, you have forensics, not monitoring.
 
-## Prerequisites: Structured Logs with Consistent Fields
+## Prerequisite: Fields You Can Count On
 
-Free-text logs support one monitoring pattern: string matching. You can alert when a log line contains the word "error" or the phrase "connection refused". That is the ceiling. You cannot group by error type, compute rates per service, derive latency percentiles, or join log events to traces without structured fields.
+Free-text logs support exactly one monitoring pattern: string matching. You can alert when a line contains "connection refused". You can't group by error type, compute a rate per service, or derive a latency percentile.
 
-Log-based monitoring requires JSON output — or logfmt, or any format your query layer can parse — with stable field names across every service and every deployment. Stable means the same field name carries the same semantic meaning everywhere, every time. `status` in one service meaning HTTP status code and in another meaning a job state is not stable.
+Everything below assumes structured records with stable field names. Stable means the same name carries the same meaning in every service, every time. [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/#borrow-names-before-you-invent-them) covers which names to use, and they're OpenTelemetry's semantic conventions rather than anything invented here. For monitoring, the ones that matter most are:
 
-These fields are the minimum viable set:
+- **Severity**, as OpenTelemetry's numeric `SeverityNumber`. Alert on the number, not the text. `severity_number >= 17` catches every error whether the service wrote `Error`, `ERROR` or `err`. [Log Levels: When to Whisper, Speak, or Shout](/guides/log-levels-and-severity/#one-scale-many-dialects) has the full mapping.
+- **`service.name`**, set once at startup as a resource attribute, never computed per call.
+- **`error.type`** on every failure, as a short stable class (`gateway_timeout`, `rate_limited`), not buried in the message.
+- **`trace_id`**, so a log-based alert can jump straight to the trace. [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/) covers the plumbing.
 
-- `level` or `severity` — lowercase enum: `debug`, `info`, `warn`, `error`. Not `ERROR`, not `Error`, not `2`. Pick one convention and enforce it at the logger configuration, not in application code.
-- `service` or `app` — the emitting service name, set once at process startup. Not computed per log call, not derived from hostname.
-- `timestamp` — ISO 8601 (`2024-01-15T14:22:01.000Z`) or Unix milliseconds. Not a locale-formatted string, not a string that varies by timezone.
-- `message` — the human-readable description. Free text is fine here. This is the field humans read; all queryable state lives in other fields.
-- `error_type` or `error.type` — on every error event, as a stable string value (`gateway_timeout`, `validation_error`, `rate_limited`). Not buried inside the message string.
-- `trace_id` — the W3C trace context trace ID. Required for log-to-trace correlation.
-
-The contrast between what works and what doesn't is direct:
+Here's the difference in practice:
 
 ```text
-# Free text — string matching only
-2024-01-15 14:22:01 ERROR Failed to process payment for user abc123: gateway timeout
+# Free text: string matching only
+2026-06-10 14:22:01 ERROR Failed to process payment for order 12345: gateway timeout
 
-# Structured — every field is queryable, groupable, alertable
-{"timestamp":"2024-01-15T14:22:01Z","level":"error","service":"payment-api","event":"payment.failed","error_type":"gateway_timeout","gateway":"stripe","user_id_hash":"a3f9c2","trace_id":"4bf92f3577b34da6a3ce929d0e0e4736","duration_ms":5003}
+# Structured: every field is queryable, groupable, alertable
+{"timestamp":"2026-06-10T14:22:01Z","severity_text":"ERROR","severity_number":17,"service.name":"payment-api","event.name":"payment.failed","error.type":"gateway_timeout","payment.provider":"stripe","trace_id":"4bf92f3577b34da6a3ce929d0e0e4736","duration_ms":5003}
 ```
 
-The free-text version tells a human what happened. The structured version tells a query engine what happened. You need the second form before any of the query patterns below will work.
+The first line tells a human what happened. The second tells a query engine. None of the patterns below work on the first. If your services disagree on names or types today, [Common Logging Pitfalls](/guides/common-logging-pitfalls/) is the place to start.
 
-## Query Strategies
+## Query Patterns
 
-### Rate and Error Counting
+The examples use LogQL against Loki, with logs arriving over OTLP. That path matters for the syntax. Loki promotes a short list of resource attributes, `service.name` among them, to index labels with dots turned into underscores (`service_name`). Log attributes, severity and trace IDs land as [structured metadata](https://grafana.com/docs/loki/latest/get-started/labels/structured-metadata/), so you filter on them directly with no parser. If you ship JSON lines instead, add `| json` after the selector. Loki sanitises the extracted keys the same way, so `error.type` becomes `error_type` either way. (Checked against the Loki docs, not run against a live Loki.)
 
-The most common log monitoring queries count events over rolling time windows and group by a field. In LogQL (Loki), `count_over_time` does this:
+### Counts and Ratios
+
+The basic query counts matching records over a rolling window, grouped by a field:
 
 ```logql
-# Error count over 1-minute windows, grouped by service
-sum by (service) (
-  count_over_time(
-    {job="application"} | json | level="error" [1m]
-  )
+# Errors per minute, per service
+sum by (service_name) (
+  count_over_time({service_name=~".+"} | severity_number >= 17 [1m])
 )
 ```
 
-That gives you a per-service error count time series. Raw counts are useful for detecting volume spikes. They are misleading when request volume varies — a count of 50 errors means something different at 1,000 requests/minute than at 10,000 requests/minute.
-
-Compute an error ratio instead:
+Raw counts catch volume spikes, and they mislead whenever traffic varies. Fifty errors a minute is an outage at 1,000 requests a minute and noise at 100,000. Alert on a ratio instead:
 
 ```logql
-# Error rate as a fraction of total requests
-sum(count_over_time({service="payment-api"} | json | level="error" [5m]))
+# Share of requests answered with a 5xx, over 5 minutes
+sum(count_over_time({service_name="checkout"} | http_response_status_code >= 500 [5m]))
 /
-sum(count_over_time({service="payment-api"} [5m]))
+sum(count_over_time({service_name="checkout"} | http_response_status_code != "" [5m]))
 ```
 
-The denominator counts all log lines from the service, treating each as one request. This only works if you log once per request at a consistent severity level. If you emit multiple log lines per request, normalize the denominator to a specific event type (`event="request.complete"`) rather than total line count.
+This only works if each request produces exactly one record carrying `http.response.status_code`, an access-log style completion event. Count every line the service writes and the denominator measures chattiness, not traffic.
 
-### Pattern Detection
+A ratio like this is also a perfectly good SLI. Feed it into multi-window burn-rate alerts, where a 14.4× burn on a 30-day SLO exhausts the budget in about 2.1 days, not hours. [SLOs and Error Budgets](/guides/slos-and-error-budgets/#burn-rate-alerts) has the math and [How to Set Up Your First SLO and Burn Rate Alerts](/howtos/set-up-slo-burn-rate-alerts/) the rules.
 
-Aggregate rates miss failure modes that are narrowly scoped. A 0.1% error rate across a service looks fine. A 100% error rate for one specific payment provider, affecting 0.1% of users, also produces 0.1% aggregate error rate — and represents a complete outage for those users.
+### Narrow Failures Hide in Aggregates
 
-Field-level pattern queries surface these:
+Aggregate ratios miss failures that are narrowly scoped. If one payment provider fails every request and handles 0.1% of traffic, the service-wide error rate looks like a rounding error. For those customers, it's a complete outage. Field-level queries surface it:
 
 ```logql
-# Specific error type on a specific service
-count_over_time(
-  {service="payment-api"} | json | error_type="gateway_timeout" [5m]
+# A specific failure class, broken out
+sum by (error_type) (
+  count_over_time({service_name="payment-api"} | severity_number >= 17 [5m])
 ) > 3
 
-# Specific HTTP status from a specific upstream dependency
+# A specific upstream returning 503s
 count_over_time(
-  {service="checkout"} | json | upstream_service="inventory" | http_status="503" [5m]
+  {service_name="checkout"} | upstream_service="inventory" | http_response_status_code="503" [5m]
 ) > 0
-
-# Retry storm: one request_id appearing many times
-count_over_time(
-  {service="order-processor"} | json | request_id="abc123" [5m]
-)
 ```
 
-The retry storm example is illustrative. In practice, you cannot alert on a specific `request_id` value without knowing it in advance. The real pattern is alerting on a derived metric: count requests where the same ID appears more than N times in a window. That requires aggregating first, which is the log-to-metric pattern below.
+Grouping by `error_type` is safe because it's bounded: a handful of values, set by your code. That distinction matters again in the cardinality section. The same logic applies to retry storms. Log each retry as its own event and count those, rather than trying to spot one request ID appearing many times.
 
-### Log-to-Metric Derivation
+### Latency from Logs
 
-When a metric doesn't exist at the source, derive one from the log stream. This is appropriate when you're working with existing instrumentation you can't change and you need alertable aggregates. It is not a substitute for source instrumentation — the resolution and accuracy of a log-derived metric depends on your logging rate.
-
-{{< obs-log-to-metric-funnel >}}
-
-The derivation itself is cheap. Everything upstream of it, the ingest and the query that finds the matching lines, is where the cost actually lives.
-
-In Loki, any metric query over a log stream produces a derived metric. Promote it to a recording rule to materialize it:
+When there's no trace backend, a `duration_ms` attribute gives you latency. LogQL can compute quantiles over an unwrapped field:
 
 ```logql
-# Error count per error_type per service — suitable as a recording rule
-sum by (service, error_type) (
-  count_over_time(
-    {job="application"} | json | level="error" [1m]
-  )
-)
+quantile_over_time(0.95,
+  {service_name="api-gateway"} | http_route != "" | unwrap duration_ms | __error__="" [5m]
+) by (http_route)
 ```
 
-In the OTel Collector, the `transform` processor with OTTL statements enriches log records before they reach a backend. For deriving metrics from logs at collection time, use the `count` connector. Both require `otel/opentelemetry-collector-contrib` — the core image does not include OTTL or connectors:
+The `__error__=""` filter drops records where `duration_ms` didn't convert to a number, instead of letting them fail the query. The caveat is sampling. This is p95 *of the records you kept*. If you keep every error but only 10% of successes, the sample is skewed towards failures, and so is the percentile. State how the logs were sampled whenever you quote a number like this.
+
+### Baselines Instead of Fixed Thresholds
+
+A fixed threshold works when the steady state is stable. Under variable load it fails both ways: set for peak, it misses failures at 3am; set for 3am, it fires every lunchtime. LogQL's `offset` modifier lets you compare against the same window last week:
+
+```logql
+sum(count_over_time({service_name="checkout"} | severity_number >= 17 [1h]))
+>
+3 * sum(count_over_time({service_name="checkout"} | severity_number >= 17 [1h] offset 1w))
+```
+
+The `offset` has to follow the range selector directly. Watch the zero case: if last week's window had no errors, any error at all trips it, so pair it with a small absolute floor. Loki has no built-in anomaly detection. Statistical baselines beyond this mean Grafana Cloud's machine-learning features or an external tool, and a ratio threshold evaluated over two windows covers most cases without either.
+
+## Cardinality: Aggregate First, Alert on the Aggregate
+
+User IDs, request IDs, trace IDs and session IDs are excellent log fields. They're terrible grouping keys.
+
+In Loki, index labels define streams. Every unique label combination is a separate stream with its own index entry and chunks. Promote `user_id` to a label and you get a stream per user, which is the quickest way to make Loki slow and expensive. Loki's default OTLP mapping already keeps log attributes and trace IDs in structured metadata rather than the index. Resist the urge to promote them.
+
+The same trap reappears one level up. `sum by (user_id) (...)` in an alert or recording rule creates one series, and potentially one alert, per user. Group by a bounded dimension instead (`error_type`, `customer_tier`, `region`). When you need the culprit, follow the alert into the logs and find it there. If those IDs identify people, [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) is worth reading before they go anywhere near a label.
+
+## Log-to-Metric Derivation
+
+Every alert evaluation re-reads and re-filters the raw logs in its window. For a rule evaluated every minute, that's a lot of repeated work for one number. Deriving a metric once and alerting on the metric is cheaper and faster. It's the right move for logs you inherit and can't re-instrument. For new code, emit the metric at the source.
+
+**In Loki**, any metric query can become a recording rule. Data-source-managed recording rules run in the Loki ruler and remote-write their results to a Prometheus-compatible store. Grafana can also run Grafana-managed recording rules against Loki. Either way, the `sum by (error_type)` query above becomes a cheap series instead of a repeated scan.
+
+**In the OpenTelemetry Collector**, the `count` connector turns log records into counts before they reach any backend. The config below was written for `otel/opentelemetry-collector-contrib` v0.158 or later and checked against the component READMEs, not run:
 
 ```yaml
-# otel-collector-config.yaml (requires otel/opentelemetry-collector-contrib)
-processors:
-  transform/enrich_logs:
-    log_statements:
-      - context: log
-        statements:
-          - set(attributes["log.level"], attributes["severity_text"])
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
 
 connectors:
   count:
     logs:
+      app.log.errors:
+        description: Log records at ERROR severity or above
+        conditions:
+          - log.severity_number >= SEVERITY_NUMBER_ERROR
+        attributes:
+          - key: error.type
+            default_value: unknown   # without this, errors missing the attribute aren't counted
+
+processors:
+  delta_to_cumulative: {}   # count emits delta sums; remote write drops them
 
 exporters:
-  otlp/loki:
-    endpoint: "http://loki:3100/otlp/v1/logs"
+  otlphttp/loki:
+    endpoint: http://loki:3100/otlp
   prometheusremotewrite:
-    endpoint: "http://prometheus:9090/api/v1/write"
+    endpoint: http://prometheus:9090/api/v1/write
 
 service:
   pipelines:
     logs:
       receivers: [otlp]
-      processors: [transform/enrich_logs]
-      exporters: [otlp/loki, count]
-    metrics:
+      exporters: [otlphttp/loki, count]
+    metrics/from_logs:
       receivers: [count]
+      processors: [delta_to_cumulative]
       exporters: [prometheusremotewrite]
 ```
 
-Prefer source-side metrics for high-cardinality signals. Log-to-metric derivation is the right pattern when you inherit existing logs you can't instrument further and you need alertable aggregates from them.
+Four details in that file are easy to get wrong:
 
-### Cardinality Traps
-
-{{< obs-cardinality-trap-tally >}}
-
-None of these fields did anything wrong in the log line. The trap is only sprung when one of them becomes a metric label.
-
-Never filter on unbounded high-cardinality fields directly inside an alert expression. `user_id`, `trace_id`, `request_id`, `session_id` — these fields have millions of distinct values. A LogQL filter like `| json | user_id="specific_value"` runs a full scan across every log line in the queried stream to find that one value. Running this as a recurring alert rule scans the full stream on every evaluation interval.
-
-The rule is: aggregate first, alert on the aggregate. Group by a bounded dimension (`customer_tier`, `account_type`, `region`, `error_type`) rather than a raw identifier. If you need per-entity anomaly detection, pre-compute a log-derived metric grouped by the bounded dimension, and alert when any bucket in that dimension exceeds a threshold.
-
-In Loki specifically: do not put high-cardinality fields in stream labels. Labels define streams — one unique label combination equals one stream. Putting `user_id` or `trace_id` in a label creates millions of streams and makes the Loki index expensive to query and store. These fields belong as parsed attributes (`| json | user_id`), never as label selectors (`{user_id="..."}`).
+- **Loki takes OTLP over HTTP**, at `/otlp`. Use the `otlphttp` exporter, which appends `/v1/logs` itself. The gRPC `otlp` exporter won't work here.
+- **The count connector emits delta sums**, and the `prometheusremotewrite` exporter drops non-cumulative sums. Without `delta_to_cumulative`, the metric silently never arrives. (Before v0.158 the processor was called `deltatocumulative`, and that name still works as a deprecated alias.) Prometheus also needs `--web.enable-remote-write-receiver` to accept the write.
+- **`default_value` matters.** A record without the attribute is skipped, so an error missing `error.type` would vanish from the very count meant to catch it.
+- **Image choice.** The `count` connector and `delta_to_cumulative` processor ship in the contrib distribution, not the core `otel/opentelemetry-collector` image. The count connector is still alpha for logs.
 
 ## Alerting on Logs
 
-### Threshold Alerts vs. Anomaly Detection
-
-A threshold alert fires when a count or rate crosses a fixed value. This works when you know the expected steady state and it stays stable. For a service that processes 1,000 requests/minute consistently, alerting when errors exceed 50/minute is defensible.
-
-For new services or variable-load patterns, a fixed threshold fails in both directions. Calibrated to peak traffic, it fires constantly during normal high-load periods. Calibrated to off-peak, it misses failures at peak. The error count that indicates a real problem at 3am looks routine at noon.
-
-Baseline comparison handles the variable-load case: alert when today's error rate is more than N standard deviations above the equivalent window from the previous week. This self-adjusts to load patterns. Loki does not have built-in anomaly detection. Route through Grafana's ML-based alerting or an external anomaly detection layer to get this behavior. A well-chosen error ratio threshold combined with multi-window evaluation covers most cases without requiring anomaly detection.
+Two engines can evaluate a LogQL alert. **Grafana-managed rules** run in Grafana and query Loki as a data source. **Data-source-managed rules** live in and run on the Loki ruler. Grafana's docs recommend Grafana-managed rules as the default. They support multiple queries per rule, expressions, no-data and error states, and alert state history. Pick the Loki ruler when you want rules versioned and evaluated alongside Loki itself, independent of Grafana, and accept the extra moving part.
 
 ### Multi-Condition Alerts
 
-Single-signal alerts produce false positives. An error from the payment service alone warrants investigation. An error from the payment service, plus upstream 503 from the inventory service, plus onset within five minutes of a deployment, is an incident with a probable cause.
+Single-signal alerts produce false positives. An error from the payment service warrants a look. An error from the payment service, plus 503s from inventory, starting within five minutes of a deploy, is an incident with a probable cause.
 
-Correlating multiple conditions within a single log stream requires that all conditions appear in the same log line. You can do this with field conjunction in LogQL:
+When all the conditions live on the same record, chain the filters as in the upstream-503 query above. When they come from different services, one Grafana-managed rule can hold several queries and combine them with a math expression such as `$A > 0 && $B > 5`. It fires only when both hold. For correlating alerts that are already firing across services, [Alert Correlation](/guides/alert-correlation/) covers topology- and time-based grouping.
 
-```logql
-count_over_time(
-  {service="checkout"} | json
-    | level="error"
-    | upstream_service="inventory"
-    | upstream_status="503"
-  [5m]
-) > 0
-```
-
-Cross-stream correlation — two separate services — requires working at the alerting layer. Two separate alert rules with a composite condition in Grafana's alert rule editor, or log enrichment in the OTel Collector that merges context from multiple services into a single record before it reaches the backend.
-
-### Latency from Logs
-
-When distributed tracing is not in place, `duration_ms` or `response_time_ms` in log fields gives you latency. LogQL supports percentile approximation over unwrapped log fields:
-
-```logql
-quantile_over_time(0.95,
-  {service="api-gateway"} | json | unwrap duration_ms [5m]
-) by (endpoint)
-```
-
-This produces p95 latency per endpoint from logs, with no trace backend required. The limitation is direct: this is a percentile of logged requests, not all requests. If you log at 10% sampling rate for INFO events, you're computing p95 over a 10% sample. For error events logged at 100%, it's accurate. State the sampling rate when publishing these numbers — a p95 derived from 10% of requests is not the same claim as a p95 derived from all requests.
+Whatever fires still has to be worth waking up for. [Alert Design Principles](/articles/alert-design-principles/) covers what the alert body must say, and [Alert Severity Levels](/guides/alert-severity-levels/) covers who it should reach.
 
 ## Retention and Query Cost
 
-{{< obs-log-spend-ladder >}}
+Log monitoring wants two tiers with very different performance.
 
-Every one of those numbers scales with the choices made earlier in this guide: what you index, what you keep, and for how long.
+The **hot tier** serves alert evaluation and incident investigation, and must answer in seconds. Size it from your own investigations: if P1 reviews routinely look back 14 days, the hot tier is 14 days. The **cold tier** serves compliance, audits and slow post-mortems. Compressed object storage is fine, and so are queries that take minutes. Length is set by your retention obligations, not by monitoring.
 
-Log monitoring needs two retention tiers with different performance profiles.
+The bigger lever is what you index and what you ingest at all. Vendor surveys keep finding cost overruns are common: Elastic's [2026 observability landscape report](https://www.elastic.co/resources/observability/report/landscape-observability-report) puts the share of respondents hitting unexpected costs at 67%, from a vendor-run survey of 500+ practitioners.
 
-The hot tier covers active monitoring: real-time queries, alert evaluation, and incident investigation. This tier must serve queries in seconds. Expect 7 to 30 days here, with full indexing. The exact window depends on how long your incident investigation cycles run — if P1 investigations routinely look back 14 days, your hot tier is 14 days.
-
-The cold tier covers compliance and forensics: regulatory audit trails, capacity planning, post-mortems on slow-developing issues. Object storage without a query index is sufficient. Response times in minutes are acceptable. Expect 90 to 365 days, compressed, not indexed for real-time alerting.
-
-Indexing strategy is the main cost lever. In Loki, the label set determines what is indexed. Keep labels to a small set of low-cardinality dimensions: `service`, `environment`, `region`, `job`. Parse high-cardinality fields at query time with `| json`. Every unique label combination creates a separate stream with its own index entry. A label with 10,000 unique values creates 10,000 streams — this is the most reliable way to make a Loki deployment expensive and slow.
-
-In Elasticsearch and OpenSearch, control field mapping explicitly. Fields you filter on in alert queries — `level`, `service`, `error_type`, `http.status_code` — should be `keyword` type (exact match, not analyzed). Text analysis is for full-text search, not monitoring queries. Use index lifecycle management (ILM) to move indices from hot to warm to cold tiers automatically based on age, matching your retention policy.
-
-## Tool Patterns
-
-### Loki + Grafana
-
-Loki's data model: streams (identified by a label set) contain timestamped log lines. Parsing — extracting structured fields from the log line — happens at query time with `| json`, `| logfmt`, or `| pattern`. You do not define a schema at write time. This makes ingestion cheap and schema evolution easy, but it means parsing cost is paid at query time on every alert evaluation.
-
-Alerting in Grafana uses LogQL expressions promoted to alert rules with a threshold and evaluation interval. The expression you write in Explore is the same expression you wire to an alert rule — no translation required. Grafana-managed alert rules — the default path most teams use — are evaluated by the Grafana server process itself, polling Loki as a datasource; no Loki-side component is required. The Loki ruler component is only required for Loki-managed (ruler-based) alert rules, which are evaluated server-side inside Loki, independent of whether Grafana is running. Grafana-managed evaluation works fine at low alert rule counts and short evaluation intervals, but does not scale as well and adds load to the Grafana server. If you have more than a handful of log-based alert rules, deploy the ruler and move them to Loki-managed evaluation.
-
-### CloudWatch Logs Insights
-
-Two alerting paths exist, with different trade-offs.
-
-Metric Filters run at ingest time. A filter pattern matches against incoming log lines and increments a CloudWatch metric. Alert on that metric with a CloudWatch Alarm. Latency is low — the metric updates within seconds of the log line arriving. The constraint: Metric Filters use a simple pattern language, not full SQL. Complex field-level aggregations are not supported.
-
-Scheduled Logs Insights queries run arbitrary SQL on a schedule via EventBridge and Lambda, then push the result to a CloudWatch metric. More expressive, but adds minutes of latency. Use Metric Filters for real-time alerting. Use Logs Insights for investigation and for alert rules where minute-level latency is acceptable.
-
-```sql
--- CloudWatch Logs Insights: error count by status code
-fields @timestamp, status_code
-| filter level = "ERROR"
-| stats count() as error_count by status_code
-| sort error_count desc
-```
-
-### OpenTelemetry Collector
-
-The Collector is the right place to enrich, filter, and route log streams before they reach a backend. Operating here reduces ingestion cost and improves signal quality upstream of any query or alerting layer.
-
-Drop noisy logs before ingestion to cut storage cost and alert query scan range:
+**Drop noise before ingestion.** The Collector's `filter` processor ships in both core and contrib images:
 
 ```yaml
 processors:
   filter/drop_debug:
-    logs:
-      log_record:
-        - 'severity_number < SEVERITY_NUMBER_INFO'
+    error_mode: ignore
+    log_conditions:
+      - log.severity_number > SEVERITY_NUMBER_UNSPECIFIED and log.severity_number < SEVERITY_NUMBER_INFO
 ```
 
-Route error logs to a high-retention, fast-query backend and INFO logs to a short-retention, cheaper backend using the routing connector. Derive aggregated metrics from log fields using the count connector. All connectors and OTTL processors require `otel/opentelemetry-collector-contrib`. The `otel/opentelemetry-collector` core image does not include them.
+The first half of the condition is load-bearing. Records whose severity was never set have `severity_number` 0, and a bare `< SEVERITY_NUMBER_INFO` drops them too. That's often every line scraped from a file without a severity parser. (`log_conditions` arrived in contrib v0.146. Older configs use the now-deprecated `logs: log_record:` form.) [High-Throughput Logging](/guides/high-throughput-log-pipelines/) goes further into sampling and batching at the Collector.
 
-### Elasticsearch / OpenSearch
+**In Loki**, keep index labels to a few low-cardinality dimensions such as service, environment, region and namespace. Leave everything else in structured metadata or the line itself.
 
-Index template design determines monitoring query performance. Define explicit mappings for your monitoring dimensions. Fields used in alert filters (`level`, `service`, `error_type`, `http.status_code`) must be `keyword` type — not `text`, not dynamically mapped. Dynamic mapping guesses field types from the first document Elasticsearch sees for that field. If the first document's `status_code` is `"200"` (a string), the field maps as `text`. Subsequent numeric comparisons behave unexpectedly.
-
-Write your index template before indexing any documents:
+**In Elasticsearch and OpenSearch**, map monitoring fields explicitly. Dynamic mapping turns any JSON string into a `text` field with a `keyword` sub-field. So a status code that arrives as `"503"` compares as text, and `"503" < "6"` is true. Define an index template before the first document lands:
 
 ```json
 {
-  "mappings": {
-    "properties": {
-      "level":       { "type": "keyword" },
-      "service":     { "type": "keyword" },
-      "error_type":  { "type": "keyword" },
-      "http_status": { "type": "keyword" },
-      "trace_id":    { "type": "keyword" },
-      "duration_ms": { "type": "long" },
-      "message":     { "type": "text" },
-      "timestamp":   { "type": "date" }
+  "index_patterns": ["logs-app-*"],
+  "template": {
+    "mappings": {
+      "properties": {
+        "@timestamp":     { "type": "date" },
+        "severity_number": { "type": "byte" },
+        "service.name":   { "type": "keyword" },
+        "error.type":     { "type": "keyword" },
+        "http.response.status_code": { "type": "short" },
+        "trace_id":       { "type": "keyword" },
+        "duration_ms":    { "type": "long" },
+        "message":        { "type": "text" }
+      }
     }
   }
 }
 ```
 
-Set up ILM to move indices through hot, warm, and cold phases by age. Hot phase: primary shards on fast storage, real-time queries. Warm phase: replicas reduced, queries slower but possible. Cold phase: searchable snapshots on object storage, not suitable for alert evaluation. Align phase transitions with your retention tiers.
+That's the body of `PUT _index_template/logs-app` (checked against the Elasticsearch docs, JSON validated, not run against a cluster). Dotted names like `service.name` map as object paths, which is what OpenTelemetry-shaped documents expect. Move indices from hot to warm to cold with ILM in Elasticsearch, or ISM, its OpenSearch counterpart. Line the phases up with the tiers above. The type mismatch behind the `"503"` problem is [one of the common logging pitfalls](/guides/common-logging-pitfalls/) for a reason.
+
+## CloudWatch Logs
+
+CloudWatch gives you two alerting paths. **Metric filters** match events at ingest and publish a CloudWatch metric you can alarm on. Patterns understand JSON, as in `{ $.level = "error" }`, and can attach dimensions. Every distinct dimension value creates a new metric, so the cardinality rule applies here too. Filters only count events that arrive after they're created.
+
+**Log alarms** evaluate a Logs Insights query directly, with no metric filter in between. CloudWatch runs the query as a scheduled query (`rate(5 minutes)`, say) and alarms when M of the last N results breach the threshold. A `by` clause in the aggregation expression evaluates each contributor separately, up to 500 per run. That's more expressive than a filter pattern, at the cost of latency set by the schedule. Logs Insights has its own pipe-based language, not SQL:
+
+```text
+fields @timestamp, status_code
+| filter level = "error"
+| stats count() as error_count by status_code
+| sort error_count desc
+```
+
+Use metric filters for fast, simple signals and log alarms where minute-level delay is acceptable.
 
 ## What Log-Based Monitoring Doesn't Replace
 
-Infrastructure metrics — CPU, memory, disk I/O, network throughput — have no log equivalent. These signals come from the host or container runtime, not the application. No amount of application logging surfaces a memory leak or a saturated network interface as reliably as a host metric. Use your metrics layer for infrastructure health; logs cover application-layer state.
+**Infrastructure metrics.** CPU, memory, disk and network saturation come from the host or runtime, not your application's logs. No amount of logging reports a saturated NIC as reliably as the host does.
 
-Distributed traces are a better tool for latency attribution. A log with `duration_ms` tells you a request took 450ms. A trace tells you 380ms of that was in a downstream database call, 40ms was in deserialization, and 30ms was in a Redis cache miss. Deriving latency from logs is an approximation useful when you have no trace backend. Once you have traces, the log-derived latency number is redundant and less accurate.
+**Traces for latency attribution.** A log with `duration_ms` says a request took 450 ms. A trace says 380 ms of it was a database call. Log-derived latency is a stopgap until traces exist. After that, it's a less accurate copy.
 
-Use logs for application-layer monitoring: business event tracking, error specifics, dependency failure modes, request-level context. Use metrics for infrastructure aggregates and SLO burn rate computation. Use traces for latency attribution and cross-service request path analysis.
-
-## See Also
-
-- [Observability Costs, KubeCon, re:Invent, and Gartner Takeaways](https://www.grepr.ai/blog/three-weeks-three-conferences-one-clear-message-about-observability-costs) — Grepr, 2026, aggregating Gartner client inquiry data. Source for the "over 50% of spend goes to logs" and "36% of enterprises spend over $1M/yr, 4% over $10M/yr" figures in the spend-ladder table.
-- [The Landscape of Observability in 2026: Balancing Cost and Innovation](https://www.elastic.co/resources/observability/report/landscape-observability-report) — Elastic, commissioned research by Dimensional Research, n=526, 2026. Source for the 97% "hit an unexpected cost or overage" figure; directional, not audited.
-- [2026 State of the Cloud](https://info.flexera.com/CM-REPORT-State-of-the-Cloud) — Flexera, 2026. Source for observability running 8-12% of cloud spend at the median, 10-15% for Kubernetes-heavy estates.
+Use logs for application-layer state: business events, error specifics, dependency failure modes and request-level context. Use metrics for infrastructure and high-volume SLIs, and traces for where the time went. [Distributed Logging](/guides/distributed-logging/) and [Log Context Enrichment](/guides/log-context-enrichment/) cover getting the right fields onto every record across services, which is what makes every query in this guide possible.

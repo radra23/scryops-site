@@ -1,316 +1,249 @@
 ---
 title: "Common Logging Pitfalls and How to Avoid Them"
 date: 2026-06-11
-draft: true
-excerpt: "The same logging mistakes appear across every team and technology stack: inconsistent field names, missing correlation context, PII in error logs, and high-frequency noise that buries real signals. Here is where to look and what to fix."
+draft: false
+excerpt: "The same logging mistakes turn up in every team and every stack: inconsistent field names, values buried in message strings, missing trace context, personal data and secrets in error logs, and loops that log the same thing ten thousand times. Here is where to look and what to fix."
 readtime: 9
 tags: ["Logs", "Structured Logging", "Observability", "Best Practices"]
 ---
 
-Logging mistakes are predictable. The same patterns appear across teams, stacks, and years — which means the fixes are also predictable. This guide covers the structural, content, and security pitfalls that most consistently degrade telemetry quality.
+Logging mistakes are predictable. The same handful turn up across teams, stacks and years, which is good news: the fixes are predictable too. None of them is exotic. Each one quietly makes your logs harder to query, more expensive to keep, or more dangerous to leak.
 
-## Naming Inconsistency Across Services
+The examples are C# with `Microsoft.Extensions.Logging`, because that's where many of these traps are easiest to show, but every pitfall here has a twin in Java, Go, Python and JavaScript. If you want the big picture first, start with [Logging Foundations](/guides/logging-foundations/).
 
-The most common structural problem is using different field names for the same concept across services. When `user_id`, `userId`, `customerId`, and `sess_id` all mean the same thing in different services, cross-service queries become impossible without manual transformation.
+## Every Service Names Things Its Own Way
+
+The most common structural problem is one concept with five names. Service A logs `OrderId`, service B logs `order_id`, service C logs `orderNumber`. Each is fine on its own. Together they mean a cross-service query has to know every spelling, and nobody ever does.
 
 ```csharp
-// ❌ Service A, B, C, D all log the same concept differently
-_logger.LogInformation("{@Event}", new { userID = "123", sessionId = "abc" });    // Service A
-_logger.LogInformation("{@Event}", new { user_id = "123", session_id = "abc" });  // Service B
-_logger.LogInformation("{@Event}", new { customer_id = "123", sess_id = "abc" }); // Service D
+// ❌ Three services, one concept, three field names
+_logger.LogInformation("Order {OrderId} placed", order.Id);       // checkout-api
+_logger.LogInformation("Order {order_id} shipped", order.Id);     // fulfilment
+_logger.LogInformation("Refund for {orderNumber}", order.Id);     // payments
 ```
 
+Fix this at the standard level, not one call site at a time. Borrow names from [OpenTelemetry's semantic conventions](https://opentelemetry.io/docs/specs/semconv/) where they exist, invent your own in the same lowercase, dot-namespaced style where they don't, and write the list down. [Borrow Names Before You Invent Them](/guides/structured-logging-machine-readable/#borrow-names-before-you-invent-them) has a table of the ones that matter most.
+
+Then make the standard hard to ignore. A shared package of source-generated log methods puts the names in one place, so a service can't misspell what it never types:
+
 ```csharp
-// ✅ Every service uses the same names
-_logger.LogInformation("{@Event}", new
+// Shared package every service references: the names live here, once.
+// [TagName] comes from Microsoft.Extensions.Telemetry.Abstractions.
+public static partial class CheckoutLog
 {
-    user_id = "user_123",
-    session_id = "session_abc",
-    request_id = Activity.Current?.TraceId.ToString(),
-    correlation_id = correlationId
-});
+    [LoggerMessage(EventId = 1001, Level = LogLevel.Information,
+        Message = "Order {order.id} placed by {customer.ref}")]
+    public static partial void OrderPlaced(
+        ILogger logger,
+        [TagName("order.id")] string orderId,
+        [TagName("customer.ref")] string customerRef);
+}
 ```
 
-Fix this at the standard level, not the code level: define a shared vocabulary of field names (ideally grounded in [OTel semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/)) and enforce it through log schema validation in CI. Naming problems that are allowed to compound across two years of log data can take months to normalize retroactively.
+Plain `[LoggerMessage]` won't accept a dotted placeholder like `{order.id}`. It needs a C# parameter of the same name, and the build fails with `SYSLIB1014`. `[TagName]` is what bridges the two. Naming drift across a whole fleet is covered in more depth in [Distributed Logging](/guides/distributed-logging/).
 
-## Missing Correlation Context
+## Handing the Logger an Object and Hoping
 
-A log entry with no trace ID, no correlation ID, and no service identifier is an island. It tells you something happened but provides no way to connect it to what triggered it, what happened before it, or what service emitted it.
+A close cousin of the naming problem: logging an anonymous object with `{@Event}` and assuming every property becomes a field.
 
 ```csharp
-// ❌ No way to connect this to the request that caused it
-_logger.LogInformation("User logged in", new { user_id = loginEvent.UserId });
+// ❌ Looks structured. Isn't, unless Serilog is the provider.
+_logger.LogInformation("{@Event}", new { order_id = "ord_12345", status = "placed" });
 ```
 
-```csharp
-// ✅ Every log carries the context needed to link it to the trace
-_logger.LogInformation("{@AuthEvent}", new
-{
-    timestamp = DateTimeOffset.UtcNow.ToString("O"),
-    service = "authentication-api",
-    service_version = "2.1.4",
-    trace_id = Activity.Current?.TraceId.ToString(),
-    span_id = Activity.Current?.SpanId.ToString(),
-    event_type = "user_authentication",
-    event_status = loginEvent.Success ? "success" : "failure",
-    user_id = loginEvent.UserId,
-    auth_method = loginEvent.AuthMethod
-});
+The `@` is Serilog's destructuring operator. With Serilog behind `ILogger` it does what you expect. With the built-in providers or the OpenTelemetry provider, the record gets **one** attribute, literally named `@Event`, holding the object's `ToString()`:
+
+```
+@Event: { order_id = ord_12345, status = placed }
 ```
 
-`Activity.Current` is the OTel .NET SDK's way of accessing the ambient trace context. If you are using `ActivitySource.StartActivity()` consistently, `Activity.Current` is populated automatically. You do not need to thread trace IDs through method signatures manually — attach them to the log at emission time.
+That's a string that happens to look like data. You can't filter on `status` or group by `order_id`. If your provider isn't Serilog, name each field in the template instead.
 
-## Data Type Inconsistency
+## Values Buried in the Message String
 
-Aggregation and filtering depend on consistent types. If `user_id` is an integer in one service and a string in another, you cannot write a query that joins them. If `amount` is a string in one place and a decimal in another, you cannot compute percentiles across services.
-
-```csharp
-// ❌ Same concepts, different types — these logs will not correlate
-var serviceALog = new
-{
-    user_id = 12345,             // number
-    order_amount = "99.99",      // string
-    is_premium = "true",         // string boolean
-    created_at = 1709736000L     // Unix epoch
-};
-
-var serviceBLog = new
-{
-    user_id = "user_12345",      // string with prefix
-    order_amount = 99.99m,       // decimal
-    is_premium = true,           // boolean
-    created_at = "2024-03-06T12:00:00Z"  // ISO 8601
-};
-```
+The most familiar version of the same mistake is string interpolation:
 
 ```csharp
-// ✅ Consistent types, defined once in a shared convention
-var standardLog = new
-{
-    user_id = $"user_{order.UserId}",           // always "user_<id>"
-    order_amount = order.Amount,                 // always decimal
-    is_premium = order.IsPremiumCustomer,        // always bool
-    created_at = order.CreatedAt.ToString("O")   // always ISO 8601 UTC
-};
-```
-
-Define type conventions in your shared logging schema: identifiers are strings with consistent prefixes, monetary values are decimals, timestamps are ISO 8601 UTC strings, counts are integers, booleans are booleans. Apply them at the point where domain objects are mapped to log fields — not in the log call itself.
-
-## Embedding Values in Message Strings
-
-Log entries where useful values are concatenated into the message string rather than emitted as separate fields cannot be filtered or aggregated on those values. This is the complement to the `.NET` anti-pattern of string interpolation in templates — it also applies to deliberately choosing to describe events in prose.
-
-```csharp
-// ❌ Processing time and error reason are inaccessible to queries
+// ❌ One opaque string. Nothing in it is queryable.
 _logger.LogError(
-    $"Payment attempt #{payment.AttemptNumber} for user {payment.UserId} " +
-    $"failed after {payment.ProcessingTime}ms: {payment.ErrorReason}");
+    $"Payment {payment.Id} attempt #{payment.AttemptNumber} failed after {elapsed.TotalMilliseconds}ms: {payment.ErrorType}");
 ```
 
 ```csharp
-// ✅ Every value is a queryable field
-_logger.LogError("{@PaymentFailed}", new
+// ✅ Same sentence for humans, separate fields for machines
+_logger.LogError(
+    "Payment {payment.id} attempt {payment.attempt} failed after {duration_ms} ms: {error.type}",
+    payment.Id, payment.AttemptNumber, elapsed.TotalMilliseconds, payment.ErrorType);
+```
+
+Run both through the OpenTelemetry provider and the difference is stark. The first produces a body and no attributes at all. The second produces the same readable message plus `payment.id`, `payment.attempt`, `duration_ms` and `error.type` as attributes, and a constant template that groups every occurrence of this event together. The interpolated version also builds its string even when the level is disabled.
+
+A cheap guard rail: if you'd want to filter by a value, aggregate over it or alert on it, it has to be a field, not part of the sentence.
+
+The opposite failure also happens. Pass arguments the template has no placeholder for, as in `_logger.LogInformation("User logged in", new { user_id = id })`, and they're silently dropped. The compiler only warns you (`CA2017`).
+
+## Missing Trace Context
+
+A log line with no trace ID is an island. It tells you something happened, but not which request caused it or what happened around it. The tempting fix is to copy `Activity.Current?.TraceId` into every log call by hand. Don't. It's repetitive, it's easy to forget, and it gives you yet another field name to keep consistent.
+
+Let the logging pipeline attach it instead. `Activity` is .NET's own tracing type (`System.Diagnostics`), and OpenTelemetry .NET builds on it. With the OpenTelemetry logging provider, every record written inside an active span carries that span's `TraceId` and `SpanId` automatically:
+
+```csharp
+builder.Logging.AddOpenTelemetry(o =>
 {
-    message = "Payment processing failed",
-    user_id = payment.UserId,
-    payment = new
-    {
-        id = payment.PaymentId,
-        amount = payment.Amount,
-        currency = payment.Currency,
-        method = payment.PaymentMethod,
-        attempt_number = payment.AttemptNumber
-    },
-    error = new
-    {
-        code = payment.ErrorCode,
-        reason = payment.ErrorReason,
-        is_retryable = payment.IsRetryable,
-        processing_time_ms = payment.ProcessingTime.TotalMilliseconds
-    }
+    o.IncludeFormattedMessage = true;
+    o.AddOtlpExporter();   // OpenTelemetry.Exporter.OpenTelemetryProtocol
 });
 ```
 
-The rule: if you would want to filter by a value, aggregate over it, or alert on it, it must be a field — not part of the message string.
+No change at any log call site. If you write JSON to stdout instead, set `ActivityTrackingOptions` and turn on `IncludeScopes`, and the JSON console formatter adds `TraceId` and `SpanId` to every line written inside a span. [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/) walks through both routes for .NET, Java, Go and Python, including the Collector half that file-based logs need. Once the trace ID is there, [Log Context Enrichment](/guides/log-context-enrichment/) covers the next layer: the business and runtime context that makes a correlated line actually useful.
 
-## Over-Logging at High Frequency
+## Same Field, Different Types
 
-Emitting a log entry for every iteration of a tight loop does not provide more information — it provides the same information N times, at a cost that scales with N.
+Aggregation and filtering depend on types as much as names. If `order.amount` is a string in one service and a number in another, you can't sum it. If `customer.ref` is a number in one place and a prefixed string in another, the same customer looks like two.
+
+```json
+{ "order.amount": "99.99", "customer.premium": "true", "created_at": 1709726400 }
+{ "order.amount": 99.99,   "customer.premium": true,   "created_at": "2024-03-06T12:00:00Z" }
+```
+
+Both lines describe the same kind of event, and no query will treat them as such. Put types in the shared convention next to the names:
+
+- **Identifiers** are strings, with one consistent format per kind of ID.
+- **Amounts** are numbers, with the currency in its own field rather than baked into the value.
+- **Durations** are numbers, with the unit in the name (`duration_ms`).
+- **Booleans** are booleans, never `"true"` or `"Y"`.
+- **Timestamps** in your own fields are ISO 8601 with an explicit offset, ideally UTC.
+
+The record's own timestamp is the SDK's job. OpenTelemetry stores it as nanoseconds since the Unix epoch, so it has no time zone to get wrong. The trouble starts with hand-rolled `created_at` fields in local time with no offset. Map domain objects to log fields in one place, not inside each log call, and type drift has nowhere to creep in. [Log-Based Monitoring](/guides/log-based-monitoring/#prerequisite-fields-you-can-count-on) shows what consistent fields buy you once you start alerting on them.
+
+## Logging Every Iteration
+
+Logging every item of a hot loop doesn't give you more information. It gives you the same information N times, at a cost that grows with N.
 
 ```csharp
-// ❌ 10,000 messages → 20,000 log entries, none more useful than two
+// ❌ 10,000 messages → 20,000 lines, none more useful than the summary
 foreach (var message in messages)
 {
-    _logger.LogDebug("Processing message {MessageId}", message.Id);
+    _logger.LogInformation("Processing message {message.id}", message.Id);
     await ProcessMessage(message);
-    _logger.LogDebug("Message {MessageId} processed", message.Id);
+    _logger.LogInformation("Message {message.id} processed", message.Id);
 }
 ```
 
+Log the anomalies individually and the normal case as one summary:
+
 ```csharp
-// ✅ One entry at start, one at completion, individual entries only for anomalies
-public async Task ProcessMessageBatch(IEnumerable<Message> messages)
+var failed = 0;
+var sw = Stopwatch.StartNew();
+
+foreach (var message in batch)
 {
-    var batch = messages.ToList();
-    using var activity = ActivitySource.StartActivity("process_message_batch");
-    activity?.SetTag("batch.size", batch.Count);
-
-    var successCount = 0;
-    var errorCount = 0;
-
-    foreach (var message in batch)
+    var started = sw.ElapsedMilliseconds;
+    try
     {
-        try
+        await ProcessMessage(message);
+        var elapsedMs = sw.ElapsedMilliseconds - started;
+        if (elapsedMs > SlowMessageThresholdMs)
         {
-            var sw = Stopwatch.StartNew();
-            await ProcessMessage(message);
-            sw.Stop();
-            successCount++;
-
-            if (sw.ElapsedMilliseconds > SlowMessageThresholdMs)
-            {
-                _logger.LogWarning("{@SlowMessage}", new
-                {
-                    message = "Slow message processing",
-                    message_id = message.Id,
-                    message_type = message.Type,
-                    processing_time_ms = sw.ElapsedMilliseconds
-                });
-            }
-        }
-        catch (Exception ex)
-        {
-            errorCount++;
-            _logger.LogError(ex, "{@MessageFailed}", new
-            {
-                message = "Message processing failed",
-                message_id = message.Id,
-                message_type = message.Type
-            });
+            _logger.LogInformation("Slow message {message.id} ({message.type}) took {duration_ms} ms",
+                message.Id, message.Type, elapsedMs);
         }
     }
-
-    _logger.LogInformation("{@BatchCompleted}", new
+    catch (Exception ex)
     {
-        message = "Message batch processing completed",
-        total = batch.Count,
-        succeeded = successCount,
-        failed = errorCount,
-        success_rate = (double)successCount / batch.Count
-    });
+        failed++;
+        _logger.LogError(ex, "Message {message.id} ({message.type}) failed",
+            message.Id, message.Type);
+    }
 }
+
+_logger.LogInformation("Batch done: {batch.size} messages, {batch.failed} failed, in {duration_ms} ms",
+    batch.Count, failed, sw.ElapsedMilliseconds);
 ```
 
-Log individual events when they are anomalous — slow, failed, or unexpected. Log aggregate metrics for the normal case. The ratio of useful signal to volume should stay high regardless of throughput.
+A slow message is logged at INFO here, not WARN: nothing was lost and nothing needs doing yet. That follows the rule in [Log Levels](/guides/log-levels-and-severity/#choosing-the-right-level-under-pressure): when in doubt, go less severe. For events that are individually useful but too frequent to keep in full, [sample them and record the rate](/guides/log-levels-and-severity/#sampling-high-frequency-events). If the volume threatens the request path itself, that's a job for [Async Logging](/guides/async-logging/).
 
-## PII and Sensitive Data in Logs
+## The Wrong Level
 
-Logging personally identifiable information — email addresses, full names, addresses, phone numbers, social security numbers, payment card numbers — creates compliance liability under GDPR, PCI-DSS, and HIPAA, and turns your log aggregation system into a high-value data breach target.
+Level misuse deserves its own page, and it has one. The two mistakes that do the most damage are worth repeating. ERROR for expected outcomes (a wrong password, a declined card) trains everyone to ignore ERROR. And paging on ERROR counts treats a log level as an incident severity, which [it isn't](/guides/log-levels-and-severity/#a-log-level-is-not-an-incident-severity). Use the [Log Levels](/guides/log-levels-and-severity/) guide as your team's reference and argue about it once.
 
-```csharp
-// ❌ A compliance incident waiting to be discovered
-_logger.LogInformation("{@Registration}", new
-{
-    email = registration.Email,            // PII
-    phone = registration.PhoneNumber,      // PII
-    credit_card = registration.CardNumber, // PCI-DSS violation
-    ssn = registration.SSN                 // Highly sensitive PII
-});
-```
+## Personal Data in Logs
+
+Emails, names, phone numbers, street addresses and card numbers in logs turn your log store into a breach target and a compliance problem. GDPR's data-minimisation principle covers telemetry like any other processing. PCI DSS requires card numbers to be unreadable wherever they're stored, and log stores count.
 
 ```csharp
-// ✅ Delete identifying values; log attributes, not values
-_logger.LogInformation("{@Registration}", new
-{
-    user_id = registration.UserId,                    // internal ID, not derived from email
-    age_band = GetAgeBand(registration.DateOfBirth),  // "25-34", not the date
-    region = GetRegion(registration.Address),          // "EU-West", not the address
-    account_type = registration.AccountType,
-    acquisition_channel = registration.AcquisitionChannel,
-    fraud_score = registration.FraudScore
-});
-```
-
-The log should contain attributes that describe the user — tier, region, acquisition channel, risk score — not the values that identify them. The email itself is deleted, not hashed: the address space is small enough that a single GPU can walk the entire list of plausible addresses, so a hash isn't opaque the way it is for a high-entropy business identifier. Correlate on the internal `user_id` the account system already assigns — it does the same job without the email ever reaching the log.
-
-Note that an internal user ID is still personal data under GDPR Article 4(5) once it can be tied back to an identity through the account record. If you need to support right-to-erasure (Article 17), a tokenisation registry with deletion capability is required — deleting the mapping from token to identity renders historical logs unlinkable. See [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) for when to hash, tokenise, or delete.
-
-## Error Information Leaks
-
-Exception details logged without filtering can expose internal system structure to anyone with log access — and log access is often broader than it should be.
-
-```csharp
-// ❌ Reveals database schema, server names, and code paths
-catch (SqlException ex)
-{
-    _logger.LogError(ex, "Payment failed", new
-    {
-        connection_string = ex.DataSource,   // server hostname or IP
-        procedure = ex.Procedure,            // database procedure name
-        server = Environment.MachineName,    // infrastructure detail
-        assembly = Assembly.GetEntryAssembly()?.Location  // deployment path
-    });
-}
+// ❌ A compliance finding waiting to be discovered
+_logger.LogInformation(
+    "Registration {email} {phone} card {card_number}",
+    registration.Email, registration.PhoneNumber, registration.CardNumber);
 ```
 
 ```csharp
-// ✅ Enough to diagnose; nothing an attacker needs
+// ✅ Attributes that describe the user, not values that identify them
+_logger.LogInformation(
+    "Registration {customer.ref} tier {customer.tier} region {customer.region} via {acquisition.channel}",
+    customerRef, registration.Tier, registration.Region, registration.AcquisitionChannel);
+```
+
+Log what *describes* the user (tier, coarse region, acquisition channel) and a pseudonymous reference to correlate on, never the values that *identify* them. Don't make that reference a plain SHA-256 of the email address. Common addresses fall to precomputed tables, so the hash is barely better than the address. Use a keyed HMAC with the key held outside the telemetry system, or a token from a registry you control. [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/#a-decision-framework-for-every-field) has a field-by-field decision table.
+
+A pseudonymous reference is still personal data under GDPR (Recital 26), because whoever holds the key or the token map can link it back. The upside is erasure: delete the mapping, and the historical logs can't be tied to the person any more. [Data Masking in Telemetry](/guides/data-masking-in-telemetry/) covers when to hash, tokenise or delete. And because one developer will eventually log the wrong field anyway, put a scrubbing step in the Collector as a backstop. [The fix lives in the Collector](/guides/pii-in-telemetry/#the-fix-lives-in-the-collector-not-the-application), not only in application code.
+
+## Secrets and Internals in Error Logs
+
+Error paths are where secrets leak, because they're where developers reach for "log everything I can see."
+
+```csharp
+// ❌ Dumps whatever was in scope when it failed
 catch (Exception ex)
 {
-    _logger.LogError("{@PaymentError}", new
-    {
-        message = "Payment processing failed",
-        error = new
-        {
-            category = CategoriseError(ex),   // "database_timeout", "network_error"
-            type = ex.GetType().Name,          // "SqlException" — type is not sensitive
-            code = GetErrorCode(ex),           // internal code like "ERR_PAY_DB_001"
-            is_retryable = IsRetryable(ex)
-        },
-        operation = new
-        {
-            component = GetFailingComponent(ex), // "payment_gateway", "persistence"
-            duration_ms = GetElapsedMs(),
-            attempt = requestContext.AttemptNumber
-        }
-    });
+    _logger.LogError(ex, "Payment failed. Connection: {db.connection_string} Request: {request.body}",
+        _options.ConnectionString, requestBody);
 }
 ```
 
-Stack traces belong in structured exception telemetry (OTel exception events on the span), not in log entries that flow to shared aggregation. Infrastructure details — hostnames, file paths, connection strings — should never appear in logs.
-
-## Log Size Inflation
-
-Logging every HTTP header, full request bodies, or complete response payloads creates entries that are expensive to store, slow to index, and mostly noise.
+A connection string can carry a password. A raw request body can carry a card number, an access token or the customer's address. Neither helps you diagnose a timeout.
 
 ```csharp
-// ❌ Logs everything — headers alone can be several kilobytes
-_logger.LogInformation("{@HttpRequest}", new
+// ✅ Pass the exception; add the facts that classify the failure
+catch (Exception ex)
 {
-    headers = context.Request.Headers.ToDictionary(h => h.Key, h => h.Value),
-    body = await ReadBodyAsync(context.Request),
-    cookies = context.Request.Cookies.ToDictionary(c => c.Key, c => c.Value)
-});
+    _logger.LogError(ex, "Payment {payment.id} failed: {error.type} (retryable: {error.retryable})",
+        payment.Id, ClassifyError(ex), IsRetryable(ex));
+}
 ```
+
+Keep passing the exception itself. The OpenTelemetry provider carries it on the log record, and exporters write it out as the semantic-convention `exception.type`, `exception.message` and `exception.stacktrace` attributes. OpenTelemetry is moving exception recording [towards logs](https://opentelemetry.io/docs/specs/semconv/exceptions/exceptions-logs/) rather than span events, so the log line is the right place for the stack trace. Infrastructure identity (`host.name`, `k8s.pod.name`, `service.version`) belongs on the record too, as resource attributes set once by the SDK or the Collector, not copied into each message.
+
+Two cautions. Exception messages aren't sanitised: a database driver may echo the failing value, and the semantic conventions note that `exception.message` may contain sensitive data. Run the same Collector scrubbing over exceptions that you run over attributes. And control who can read the log store. Detailed errors are fine in logs; detailed errors readable by everyone are not.
+
+## Logging Whole Requests
+
+Logging every header, cookie and full body on every request creates lines that are expensive to store, slow to index and mostly noise. It's also a security problem, not just a size one: `Authorization` and `Cookie` headers are credentials.
+
+If you're on ASP.NET Core, don't hand-roll it. The built-in HTTP logging middleware lets you choose the fields, and redacts the value of any header you haven't explicitly allowed:
 
 ```csharp
-// ✅ Logs what is useful; samples the rest
-_logger.LogInformation("{@HttpRequest}", new
+builder.Services.AddHttpLogging(o =>
 {
-    method = context.Request.Method,
-    path = context.Request.Path.Value,
-    content_type = context.Request.ContentType,
-    content_length = context.Request.ContentLength,
-    // Selected headers only, not the full set
-    correlation_id = context.Request.Headers["X-Correlation-ID"].ToString(),
-    user_agent_category = CategoriseUserAgent(context.Request.Headers["User-Agent"]),
-    // Body metadata, not body content
-    body_size_bytes = context.Request.ContentLength ?? 0
+    // Method, path, status and duration: no headers, no bodies.
+    o.LoggingFields = HttpLoggingFields.RequestMethod
+                    | HttpLoggingFields.RequestPath
+                    | HttpLoggingFields.ResponseStatusCode
+                    | HttpLoggingFields.Duration;
+    o.CombineLogs = true; // one line per request, not one per phase
 });
+
+var app = builder.Build();
+app.UseHttpLogging();
 ```
 
-Apply intelligent sampling for detailed captures: log full request context for error responses (`status >= 400`), requests that exceed a latency threshold, and a configured percentage of normal requests. Log metadata (size, type, category) for everything else.
+Its records are written under the `Microsoft.AspNetCore.HttpLogging.HttpLoggingMiddleware` category at Information, which the default templates filter out, so raise that category in `appsettings.json` or you'll see nothing. Watch the path, too: `/users/alice@example.com/orders` puts an email address in a field you thought was safe. If you already emit OpenTelemetry HTTP server spans, they carry method, route, status and duration, and a per-request log line may be redundant altogether.
 
-<!-- TODO: Expand with Go and Python equivalents for naming/correlation patterns -->
-<!-- TODO: Add section on log level misuse — DEBUG in production, WARN for expected conditions -->
-<!-- TODO: Add section on timestamp pitfalls — local time instead of UTC, missing timezone info -->
+When you need fuller detail, capture it for the requests that earn it, such as failed responses or a small fixed sample, and keep metadata (size, content type, status) for the rest.
+
+{{< insight >}}
+**The five-minute audit.**
+Pick one service and pull an hour of its logs. Can you filter by every ID you'd need during an incident? Does every line carry a `trace_id`? Is there anything in there you'd be uncomfortable seeing in a breach report? Each "no" or "yes" maps to a section above, and fixing it in one service gives you the template for the rest.
+{{< /insight >}}

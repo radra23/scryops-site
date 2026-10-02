@@ -1,353 +1,316 @@
 ---
 title: "Async Logging: Keeping Your Application Threads Free"
 date: 2026-06-11
-draft: true
-excerpt: "Every synchronous log write forces a request thread to wait on disk or network I/O. Async logging moves that work to background threads so your application threads stay free — here is how to configure it correctly with Serilog and OpenTelemetry."
-readtime: 7
-tags: ["Logs", "Observability", "OpenTelemetry", "Structured Logging"]
+draft: false
+excerpt: "A synchronous log write makes the request thread wait on disk or network I/O. Async logging hands that work to a background thread, and quietly adds a queue that can fill up, drop records and lose them at shutdown. How to size it, watch it and flush it, with Serilog, the OpenTelemetry SDK and Python."
+readtime: 11
+tags: ["Logs", "Observability", "OpenTelemetry", "Reliability"]
 ---
 
-Synchronous logging is a hidden tax on request latency. A log write to a rolling file or a remote endpoint involves I/O — disk seeks, network round-trips, format serialisation — and every one of those operations runs on the thread that called `LogInformation`. At low request rates the cost is negligible. At high rates, each log statement becomes a serialisation point that limits throughput.
+Synchronous logging is a hidden tax on request latency. Writing to a rolling file or a remote endpoint means I/O: a disk flush, a network round-trip, serialisation. Every bit of it runs on the thread that called `LogInformation`. At low request rates you'll never notice. At high rates, or on the day the disk gets slow, each log statement becomes a small wait that every request has to sit through.
 
-Async logging separates the act of submitting a log record from the act of delivering it. The application thread enqueues the record into a memory buffer and returns immediately; a dedicated background thread drains the buffer and handles the I/O. The application continues without waiting.
+Async logging splits submitting a record from delivering it. The application thread drops the record into an in-memory queue and returns. A background worker drains the queue and does the I/O.
 
-## Serilog: WriteTo.Async()
+That sounds free. It isn't. You've added a queue, and every queue forces three decisions on you: how big it is, what happens when it's full, and what happens to whatever is still in it when the process exits. Make those decisions on purpose and async logging is one of the cheapest latency wins you'll find. Leave them to the defaults and you get log loss you can't see.
 
-Serilog provides async wrapping out of the box through `Serilog.Sinks.Async`. Any sink — file, console, OpenTelemetry — can be made async by wrapping it:
+## What Moves Off the Thread, and What Doesn't
+
+Async logging moves the *sink* work: formatting the output and writing it somewhere. It doesn't move the work of creating the event. In Serilog, parsing the message template, capturing properties and running enrichers all happen on the calling thread, before the event is queued. Python's `QueueHandler` does the same: it merges the message with its arguments on the caller's thread so the record can be pickled or handed off safely.
+
+So async logging fixes slow I/O. It doesn't fix logging too much. A tight loop that logs every item still pays for every event, then fills the queue on top. The fix for that is level discipline and sampling, covered in [Log Levels](/guides/log-levels-and-severity/#sampling-high-frequency-events), not a bigger buffer.
+
+## Serilog: `WriteTo.Async()`
+
+In .NET, Serilog's async wrapper lives in the `Serilog.Sinks.Async` package. Wrap a sink in it and that sink's `Emit` runs on a dedicated background worker:
 
 ```csharp
-public static class AsyncLoggingConfiguration
-{
-    public static IServiceCollection AddAsyncLogging(
-        this IServiceCollection services,
-        IConfiguration configuration)
+// Serilog 4.4, Serilog.Sinks.Async 2.1, Serilog.Sinks.OpenTelemetry 4.2
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithThreadId()        // Serilog.Enrichers.Thread
+    .Enrich.WithMachineName()     // Serilog.Enrichers.Environment
+
+    // Console: synchronous by nature, so wrap it
+    .WriteTo.Async(a => a.Console(new RenderedCompactJsonFormatter()),
+        bufferSize: 1_000,
+        blockWhenFull: false)
+
+    // Rolling file: a slow disk flush shouldn't stall a request
+    .WriteTo.Async(a => a.File(
+            formatter: new RenderedCompactJsonFormatter(),
+            path: config["Logging:FilePath"]!,
+            rollingInterval: RollingInterval.Day,
+            retainedFileCountLimit: 7),
+        bufferSize: 10_000,
+        blockWhenFull: false)
+
+    // OTLP: already batched and asynchronous, so NOT wrapped in Async
+    .WriteTo.OpenTelemetry(options =>
     {
-        Log.Logger = new LoggerConfiguration()
-            .ReadFrom.Configuration(configuration)
-            .Enrich.FromLogContext()
-            .Enrich.WithThreadId()        // Serilog.Enrichers.Thread
-            .Enrich.WithEnvironmentName() // Serilog.Enrichers.Environment
-
-            // Console: small buffer, fast drain
-            .WriteTo.Async(a => a.Console(new JsonFormatter()),
-                bufferSize: 1000,
-                blockWhenFull: false)
-
-            // Rolling file: larger buffer for slower disk writes
-            .WriteTo.Async(a => a.File(
-                path: configuration["Logging:FilePath"]!,
-                formatter: new JsonFormatter(),
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 7),
-                bufferSize: 10000,
-                blockWhenFull: false)
-
-            // OpenTelemetry export: largest buffer for network latency
-            // (Serilog.Sinks.OpenTelemetry — batching handled by the Async wrapper)
-            .WriteTo.Async(a => a.OpenTelemetry(options =>
-                {
-                    options.Endpoint = configuration["OpenTelemetry:Endpoint"];
-                    options.Protocol  = OtlpProtocol.GrpcProtobuf;
-                }),
-                bufferSize: 10000,
-                blockWhenFull: false)
-
-            .CreateLogger();
-
-        services.AddLogging(builder =>
-        {
-            builder.ClearProviders();
-            builder.AddSerilog();
-        });
-
-        return services;
-    }
-}
+        options.Endpoint = config["OpenTelemetry:Endpoint"];
+        options.Protocol = OtlpProtocol.Grpc;
+        options.BatchingOptions.BatchSizeLimit = 1_000;
+        options.BatchingOptions.BufferingTimeLimit = TimeSpan.FromSeconds(2);
+        options.BatchingOptions.QueueLimit = 100_000;
+    })
+    .CreateLogger();
 ```
+
+Note the OpenTelemetry sink. It's already a batched sink: Serilog queues its events in the background and ships them in batches (by default up to 1,000 events, every 2 seconds, with a queue limit of 100,000). Wrapping it in `WriteTo.Async` as well just stacks a second queue in front of the first. You get two places to lose events and two sets of numbers to tune, for no gain. Tune `BatchingOptions` instead. The values above are the defaults, written out so they show up in code review.
+
+{{< insight >}}
+**Only wrap sinks that block.** Console and file sinks write on the calling thread, so `WriteTo.Async` earns its keep there. Network sinks built on Serilog's batching (`IBatchedLogEventSink`, which the OpenTelemetry sink uses) already do their I/O in the background. Check how a sink works before you wrap it.
+{{< /insight >}}
 
 ### bufferSize and blockWhenFull
 
-These two parameters control what happens when the background thread cannot drain the queue as fast as records arrive:
+These two parameters decide what happens when the worker can't keep up.
 
-**`bufferSize`** is the maximum number of log records held in memory before the overflow policy kicks in. Start with the values shown above and adjust based on observed queue depth. A buffer that never fills is fine; a buffer that regularly fills indicates either too-small a buffer or a genuinely overwhelmed sink.
+**`bufferSize`** caps how many events wait in memory. The default is 10,000, so the queue is always bounded, even if you never set it. A buffer that never fills is fine. A buffer that fills regularly means either it's too small for your bursts or the sink is genuinely too slow, and only one of those is fixed by a bigger number.
 
-**`blockWhenFull: false`** drops the oldest records when the buffer is full, rather than blocking the application thread. For most sinks this is the right choice — a brief gap in log coverage during a traffic spike is far less harmful than the request latency that blocking would introduce. Use `blockWhenFull: true` only for sinks where log loss is genuinely unacceptable (audit trails written to a local file, for example), and only if the sink is fast enough to drain within your latency budget.
+**`blockWhenFull: false`** (the default) means that when the buffer is full, the *arriving* event is dropped and the caller moves on. It isn't the oldest event that goes; it's the newest one, the one being written right now. Each drop is reported through Serilog's failure listener (by default `SelfLog`, which is silent unless you enable it). Dropping is usually the right trade: a gap in the logs during a spike does less harm than adding sink latency to every request.
 
-{{< insight >}}
-**Serilog's `WriteTo.Async` and OTel's `BatchExportProcessorOptions` are separate batching layers for separate paths.** If you use `WriteTo.Async(a => a.OpenTelemetry(...))`, Serilog's async wrapper handles the buffering — do not also configure OTel's `BatchExportProcessorOptions` inside the sink options. If you use the OTel SDK's `AddOtlpExporter()` directly (not via Serilog), configure batching via `BatchExportProcessorOptions<LogRecord>` on the exporter. The two patterns are not interchangeable.
-{{< /insight >}}
+**`blockWhenFull: true`** turns the queue into backpressure. When it fills, the calling thread waits for a free slot, so you're back to synchronous logging at exactly the moment the system is under the most strain. Use it only where losing a record is worse than slowing down, and only if the sink can drain within your latency budget.
 
-## Multi-Sink Configuration
+## Watch the Queue
 
-Different destinations warrant different buffer sizes. A console sink drains fast; a remote endpoint has network latency to absorb:
+A queue that drops silently is a monitoring blind spot sitting inside your monitoring. Serilog.Sinks.Async exposes its state through `IAsyncLogEventSinkMonitor`. Pass one in, and you get an inspector with `Count`, `BufferSize` and `DroppedMessagesCount`. Publish those as metrics:
 
 ```csharp
-public static LoggerConfiguration CreateMultiSinkLogger(IConfiguration config)
+sealed class AsyncQueueMetrics : IAsyncLogEventSinkMonitor
 {
-    return new LoggerConfiguration()
-        .MinimumLevel.Information()
-        .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
-        .Enrich.FromLogContext()
-        .Enrich.WithMachineName()
-        .Enrich.WithProcessId()
-        .Enrich.WithThreadId()
+    static readonly Meter Meter = new("MyApp.Logging");
+    IAsyncLogEventSinkInspector? _inspector;
 
-        // Console: fast drain, small buffer, tolerate drops
-        .WriteTo.Async(a => a.Console(
-            outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}"),
-            bufferSize: 1000,
-            blockWhenFull: false)
+    public AsyncQueueMetrics(string sinkName)
+    {
+        var tags = new KeyValuePair<string, object?>("sink", sinkName);
+        Meter.CreateObservableGauge("logging.async.queue.depth",
+            () => new Measurement<int>(_inspector?.Count ?? 0, tags));
+        Meter.CreateObservableCounter("logging.async.dropped",
+            () => new Measurement<long>(_inspector?.DroppedMessagesCount ?? 0, tags));
+    }
 
-        // Hourly rolling file: larger buffer, retain 1 week of hourly files
-        .WriteTo.Async(a => a.File(
-            path: config["Logging:FilePath"]!,
-            formatter: new JsonFormatter(),
-            rollingInterval: RollingInterval.Hour,
-            retainedFileCountLimit: 168),
-            bufferSize: 25000,
-            blockWhenFull: false)
+    public void StartMonitoring(IAsyncLogEventSinkInspector inspector) => _inspector = inspector;
+    public void StopMonitoring(IAsyncLogEventSinkInspector inspector) => _inspector = null;
+}
 
-        // OTel export: large buffer; remote network is the bottleneck
-        .WriteTo.Async(a => a.OpenTelemetry(options =>
-            {
-                options.Endpoint = config["OpenTelemetry:Endpoint"];
-                options.Protocol  = OtlpProtocol.GrpcProtobuf;
-            }),
-            bufferSize: 20000,
-            blockWhenFull: false);
+// .WriteTo.Async(a => a.File(...), monitor: new AsyncQueueMetrics("file"))
+```
+
+Add the `MyApp.Logging` meter to your OpenTelemetry metrics pipeline and alert on any increase in `logging.async.dropped`. Queue depth sitting near `bufferSize` is your early warning; a rising drop counter means you're already losing logs. These are metrics on purpose: a log line that says "I'm dropping logs" can be dropped by the very queue it's reporting on.
+
+If you'd rather catch dropped events than just count them, Serilog 4.1 and later can route failures to a second sink. `WriteTo.FallbackChain` attaches itself as the failure listener of the primary sink, and the async wrapper reports every drop to it:
+
+```csharp
+.WriteTo.FallbackChain(
+    wt => wt.Async(a => a.File(...), bufferSize: 10_000),
+    wt => wt.Console())   // receives events the async buffer had to drop
+```
+
+Keep the fallback fast and local. If it's as slow as the primary, all you've done is move the backlog.
+
+## The OpenTelemetry SDK Is Already Async
+
+If you log through `ILogger` straight into the OpenTelemetry SDK, there's no wrapper to add. The OTLP exporter sits behind a **batch processor** by default, and that processor is a bounded queue with a background export loop, the same pattern as above. The [Logs SDK spec](https://opentelemetry.io/docs/specs/otel/logs/sdk/) sets its defaults: a queue of 2,048 records, batches of up to 512, a 30-second export timeout. When the queue is full, new records are dropped. The Logs SDK spec is stable, and so is the .NET logs implementation.
+
+In .NET you tune it through the processor options on `AddOtlpExporter`:
+
+```csharp
+// OpenTelemetry .NET 1.19
+builder.Logging.AddOpenTelemetry(logging =>
+{
+    logging.SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("checkout-api"));
+    logging.AddOtlpExporter((exporter, processor) =>
+    {
+        exporter.Endpoint = new Uri("http://localhost:4317");
+
+        processor.ExportProcessorType = ExportProcessorType.Batch;   // the default
+        processor.BatchExportProcessorOptions.MaxQueueSize = 2048;
+        processor.BatchExportProcessorOptions.ScheduledDelayMilliseconds = 1000;
+        processor.BatchExportProcessorOptions.MaxExportBatchSize = 512;
+        processor.BatchExportProcessorOptions.ExporterTimeoutMilliseconds = 30000;
+    });
+});
+```
+
+One detail is worth knowing. The spec's default delay between exports is 1,000 ms, but .NET's log processor defaults to 5,000 ms. The other three values match the spec. If you want the spec's behaviour, set the delay explicitly as above, or use the standard environment variables (`OTEL_BLRP_SCHEDULE_DELAY`, `OTEL_BLRP_MAX_QUEUE_SIZE`, `OTEL_BLRP_MAX_EXPORT_BATCH_SIZE`, `OTEL_BLRP_EXPORT_TIMEOUT`), which the .NET SDK reads.
+
+Pick one path per destination. Either Serilog owns the queue (Serilog sink to OTLP) or the OTel SDK does (`ILogger` to the OTel provider). Configuring both for the same records just buffers them twice.
+
+## Context Is Captured at the Call Site
+
+The usual worry with async logging is losing correlation: if a background thread writes the record, does it still carry the trace ID and the order ID? It does, because context is captured when the event is *created*, on the calling thread, and travels with the event through the queue. Serilog's `LogContext` and `ILogger.BeginScope` both store their values in `AsyncLocal<T>`, which flows with the logical execution context across `await`, and into `Task.Run` and the thread pool.
+
+```csharp
+using (logger.BeginScope(new Dictionary<string, object> { ["order_id"] = order.Id }))
+{
+    logger.LogInformation("Request thread");                       // order_id present
+    await SomethingAsync();
+    logger.LogInformation("After await");                          // order_id present
+    await Task.Run(() => logger.LogInformation("In Task.Run"));    // order_id present
+    await orderQueue.Writer.WriteAsync(order.Id);                  // hand-off to a worker...
+}
+
+// ...a consumer loop started at application startup:
+await foreach (var id in orderQueue.Reader.ReadAllAsync())
+    logger.LogInformation("Handled order {OrderId}", id);          // order_id MISSING
+```
+
+The scope is lost where work crosses a queue into a loop that was started before the scope existed. The consumer runs in the execution context it captured at startup, not the producer's. That covers `Channel<T>` consumers, `BackgroundService` loops and message handlers. The fix is to make the context part of the message: put the order ID and the trace context into the work item, and open a new scope (and, for tracing, a linked span) when the worker picks it up. [Log Context Enrichment](/guides/log-context-enrichment/) covers what to carry, and [wiring trace IDs into logs](/howtos/wire-trace-ids-into-logs/) covers the trace side.
+
+Two smaller traps. Pass scope state as a dictionary (or a message template with arguments), not an anonymous object: Serilog's `ILogger` provider turns key/value pairs into properties, but an anonymous object becomes a single `Scope` value you can't query by field. And `ExecutionContext.SuppressFlow()` or `UnsafeQueueUserWorkItem` deliberately break the flow, so scopes don't follow work started that way.
+
+## Flush on Shutdown
+
+Whatever is in the queue when the process exits is gone. For Serilog with the static `Log.Logger`, the pattern from Serilog's own hosting docs is a `try`/`finally` around the host:
+
+```csharp
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Async(a => a.Console(), monitor: new AsyncQueueMetrics("console"))
+    .CreateLogger();
+
+try
+{
+    var builder = Host.CreateApplicationBuilder(args);
+    builder.Services.AddSerilog();   // routes ILogger<T> through Log.Logger
+    using var host = builder.Build();
+    host.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Host terminated unexpectedly");
+}
+finally
+{
+    Log.CloseAndFlush();             // drains every async buffer, then disposes the sinks
 }
 ```
 
-## Context Preservation Across Async Operations
+This runs after the host has stopped, so the shutdown messages from your hosted services are in the queue too. Calling `CloseAndFlush` from an `ApplicationStopping` callback instead disposes the logger while the host is still shutting down, and everything logged after that point is lost. The OpenTelemetry SDK path flushes its batch processor when the host disposes the logger provider, so a clean host shutdown is enough there.
 
-Async logging dequeues and writes records on a background thread. The correlation context — trace ID, user ID, operation name — must be captured at enqueue time, not at write time. `BeginScope` and OTel activity propagation handle this correctly through `AsyncLocal<T>`, which follows the logical execution context across `await` boundaries.
+Flushing takes time, and that time comes out of your termination budget. On Kubernetes the pod gets `terminationGracePeriodSeconds` (30 by default) between SIGTERM and SIGKILL. A queue that takes longer than that to drain to a slow remote endpoint gets cut off partway. A full queue on a sink that's struggling is exactly the case where that happens.
 
-```csharp
-public class OrderProcessor
-{
-    private static readonly ActivitySource ActivitySource =
-        new ActivitySource("MyApp.Orders");
+## Beyond .NET
 
-    private readonly ILogger<OrderProcessor> _logger;
+Every mature logging stack has the same three knobs. Only the defaults differ, and the defaults are where the surprises are.
 
-    public OrderProcessor(ILogger<OrderProcessor> logger) => _logger = logger;
+**Python** ships the pattern in the standard library: `QueueHandler` on the application side, `QueueListener` running the real handlers on a background thread. The examples in the docs use an unbounded `queue.Queue()`. If you bound it, a full queue raises `queue.Full`, which the handler reports as a `--- Logging error ---` traceback on stderr for *every* dropped record. Override `enqueue` to drop quietly and count:
 
-    public async Task ProcessOrderAsync(Order order)
-    {
-        // BeginScope attaches correlation context to all log records
-        // within this async operation, including those on resumed threads
-        using var scope = _logger.BeginScope(new Dictionary<string, object>
-        {
-            ["order_id"]    = order.Id,
-            ["customer_id"] = order.CustomerId,
-        });
+```python
+import atexit
+import logging
+import logging.handlers
+import queue
+import sys
 
-        using var activity = ActivitySource.StartActivity("process_order");
+log_queue = queue.Queue(maxsize=10_000)  # bounded: the default Queue() is not
 
-        // Use Stopwatch for duration — activity.Duration is only set
-        // after the activity stops (when the using block exits)
-        var start = Stopwatch.GetTimestamp();
 
-        _logger.LogInformation("Starting order processing");
+class DroppingQueueHandler(logging.handlers.QueueHandler):
+    """Count and drop records when the queue is full, instead of erroring."""
 
-        try
-        {
-            await ProcessOrderSteps(order);
+    dropped = 0
 
-            _logger.LogInformation(
-                "Order processing completed in {DurationMs}ms",
-                Stopwatch.GetElapsedTime(start).TotalMilliseconds);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex,
-                "Order processing failed after {DurationMs}ms",
-                Stopwatch.GetElapsedTime(start).TotalMilliseconds);
-            throw;
-        }
-    }
-}
+    def enqueue(self, record):
+        try:
+            self.queue.put_nowait(record)
+        except queue.Full:
+            DroppingQueueHandler.dropped += 1
+
+
+# The slow, real handler lives on the listener's thread
+stream = logging.StreamHandler(sys.stdout)
+stream.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(name)s %(message)s"))
+
+listener = logging.handlers.QueueListener(
+    log_queue, stream, respect_handler_level=True
+)
+listener.start()
+atexit.register(listener.stop)  # stop() drains the queue before returning
+
+root = logging.getLogger()
+root.setLevel(logging.INFO)
+root.addHandler(DroppingQueueHandler(log_queue))
+
+logging.getLogger("checkout").info("order %s placed", "ord_12345")
 ```
 
-`BeginScope` uses `AsyncLocal<T>` internally. Values set in the scope flow into awaited continuations even when they resume on a different thread pool thread, so async-logged records will carry the correct correlation context regardless of which thread actually drains the buffer.
+Export `DroppingQueueHandler.dropped` as a metric, the same way as the Serilog counter.
 
-## Graceful Shutdown
+**Java with Logback** uses `AsyncAppender`, and its defaults are the opposite of Serilog's. The queue holds 256 events. Once only 20% of that capacity is left, it starts *discarding TRACE, DEBUG and INFO* events and keeps WARN and ERROR. When the queue is completely full it *blocks*, because `neverBlock` defaults to `false`. To get "keep every level, drop rather than block", say so:
 
-Async logging introduces a shutdown risk: records queued at the moment of shutdown may not have been drained when the process exits. Register a `IHostedService` that explicitly flushes before the process terminates:
+```xml
+<configuration>
+  <shutdownHook/>  <!-- stops the context, flushing AsyncAppender, on JVM exit -->
 
-```csharp
-public class GracefulShutdownService : IHostedService
-{
-    private readonly ILogger<GracefulShutdownService> _logger;
-    private readonly IHostApplicationLifetime _lifetime;
+  <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+    <queueSize>8192</queueSize>
+    <discardingThreshold>0</discardingThreshold>  <!-- 0 = keep all levels -->
+    <neverBlock>true</neverBlock>                 <!-- drop when full, never stall -->
+    <appender-ref ref="FILE" />
+  </appender>
 
-    public GracefulShutdownService(
-        ILogger<GracefulShutdownService> logger,
-        IHostApplicationLifetime lifetime)
-    {
-        _logger = logger;
-        _lifetime = lifetime;
-    }
-
-    public Task StartAsync(CancellationToken cancellationToken)
-    {
-        _lifetime.ApplicationStopping.Register(OnShutdown);
-        return Task.CompletedTask;
-    }
-
-    private void OnShutdown()
-    {
-        // Log before flushing — not after. CloseAndFlush disposes the logger.
-        _logger.LogInformation("Application shutdown initiated — flushing log queues");
-
-        // Drain all async sinks and deliver buffered records to their destinations
-        Log.CloseAndFlush();
-
-        // Do NOT log after CloseAndFlush; the logger is disposed at this point
-    }
-
-    public Task StopAsync(CancellationToken cancellationToken) => Task.CompletedTask;
-}
+  <root level="INFO">
+    <appender-ref ref="ASYNC" />
+  </root>
+</configuration>
 ```
 
-Register it in `Program.cs`:
-
-```csharp
-services.AddHostedService<GracefulShutdownService>();
-```
-
-`Log.CloseAndFlush()` blocks until all queued records have been delivered. The background thread draining the buffer runs to completion before the method returns. On a healthy system this takes milliseconds; on a slow remote sink it may take longer — factor this into your shutdown timeout (`hostBuilder.UseShutdownTimeout(...)`).
-
-## Resilient Fallback
-
-If the async logger's queue fills and `blockWhenFull: false` drops records, or if the primary logger fails, a synchronous fallback preserves the most critical events:
-
-```csharp
-public class ResilientLogger
-{
-    private readonly ILogger _primary;
-    private readonly ILogger _fallback;
-
-    public ResilientLogger(ILogger primary, ILogger fallback)
-    {
-        _primary  = primary;
-        _fallback = fallback;
-    }
-
-    public void Log(LogLevel level, string message, params object[] args)
-    {
-        try
-        {
-            _primary.Log(level, message, args);
-        }
-        catch (InvalidOperationException)
-        {
-            // Primary logger is disposed or faulted — fall through to synchronous sink
-            _fallback.Log(level, message, args);
-        }
-    }
-}
-```
-
-The fallback logger should write to a fast, local destination — a console sink or a local file — not to a slow remote endpoint. Its purpose is to preserve records when the async path is unavailable, not to maintain full throughput.
-
-## Common Pitfalls
-
-**1. Unbounded queue.** `WriteTo.Async()` has a default `bufferSize` of 10,000. If you pass no arguments, you get that default. Be explicit so the configuration is visible in code review:
-
-```csharp
-// Don't: implicit defaults are invisible
-.WriteTo.Async(a => a.Console())
-
-// Do: make buffer size and overflow policy explicit
-.WriteTo.Async(a => a.Console(), bufferSize: 10000, blockWhenFull: false)
-```
-
-**2. Logging every item in a high-volume loop.** Async logging queues records; it does not make them free. At high enough call rates, you will still fill the buffer. Adapt the logging rate to the item count:
-
-```csharp
-// Don't: log every item — fills the buffer at large list sizes
-foreach (var item in items)
-{
-    _logger.LogDebug("Processing item {ItemId}", item.Id);
-    ProcessItem(item);
-}
-
-// Do: log periodically with progress context
-var logEveryN = Math.Max(1, items.Count / 100); // log ~100 progress updates
-
-for (int i = 0; i < items.Count; i++)
-{
-    if (i % logEveryN == 0)
-        _logger.LogDebug("Processing batch {Current}/{Total} ({Progress}%)",
-            i, items.Count, (i * 100) / items.Count);
-
-    ProcessItem(items[i]);
-}
-```
-
-**3. Context loss in fire-and-forget.** `Task.Run()` creates a new `AsyncLocal` scope that does not inherit scope values from the parent. Log before launching; do not rely on context flowing into detached tasks:
-
-```csharp
-// Don't: context does not propagate into Task.Run()
-_logger.LogInformation("Starting process");
-await Task.Run(() => DoWork()); // scope values lost inside here
-
-// Do: use async/await to preserve context, or log inside the task with explicit context
-using var scope = _logger.BeginScope(new { operation_id = Guid.NewGuid() });
-_logger.LogInformation("Starting process");
-await DoWorkAsync(); // scope propagates through await
-```
+Whether dropping INFO under pressure is the right call is a judgement about your logs, not about Logback. Just make it on purpose.
 
 ## Testing Async Logging
 
-Async logging tests must account for the fact that records are written on background threads — assertions made immediately after logging may run before the drain completes:
+Async sinks make naive tests flaky: an assertion that runs straight after a log call may run before the worker has written anything. Flush before you assert, and flush the logger you actually built:
 
 ```csharp
 [Test]
-public async Task AsyncLogging_UnderLoad_DoesNotBlockCallers()
+public void Dispose_DeliversEverythingQueued()
 {
+    var sink = new InMemorySink();   // ILogEventSink that appends to a ConcurrentQueue<LogEvent>
     var logger = new LoggerConfiguration()
-        .WriteTo.Async(a => a.Console(), bufferSize: 100, blockWhenFull: false)
+        .WriteTo.Async(a => a.Sink(sink), bufferSize: 1_000)
         .CreateLogger();
 
-    var stopwatch = Stopwatch.StartNew();
-
-    // Emit 1000 records concurrently
-    var tasks = Enumerable.Range(0, 1000)
-        .Select(i => Task.Run(() => logger.Information("Test message {MessageId}", i)))
-        .ToArray();
-
-    await Task.WhenAll(tasks);
-    stopwatch.Stop();
-
-    // Enqueueing 1000 records should complete well under 1 second
-    // (the drain may continue in the background)
-    Assert.That(stopwatch.ElapsedMilliseconds, Is.LessThan(1000));
-}
-
-[Test]
-public void AsyncLogging_OnFlush_DeliversAllQueuedMessages()
-{
-    var sink    = new InMemorySink();
-    var logger  = new LoggerConfiguration()
-        .WriteTo.Async(a => a.Sink(sink), bufferSize: 1000)
-        .CreateLogger();
-
-    for (int i = 0; i < 100; i++)
+    for (var i = 0; i < 100; i++)
         logger.Information("Message {MessageId}", i);
 
-    // CloseAndFlush blocks until all queued records are delivered
-    Log.CloseAndFlush();
+    // Dispose *this* logger. Log.CloseAndFlush() only flushes the static Log.Logger.
+    logger.Dispose();
 
     Assert.That(sink.Events.Count, Is.EqualTo(100));
 }
+
+[Test]
+public void FullBuffer_DropsInsteadOfBlocking()
+{
+    var stuck = new StuckSink();     // Emit() waits on a ManualResetEventSlim
+    var monitor = new CapturingMonitor();
+    var logger = new LoggerConfiguration()
+        .WriteTo.Async(a => a.Sink(stuck), bufferSize: 10, blockWhenFull: false, monitor: monitor)
+        .CreateLogger();
+
+    for (var i = 0; i < 100; i++)
+        logger.Information("Message {MessageId}", i);   // returns even though the sink is stuck
+
+    // 1 event held by the stuck worker + 10 in the buffer; the rest were dropped
+    Assert.That(monitor.Inspector!.DroppedMessagesCount, Is.GreaterThanOrEqualTo(89));
+
+    stuck.Release.Set();
+    logger.Dispose();
+}
 ```
 
-`InMemorySink` can be implemented as a simple `ILogEventSink` that appends to a `ConcurrentBag<LogEvent>`, or you can use the `Serilog.Sinks.TestCorrelator` package which provides `TestCorrelator.CreateContext()` and `TestCorrelator.GetLogEventsFromCurrentContext()`.
+The first comment is the one that bites. `Log.CloseAndFlush()` acts on the static `Log.Logger`, so calling it on a test's local logger leaves the queue untouched, and the test only passes when it wins a race. The second test is the one most suites lack: it proves the overflow policy does what the config says, rather than assuming it.
 
-For extreme-throughput scenarios — `Channel<T>`, `BoundedChannelOptions.DropOldest`, multiple concurrent consumers — see [High-Throughput Logging](/guides/high-throughput-logging/).
+## The Short Version
 
-- [High-Throughput Logging](/guides/high-throughput-logging/) — `Channel<T>` and multi-consumer patterns for 100k+ req/s
-- [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — the field choices that make async log records useful downstream
-- [Logging Foundations](/guides/logging-foundations/) — log levels, what to log, and context philosophy
+- Wrap sinks that block (console, file). Leave already-batched sinks (Serilog's OpenTelemetry sink, the OTel SDK exporter) alone, and tune their own batching.
+- Every queue is bounded and drops *new* records when full, unless you've configured it to block. Know which one you have.
+- Export queue depth and dropped count as metrics, and alert on drops.
+- Context travels with the event. It doesn't travel through your own work queues, so carry it in the message.
+- Flush after the host stops, and leave room for it in the termination grace period.
+
+For the next step up, multiple consumers, `Channel<T>` and back-pressure at hundreds of thousands of events per second, see [High-Throughput Logging](/guides/high-throughput-logging/). For what goes *into* the records you're queueing, see [Structured Logging](/guides/structured-logging-machine-readable/) and [Logging Foundations](/guides/logging-foundations/). For the mistakes async logging won't save you from, see [Common Logging Pitfalls](/guides/common-logging-pitfalls/).
