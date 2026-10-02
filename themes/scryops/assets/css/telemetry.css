@@ -650,6 +650,9 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    chrome — eyebrow, pixel wordmark, mode toggle
    ============================================================ */
 .scry-wordmark{font-size:13px;line-height:1;color:var(--heading)}
+.site-top .scry-wordmark{display:inline-flex;align-items:center;gap:var(--sp-2)}
+.scry-mark{display:block;flex-shrink:0}
+.scry-mark__ops{fill:var(--green)}
 .scry-wordmark__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .scry-wordmark__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
 
