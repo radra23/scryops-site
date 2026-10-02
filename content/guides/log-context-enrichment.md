@@ -1,378 +1,220 @@
 ---
 title: "Log Context Enrichment: Adding Meaning to Your Events"
 date: 2026-06-11
-draft: true
-excerpt: "Enrichment turns isolated log records into connected business events. Here is the architecture that makes it work — static resource attributes, background-refreshed caches, and real-time scope propagation — without taxing the request path."
-readtime: 9
+draft: false
+excerpt: "Enrichment turns isolated log records into connected business events. Here is the architecture that makes it work — static resource attributes, background-refreshed caches, and per-request scopes — without taxing the request path."
+readtime: 8
 tags: ["Logs", "Observability", "OpenTelemetry", "Structured Logging", "Best Practices"]
 ---
 
-A log line that reads `"Payment failed"` tells you something went wrong. A log line that reads `"Payment failed"` with `customer_tier=enterprise`, `order_value_range=high`, `region=EU`, and `retry_count=3` tells you something actionable. Enrichment is the difference between knowing an event occurred and knowing what it means.
+A log line that reads `"Payment failed"` tells you something went wrong. The same line with `customer.tier=enterprise`, `cloud.region=eu-west-1` and `retry.count=3` tells you who is hurting, where, and how hard the system already tried. Enrichment is the difference between knowing an event occurred and knowing what it means.
 
-The challenge is doing it without adding latency to every request. Enrichment that calls a database on each log event is not enrichment — it is a way to turn a payment failure into a timeout cascade under load. The architecture that avoids this splits enrichment into three tiers, each with a different source of data and a different integration point.
+The catch is doing it without adding latency to every request. Enrichment that calls a database on each log event isn't enrichment. It's a way to turn a payment failure into a timeout cascade under load. The architecture that avoids this splits enrichment into three tiers, each with its own data source and its own integration point.
+
+This guide assumes your logs are already structured and that trace IDs already reach them. If not, start with [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/) for field names and [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/) for correlation. The examples are .NET, where the OpenTelemetry logs SDK is stable; the patterns carry to any runtime.
 
 ## The Three Tiers
 
 | Tier | Changes how often | Source | .NET mechanism |
 |---|---|---|---|
-| Static | Never (per deployment) | Config, environment, build metadata | OTel `ResourceBuilder` |
-| Cached | Minutes to hours | External lookups pre-fetched in background | `EnrichmentCache` + `BackgroundService` |
-| Real-time | Per request | In-process state: Activity, scope, request context | `ILogger.BeginScope`, `Activity.Current` |
+| Static | Never (per deployment) | Config, environment, build metadata | OpenTelemetry resource |
+| Cached | Minutes to hours | External lookups, fetched in the background | Snapshot cache + `BackgroundService` |
+| Per-request | Every request | In-process state: route, tenant, current activity | `ILogger.BeginScope` |
 
-The governing rule: **no enricher ever calls an external service synchronously.** Static data is set once at startup. Cached data is fetched asynchronously in a background service and read synchronously by enrichers. Real-time data is already in-process.
+The governing rule: **nothing on the logging path does I/O.** Static data is set once at startup. Cached data is fetched asynchronously by a background service and read synchronously at log time. Per-request data is already in memory.
 
 ## Tier 1: Static Enrichment
 
-Service name, version, environment, deployment region — these do not change while the service is running. OTel's `ResourceBuilder` is the right place for static enrichment. Resource attributes propagate automatically to every log record, trace, and metric the service exports.
+Service name, version, environment and region don't change while the process runs. They belong on the OpenTelemetry **resource**, which describes the entity producing the telemetry. The SDK attaches it to every batch it exports, so logs, traces and metrics all carry the same identity without a single field on any log call.
 
 ```csharp
-var resourceBuilder = ResourceBuilder.CreateDefault()
-    .AddService(
-        serviceName: configuration["ServiceName"]!,
-        serviceVersion: configuration["ServiceVersion"]!)
-    .AddAttributes(new Dictionary<string, object>
-    {
-        ["deployment.environment"] = configuration["Environment"]!,
-        ["deployment.region"]      = configuration["Region"]!,
-        ["team.name"]              = configuration["TeamName"]!,
-    });
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(resource => resource
+        .AddService(
+            serviceName: "checkout-api",
+            serviceVersion: builder.Configuration["Build:Version"])
+        .AddAttributes(new Dictionary<string, object>
+        {
+            ["deployment.environment.name"] = builder.Environment.EnvironmentName.ToLowerInvariant(),
+            ["cloud.region"] = builder.Configuration["Region"] ?? "unknown",
+            ["team.name"]    = "payments", // your own key, not a semantic convention
+        }))
+    .WithLogging(
+        logging => logging.AddOtlpExporter(),
+        options => options.IncludeScopes = true); // Tier 3 needs this; see below
 ```
 
-Note: in the .NET SDK, pass the service version as a string argument to `AddService()` or as the `"service.version"` string key in `AddAttributes()`. The `SERVICE_VERSION` constant exported by the Python SDK does not exist in the .NET SDK.
+Use the semantic-convention names where they exist. The environment key is `deployment.environment.name`; the older `deployment.environment` is deprecated. Region is `cloud.region`. Anything that isn't in the conventions, like `team.name`, is yours to name, so namespace it and keep it consistent across services.
 
-For static enrichment, `ResourceBuilder` is the complete answer. There is no pipeline, no cache, no background service required.
+You can also set all of this without code. Every OpenTelemetry SDK reads two standard environment variables:
+
+```bash
+OTEL_SERVICE_NAME=checkout-api
+OTEL_RESOURCE_ATTRIBUTES=service.version=1.4.2,deployment.environment.name=production,cloud.region=eu-west-1
+```
+
+There is no `OTEL_SERVICE_VERSION` variable; the version goes in `OTEL_RESOURCE_ATTRIBUTES` like everything else. In .NET, the default resource reads both variables, and an attribute you also set in code takes the code's value. Pick one source per key so nobody has to work out which won.
+
+One limit to know: the resource travels with OTLP exports. A JSON console log scraped from stdout doesn't carry it, so for that path the Collector has to add it back. Its `resourcedetection` and `k8sattributes` processors stamp host, cloud and Kubernetes metadata onto every record that passes through. [Log-Based Monitoring](/guides/log-based-monitoring/) shows a Collector `transform` pipeline doing the same kind of work.
 
 ## Tier 2: Cached Enrichment
 
-Customer tier, feature flag assignments, A/B cohorts — these change infrequently but require a lookup to retrieve. The pattern: fetch asynchronously in a background service, store in memory, read synchronously at log time.
+Customer tier, plan, feature-flag cohort: this data changes slowly but lives somewhere else. Fetch it in the background, hold it in memory, read it synchronously at log time.
 
-### TTL by Data Volatility
-
-Not all cached data ages at the same rate. Expressing TTLs as volatility categories keeps configuration readable:
+The simplest version that's correct is an immutable snapshot that gets swapped whole:
 
 ```csharp
-public enum DataVolatility
+public sealed class TenantTierCache
 {
-    Static,               // Config values: rarely changes
-    SlowChanging,         // User tier, subscription status: changes over days
-    ModeratelyChanging,   // Feature flags, A/B assignments: changes over hours
-    FastChanging          // Rate-limit state, session counters: changes over minutes
+    private volatile FrozenDictionary<string, string> _tiers =
+        FrozenDictionary<string, string>.Empty;
+
+    // Hot path: one dictionary read. No I/O, no await, no lock.
+    public string? GetTier(string tenantId) =>
+        _tiers.TryGetValue(tenantId, out var tier) ? tier : null;
+
+    // Called only by the refresher. Swapping a reference is atomic.
+    public void Replace(IReadOnlyDictionary<string, string> tiers) =>
+        _tiers = tiers.ToFrozenDictionary();
 }
-```
 
-A two-tier cache — in-process memory backed by a distributed store — lets enrichers read at memory speed on cache hits while surviving process restarts with warm distributed state:
-
-```csharp
-public class EnrichmentCache
+public sealed class TenantTierRefresher(
+    TenantTierCache cache,
+    ITenantDirectory directory,
+    ILogger<TenantTierRefresher> logger) : BackgroundService
 {
-    private readonly IMemoryCache      _memory;
-    private readonly IDistributedCache _distributed;
-
-    public async Task<T?> GetOrSetAsync<T>(
-        string                           key,
-        Func<CancellationToken, Task<T>> factory,
-        DataVolatility                   volatility,
-        CancellationToken                ct = default)
-    {
-        // L1: in-process memory (fastest, no serialisation)
-        if (_memory.TryGetValue(key, out T? hit)) return hit;
-
-        // L2: distributed cache (survives restart, shared across replicas)
-        var bytes = await _distributed.GetAsync(key, ct);
-        if (bytes is not null)
-        {
-            var cached = Deserialize<T>(bytes);
-            _memory.Set(key, cached, MemoryTtl(volatility));
-            return cached;
-        }
-
-        // Miss: fetch from source, populate both tiers
-        var value = await factory(ct);
-        if (value is not null)
-        {
-            await _distributed.SetAsync(
-                key,
-                Serialize(value),
-                new DistributedCacheEntryOptions
-                {
-                    AbsoluteExpirationRelativeToNow = DistributedTtl(volatility)
-                },
-                ct);
-            _memory.Set(key, value, MemoryTtl(volatility));
-        }
-        return value;
-    }
-
-    private static TimeSpan MemoryTtl(DataVolatility v) => v switch
-    {
-        DataVolatility.Static             => TimeSpan.FromHours(1),
-        DataVolatility.SlowChanging       => TimeSpan.FromMinutes(30),
-        DataVolatility.ModeratelyChanging => TimeSpan.FromMinutes(5),
-        DataVolatility.FastChanging       => TimeSpan.FromMinutes(1),
-        _                                 => TimeSpan.FromMinutes(5)
-    };
-
-    private static TimeSpan DistributedTtl(DataVolatility v) => v switch
-    {
-        DataVolatility.Static             => TimeSpan.FromDays(1),
-        DataVolatility.SlowChanging       => TimeSpan.FromHours(4),
-        DataVolatility.ModeratelyChanging => TimeSpan.FromMinutes(30),
-        DataVolatility.FastChanging       => TimeSpan.FromMinutes(5),
-        _                                 => TimeSpan.FromMinutes(30)
-    };
-}
-```
-
-### Background Refresh
-
-A `BackgroundService` pre-warms the cache at startup and periodically refreshes data before TTLs expire. `PeriodicTimer` (available since .NET 6) avoids the drift accumulation that `Task.Delay` in a while loop produces over hours.
-
-```csharp
-public class EnrichmentCacheWarmup : BackgroundService
-{
-    private readonly EnrichmentCache      _cache;
-    private readonly IEnrichmentDataSource _source;
-    private readonly ILogger<EnrichmentCacheWarmup> _logger;
-
     protected override async Task ExecuteAsync(CancellationToken ct)
     {
-        // Warm up at startup so enrichers have data immediately
-        await RefreshAsync(ct);
-
-        // Refresh on a schedule shorter than the shortest TTL
-        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(4));
-        while (await timer.WaitForNextTickAsync(ct))
-            await RefreshAsync(ct);
-    }
-
-    private async Task RefreshAsync(CancellationToken ct)
-    {
-        try
+        using var timer = new PeriodicTimer(TimeSpan.FromMinutes(5));
+        do
         {
-            var data = await _source.FetchEnrichmentDataAsync(ct);
-            foreach (var entry in data)
-                await _cache.GetOrSetAsync(entry.Key, _ => Task.FromResult(entry.Value),
-                    entry.Volatility, ct);
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            // Log but do not crash the background service — stale cache is better than no cache
-            _logger.LogWarning("Enrichment cache refresh failed: {ErrorType}", ex.GetType().Name);
-        }
-    }
-}
-```
-
-At log time, enrichers read from the in-process cache synchronously. The async work is entirely confined to the background service.
-
-## Tier 3: Real-Time Enrichment
-
-Request ID, trace ID, authenticated user ID, operation name — these are available in-process without any lookup. They belong in `ILogger.BeginScope` (MEL) or as Serilog enrichers reading from `Activity.Current`.
-
-With MEL — set in middleware once per request:
-
-```csharp
-public class LogContextMiddleware
-{
-    private readonly RequestDelegate _next;
-    private readonly ILogger<LogContextMiddleware> _logger;
-    private readonly IUserTierCache _cache;
-
-    public LogContextMiddleware(
-        RequestDelegate next,
-        ILogger<LogContextMiddleware> logger,
-        IUserTierCache cache)
-    {
-        _next = next;
-        _logger = logger;
-        _cache = cache;
-    }
-
-    public async Task InvokeAsync(HttpContext context)
-    {
-        // BeginScope runs once per request, not per log call
-        using (_logger.BeginScope(new Dictionary<string, object?>
-        {
-            ["TraceId"]    = Activity.Current?.TraceId.ToString(),
-            ["RequestId"]  = context.TraceIdentifier,
-            ["UserId"]     = context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-            ["UserTier"]   = _cache.GetUserTier(context.User.FindFirst("sub")?.Value),
-        }))
-        {
-            await _next(context);
-        }
-    }
-}
-```
-
-With Serilog — as an `ILogEventEnricher` registered at application startup:
-
-```csharp
-public class ActivityEnricher : ILogEventEnricher
-{
-    public void Enrich(LogEvent logEvent, ILogEventPropertyFactory factory)
-    {
-        var activity = Activity.Current;
-        if (activity is null) return;
-
-        logEvent.AddPropertyIfAbsent(
-            factory.CreateProperty("TraceId", activity.TraceId.ToString()));
-        logEvent.AddPropertyIfAbsent(
-            factory.CreateProperty("SpanId", activity.SpanId.ToString()));
-        logEvent.AddPropertyIfAbsent(
-            factory.CreateProperty("ParentSpanId", activity.ParentSpanId.ToString()));
-    }
-}
-```
-
-Both read from thread-local state. No cache, no I/O.
-
-## Orchestrating Multiple Enrichment Providers
-
-When you have several enrichment providers, a pipeline applies them in priority order, skipping those that do not apply, and stopping when the time budget is exhausted. Elapsed time is measured with `Stopwatch.GetElapsedTime` (available since .NET 7), which turns a starting timestamp into an elapsed `TimeSpan` directly, without the manual conversion required when using `Stopwatch.GetTimestamp()` alone:
-
-```csharp
-public interface IEnrichmentProvider
-{
-    string Name     { get; }
-    int    Priority { get; }  // Lower value = higher priority, runs first
-    bool   AppliesTo(object logEvent, EnrichmentContext context);
-    Task<IReadOnlyDictionary<string, object?>?> EnrichAsync(
-        object logEvent, EnrichmentContext context, CancellationToken ct);
-}
-
-public record EnrichmentContext(
-    TimeSpan? PerformanceBudget = null,
-    string?   CorrelationId    = null);
-
-public class EnrichmentPipeline
-{
-    private readonly IReadOnlyList<IEnrichmentProvider> _providers;
-
-    public EnrichmentPipeline(IEnumerable<IEnrichmentProvider> providers)
-    {
-        _providers = providers.OrderBy(p => p.Priority).ToList();
-    }
-
-    public async Task<IReadOnlyDictionary<string, object?>> EnrichAsync(
-        object logEvent, EnrichmentContext context)
-    {
-        var merged   = new Dictionary<string, object?>();
-        var budget   = context.PerformanceBudget ?? TimeSpan.FromMilliseconds(50);
-        var started  = Stopwatch.GetTimestamp();
-
-        foreach (var provider in _providers)
-        {
-            var elapsed = Stopwatch.GetElapsedTime(started);
-            if (elapsed >= budget) break;
-
-            if (!provider.AppliesTo(logEvent, context)) continue;
-
-            var remaining = budget - elapsed;
             try
             {
-                using var cts = new CancellationTokenSource(remaining);
-                var result = await provider.EnrichAsync(logEvent, context, cts.Token);
-                if (result is not null)
-                    foreach (var (k, v) in result) merged[k] = v;
+                cache.Replace(await directory.GetTenantTiersAsync(ct));
             }
-            catch (OperationCanceledException)
+            catch (Exception ex) when (ex is not OperationCanceledException)
             {
-                // Provider exceeded its share of the budget; skip and continue
-            }
-            catch (Exception)
-            {
-                // Provider failed; do not surface to caller
+                // Keep the last good snapshot: stale context beats no context.
+                logger.LogWarning(ex, "Tenant tier refresh failed; keeping previous snapshot");
             }
         }
-
-        return merged;
+        while (await timer.WaitForNextTickAsync(ct));
     }
 }
 ```
 
-The `Priority` ordering ensures critical, lightweight enrichers (static context, in-process state) run first. Lower-priority enrichers (heavier cache lookups) only run if budget remains.
+Register both with `AddSingleton<TenantTierCache>()` and `AddHostedService<TenantTierRefresher>()`. A few properties are doing the real work here:
 
-{{< insight lightbulb >}}
-**The critical invariant:** enrichers must not perform I/O. All external data must come from the `EnrichmentCache`. An enricher that calls a database or external service directly will add the latency of that call to every log statement it affects — and under load, will cause those calls to queue up behind each other.
-{{< /insight >}}
+- **Readers never wait.** A lookup is a read from a frozen dictionary. A miss returns `null` and the field is simply absent; it never triggers a fetch.
+- **Failure degrades, it doesn't break.** If the directory is down, logs keep the last known tiers. Logging the failure as a warning, with the exception attached, tells you the context is going stale.
+- **`PeriodicTimer` keeps a steady cadence.** Its ticks don't shift by the time each refresh takes, which a `Task.Delay` loop does.
+- **The refresh interval is your staleness budget.** Five minutes means a tenant who upgrades can be logged as their old tier for up to five minutes. Choose the interval per data source with that in mind.
 
-## Runtime and Infrastructure Context
+Two caveats. The first refresh runs after the host starts, so the earliest requests may log without a tier. If that matters, load the first snapshot before the app starts accepting traffic. And a full snapshot only works when the data set fits comfortably in memory, as tenant or plan tables usually do. For large per-key data, keep the same shape: a synchronous read of whatever is already cached, with misses queued for the background to fetch, never awaited inline.
 
-One category of enrichment sits outside the tier model: dynamic runtime state that is already in-process and requires no external lookup. GC pressure, thread pool utilisation, and process uptime are useful at diagnostic boundaries — when correlating a slow request path with a Gen 2 collection, or confirming that a timeout happened while the thread pool was already saturated.
+## Tier 3: Per-Request Enrichment
 
-`RuntimeContextSnapshot.Capture()` produces a dictionary suitable for `BeginScope`:
+Some context only exists for the duration of a request: the tenant, the route, the activity. Push it into a logging scope once, in middleware, and every log call inside the request picks it up.
+
+Before adding anything, check what you already get. The ASP.NET Core host opens scopes with `TraceId`, `SpanId`, `ParentId`, `ConnectionId`, `RequestId` and `RequestPath` on every request. Adding a `TraceId` of your own just duplicates it. Your middleware should add only what the framework can't know:
 
 ```csharp
-/// <summary>
-/// Captures a point-in-time snapshot of runtime state for diagnostic context.
-/// Use at error or slow-path boundaries — not on every log event.
-/// </summary>
-public static class RuntimeContextSnapshot
-{
-    public static Dictionary<string, object> Capture()
-    {
-        ThreadPool.GetAvailableThreads(
-            out int availableWorker, out int availableIocp);
-        ThreadPool.GetMaxThreads(
-            out int maxWorker, out int maxIocp);
+var tiers  = app.Services.GetRequiredService<TenantTierCache>();
+var logger = app.Services.GetRequiredService<ILogger<Program>>();
 
-        return new Dictionary<string, object>
-        {
-            ["runtime.gc.total_memory_bytes"] = GC.GetTotalMemory(forceFullCollection: false),
-            ["runtime.gc.gen0_collections"]   = GC.CollectionCount(0),
-            ["runtime.gc.gen1_collections"]   = GC.CollectionCount(1),
-            ["runtime.gc.gen2_collections"]   = GC.CollectionCount(2),
-            ["runtime.threadpool.worker_in_use"]  = maxWorker - availableWorker,
-            ["runtime.threadpool.worker_max"]     = maxWorker,
-            ["runtime.threadpool.iocp_in_use"]    = maxIocp - availableIocp,
-            ["host.name"]         = Environment.MachineName,
-            ["host.platform"]     = Environment.OSVersion.Platform.ToString(),
-            ["process.id"]        = Environment.ProcessId,
-            ["process.uptime_ms"] = Environment.TickCount64,
-        };
+app.Use(async (context, next) =>
+{
+    var tenantId = context.User.FindFirst("tenant_id")?.Value;
+
+    using (logger.BeginScope(new Dictionary<string, object?>
+    {
+        ["tenant.id"]     = tenantId,
+        ["customer.tier"] = tenantId is null ? null : tiers.GetTier(tenantId),
+    }))
+    {
+        await next(context);
     }
+});
+```
+
+Scopes flow with the async call chain (they live in an `AsyncLocal`, not in thread-local storage), so they survive every `await` inside the request. [Async Logging](/guides/async-logging/) covers the other half: capturing that context when the record is enqueued, not when a background writer gets round to it.
+
+{{< insight >}}
+**Scopes are off by default in the OpenTelemetry exporter.** With `IncludeScopes` left at `false`, every scope above, including the host's own `RequestId`, is dropped before export. Your logs look enriched in the console and arrive bare in the backend. Set `options.IncludeScopes = true`, as in the Tier 1 configuration.
+{{< /insight >}}
+
+Note what's missing from that scope: the user. A raw user ID, email or name on every log line turns your log store into a personal-data store, with everything that implies for access, retention and erasure requests. A tenant ID is usually fine. If you genuinely need to follow one person's requests, use a keyed pseudonym rather than the raw identifier. [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) explains why plain hashing isn't enough, and [Scrub PII from Application Logs in .NET](/howtos/scrub-pii-from-application-logs-dotnet/) shows the redaction wiring.
+
+### If you use Serilog
+
+Since Serilog 3.1, every event records `Activity.Current`'s trace and span IDs as first-class `TraceId` and `SpanId` properties, so the custom "activity enricher" many codebases still carry is redundant. Per-request business context goes through `LogContext`:
+
+```csharp
+// At startup: .Enrich.FromLogContext()
+using (LogContext.PushProperty("customer.tier", tier))
+{
+    Log.Information("Payment failed for {OrderId}", orderId);
 }
 ```
 
-Use it as a `BeginScope` payload at exception boundaries where multiple log calls may follow:
+## Runtime State at the Failure Boundary
+
+Some context is worth having only when something has gone wrong. Was the thread pool backed up when this timeout fired? Had there just been a burst of Gen 2 collections? That state is in-process and cheap to read, but not free, so capture it at error and slow-path boundaries rather than on every event:
+
+```csharp
+public static class RuntimeSnapshot
+{
+    // Point-in-time runtime state for error and slow-path boundaries only.
+    public static Dictionary<string, object> Capture() => new()
+    {
+        ["diag.gc.heap_bytes"]           = GC.GetTotalMemory(forceFullCollection: false),
+        ["diag.gc.gen2_collections"]     = GC.CollectionCount(2),
+        ["diag.threadpool.threads"]      = ThreadPool.ThreadCount,
+        ["diag.threadpool.queue_length"] = ThreadPool.PendingWorkItemCount,
+        ["diag.process.uptime_s"]        = (long)(DateTime.Now - Process.GetCurrentProcess().StartTime).TotalSeconds,
+    };
+}
+```
 
 ```csharp
 catch (Exception ex)
 {
-    using (_logger.BeginScope(RuntimeContextSnapshot.Capture()))
+    using (_logger.BeginScope(RuntimeSnapshot.Capture()))
     {
-        _logger.LogError(ex,
-            "Critical failure in {Operation} after {DurationMs}ms",
-            operationName, stopwatch.ElapsedMilliseconds);
+        _logger.LogError(ex, "Payment failed for {OrderId}", orderId);
     }
+    return PaymentResult.Failed; // handled here, so logged here; don't rethrow
 }
 ```
 
-Deployment metadata (region, zone, build version) should come from static Tier 1 enrichment, not from `Environment.GetEnvironmentVariable()` calls inside `Capture()`. Read those values once at startup and include them in the `ResourceBuilder`.
+The `diag.*` names are deliberately your own namespace. OpenTelemetry does define runtime conventions, but as metrics (`dotnet.gc.collections`, `dotnet.thread_pool.queue.length` and friends), and those metrics are the better home for trends. The snapshot answers a narrower question: what did the runtime look like at the moment this particular request failed? Host name, process ID and region don't belong here either. They're static, so they go on the resource in Tier 1.
 
-### OTel Baggage for Cross-Service Correlation
+## Carrying Context Across Services with Baggage
 
-When a caller sets values on the OTel Baggage, they propagate through every outbound call via the W3C `baggage` header and are available in downstream services without custom propagation code:
+A tenant resolved at the edge is useful three services downstream, too. OpenTelemetry **baggage** carries key-value pairs alongside the trace context in the W3C `baggage` header. With the ASP.NET Core and `HttpClient` instrumentation installed, incoming baggage lands in `Baggage.Current` and outgoing calls carry it on.
+
+Baggage does not turn into log attributes on its own. Each service copies the keys it wants into its scope:
 
 ```csharp
 using var scope = _logger.BeginScope(new Dictionary<string, object?>
 {
-    ["correlation.request_id"] = Baggage.Current.GetBaggage("request_id"),
-    ["correlation.tenant_id"]  = Baggage.Current.GetBaggage("tenant_id"),
-    ["correlation.user_tier"]  = Baggage.Current.GetBaggage("user_tier"),
+    ["tenant.id"] = Baggage.GetBaggage("tenant.id"),
 });
 ```
 
-`GetBaggage` returns `null` when the key is absent — the scope entry is included with a null value, which most sinks drop gracefully. Keep Baggage keys to lightweight correlation identifiers and routing hints, not large payloads.
+Treat baggage as public. It travels in plain HTTP headers to every downstream call, including third-party APIs, and nothing verifies who set it. Keep it to small, non-sensitive routing keys like a tenant ID or a region. No user identifiers, no tokens, nothing you'd mind seeing in someone else's access log.
 
-<!-- TODO: Add example implementations of concrete IEnrichmentProvider classes: UserTierEnricher (reads from EnrichmentCache), FeatureFlagEnricher (reads from distributed feature flag store via cache), BusinessContextEnricher (order value buckets, not raw amounts or PII) -->
-<!-- TODO: Add Serilog ILogEventEnricher integration showing how to wire EnrichmentPipeline into the Serilog pipeline as a registered enricher -->
-<!-- TODO: Add BenchmarkDotNet measurements comparing enrichment overhead by tier — static Resource attributes (near-zero), cached hit path (sub-microsecond), cached miss path (measured separately to separate background refresh cost from hot path cost) -->
+## Where to Spend the Effort
+
+Enrichment pays off when the fields it adds are the ones your queries group by: tier, tenant, region, version. Start with the resource, since it's one block of configuration and every signal benefits. Add a request scope for the two or three business fields your incident reviews keep asking about. Reach for cached lookups only when a field genuinely lives in another system.
+
+Every field you add is also a field you store and index on every event. [High-Throughput Logging](/guides/high-throughput-logging/) covers where those per-record costs land, and [Common Logging Pitfalls](/guides/common-logging-pitfalls/) covers the naming drift that makes enriched fields hard to query across teams.
 
 ## See Also
 
-- [Logging Foundations](/guides/logging-foundations/) — log levels, output format, and the baseline structure enrichment adds context to
-- [Structured Logging in .NET](/howtos/implement-structured-logging-dotnet/) — the ILogger and Serilog patterns enrichment integrates with
-- [OTel Resource Attributes and Service Naming](/guides/otel-resource-attributes-and-service-naming/) — the authoritative guide to static enrichment via ResourceBuilder
-- [High-Throughput Logging](/guides/high-throughput-logging/) — enrichment overhead at scale: where the per-record costs actually land
+- [Logging Foundations](/guides/logging-foundations/) — what logs are for, and the baseline structure enrichment adds context to
+- [Structured Logging: Teaching Machines to Read](/guides/structured-logging-machine-readable/) — the field names enrichment should reuse
+- [How to Wire Trace IDs Into Your Logs](/howtos/wire-trace-ids-into-logs/) — trace correlation, which most runtimes now attach for you
+- [Distributed Logging](/guides/distributed-logging/) — collecting and correlating logs across many services
+- [Log-Based Monitoring](/guides/log-based-monitoring/) — turning enriched fields into queries, metrics and alerts
+- [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/) — what not to enrich with
