@@ -26,11 +26,11 @@ The cycle is intentional. The postmortem feeds back into the monitoring layer â€
 On-call works best with two roles in rotation simultaneously: a primary who owns detection and response, and a secondary who provides backup escalation and covers gaps.
 
 {{< mermaid >}}
-flowchart TD
+flowchart LR
     A[Primary On-Call] --> B[Detect and Respond]
     A --> C[Escalate if Needed]
     D[Secondary On-Call] --> E[Assist Primary]
-    D --> F[Take Over if Primary Unavailable]
+    D --> F[Take Over if<br/>Primary Unavailable]
 {{< /mermaid >}}
 
 The boundary between the roles should be written down, not negotiated during an incident. Common conventions:
@@ -85,12 +85,11 @@ When a page fires, the first step is triage â€” establishing severity before com
 flowchart TD
     A[Incident Detected] --> B[Assess Severity]
     B --> C{Severity Level}
-    C -->|P0| D[Activate Incident Response<br/>bridge, incident commander,<br/>status page update]
-    C -->|P1| E[Investigate and Mitigate<br/>one on-call engineer starts,<br/>team pulled in if not contained]
-    C -->|P2| F[Resolve in Business Hours<br/>from the incident channel,<br/>nobody woken up]
-    D --> G[Communicate to stakeholders]
-    D --> H[Escalate if unresolved in SLA]
-    D --> I[Resolve]
+    C -->|P0| D[Activate Incident<br/>Response: bridge,<br/>incident commander,<br/>status page update]
+    C -->|P1| E[Investigate and<br/>Mitigate: one<br/>on-call engineer<br/>starts, team pulled<br/>in if not contained]
+    C -->|P2| F[Resolve in<br/>Business Hours<br/>from the incident<br/>channel, nobody<br/>woken up]
+    D --> G[Communicate to<br/>stakeholders;<br/>escalate if<br/>unresolved in SLA]
+    G --> I[Resolve]
     E --> I
     F --> I
     I --> J[Postmortem]

@@ -51,11 +51,11 @@ flowchart TD
     B --> C{decision_wait elapsed?}
     C -->|No| B
     C -->|Yes| D{Evaluate every policy}
-    D -->|Error span present| E[Keep: 100%]
-    D -->|Latency over threshold| E
-    D -->|High-value customer| E
+    D -->|Error span<br/>present| E[Keep: 100%]
+    D -->|Latency<br/>over threshold| E
+    D -->|High-value<br/>customer| E
     D -->|Health check| F[Sample: 1%]
-    D -->|Everything else| G[Sample: 5%]
+    D -->|Everything<br/>else| G[Sample: 5%]
     E --> H[Export to Backend]
     F --> H
     G --> H

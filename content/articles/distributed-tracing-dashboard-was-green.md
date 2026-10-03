@@ -28,21 +28,26 @@ Metrics are the statisticians in the room. They’ll tell you how often things h
 Traces are your surveillance footage. They follow a single request from the front door to the exit, catching every service hop, every database query, and every millisecond spent twiddling its thumbs. Here, the star of the show is the request itself, more than an event, less than a summary. That’s a whole different way of asking questions.
 
 {{< mermaid >}}
+%%{init: {"sequence": {"width": 100, "actorMargin": 24}}}%%
 sequenceDiagram
     participant U as User
     participant API as API Gateway
-    participant Cart as Cart Service
-    participant Promo as Promo Service
+    participant Cart
+    participant Promo
     participant DB as Orders DB
 
-    U->>API: POST /checkout (trace-id: a1b2c3)
-    API->>Cart: validate cart (span: cart.validate)
-    Cart->>Promo: apply discount (span: promo.apply)
-    Promo->>DB: SELECT discount WHERE code=... (span: db.query 847ms ⚠)
+    U->>API: POST /checkout
+    Note over U,API: trace-id a1b2c3
+    API->>Cart: validate cart
+    Cart->>Promo: apply discount
+    Promo->>DB: query discount
+    Note over Promo,DB: db.query: 847ms
     DB-->>Promo: null
-    Promo-->>Cart: discount: null (no error thrown)
+    Promo-->>Cart: discount: null
+    Note over Cart,Promo: no error thrown
     Cart-->>API: total: $0.00
-    API-->>U: 200 OK, checkout "succeeded"
+    API-->>U: 200 OK
+    Note over U,API: "succeeded"
 {{< /mermaid >}}
 
 ## How DORA Made This Worse

@@ -12,15 +12,15 @@ tags: ["OpenTelemetry", "Logs", "Tracing", "Python", "How-to"]
 When a burn rate alert fires, the ideal path from alert to root cause looks like this: alert → trace → the log lines that explain why. That last jump — from a span to the log lines emitted during that span — only works if your logs carry the trace ID. Without it, you're doing a time-based search across the logs of multiple services — no guarantee you'll find the relevant lines, and no way to limit the search to a single request.
 
 {{< mermaid caption="Fig. — Trace IDs in logs turn root-causing from a manual timestamp search across every service into a single click from trace to log lines." >}}
-flowchart TB
+flowchart LR
     subgraph With["With trace IDs in logs"]
-        direction LR
+        direction TB
         A1[Alert fires] --> B1[Open trace]
         B1 -->|click| C1[Correlated log lines]
         C1 --> D1[Root cause]
     end
     subgraph Without["Without trace IDs in logs"]
-        direction LR
+        direction TB
         A2[Alert fires] --> B2[Open trace]
         B2 --> C2[Note timestamp]
         C2 --> D2[Search logs by time<br/>across all services]
@@ -33,7 +33,7 @@ flowchart TB
 Two approaches cover the common cases in every language: let the SDK or your logging library attach the trace context, or read it off the active span yourself. Start with the first. Reach for the second only when your logger has no integration, or you need the IDs under a specific field name the integration won't give you.
 
 {{< mermaid caption="Fig. — Default to the integration your SDK or logger already ships; write the extraction yourself only when nothing attaches the IDs where your backend looks for them." >}}
-flowchart LR
+flowchart TD
     A{Does your SDK or logger<br/>attach trace context?} -->|yes| E[Approach 1<br/>use the integration]
     A -->|no| D[Approach 2<br/>extract it yourself]
     E --> F{Do the IDs land where<br/>your backend looks?}

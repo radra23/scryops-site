@@ -36,17 +36,18 @@ sequenceDiagram
     participant Dev as Developer
     participant CI as CI Pipeline
     participant OPA as OPA / Conftest
-    participant Infra as Infrastructure
 
-    Dev->>CI: Push infrastructure change
+    Dev->>CI: push infra change
     CI->>CI: terraform plan → plan.json
-    CI->>OPA: conftest test --policy policies/ plan.json
+    CI->>OPA: conftest test plan.json
     alt Policy passes
-        OPA-->>CI: ✓ All resources compliant
-        CI->>Infra: terraform apply
+        OPA-->>CI: pass: all compliant
+        CI->>CI: terraform apply
     else Policy fails
-        OPA-->>CI: ✗ Missing: owner, monitoring-tier
-        CI-->>Dev: PR blocked, fix tags before merging
+        OPA-->>CI: fail: missing tags
+        Note over CI,OPA: owner, monitoring-tier
+        CI-->>Dev: PR blocked
+        Note over Dev,CI: fix tags before merging
     end
 {{< /mermaid >}}
 

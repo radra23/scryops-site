@@ -15,16 +15,15 @@ Context propagation is the mechanism that keeps the trace together. It has two h
 
 {{< mermaid caption="Fig. — The traceparent header carries one trace-id hop by hop, so spans created by every service in the chain assemble into a single trace instead of orphaned fragments." >}}
 sequenceDiagram
-    participant LB as Load Balancer
     participant A as Service A
     participant B as Service B
     participant C as Service C
 
-    LB->>A: Request (no traceparent)
+    Note over A: Request arrives<br/>with no traceparent
     Note over A: Creates root span<br/>trace-id: 4bf92f35...
-    A->>B: Request + traceparent header
+    A->>B: Request + traceparent
     Note over B: Creates child span<br/>same trace-id
-    B->>C: Request + traceparent header
+    B->>C: Request + traceparent
     Note over C: Creates child span<br/>same trace-id
     C-->>B: Response
     B-->>A: Response
