@@ -207,14 +207,47 @@ def render(eyebrow, title, excerpt=None, rows=None, accent_word=None):
     # 36px radius so apps that round preview corners don't clip it away.
     d.rounded_rectangle([1 * S, 1 * S, (W - 1) * S - 1, (H - 1) * S - 1], radius=36 * S,
                         outline=t["frame"], width=2 * S)
-    return img.resize((W, H), Image.LANCZOS)
+    img = img.resize((W, H), Image.LANCZOS)
+    # Downsampling blends the 2px line with its neighbours (#453E33 -> #423C31).
+    # Repaint the straight runs at 1x so they are the exact token; the corner
+    # arcs keep their 2x anti-aliasing. quantize() reserves the colour.
+    d1, r = ImageDraw.Draw(img), 1 + 36
+    for k in (1, 2):
+        d1.line([(r, k), (W - 1 - r, k)], fill=t["frame"])
+        d1.line([(r, H - 1 - k), (W - 1 - r, H - 1 - k)], fill=t["frame"])
+        d1.line([(k, r), (k, H - 1 - r)], fill=t["frame"])
+        d1.line([(W - 1 - k, r), (W - 1 - k, H - 1 - r)], fill=t["frame"])
+    return img
 
 
 def save(img, path, h):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     info = PngImagePlugin.PngInfo()
     info.add_text(card_lib.HASH_KEY, h)
-    img.quantize(colors=128, dither=Image.Dither.NONE).save(path, optimize=True, pnginfo=info)
+    quantize(img).save(path, optimize=True, pnginfo=info)
+
+
+def quantize(img):
+    """128-colour palette with --frame reserved as an exact entry.
+
+    An adaptive palette alone rounded the 2px frame from #453E33 to #433C32,
+    which cost ~0.05 of edge contrast on dark feeds. Take 127 adaptive colours,
+    append the exact frame colour (snapping near-duplicates onto it), then map
+    every pixel to the nearest entry: pure frame pixels land on it exactly.
+    """
+    frame = tuple(int(tokens()["frame"][i:i + 2], 16) for i in (1, 3, 5))
+    adaptive = img.quantize(colors=127, dither=Image.Dither.NONE)
+    pal = adaptive.getpalette()[:127 * 3]
+    # Pillow's nearest-colour lookup can't split a 1-level difference, so an
+    # adaptive entry like #453E32 would steal the frame pixels: snap any entry
+    # within 4 levels of the frame onto it exactly.
+    for i in range(0, len(pal), 3):
+        if max(abs(pal[i + c] - frame[c]) for c in range(3)) <= 4:
+            pal[i:i + 3] = list(frame)
+    pal += list(frame)
+    ref = Image.new("P", (1, 1))
+    ref.putpalette(pal + [0] * (768 - len(pal)))
+    return img.quantize(palette=ref, dither=Image.Dither.NONE)
 
 
 def page_card(section, stem, md):
