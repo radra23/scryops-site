@@ -1,5 +1,6 @@
 {{- /* layouts/partials/brand-mark.html
-     Lens mark: the wordmark's split drawn as a 16-unit pixel disc —
+     Lens mark: the wordmark's split drawn as a 16-unit pixel disc with a
+     rounded 4×4 void at its centre (the pupil: the lens reads as an eye) —
      dotted half = scry (Doto), solid half = ops (Pixelify). Split by
      shape as well as colour, so it survives pref-mono. Dots inherit
      currentColor; the solid half takes var(--green) via .scry-mark__ops.
@@ -8,4 +9,4 @@
      Context: a unique id string for the dot pattern (one per page use),
      e.g. {{ partial "brand-mark.html" "top" }}. */ -}}
 {{- $id := printf "scry-mark-dot-%s" . -}}
-<svg class="scry-mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><defs><pattern id="{{ $id }}" width="1" height="1" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".4" fill="currentColor"/></pattern></defs><path fill="url(#{{ $id }})" d="M5 2h3v1H5zM3 3h5v2H3zM2 5h6v6H2zM3 11h5v2H3zM5 13h3v1H5z"/><path class="scry-mark__ops" shape-rendering="crispEdges" d="M8 2h3v1H8zM8 3h5v2H8zM8 5h6v6H8zM8 11h5v2H8zM8 13h3v1H8z"/></svg>
+<svg class="scry-mark" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true" focusable="false"><defs><pattern id="{{ $id }}" width="1" height="1" patternUnits="userSpaceOnUse"><circle cx=".5" cy=".5" r=".4" fill="currentColor"/></pattern></defs><path fill="url(#{{ $id }})" d="M5 2h3v1H5zM3 3h5v2H3zM2 5h6v1H2zM2 6h5v1H2zM2 7h4v2H2zM2 9h5v1H2zM2 10h6v1H2zM3 11h5v2H3zM5 13h3v1H5z"/><path class="scry-mark__ops" shape-rendering="crispEdges" d="M8 2h3v1H8zM8 3h5v2H8zM8 5h6v1H8zM9 6h5v1H9zM10 7h4v2H10zM9 9h5v1H9zM8 10h6v1H8zM8 11h5v2H8zM8 13h3v1H8z"/></svg>
