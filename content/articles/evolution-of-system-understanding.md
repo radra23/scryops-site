@@ -1,158 +1,108 @@
 ---
 title: "The Evolution of System Understanding"
 date: 2026-06-07
-draft: true
-excerpt: "From reading log files to predicting failures — how our ability to understand complex systems has evolved over 30 years of distributed computing."
-readtime: 6
-tags: ["Observability", "Philosophy"]
+draft: false
+excerpt: "From grepping one log file to querying wide, trace-linked events: how the questions we can ask a running system changed when monoliths split apart, and why OpenTelemetry had to exist."
+readtime: 5
+tags: ["Observability", "OpenTelemetry", "Tracing", "Philosophy"]
 references:
   - title: "A brief history of OpenTelemetry (So Far)"
     url: "https://www.cncf.io/blog/2019/05/21/a-brief-history-of-opentelemetry-so-far/"
-    note: "Sigelman & McLean (CNCF, 2019) on the OpenTracing + OpenCensus merger that formed OpenTelemetry."
-  - title: "OpenTelemetry"
-    url: "https://opentelemetry.io/"
-    note: "Vendor-neutral SDKs, the OTLP protocol, and the Collector."
+    note: "Sigelman & McLean (CNCF, May 2019) on the OpenTracing + OpenCensus merger that formed OpenTelemetry."
+  - title: "What is OpenTelemetry?"
+    url: "https://opentelemetry.io/docs/what-is-opentelemetry/"
+    note: "The project's own account of its origins and scope."
   - title: "OTLP — OpenTelemetry Protocol specification"
     url: "https://opentelemetry.io/docs/specs/otlp/"
     note: "The common wire protocol for traces, metrics, and logs."
-  - title: "Observability (control theory) — Wikipedia"
-    url: "https://en.wikipedia.org/wiki/Observability"
-    note: "Where the term originates: inferring internal state from external outputs."
+  - title: "OpenTelemetry semantic conventions"
+    url: "https://opentelemetry.io/docs/specs/semconv/"
+    note: "The shared attribute names (http.response.status_code, cloud.region, service.version) used in the example event."
+  - title: "W3C Trace Context"
+    url: "https://www.w3.org/TR/trace-context/"
+    note: "Defines the 16-byte trace-id and 8-byte parent-id carried in the traceparent header."
 tools:
   - title: "opentelemetry-collector"
     url: "https://github.com/open-telemetry/opentelemetry-collector"
     note: "Core receive / process / export pipelines."
-  - title: "opentelemetry-collector-contrib"
-    url: "https://github.com/open-telemetry/opentelemetry-collector-contrib"
-    note: "OTTL transforms and most real-world components."
-  - title: "Grafana Pyroscope"
-    url: "https://github.com/grafana/pyroscope"
-    note: "Continuous profiling — the emerging fourth signal."
 ---
 
-For most of computing history, understanding a running system meant reading its logs, watching its dashboards, and writing an alert for the last thing that broke you. That worked when systems were small, stable, and well-understood. It stopped working around 2010, when the industry shifted from monoliths to microservices and the assumptions underneath traditional monitoring became untrue.
+For most of computing history, understanding a running system meant reading its logs, watching its dashboards, and writing an alert for the last thing that broke you. That worked while systems were small, stable, and well understood. It stopped working over the 2010s, as the industry broke monoliths into services and the assumptions underneath traditional monitoring quietly stopped being true.
 
-## The Monolithic Era
+This is the short history of how we got from one to the other. If you want the definitions, [Observability vs. Monitoring](/articles/observability-vs-monitoring/) draws the line between the two words.
 
-In a monolith, the system is one unit. A problem with the payment code shows up in the payment logs. Slow database queries appear in query time metrics. The instrumentation strategy is obvious — monitor the things you care about, set thresholds based on what normal looks like, and alert when that changes.
+## The monolithic era
 
-This model works because failures repeat. If something broke last month, it will probably break again. You write an alert for it and move on.
+In a monolith, the system is one unit. A problem in the payment code shows up in the payment logs. A slow database query shows up in the query-time metric. The instrumentation strategy is obvious: monitor the things you care about, set thresholds based on what normal looks like, and alert when that changes.
 
-The limitation: it only works if you already know what can go wrong.
+The model works because failures repeat. If something broke last month, it'll probably break the same way again. You write an alert for it and move on.
 
-## The Distributed Systems Problem
+The catch: it only works if you already know what can go wrong.
 
-When applications fragmented into microservices, the “anticipate the failure mode” model collapsed. A single user request might traverse thirty services. A slow downstream dependency cascades up the call chain, and the error surfaces three hops away from the actual cause. The dashboards look green. Users are already experiencing failures.
+## When the map ran out
 
-The classic four-category problem emerges directly from this:
+Split that monolith into dozens of services and the "anticipate the failure mode" model falls apart. A request crosses service boundaries, a slow dependency surfaces as an error somewhere else entirely, and every per-service dashboard stays green while users hit the wall. That failure mode gets its own walkthrough in [The dashboard was green, but the request was broken](/articles/distributed-tracing-dashboard-was-green/).
 
-### Charted
+What changed wasn't only the architecture. It was what you could know in advance. A useful way to see it is as a map with four kinds of territory.
 
-These are the failures you have already seen and instrumented. Payment success rates, transaction volumes, response time thresholds. You have alerts for these. They do their job.
+**Charted.** Failures you've already seen and instrumented. Payment success rate, transaction volume, latency thresholds. You have alerts for these, and they do their job.
 
-### Marked
+**Marked.** Gaps you know about but haven't instrumented. You know regional performance varies, but latency isn't split by region. You know a traffic spike is coming, but the new checkout flow is untested. The gap is on the map. Nobody has walked it yet.
 
-These are the gaps you know about but haven’t instrumented. You know regional performance varies, but latency is not split by region. You know traffic spikes are coming, but the new checkout flow is untested. You see the gap. Nobody has explored it yet.
+**Rumored.** Signals already hiding in your telemetry. The `payment.provider` field has been on every event for a year, and nobody has ever filtered on it. The data is there; the question isn't. This is where the fastest wins live.
 
-### Rumored
+**Here Be Dragons.** The failures that catch you by surprise. New interactions between services. A cascade triggered by a third-party edge case. Fraud patterns that only appear when signals combine in ways nobody expected.
 
-These are signals hiding in your telemetry. The payment.provider field has been in every log for a year, but nobody has filtered on it. The data is there. The monitoring is not. This is where you find the fastest wins.
-
-### Here Be Dragons
-
-These are the failures that catch you by surprise. New interactions between services. Cascades triggered by a third-party edge case. Fraud patterns that show up when signals combine in ways nobody expected.
-
-Traditional monitoring only covers the first tier. Most teams spend their time in the second. The fastest wins are hiding in the third. The incidents you remember live in the fourth.
+Traditional monitoring covers the first tier. Most teams spend their time in the second. The fastest wins are in the third. The incidents you remember live in the fourth.
 
 {{< obs-knowledge-tiers >}}
 
-## The Telemetry Gap
+## The telemetry gap
 
-In the 2000s, data was sparse because it had to be. Storage cost too much. Networks were slow. Querying rich data at scale was not possible. A typical payment event from that era:
+The first three tiers are reachable with better instrumentation. The fourth is only reachable if your telemetry already carries enough context to answer a question nobody thought to ask. For a long time, it didn't, and it couldn't. Storage was expensive, and querying rich data at scale wasn't practical. A payment from that era usually left something like this behind:
 
-```json
-{
-  "timestamp": "2005-06-14T09:12:00Z",
-  "status": "success",
-  "amount": 49.99
-}
+```text
+2005-06-14 09:12:00 INFO  payment success amount=49.99
 ```
 
-You could only ask one thing: did it succeed? That was the limit.
+One question: did it succeed? That was the ceiling.
 
-A current equivalent:
+A current equivalent, as a single wide event attached to a span:
 
 ```json
 {
-  "timestamp": "2026-06-11T09:12:00Z",
+  "timestamp": "2026-06-04T09:12:00Z",
   "trace_id": "4bf92f3577b34da6a3ce929d0e0e4736",
   "span_id": "00f067aa0ba902b7",
+  "duration_ms": 187,
   "service.name": "checkout-api",
+  "service.version": "4.2.1",
+  "cloud.region": "eu-west-1",
+  "http.request.method": "POST",
+  "http.response.status_code": 200,
   "payment.amount": 49.99,
   "payment.currency": "GBP",
   "payment.provider": "stripe",
-  "payment.method": "credit_card",
-  "user.tier": "premium",
-  "user.region": "eu-west-1",
-  "app.version": "4.2.1",
-  "perf.auth_ms": 43,
-  "perf.total_ms": 187,
-  "http.status_code": 200
+  "payment.method": "card",
+  "app.customer.tier": "premium",
+  "app.auth.duration_ms": 43
 }
 ```
 
-What you can ask: is this payment slow? Is it slow for a specific provider? Is it slow for a specific region? Is it slow for premium-tier users specifically? Is it correlated with a particular app version? These are the questions that turn a "latency spiked" alert into a "stripe auth latency spiked for EU premium users on v4.2.1" root cause.
+The `trace_id` and `span_id` are the W3C Trace Context sizes, 32 and 16 hex characters, which is what lets this event be stitched to every other span in the same request. `service.*`, `cloud.region` and `http.*` are OpenTelemetry semantic conventions, so every backend reads them the same way. The `payment.*` and `app.*` keys are this application's own namespace, and note what's absent: no user ID, no email, nothing that identifies a person. You can segment by customer tier without carrying the customer.
 
-{{< obs-telemetry-techtree >}}
+Now you can ask: is this payment slow? Slow for one provider? In one region? For premium customers only? Since one release? Those are the questions that turn a "latency spiked" alert into "Stripe auth latency spiked for premium customers in eu-west-1 on 4.2.1", which is a root cause, not a symptom.
 
-## The Observability Shift
+## OpenTelemetry: a shared foundation
 
-Distributed tracing let you follow a request across service boundaries. It was the first real answer to the microservices debugging problem.
+Distributed tracing gave us the first real answer to "where did this request go?", and the [tracing article](/articles/distributed-tracing-dashboard-was-green/) covers why it took a decade to go mainstream. The practical barrier through most of the 2010s was fragmentation. Each team picked its own tracing library, its own metrics client, its own data format. Correlating signals across services meant reconciling incompatible data models, and the observability stack became operational debt of its own.
 
-Tracing solved cross-service request visibility. It didn't solve the harder problem: you could only ask questions you had thought to instrument for. That gap is what observability addresses. In control theory, a system is observable if you can figure out its internal state just from what it emits — no need to add probes at every possible failure point.
+Two open projects tried to fix that, and their overlap made it worse: OpenTracing, a vendor-neutral tracing API, and OpenCensus, Google's libraries for collecting traces and metrics. In May 2019, their maintainers announced they were merging into OpenTelemetry, accepted as a CNCF sandbox project, and described it as the next major version of both. The goal they named was consolidation itself, not a shiny new feature.
 
-Applied to software: an observable system lets you ask any question about its behaviour and get an answer from the telemetry it emits — not just the questions you anticipated when you wrote the instrumentation.
+What came out of it is the foundation most stacks now share: one vendor-neutral API and SDK per language for traces, metrics, and logs; one wire protocol, OTLP; one Collector to receive, process, and forward to any backend; and one set of semantic conventions so that `http.response.status_code` means the same thing everywhere. With W3C Trace Context carrying the `traceparent` header between services (the mechanics are in the [context propagation guide](/guides/otel-context-propagation/)), the event above stops being a nice idea and becomes something you can emit from service one and still query in service thirty.
 
-Three shifts characterise the move from monitored to observable:
+## Where the map goes next
 
-### Reactive to proactive
+Every step in this history bought a sharper question: did it succeed, then is the error rate rising, then which service, then why, for whom, and since which release. The move from monitored to observable is less about tools than about building systems that emit enough context to be questioned at all.
 
-Traditional monitoring waits for thresholds to fire. Observable systems can catch degradation patterns before they cross a user-visible threshold — because the telemetry is rich enough to show the signal early.
-
-### Isolated to connected
-
-Monitoring tracks each service independently while observable systems correlate signals across service boundaries, so a slow database query in service A is visible as latency in service B’s downstream call.
-
-### Static to dynamic
-
-Traditional monitoring requires pre-built dashboards for pre-anticipated questions. Observable systems support arbitrary queries — “show me all requests slower than 300ms, grouped by downstream dependency, for the last 15 minutes” — answered at investigation time, not dashboard-build time.
-
-{{< obs-monitoring-shifts >}}
-
-## OpenTelemetry: A Shared Foundation
-
-The practical barrier to observability adoption through most of the 2010s was fragmentation. Each team chose its own tools, its own instrumentation libraries, its own data formats. Correlating signals across services meant reconciling incompatible data models. The observability system itself became a source of operational debt.
-
-OpenTelemetry, formed as a CNCF project in 2019 through the merger of OpenCensus and OpenTracing, addressed this directly. A single vendor-neutral SDK for traces, metrics, and logs. A common wire protocol (OTLP) for all telemetry. A standard Collector for receiving, processing, and forwarding to any backend.
-
-With a shared standard, the instrumentation an engineer writes is portable across backends, queryable alongside signals from other services, and maintainable without specialist knowledge of any particular vendor.
-
-## What Comes Next
-
-### Continuous profiling
-
-Profiling adds a fourth signal to the stack: low-overhead execution profiles collected from production services in real time. Traces show you which request was slow. Profiling shows you why — which functions consumed CPU, which allocations caused GC pressure, which I/O patterns created contention.
-
-### Threshold-free anomaly detection
-
-Instead of making engineers predict every failure mode and write a threshold for it, statistical models — rolling baselines, time-series anomaly detection — learn what normal looks like from the telemetry and surface deviations automatically. It doesn't replace engineering judgment. It lowers the floor on what you can detect, catching subtle degradations that would never fire a static alert.
-
-### Business context integration
-
-Not every degradation is equally urgent. A latency spike during checkout costs revenue. The same spike during a background sync can wait. Telemetry enriched with business attributes — customer tier, transaction value, revenue impact — lets engineers prioritise by consequence, not just severity.
-
-The infrastructure for arbitrary-query observability exists. The gap now is not tooling — it is the organizational habit of building systems that emit enough context to be questioned at all.
-
-- [OpenTelemetry Overview](/guides/opentelemetry-overview/) — the shared foundation described above, in practical detail
-- [eBPF Continuous Profiling](/guides/ebpf-continuous-profiling/) — the fourth signal, covered in depth
-- [What's the difference between AIOps and traditional threshold-based alerting?](/qa/aiops-vs-traditional-alerting/) — where threshold-free anomaly detection fits today
+The next step is turning that context into foresight, catching the pattern before it becomes the incident. That's the argument of [Observability 1.0 meant forensics. Observability 2.0 means prevention.](/articles/what-is-observability-2-and-why-scryops/) Part of it is already running in production: continuous profiling shows which function burned the CPU inside the slow span, covered in [eBPF continuous profiling](/guides/ebpf-continuous-profiling/).
