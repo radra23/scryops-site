@@ -8,7 +8,9 @@
 One card per published article/guide/how-to/Q&A, written to
 static/cards/<section>/<file-stem>.png, plus static/cards/default.png for the
 homepage and list pages. Each card: lens + wordmark, a SECTION · TAG eyebrow,
-the title, and either the excerpt or an evidence panel from frontmatter:
+the title, and either the excerpt (2 lines max) or an evidence panel from
+frontmatter (4 rows max). Secondary text is sized for a phone feed, where a
+card shows at ~0.29x: eyebrow 28px, panel rows and excerpt 32px (~8-9pt).
 
     card:
       panel:
@@ -122,7 +124,7 @@ def header(d, t, eyebrow):
     scry, ops = font(DOTO, 38), font(PIXELIFY, 38)
     d.text((x * S, fy * S), "scry", font=scry, fill=t["heading"], anchor="lm")
     d.text((x * S + scry.getlength("scry"), fy * S), "ops", font=ops, fill=t["green"], anchor="lm")
-    text(d, (W - M, fy), eyebrow, font(PLEX_MD, 20), t["muted"], anchor="rm", track=2)
+    text(d, (W - M, fy), eyebrow, font(PLEX_MD, 28), t["muted"], anchor="rm", track=2)
 
 
 GLYPH = {"ok": "green", "warn": "warn", "error": "danger"}
@@ -130,7 +132,7 @@ LABEL = {"ok": "OK", "warn": "WARN", "error": "ERROR"}
 
 
 def glyph(d, kind, cx, cy, colour):
-    r = 7 * S
+    r = 9 * S
     cx, cy = cx * S, cy * S
     if kind == "ok":
         d.ellipse([cx - r, cy - r, cx + r, cy + r], fill=colour)
@@ -141,11 +143,11 @@ def glyph(d, kind, cx, cy, colour):
 
 
 def panel(d, t, rows):
-    row_h, pad, gap = 40, 26, 18
+    row_h, pad, gap = 50, 28, 18
     first_alert = next((i for i, r in enumerate(rows) if r["state"] != "ok"), None)
     divider = first_alert not in (None, 0)
     h = pad * 2 + row_h * len(rows) + (gap if divider else 0)
-    top, bottom = H - 52 - h, H - 52
+    top, bottom = H - 44 - h, H - 44
     d.rounded_rectangle([M * S, top * S, (W - M) * S, bottom * S], radius=10 * S,
                         fill=t["surface"], outline=t["frame"], width=S)
     y = top + pad + row_h / 2
@@ -158,11 +160,11 @@ def panel(d, t, rows):
         state = r["state"]
         col = t[GLYPH[state]]
         alert = state != "ok"
-        text(d, (M + 30, y), r["key"], font(PLEX, 24), t["text"], anchor="lm")
-        text(d, (M + 320, y), r["value"], font(PLEX, 24), col if alert else t["heading"], anchor="lm")
-        glyph(d, state, M + 489, y, col)
+        text(d, (M + 30, y), r["key"], font(PLEX, 32), t["text"], anchor="lm")
+        text(d, (M + 340, y), r["value"], font(PLEX, 32), col if alert else t["heading"], anchor="lm")
+        glyph(d, state, M + 532, y, col)
         label = (r.get("label") or LABEL[state]).upper()
-        text(d, (M + 510, y), label, font(PLEX_SB if alert else PLEX, 24), col, anchor="lm")
+        text(d, (M + 558, y), label, font(PLEX_SB if alert else PLEX, 32), col, anchor="lm")
         y += row_h
     return top
 
@@ -173,17 +175,17 @@ def render(eyebrow, title, excerpt=None, rows=None, accent_word=None):
     d = ImageDraw.Draw(img)
     header(d, t, eyebrow)
     f, size, lines = fit_headline(title, 2 if rows else 3)
-    lh, y = round(size * 1.18), 150
+    lh, y = round(size * 1.18), 140
     el = []
     if not rows and excerpt:
-        ef = font(READ, 26)
+        ef = font(READ, 32)
         el = wrap(excerpt, ef, W - 2 * M)
-        cap = 3 if len(lines) <= 2 else 2                        # a 3-line title leaves room for 2
+        cap = 2                                                  # 32px excerpt: two lines at most
         if len(el) > cap:
             el = el[:cap]; el[-1] = el[-1].rstrip(".,;: ") + "…"
-        # centre headline + excerpt between the header (y≈120) and the footer line (y≈530)
-        block = len(lines) * lh + 24 + 40 * len(el)
-        y = max(140, round(120 + (410 - block) / 2))
+        # centre headline + excerpt in the space below the header (y≈120..586)
+        block = len(lines) * lh + 24 + 46 * len(el)
+        y = max(140, round(120 + (466 - block) / 2))
     for line in lines:
         if accent_word and accent_word in line:                     # default card: green "understanding"
             pre, _, post = line.partition(accent_word)
@@ -198,8 +200,7 @@ def render(eyebrow, title, excerpt=None, rows=None, accent_word=None):
     else:
         y += 24
         for line in el:
-            text(d, (M, y), line, ef, t["muted"]); y += 40
-        text(d, (M, H - 56), "scryops.dev", font(PLEX, 20), t["muted"], anchor="ls")
+            text(d, (M, y), line, ef, t["muted"]); y += 46
     return img.resize((W, H), Image.LANCZOS)
 
 
@@ -215,6 +216,8 @@ def page_card(section, stem, md):
     tags = fm.get("tags") or []
     eyebrow = card_lib.SECTIONS[section] + (f" · {tags[0].upper()}" if tags else "")
     rows = (fm.get("card") or {}).get("panel")
+    if rows and len(rows) > 4:
+        sys.exit(f"{md}: card.panel has {len(rows)} rows; 4 at most (rows are 32px so they read on a phone)")
     for r in rows or []:
         if r.get("state") not in ("ok", "warn", "error"):
             sys.exit(f"{md}: card.panel state must be ok|warn|error, got {r.get('state')!r}")
