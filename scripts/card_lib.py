@@ -15,7 +15,7 @@ OUT_DIR = os.path.join("static", "cards")
 DEFAULT_CARD = os.path.join(OUT_DIR, "default.png")
 HASH_KEY = "scryops-card"
 # Bump when the card layout changes, so every committed card reads as stale.
-RENDER_VERSION = "1"
+RENDER_VERSION = "2"
 
 
 def frontmatter(md_path):
