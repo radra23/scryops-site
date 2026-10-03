@@ -1,99 +1,82 @@
 ---
 title: "Observability vs. Monitoring: Why the Distinction Matters"
 date: 2026-06-07
-draft: true
-excerpt: "Monitoring tells you when something is wrong. Observability lets you figure out why. The gap between them is where most teams get stuck."
-readtime: 5
-tags: ["Observability", "Monitoring", "Philosophy"]
+draft: false
+excerpt: "Monitoring tells you when something you predicted goes wrong. Observability lets you work out what's happening when it's something you didn't. You need both, and the gap between them is where incidents drag on."
+readtime: 6
+tags: ["Observability", "Monitoring", "Philosophy", "Cost"]
 ---
 
-Both words get used interchangeably. They are not the same thing, and the difference is not semantic. It determines what questions you can answer when something breaks.
+People use the two words interchangeably. They aren't the same thing, and the difference isn't semantic. It decides which questions you can answer when something breaks at 2am.
 
-## The Definition
+## Two Different Questions
 
-**Monitoring** is the practice of watching known failure modes. You decide in advance what matters — CPU usage, error rate, latency, queue depth — and you alert when those metrics cross thresholds. Monitoring answers the question: *is this thing I'm watching within acceptable bounds?*
+**Monitoring** is watching for failures you already know about. You decide in advance what matters (CPU, error rate, latency, queue depth), pick a threshold for each, and alert when one crosses the line. Monitoring answers one question: *is the thing I'm watching within acceptable bounds?*
 
-**Observability** is the property of a system that lets you understand its internal state from its external outputs. An observable system lets you ask arbitrary questions — questions you did not think to ask before the incident — and get answers from the telemetry the system emits. Observability answers the question: *what is happening inside this system right now, and why?*
+**Observability** is a property of the system, not a tool you buy. The term is borrowed from control theory, where a system is observable if you can work out its internal state from its outputs alone. In software that means you can ask questions you never thought to ask before the incident, and answer them from the telemetry the system already emits. Observability answers a different question: *what is happening in there right now, and why?*
 
-Monitoring requires prior knowledge of what can go wrong. Observability does not.
+Monitoring needs you to know in advance what can go wrong. Observability doesn't.
 
-## Why the Distinction Matters in Production
+## What Monitoring Structurally Can't See
 
-A monitored system without observability will eventually produce an incident that none of the monitors catch. Not because the monitors are wrong — because the failure mode was not anticipated when they were written.
+Monitoring isn't broken. Every alert can be well tuned and still miss things, because of how the model is built. Two blind spots matter most.
 
-The pattern is familiar: the dashboard is green, the thresholds have not fired, and users are already experiencing degraded service. The alert fires three minutes later, or not at all, because the failure did not look like any of the known failure modes. The on-call engineer opens the system and has no tools to ask "what changed, where, and for which users?" They have dashboards built for questions that were already answered.
+**Cardinality blindness.** An error-rate alert tells you 2% of requests are failing. It can't tell you whether that 2% is spread evenly across your users or comes entirely from one tenant, one region, or one endpoint. Monitoring aggregates by design: you pre-compute a number so it stays cheap to store and fast to alert on. The aggregation is exactly what hides the structure that would tell you where to look. "2% errors" and "100% of requests from the Frankfurt enterprise tenant are failing" can be the same line on the same graph.
 
-Observability covers the unknown unknowns. Monitoring covers the known ones. You need both.
+You can't fix this by adding a label for every dimension. Put `user_id` on a metric and you get one series per user, which is how metric bills explode. That's why [log-based monitoring](/guides/log-based-monitoring/) and good alert design both say the same thing: aggregate on bounded dimensions, then follow the alert into high-cardinality data to find the culprit. Monitoring tells you something's wrong. You need something else to find out who it's wrong for.
 
-## The Five Requirements for an Observable System
+**Novel failure modes.** The alerts you write protect you from failures you've already seen. The first time something new shows up (a new dependency, a new traffic pattern, a config change that interacts badly with another one) there's no alert for it, because nobody knew to write one. The system looks green until users tell you otherwise. We've told that story in full in [The dashboard was green, but the request was broken](/articles/distributed-tracing-dashboard-was-green/): checkout failing for one narrow slice of carts while every metric looked healthy.
 
-A system that is truly observable — not just monitored — needs five capabilities:
+There's a slower version of the same blindness, too. A degradation can creep in under every static threshold until it finally snaps, which is the memory-leak scenario in [Observability 1.0 meant forensics](/articles/what-is-observability-2-and-why-scryops/). Different shape, same root cause: the threshold only knows the question it was written for.
 
-**1. Comprehensive instrumentation.** Every service emits telemetry for every operation that matters. Not just when something breaks — continuously. If a service only logs errors, you cannot distinguish "no requests" from "all requests succeeding" from "all requests being dropped before they arrive."
+## Where Monitoring Still Belongs
 
-**2. Consistent naming.** If one service calls the same concept `user_id` and another calls it `userId` and a third calls it `customerId`, you cannot write a query that spans all three. Shared vocabulary — semantic conventions — is what makes cross-service analysis possible. Without it, every team's telemetry is only queryable by that team.
+None of this makes monitoring obsolete. It's the right tool for known failure modes with clear operational thresholds. A disk at 90% should page someone. A TLS certificate that expires in under 30 days should raise a ticket. These are binary checks on well-understood conditions, and a threshold is the cheapest, most reliable way to catch them. You don't need to explore a full disk. You need to know about it before it fills.
 
-**3. Context propagation.** As a request moves through your system, its identity must travel with it. The trace ID that identifies a request in service A must be present in service B's spans, service C's logs, and the database query it triggers. Without propagation, you have islands of data that cannot be connected.
+The mistake is treating that layer as the whole job. Known failure modes are a subset of what can go wrong, and the subset shrinks as your system grows more services, more dependencies and more ways for them to interact. Monitoring is the floor. Observability is the ceiling. You need the floor or you fall through it. You need the ceiling or you hit your head on every incident you didn't predict.
 
-**4. Centralised collection.** Telemetry emitted by individual services is only useful when it can be queried together. A Collector or aggregation layer that receives signals from all services — normalises them, routes them, and forwards them to storage — is the infrastructure that makes cross-service queries possible.
+Keep the alerts. Just make sure each one comes with a next step, which is the argument in [An Alert Without a Next Step Is Just Noise](/articles/alert-design-principles/). And don't let them multiply until nobody reads them, which is how you end up with [alert fatigue](/articles/alert-fatigue-is-an-observability-problem/).
 
-**5. Flexible analysis.** Raw telemetry answers no questions on its own. The tooling that queries it — the ability to filter by any attribute, aggregate over any dimension, correlate spans to logs, and ask questions that were not anticipated at instrumentation time — is what converts telemetry into understanding.
+## Five Things an Observable System Needs
 
-Most teams have partial versions of all five. The gaps between "partial" and "complete" are where incidents become prolonged.
+"Observable" isn't a product you can buy, and you can't get there with one tool. A system you can actually ask new questions of needs five things.
 
-## The Cost Dimension
+**1. Comprehensive instrumentation.** Every service emits telemetry for every operation that matters, all the time, not just when something fails. If a service only logs errors, you can't tell "no requests" apart from "every request succeeded" or "every request got dropped before it arrived."
 
-Observability is not free, and the bill scales with exactly the thing that makes it useful. Monitoring stores pre-aggregated metrics: a fixed set of series, decided in advance, that stays bounded no matter how much traffic flows through it. Observability stores raw events and traces, kept at enough fidelity to answer the questions you have not asked yet — and that volume grows with both traffic and cardinality. Add a single high-cardinality attribute like `user_id` and the number of distinct series can multiply by thousands.
+**2. Consistent naming.** If one service calls it `user_id`, another `userId` and a third `customerId`, no query can span all three. A shared vocabulary is what makes cross-service analysis possible. Without it, each team's telemetry can only be queried by that team. [Structured logging](/guides/structured-logging-machine-readable/) covers which field names to settle on, and why five teams sharing one schema beats one team's perfect one.
 
-{{< obs-observability-cost >}}
+**3. Context propagation.** As a request moves through your system, its identity has to travel with it. The trace ID from service A has to show up in service B's spans, service C's logs and the database call at the end. Drop it at one hop and the trace splits in two. You end up with islands of data you can't connect. [Context propagation](/guides/otel-context-propagation/) shows where it usually gets lost.
 
-The instinct when the bill arrives is to collect less. That defeats the point: the telemetry you drop is the question you can no longer answer. The real levers are sampling — keep every error and a representative fraction of the rest — and tiered retention: raw events hot for days, rolled-up aggregates warm for months. Observability is the ability to ask any question; cost control is deciding which questions are worth keeping the data to answer.
+**4. Centralised collection.** Telemetry only helps when you can query it together. A collection layer that receives signals from every service, normalises them and routes them to storage is the plumbing behind every cross-service query.
+
+**5. Flexible analysis.** Raw telemetry doesn't answer anything on its own. You need to filter on any attribute, group by any dimension, jump from a span to its logs, and ask questions nobody planned for when the code was instrumented. That's the step that turns data into understanding.
+
+Most teams have a partial version of all five. Incidents drag on in the gaps between partial and complete.
 
 ## The Practical Test
 
-The clearest way to distinguish a monitored system from an observable one is to ask what happens during an incident you have never seen before.
+The clearest way to tell a monitored system from an observable one: what happens during an incident you've never seen before?
 
-In a monitored system: the on-call engineer looks at the dashboards they have, does not find the answer there, escalates to someone who knows the code, and resolves the incident based on expertise rather than evidence.
+In a monitored system, the on-call engineer checks the dashboards they have, doesn't find the answer, and escalates to whoever knows the code. The incident gets resolved from expertise, not evidence. If that person is on holiday, it takes longer.
 
-In an observable system: the on-call engineer queries the telemetry with arbitrary questions — "show me all requests slower than 500ms, grouped by downstream dependency, for the last 30 minutes" — and finds the answer in the data, without needing to know the codebase.
+In an observable system, the on-call engineer asks the telemetry a question nobody built a dashboard for. Something like "show me every request slower than 500ms in the last 30 minutes, grouped by downstream dependency". The answer is in the data, and they don't need to know the codebase to find it.
 
-The goal of instrumentation is to reach the second state. Not just for incidents you have already seen. For any incident.
+That second state is the point of instrumentation. Not just for the incidents you've already had. For any incident.
 
-## Where Does Your System Stand?
+If you want the longer arc of how the industry got from grepping log files to here, [The Evolution of System Understanding](/articles/evolution-of-system-understanding/) traces it.
 
-The monitoring-to-observability spectrum is easier to navigate with a concrete self-assessment. This decision tree is not a score — it is a map that shows which capability you currently have and what the adjacent gap looks like.
+## The Bill
 
-{{< mermaid caption="Fig. — Each yes answer moves you one rung up the monitoring-to-observability ladder: metrics, alerting, investigable unknowns, distributed tracing, then full-stack APM." >}}
-flowchart TD
-    A["Do you track predefined metrics?"]
-    A -->|Yes| B["You have: Monitoring"]
-    A -->|No| Z1["Start here<br/>Add baseline metrics<br/>and dashboards"]
+Observability isn't free, and the bill scales with exactly what makes it useful. Monitoring stores pre-aggregated metrics: a fixed set of series, decided in advance, that stays bounded however much traffic flows through it. Observability keeps raw events and traces at enough fidelity to answer questions you haven't asked yet. That volume grows with traffic *and* with cardinality: every new attribute you can slice by is another dimension you're paying to keep.
 
-    B --> C{"Do you alert<br/>on those metrics?"}
-    C -->|Yes| D["You have: Monitoring + Alerting"]
-    C -->|No| Z2["Alerting gap<br/>Metrics without alerts<br/>require someone to be watching"]
+The chart below is schematic. It shows the shape of the problem, not measured numbers.
 
-    D --> E{"Can you investigate<br/>unknown failures<br/>without adding new code?"}
-    E -->|Yes| F["You have: Observability"]
-    E -->|No| Z3["Observability gap<br/>Add structured events, tracing,<br/>and flexible ad-hoc querying"]
+{{< obs-observability-cost >}}
 
-    F --> G{"Can you trace a single request<br/>across all your services?"}
-    G -->|Yes| H["You have: Distributed Tracing"]
-    G -->|No| Z4["Tracing gap<br/>Add context propagation<br/>across service boundaries"]
+When the bill arrives, the instinct is to collect less. That defeats the point: every bit of telemetry you drop is a question you can no longer answer. There are two better levers.
 
-    H --> I{"Can you see DB queries,<br/>external call durations,<br/>and method-level timing?"}
-    I -->|Yes| J["Full-stack APM coverage"]
-    I -->|No| Z5["APM gap<br/>Add code-level instrumentation<br/>or an auto-instrumentation agent"]
-{{< /mermaid >}}
+**Sample smarter, not flatter.** Keep every error and every slow request, and a small fraction of the healthy, boring traffic. A flat random rate throws away the rare requests you need at the same rate as the ones you'll never look at. [Your Sampling Strategy Is Lying to You](/articles/sampling-strategy/) makes that case for traces, and [High-Throughput Logging](/guides/high-throughput-log-pipelines/) does the same for logs at volume.
 
-Most production systems land somewhere in the middle — monitoring and alerting in place, partial tracing on the critical path, APM coverage on a handful of services. The decision tree shows which gap is adjacent. Which gap is most expensive depends on the failure modes you actually encounter. A system where distributed tracing would have cut last quarter's worst incident in half has a clear next step.
+**Tier your retention.** Keep raw, high-cardinality data hot for as long as your investigations actually look back, and roll it up or move it to cheap cold storage after that. Size the hot tier from your own post-mortems, not from a vendor default. [Log-based monitoring](/guides/log-based-monitoring/) walks through the hot/cold split.
 
-## APM and Observability Platforms: Where They Sit
-
-"APM" and "observability platform" are terms vendors use differently, but they describe distinct tiers of the spectrum above. Traditional APM tools (New Relic, Dynatrace, AppDynamics) focused on the code-level and tracing tiers — detailed transaction traces, DB query visibility, JVM or CLR profiling. Observability platforms (Honeycomb, ServiceNow Cloud Observability, Grafana's stack) emphasise the ability to ask arbitrary questions across high-cardinality telemetry, which maps to the observability tier.
-
-In practice, most modern APM tools have expanded toward observability, and most observability platforms now include APM-style code-level features. The spectrum matters more than the label: the question to ask of any tool is not "is it APM or observability?" but "does it let me answer questions I did not anticipate before the incident?"
-
-- [Cardinality Management](/guides/cardinality-management/) — the practical side of the cost dimension above
-- [OTel Context Propagation](/guides/otel-context-propagation/) — how requirement 3, context propagation, actually works
-- [OTel Semantic Conventions](/guides/otel-semantic-conventions/) — the shared vocabulary behind requirement 2, consistent naming
+Observability is the ability to ask any question. Cost control is deciding which questions are worth keeping the data to answer. Monitoring is how you make sure the questions you already know about never need asking twice.
