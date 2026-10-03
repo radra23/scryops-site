@@ -11,9 +11,10 @@ capitalizeListTitles = false
   topics = ["logs", "metrics", "traces", "opentelemetry", "distributed-systems"]
   tagline = "observability decoded"
   mission = "The stack is always changing. We help you see through it."
-  # Brevo subscription form — paste the action URL from Contacts → Forms → your form → Share
-  # e.g. "https://sibforms.com/serve/MUIEAK..."
-  brevo_form_url = "https://a687b92f.sibforms.com/serve/MUIFAJDqIgx84az-BuoP8gEdihFM0YeuIs35pNsnqDxUA7D0oy8kTjObl3h-LXe0CWtvfLGxXFz99znudbnkHdoR3vQxEXBzUN_DwHOqR35NRPWyI4uHfssMvHoECDDNhDSpQx7QR1zMPB0KNpYMNX3uqGP9U0V5nfrhFVlDFHug-PICu_qzzzzRKL3_MuG5p96OKMiI5jdWM7dbvA=="
+  # Newsletter (Substack). Plain links only: no embed, no script, nothing
+  # loads from Substack until the reader clicks. The subscribe block links to
+  # "<newsletter_url>/subscribe"; leave empty to hide the block and footer link.
+  newsletter_url = "https://scryops.substack.com"
 
 [params.analytics]
   umami_script = "https://cloud.umami.is/script.js"

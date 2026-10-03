@@ -16,6 +16,8 @@ This publication is for teams trying to close that gap. The move from forensics 
 
 {{< obs-about-sections >}}
 
+The newsletter lives on Substack and goes out every Tuesday: a short take, one thing to try that week, and a link to the full article here. [Subscribe on Substack](https://scryops.substack.com/subscribe).
+
 ### The name
 
 *Scry* — to foretell the future by gazing into a reflective surface. Your telemetry data is that surface. Observability done right isn't recording what happened — it's reading what the signals are already telling you about what comes next.

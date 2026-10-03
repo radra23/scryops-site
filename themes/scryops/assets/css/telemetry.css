@@ -725,6 +725,7 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .layout .article{margin:0;padding:0;max-width:none}
 .layout .article > .single-header,
 .layout .article > .article-end,
+.layout .article > .article-sub,
 .layout .prose > *{max-width:720px;margin-inline:auto}
 .site-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--bg);border-bottom:1px solid var(--border)}
 .site-top .spacer{flex:1}
@@ -976,26 +977,16 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 /* subscribe */
 /* Green budget (DS: ~3 marks per view): the home first screen already spends
    green on the wordmark, the headline word and "Start reading", so the
-   subscribe block uses the ink ramp — rule in --cyan, an outlined button.
-   Only the success message stays green: it is genuine healthy status. */
+   subscribe block uses the ink ramp: rule in --cyan, an outlined button.
+   The button is a plain link to Substack (no form, no script), so it needs
+   inline-flex for its padding and 44px touch height to apply. */
 .scry-sub{margin-bottom:4rem;border:1px solid var(--border);border-left:3px solid var(--cyan);padding:1.6rem 2rem;background:var(--surface);border-radius:var(--radius)}
 .scry-sub__label{font-family:var(--font-display);font-size:1.05rem;color:var(--heading);margin-bottom:.4rem;text-transform:lowercase}
 .scry-sub__desc{font-family:var(--font-read);font-size:.9rem;color:var(--muted);margin-bottom:1rem;line-height:1.6}
-.scry-sub__form{display:flex;gap:.6rem;flex-wrap:wrap}
-.scry-sub__input{font-family:var(--font-code);font-size:.85rem;background:var(--bg);border:1px solid var(--muted);color:var(--text);padding:.55rem .9rem;flex:1;min-width:200px;border-radius:var(--radius-sm)}
-.scry-sub__input::placeholder{color:var(--muted)}
-.scry-sub__input:focus{border-color:var(--green)}
-.scry-sub__btn{font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text);background:transparent;border:1px solid var(--muted);padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap;border-radius:var(--radius-sm)}
+.scry-sub__btn{display:inline-flex;align-items:center;font-family:var(--font-code);font-size:.82rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text);background:transparent;border:1px solid var(--muted);padding:.55rem 1.2rem;cursor:pointer;white-space:nowrap;border-radius:var(--radius-sm)}
 .scry-sub__btn:hover{border-color:var(--cyan);color:var(--cyan)}
-.scry-sub__btn[disabled]{opacity:.55;cursor:not-allowed}
-/* Success/error is a green/coral pair — the exact confusion case for ~8%
-   of men — so each state also carries a distinct glyph silhouette, not
-   just colour (see redundant-encoding law in the DS readme). */
-.scry-sub__msg{font-family:var(--font-code);font-size:.82rem;margin-top:.75rem;line-height:1.5;display:flex;align-items:baseline;gap:.45rem}
-.scry-sub__msg .g{font-size:.75rem;line-height:1;flex:none}
-.scry-sub__msg.success{color:var(--green)}
-.scry-sub__msg.error{color:var(--danger)}
-.scry-sub__msg.loading{color:var(--muted)}
+/* end of an article/guide/how-to: after the body, before resources + related */
+.article-sub{margin-top:3rem}
 
 /* footer */
 .site-footer{border-top:1px solid var(--border);padding:2.5rem 2rem;text-align:center}
@@ -1011,7 +1002,6 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
   .featured-article{padding-right:0;border-right:none;border-bottom:1px solid var(--border);padding-bottom:2rem}
   .featured-title{font-size:1.3rem}
   .wrap{padding:30px 20px 70px}
-  .scry-sub__form{flex-direction:column}
   .top-nav{gap:12px}
 }
 

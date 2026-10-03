@@ -30,6 +30,8 @@ A good alert answers four questions before the on-call even asks them.
 
 Same alert, two designs: the lane that ships a next step, and the bare notification most teams send today.
 
+Copy-paste version: [the alert body template](/alert-body-template/).
+
 ## Before and After: Same Incident, Different Alert Bodies
 
 Here's the difference good design makes. The same underlying condition, a raised error rate in the payment service, written two ways.
