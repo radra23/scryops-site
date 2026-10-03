@@ -60,6 +60,10 @@ self.addEventListener('fetch', function (event) {
     return;
   }
 
+  // Feeds and the sitemap aren't fingerprinted, so cache-first would pin a
+  // stale copy: leave them to the network.
+  if (url.pathname.slice(-4) === '.xml') { return; }
+
   // Static assets: cache-first, populate on miss.
   event.respondWith(
     caches.match(request).then(function (cached) {
