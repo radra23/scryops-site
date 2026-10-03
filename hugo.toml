@@ -65,7 +65,8 @@ capitalizeListTitles = false
     weight = 6
 
 [outputs]
-  home = ["HTML"]
+  # RSS: one site feed at /index.xml (themes/scryops/layouts/home.rss.xml).
+  home = ["HTML", "RSS"]
   section = ["HTML"]
   taxonomy = ["HTML"]
   term = ["HTML"]
