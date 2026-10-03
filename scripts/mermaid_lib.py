@@ -78,12 +78,15 @@ PALETTE = {
     "#CD384B": "var(--danger)",   # error
     "#D4820A": "var(--warn)",     # warning
     "#2A2A2A": "var(--border)",   # neutral/default classDef stroke
-    # color (text) role, grouped by hue family
+    # color (text) role. Label text never carries the state hue: the
+    # stroke above already does (hue + width + dash, so it survives
+    # pref-mono), and green/red/orange text measured ~5.3:1 in light,
+    # well under the ~10:1 figure-label target. --cyan is warm ink.
     "#5B8DEF": "var(--cyan)",
-    "#28CA41": "var(--green)",
-    "#FF6060": "var(--danger)",
-    "#F5A623": "var(--warn)",
-    "#A8A8A0": "var(--muted)",    # neutral/default classDef text
+    "#28CA41": "var(--nlab)",
+    "#FF6060": "var(--nlab)",
+    "#F5A623": "var(--nlab)",
+    "#A8A8A0": "var(--text)",     # neutral/default classDef text
     # bare `style X fill:#hex` single-value highlights (no stroke/color)
     "#4ecdc4": "var(--cyan)",
     "#66bb6a": "var(--green)",
