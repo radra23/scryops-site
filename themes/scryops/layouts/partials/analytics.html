@@ -1,5 +1,9 @@
-{{ with .Site.Params.analytics }}
-  {{ if and .umami_script .umami_website_id }}
-    <script defer src="{{ .umami_script }}" data-website-id="{{ .umami_website_id }}"></script>
-  {{ end }}
+{{- /* Umami analytics, self-hosted script. The tracker is vendored at
+       assets/js/vendor/umami.js and served from this site, so the only
+       off-site request left is the page-view event itself, which the script
+       posts to https://gateway.umami.is/api/send (its built-in default; set
+       data-host-url to change it). Cookieless, no personal data. */ -}}
+{{ with site.Params.analytics.umami_website_id }}
+  {{ $umami := resources.Get "js/vendor/umami.js" | fingerprint }}
+  <script defer src="{{ $umami.RelPermalink }}" integrity="{{ $umami.Data.Integrity }}" crossorigin="anonymous" data-website-id="{{ . }}"></script>
 {{ end }}

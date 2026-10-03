@@ -13,7 +13,7 @@ arrives at its numbers. Awareness, not absolution.
   <div class="scry-colophon__cmd"><b>scry@ops</b>:~$ cat colophon.txt</div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">generator</span><span class="scry-colophon__v">Hugo · static HTML, no server runtime</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">delivery</span><span class="scry-colophon__v">prebuilt files served as-is</span></div>
-  <div class="scry-colophon__row"><span class="scry-colophon__k">analytics</span><span class="scry-colophon__v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data · the site's one third-party request</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">analytics</span><span class="scry-colophon__v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data · script self-hosted; page-view events go to Umami Cloud</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">newsletter</span><span class="scry-colophon__v"><a href="https://scryops.substack.com">Substack</a> · a plain link, nothing loads from Substack until you click</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">offline</span><span class="scry-colophon__v">service worker · reads from cache when the network drops</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">fonts</span><span class="scry-colophon__v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P, Doto, Pixelify Sans (no CDN; Pixelify re-cut for label sizes: C, G, S, Z, 2, 3, 5, 6 and 9 get apertures wide enough to stay open, and B a square stem, so none reads as O, 8 or S)</span></div>
@@ -41,9 +41,9 @@ year lands beside it so the trend is visible, not just asserted.
 Measured from the built site (`public/`), gzipped, by
 [`scripts/footprint-report.py`](https://github.com/radra23/scryops-site/blob/main/scripts/footprint-report.py)
 — inspectable and reproducible: run it after a build and you get these numbers.
-One third-party call: the Umami analytics script, about 2 KB from
-cloud.umami.is on every page. Everything else (HTML, CSS, JS, fonts and
-diagrams) comes from this site. Every page sits well within its per-template budget
+One third-party call: the Umami page-view event, a small POST to
+gateway.umami.is on every page. Everything else (HTML, CSS, JS, fonts,
+diagrams and the analytics script itself) comes from this site. Every page sits well within its per-template budget
 (article 100 KB, guide 200 KB, front page 120 KB), and the whole site is small
 enough to cache offline in full.
 
@@ -88,10 +88,10 @@ way you'd treat a sampled trace rather than a billing record.
   than a cold first load.
 - **Cross-origin assets report zero.** Resources served without a
   `Timing-Allow-Origin` header return `transferSize: 0`. Fonts are now all
-  self-hosted and counted, and diagrams are pre-rendered SVG with no library
-  to load. What's still hidden is the Umami analytics script, which sends no
-  such header. We treat that as a to-do, not a loophole: self-hosting it would
-  make it visible to the meter.
+  self-hosted and counted, diagrams are pre-rendered SVG with no library to
+  load, and the Umami script is self-hosted too, so the meter sees it. What's
+  still hidden is the page-view event Umami posts to its own server, which
+  sends no such header. It's a small request, but the badge can't weigh it.
 - **It's modelled averages, not your request.** The SWD model uses
   global-average energy intensities and grid carbon — not your actual device,
   network, or the grid where the page was served. It's a rigorous industry
