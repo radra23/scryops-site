@@ -73,6 +73,8 @@ Trace sample:   https://jaeger.example.com/trace/abc123def456
 
 The arithmetic: 8.3% errors against a 1% budget is a burn rate of 8.3x. At that rate a full 30-day budget lasts 30 / 8.3 = about 3.6 days, or 87 hours. With 77% of the budget left, that's about 67 hours.
 
+8.3x is under the 14.4x fast-burn threshold in the rule below, so that rule wouldn't page for this incident. The slower pair the Google SRE Workbook runs alongside it would: 6x over both the last 6 hours and the last 30 minutes. The rules below show the fast-burn half; add the 6x pair the same way, with 6-hour and 30-minute recording rules.
+
 ## Prometheus: fill it in automatically
 
 Most of the template can come from the alert rule itself. These rules assume your services export the OpenTelemetry HTTP server metric, which Prometheus exposes as `http_server_request_duration_seconds`, with `service.name` mapped to the `job` label. Change the `job` value, the SLO target and the links to match your setup.
@@ -124,7 +126,7 @@ groups:
           dashboard: "https://grafana.example.com/d/payment?var-service=payment-api&from=now-1h"
 ```
 
-Two details that are easy to get wrong:
+Three details that are easy to get wrong:
 
 - `$value` is the value of the alert expression, here the 1-hour error ratio. It isn't the burn rate. The `burn_rate` annotation divides the ratio by the budget with a `query` call so the number on the page means what it says.
 - A 14.4x burn on a 30-day budget empties it in about 2.1 days, not 2 hours. It pages because at that pace the budget is gone within days, not because it's gone already.
