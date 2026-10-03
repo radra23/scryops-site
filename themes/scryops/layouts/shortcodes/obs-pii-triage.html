@@ -23,8 +23,8 @@
 <figure class="diagram pii-tri" aria-label="Decision tree for one span attribute. Two questions — is it needed for operational debugging, and does it identify an individual — fan out to four outcomes ordered least to most severe: system data marked with a circle is kept as-is; business identifiers marked with a triangle are hashed; personal identifiers marked with a square are removed or tokenised; payment data marked with a diamond is removed entirely. Severity is carried by shape, rail weight and connector weight, not colour.">
   <style>
     .pii-tri .diag-card{padding:1.2rem;}
-    .pii-tri .tri-hd{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;letter-spacing:.1em;color:var(--mc-ink-muted);margin-bottom:.4rem;}
-    .pii-tri .tri-sub{font-family:var(--font-code);font-size:12px;color:var(--mc-ink-muted);margin-bottom:1.25rem;}
+    .pii-tri .tri-hd{font-family:var(--font-pixel);font-size:.66rem;line-height:1.6;letter-spacing:.1em;color:var(--mc-ink-secondary);margin-bottom:.4rem;}
+    .pii-tri .tri-sub{font-family:var(--font-code);font-size:12px;color:var(--mc-ink-secondary);margin-bottom:1.25rem;}
     .pii-tri .tri-body{display:grid;grid-template-columns:210px 64px minmax(0,1fr);align-items:start;font-family:var(--font-code);}
     @media(max-width:700px){.pii-tri .tri-body{grid-template-columns:1fr;}.pii-tri .tri-fan{display:none;}.pii-tri .tri-stem{margin-bottom:1rem;}}
     .pii-tri .tri-stem{display:flex;flex-direction:column;}
@@ -39,7 +39,7 @@
     @media(max-width:700px){.pii-tri .tri-node{height:auto;padding:10px 12px;}}
     .pii-tri .tri-node.entry{border-width:3.5px;background:var(--bg);}
     .pii-tri .tri-nm{display:block;font-size:12.5px;line-height:1.4;color:var(--mc-ink);}
-    .pii-tri .tri-cap{display:block;font-size:12px;color:var(--mc-ink-muted);margin-top:3px;}
+    .pii-tri .tri-cap{display:block;font-size:12px;color:var(--mc-ink-secondary);margin-top:3px;}
     .pii-tri .tri-link{align-self:center;overflow:visible;}
     .pii-tri .tri-fan{width:64px;height:299px;display:block;}
     .pii-tri .tri-rows{display:flex;flex-direction:column;gap:9px;}
