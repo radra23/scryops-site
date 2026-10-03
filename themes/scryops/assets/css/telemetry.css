@@ -799,17 +799,12 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    -> 636px, a 2.3x stretch), rendering mermaid's 14px text far larger than
    body copy. Scoping this out lets mermaid render at scale 1.0. */
 .diag-card > svg:not([style*="max-width"]){min-width:636px}
-/* Mermaid has no fixed floor, so wide diagrams shrank to fit the card: 4-6px
-   labels at phone width, and 4-9px even in the 678px desktop card for
-   viewBoxes over ~1130px. The shortcode sets --diag-min = 0.6 x viewBox width,
-   the scale that keeps the smallest label >= 11px; wider diagrams then scroll
-   in the card like the obs-* figures. Applies at every width, since the
-   desktop card is too narrow for the widest diagrams too. */
+/* Mermaid has no fixed floor, so wide diagrams shrank to fit the card (8.4px
+   labels at phone width and in the 678px desktop card). The shortcode sets
+   --diag-min = viewBox width x 12/14, which holds Mermaid's 14px labels at the
+   12px figure floor; wider diagrams pan in the card like the obs-* figures.
+   Applies at every width: the desktop card fits viewBoxes up to ~791 units. */
 .diag-card > svg[style*="max-width"]{min-width:var(--diag-min,0)}
-/* Below the 720px measure the 0.6 floor still left 8.4px flowchart and 9.6px
-   sequence labels. --diag-min-phone = viewBox x 12/14 holds Mermaid's 14px
-   labels at the 12px figure floor; the card pans instead of shrinking. */
-@media (max-width:720px){.diag-card > svg[style*="max-width"]{min-width:var(--diag-min-phone,var(--diag-min,0))}}
 
 /* divider between stacked comparison flows (obs-reactive-loop) */
 .flow-divider{height:1px;background:var(--border);margin:19px 0}
