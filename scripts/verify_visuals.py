@@ -10,6 +10,7 @@ With no arguments it scans every markdown file under content/. Checks:
   2. each referenced obs-*.html SVG is well-formed XML and each HTML fragment has balanced tags
   3. normalize-tags.py passes (tag casing)
   4. figure labels don't trip the OTel correctness traps (see CLAUDE.md > OTel Correctness Gotchas)
+  5. every published page has a current share card (full scan only; see render-cards.py)
 
 Exit code is non-zero if any hard check fails. OTel hits are warnings (judgment needed).
 Standard library only.
@@ -131,6 +132,20 @@ def check_diagram_svgs(articles):
     return hard
 
 
+def check_share_cards():
+    """Every published page needs a committed, current share card (full scan only)."""
+    import card_lib
+    print(f"\n{DIM}— share cards —{OFF}")
+    problems = card_lib.stale_cards()
+    for path, why in problems:
+        fail(f"{path}: {why} — run scripts/render-cards.py")
+    if not problems:
+        ok(f"{len(list(card_lib.pages())) + 1} share cards present and current")
+    for orphan in card_lib.orphan_cards():
+        warn(f"orphan card {orphan} — run scripts/render-cards.py --prune")
+    return bool(problems)
+
+
 def main():
     if not os.path.isdir(SHORTCODE_DIR):
         fail(f"run me from the repo root — {SHORTCODE_DIR} not found")
@@ -179,6 +194,9 @@ def main():
         warn(f"{tagscript} not found — skipping")
 
     if check_diagram_svgs(articles):
+        hard_fail = True
+
+    if len(sys.argv) <= 1 and check_share_cards():
         hard_fail = True
 
     print()

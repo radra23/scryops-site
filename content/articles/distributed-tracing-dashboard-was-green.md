@@ -5,6 +5,12 @@ draft: false
 excerpt: "Metrics show something is wrong; logs report what happened in a specific place, but distributed tracing tells you what the request actually went through, and that's a different question entirely."
 readtime: 6
 tags: ["Tracing", "Observability", "OpenTelemetry", "Sampling", "Debugging"]
+card:
+  panel:
+    - {key: error_rate, value: "0.3%", state: ok}
+    - {key: latency.p50, value: "42ms", state: ok}
+    - {key: health_checks, value: "4/4", state: ok}
+    - {key: checkout.total, value: "$0.00", state: warn, label: "200 OK, no error"}
 ---
 
 It’s 2 a.m., and your phone almost vibrates off the table. You stumble to your laptop, open the dashboard, and see a sea of green: error rate at 0.3%, latency p50 at 42ms, health checks all smiling. You start to think this is just another false alarm. Twenty minutes later, another engineer hops on and drops a user complaint into Slack. Turns out, checkout is broken—but only for folks using a promo code on a cart with one very specific product category. The plot thickens.

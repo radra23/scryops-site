@@ -1,6 +1,27 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — scryops{{ end }}</title>
+{{- /* Share cards: 1200x630 PNGs pre-rendered by scripts/render-cards.py into
+       static/cards/<section>/<file-stem>.png; every other page (home, lists,
+       taxonomies) falls back to static/cards/default.png. */ -}}
+{{- $card := "cards/default.png" -}}
+{{- if and .IsPage .File (in (slice "articles" "guides" "howtos" "qa") .Section) -}}
+  {{- $c := printf "cards/%s/%s.png" .Section .File.ContentBaseName -}}
+  {{- if fileExists (printf "static/%s" $c) }}{{ $card = $c }}{{ end -}}
+{{- end -}}
+{{- $shareTitle := cond .IsHome site.Title .Title -}}
+{{- $shareDesc := .Params.excerpt | default .Description | default site.Params.description -}}
+<meta property="og:site_name" content="scryops" />
+<meta property="og:type" content="{{ cond .IsPage "article" "website" }}" />
+<meta property="og:title" content="{{ $shareTitle }}" />
+<meta property="og:description" content="{{ $shareDesc }}" />
+<meta property="og:url" content="{{ .Permalink }}" />
+<meta property="og:image" content="{{ $card | absURL }}" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="{{ $shareTitle }}" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:image" content="{{ $card | absURL }}" />
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
