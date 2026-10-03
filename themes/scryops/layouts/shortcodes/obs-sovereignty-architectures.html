@@ -23,12 +23,12 @@
     .sva .diag-card{padding:1rem 1rem .85rem;}
     .sva svg{width:100%;height:auto;display:block;font-family:var(--font-code);}
     .sva .t{font-size:12px;fill:var(--mc-ink);}
-    .sva .c{font-size:11px;fill:var(--mc-ink-muted);}
+    .sva .c{font-size:12px;fill:var(--mc-ink-muted);}
     .sva .h{font-size:12.5px;fill:var(--mc-ink);}
-    .sva .k{font-size:11px;fill:var(--mc-ink-muted);}
+    .sva .k{font-size:12px;fill:var(--mc-ink-muted);}
   </style>
   <div class="diag-card" tabindex="0">
-    <svg viewBox="0 0 680 372" role="img" aria-label="Three regional telemetry architectures compared: one global backend, regional isolation, and regional isolation with a global aggregate tier.">
+    <svg style="min-width:680px" viewBox="0 0 680 372" role="img" aria-label="Three regional telemetry architectures compared: one global backend, regional isolation, and regional isolation with a global aggregate tier.">
       <defs>
         <marker id="sva-a" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="9" markerHeight="9" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-3)"/></marker>
         <marker id="sva-b" viewBox="0 0 9 9" refX="8" refY="4.5" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="var(--mc-ramp-1)"/></marker>
@@ -71,8 +71,8 @@
       <text class="t" x="270" y="329" text-anchor="middle">EU backend</text>
       <path d="M336 325 H372 V343 H398" stroke="var(--mc-ramp-1)" stroke-width="3" fill="none" marker-end="url(#sva-b)"/>
       <rect x="406" y="326" width="180" height="34" fill="none" stroke="var(--mc-ramp-1)" stroke-width="3" stroke-dasharray="5 4" rx="3"/>
-      <text class="t" x="496" y="347" text-anchor="middle">allowlisted aggregates</text>
-      <text class="c" x="594" y="347">&rarr; global tier</text>
+      <text class="t" x="488" y="347" text-anchor="middle">allowlisted aggregates</text>
+      <text class="c" x="678" y="347" text-anchor="end">&#8594; global tier</text>
       <text class="k" x="0" y="366">heavy dashed = the only thing that may cross a border</text>
     </svg>
   </div>
