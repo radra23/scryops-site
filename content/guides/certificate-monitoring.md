@@ -88,18 +88,10 @@ Modern proxies and load balancers already validate certificates as part of their
 - **F5 BIG-IP**: Certificate monitoring with SNMP and REST API access
 
 {{< mermaid caption="Fig. — Certificate status flows from the load balancer's ongoing validation through a status API into the observability platform, which alerts the response team only at set thresholds." >}}
-sequenceDiagram
-    participant LB as Load Balancer
-    participant Cert as Certificates
-    participant API as Status API
-    participant NR as Observability
-    participant Team as Response Team
-
-    LB->>Cert: Ongoing validation
-    Cert->>LB: Status information
-    LB->>API: Expose results
-    API->>NR: Forward cert metadata
-    NR->>Team: Alert at thresholds
+flowchart LR
+    lb["Load balancer<br/>validates certs"] --> api["Status<br/>API"]
+    api --> obs["Observability<br/>platform"]
+    obs -->|alerts| team["Response<br/>team"]
 
 {{< /mermaid >}}
 

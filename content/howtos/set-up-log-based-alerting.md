@@ -14,7 +14,7 @@ The result is a Grafana-managed alert rule backed by a LogQL query, routed to Pa
 {{< mermaid caption="Fig. — Logs arrive in Loki over OTLP. A Grafana alert rule evaluates a LogQL query, and the notification policy routes on the rule's severity label." >}}
 flowchart LR
     app["Service<br/>(OTel SDK)"] -->|OTLP| loki[("Loki")]
-    loki --> rule["Alert rule<br/>LogQL + threshold"]
+    loki --> rule["Alert rule<br/>LogQL &gt; N"]
     rule --> policy["Notification<br/>policy"]
     policy -->|critical| pd["PagerDuty"]
     policy -->|warning| slack["Slack"]
