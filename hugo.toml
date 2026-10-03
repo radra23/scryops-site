@@ -17,7 +17,8 @@ capitalizeListTitles = false
   newsletter_url = "https://scryops.substack.com"
 
 [params.analytics]
-  umami_script = "https://cloud.umami.is/script.js"
+  # Umami tracker is self-hosted (themes/scryops/assets/js/vendor/umami.js);
+  # page-view events still go to Umami Cloud. Leave empty to drop analytics.
   umami_website_id = "9b6c5846-f8af-408a-99ef-c03ada9b386d"
 
 [taxonomies]
