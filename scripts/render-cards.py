@@ -201,6 +201,12 @@ def render(eyebrow, title, excerpt=None, rows=None, accent_word=None):
         y += 24
         for line in el:
             text(d, (M, y), line, ef, t["muted"]); y += 46
+    # Outer edge: a 2px --frame border, the design system's container edge. The
+    # dark card sits at ~1.1:1 on dark-mode feeds; --frame lifts the outline to
+    # ~1.6-2.0:1 there and vanishes into the card on light feeds. Inset 1px with a
+    # 36px radius so apps that round preview corners don't clip it away.
+    d.rounded_rectangle([1 * S, 1 * S, (W - 1) * S - 1, (H - 1) * S - 1], radius=36 * S,
+                        outline=t["frame"], width=2 * S)
     return img.resize((W, H), Image.LANCZOS)
 
 
