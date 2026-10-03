@@ -42,8 +42,10 @@ Measured from the built site (`public/`), gzipped, by
 [`scripts/footprint-report.py`](https://github.com/radra23/scryops-site/blob/main/scripts/footprint-report.py)
 — inspectable and reproducible: run it after a build and you get these numbers.
 One third-party call: the Umami page-view event, a small POST to
-gateway.umami.is on every page. Everything else (HTML, CSS, JS, fonts,
-diagrams and the analytics script itself) comes from this site. Every page sits well within its per-template budget
+gateway.umami.is on every page. Pressing the newsletter's Subscribe button
+sends one more small event the same way, so we can see which pages lead to
+sign-ups. Everything else (HTML, CSS, JS, fonts, diagrams and the analytics
+script itself) comes from this site. Every page sits well within its per-template budget
 (article 100 KB, guide 200 KB, front page 120 KB), and the whole site is small
 enough to cache offline in full.
 

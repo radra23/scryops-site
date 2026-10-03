@@ -4,11 +4,15 @@
        A plain link, not a form or embed: nothing loads from Substack until
        the reader clicks, so the block adds no request to the page.
        Keeps id="subscribe" for the front-page "Subscribe" anchor; place at
-       most one per page. Renders bare: the caller controls width. */ -}}
+       most one per page. Renders bare: the caller controls width.
+       data-umami-event: Umami reports a "subscribe" event only when the
+       button is clicked, tagged with the section it was clicked from. If
+       the tracker is blocked or opted out, it stays a plain link. */ -}}
+{{ $section := cond $.IsHome "front" $.Type }}
 {{ with site.Params.newsletter_url }}
 <section class="scry-sub" id="subscribe" aria-labelledby="subscribe-label">
   <h2 class="scry-sub__label" id="subscribe-label">One observability idea, every Tuesday</h2>
   <p class="scry-sub__desc">A short take, one thing to try that week, and a link to the full article. No vendor pitches.</p>
-  <a class="scry-sub__btn" href="{{ strings.TrimSuffix "/" . }}/subscribe">Subscribe on Substack</a>
+  <a class="scry-sub__btn" href="{{ strings.TrimSuffix "/" . }}/subscribe" data-umami-event="subscribe" data-umami-event-section="{{ $section }}">Subscribe on Substack</a>
 </section>
 {{ end }}
