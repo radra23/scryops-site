@@ -1,7 +1,7 @@
 ---
 title: "OpenTelemetry: What It Is and How It Fits Together"
-date: 2026-06-11
-draft: true
+date: 2026-10-03
+draft: false
 excerpt: "OpenTelemetry is a single instrumentation layer that produces traces, metrics, and logs in a vendor-neutral format. This guide explains what each signal is for, how the SDK and Collector relate, and where to go next."
 readtime: 8
 tags: ["OpenTelemetry", "Observability", "Tracing", "Metrics", "Logs"]
@@ -13,7 +13,7 @@ OTel collapses that to one instrumentation layer. You add the SDK once. It emits
 
 ## The Three Signals
 
-OTel defines three telemetry signal types. Each answers a different class of question.
+OTel's three established telemetry signals are traces, metrics and logs, and each answers a different class of question. The project also lists baggage as a signal, but it isn't telemetry you store: it's key-value context that travels with a request between services. Profiles, a fourth kind of telemetry, are still in development.
 
 **Traces** answer "what happened to this request?" A trace is a directed acyclic graph of spans — one span per unit of work — recording when each operation started, how long it took, whether it succeeded, and what attributes it carried. Distributed tracing links spans across service boundaries using propagated context headers, so a single trace can span an API gateway, three microservices, a message queue consumer, and a database call. Traces are the signal for understanding request paths and diagnosing latency.
 
@@ -63,40 +63,37 @@ The SDK and the Collector are independent deployment decisions. You can start by
 
 Every piece of telemetry produced by your application carries a **resource** — a set of attributes describing the entity that produced it. At minimum: service name, service version, and deployment environment. These attributes appear on every span, metric, and log record the service emits, and they are what makes cross-signal correlation possible in the backend.
 
-```yaml
-# Collector resource processor — applied to all signals
-processors:
-  resource:
-    attributes:
-      - key: service.name
-        value: checkout-api
-        action: upsert
-      - key: deployment.environment
-        value: production
-        action: upsert
+Set them in the service itself, where the SDK reads them from standard environment variables in every language:
+
+```bash
+OTEL_SERVICE_NAME=checkout-api
+OTEL_RESOURCE_ATTRIBUTES=service.version=1.4.2,deployment.environment.name=production
 ```
 
-Resource attributes are defined by OTel [semantic conventions](/guides/otel-semantic-conventions/) — a shared vocabulary that makes the same field names mean the same thing across every service and every language SDK.
+Two traps. There's no `OTEL_SERVICE_VERSION` variable, so the version goes in `OTEL_RESOURCE_ATTRIBUTES` with everything else. And the environment attribute is `deployment.environment.name`: plain `deployment.environment` is deprecated in the semantic conventions, though plenty of examples still use it. Don't set `service.name` in a shared Collector, either. A `resource` processor that upserts it rewrites the identity of every service sending through that Collector.
+
+Resource attributes are defined by OTel semantic conventions — a shared vocabulary that makes the same field names mean the same thing across every service and every language SDK.
 
 ## Where to Go Next
 
 **By signal:**
-- [OTel Metrics Instrumentation](/guides/otel-metrics-instrumentation/) — the six instrument types and when to use each
 - [Structured Logging: Making Your Logs Machine-Readable](/guides/structured-logging-machine-readable/) — what schema-consistent logs unlock for automated analysis
 
 **By concept:**
 - [Context Propagation](/guides/otel-context-propagation/) — how trace context crosses service boundaries
-- [Resource Attributes and Service Naming](/guides/otel-resource-attributes-and-service-naming/) — the identity layer for all three signals
-- [Semantic Conventions](/guides/otel-semantic-conventions/) — the standard attribute vocabulary
-- [Exporter Configuration](/guides/otel-exporter-configuration/) — wiring the SDK and Collector to your backend
-- [SDK Direct vs Collector](/qa/otel-collector-vs-sdk-direct/) — when to use each
 
 **By language (how-tos):**
 - [Instrument a .NET Service](/howtos/instrument-dotnet-service-opentelemetry/)
-- [Instrument a Python Service](/howtos/instrument-python-service-opentelemetry/)
 - [Instrument a Java Service](/howtos/instrument-java-service-opentelemetry/)
+
+<!-- Re-add each link here as its page is published (all still draft on 2026-10-03):
+- [OTel Metrics Instrumentation](/guides/otel-metrics-instrumentation/) — the six instrument types and when to use each
+- [Resource Attributes and Service Naming](/guides/otel-resource-attributes-and-service-naming/) — the identity layer for all three signals
+- [Semantic Conventions](/guides/otel-semantic-conventions/) — the standard attribute vocabulary (also link "semantic conventions" in the Resource Attributes section)
+- [Exporter Configuration](/guides/otel-exporter-configuration/) — wiring the SDK and Collector to your backend
+- [SDK Direct vs Collector](/qa/otel-collector-vs-sdk-direct/) — when to use each
+- [Instrument a Python Service](/howtos/instrument-python-service-opentelemetry/)
 - [Instrument a Go Service](/howtos/instrument-go-service-opentelemetry/)
 - [Instrument a Node.js Service](/howtos/instrument-nodejs-service-opentelemetry/)
-
-**Migrating from a proprietary SDK:**
 - [OTel Migration from Proprietary Tooling](/guides/otel-migration-from-proprietary/)
+-->
