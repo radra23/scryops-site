@@ -201,18 +201,18 @@ def render(eyebrow, title, excerpt=None, rows=None, accent_word=None):
         y += 24
         for line in el:
             text(d, (M, y), line, ef, t["muted"]); y += 46
-    # Outer edge: a 2px --frame border, the design system's container edge. The
+    # Outer edge: a 3px --frame border, the design system's container edge. The
     # dark card sits at ~1.1:1 on dark-mode feeds; --frame lifts the outline to
     # ~1.6-2.0:1 there and vanishes into the card on light feeds. Inset 1px with a
     # 36px radius so apps that round preview corners don't clip it away.
     d.rounded_rectangle([1 * S, 1 * S, (W - 1) * S - 1, (H - 1) * S - 1], radius=36 * S,
-                        outline=t["frame"], width=2 * S)
+                        outline=t["frame"], width=3 * S)
     img = img.resize((W, H), Image.LANCZOS)
-    # Downsampling blends the 2px line with its neighbours (#453E33 -> #423C31).
+    # Downsampling blends the 3px line with its neighbours (#453E33 -> #423C31).
     # Repaint the straight runs at 1x so they are the exact token; the corner
     # arcs keep their 2x anti-aliasing. quantize() reserves the colour.
     d1, r = ImageDraw.Draw(img), 1 + 36
-    for k in (1, 2):
+    for k in (1, 2, 3):
         d1.line([(r, k), (W - 1 - r, k)], fill=t["frame"])
         d1.line([(r, H - 1 - k), (W - 1 - r, H - 1 - k)], fill=t["frame"])
         d1.line([(k, r), (k, H - 1 - r)], fill=t["frame"])
