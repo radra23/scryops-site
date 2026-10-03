@@ -25,6 +25,11 @@
       {{ .Content }}
     </div>
 
+    {{/* newsletter: where long-form readers finish, before resources + related */}}
+    {{ if in (slice "articles" "guides" "howtos") .Type }}
+    <div class="article-sub">{{ partial "subscribe.html" . }}</div>
+    {{ end }}
+
     {{/* ── END-OF-ARTICLE ZONE: resources (frontmatter-driven) + related posts ── */}}
     {{ $hasRes := or .Params.references .Params.tools }}
     {{/* series siblings first (in part order), then tag-related pages; union dedupes */}}

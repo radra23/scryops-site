@@ -1,0 +1,14 @@
+{{- /* Newsletter block (Substack). Self-gating: renders nothing unless
+       Site.Params.newsletter_url is set. Call with the page context:
+       {{ partial "subscribe.html" . }}
+       A plain link, not a form or embed: nothing loads from Substack until
+       the reader clicks, so the page makes no third-party request.
+       Keeps id="subscribe" for the front-page "Subscribe" anchor; place at
+       most one per page. Renders bare: the caller controls width. */ -}}
+{{ with site.Params.newsletter_url }}
+<section class="scry-sub" id="subscribe" aria-labelledby="subscribe-label">
+  <h2 class="scry-sub__label" id="subscribe-label">One observability idea, every Tuesday</h2>
+  <p class="scry-sub__desc">A short take, one thing to try that week, and a link to the full article. No vendor pitches.</p>
+  <a class="scry-sub__btn" href="{{ strings.TrimSuffix "/" . }}/subscribe">Subscribe on Substack</a>
+</section>
+{{ end }}

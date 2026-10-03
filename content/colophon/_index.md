@@ -14,6 +14,7 @@ arrives at its numbers. Awareness, not absolution.
   <div class="scry-colophon__row"><span class="scry-colophon__k">generator</span><span class="scry-colophon__v">Hugo · static HTML, no server runtime</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">delivery</span><span class="scry-colophon__v">prebuilt files served as-is</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">analytics</span><span class="scry-colophon__v"><a href="https://umami.is/">Umami</a> · cookieless, no personal data</span></div>
+  <div class="scry-colophon__row"><span class="scry-colophon__k">newsletter</span><span class="scry-colophon__v"><a href="https://scryops.substack.com">Substack</a> · a plain link, nothing loads from Substack until you click</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">offline</span><span class="scry-colophon__v">service worker · reads from cache when the network drops</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">fonts</span><span class="scry-colophon__v">all <span class="eco">self-hosted</span> — Space Mono, Courier Prime, IBM Plex Mono, Atkinson Hyperlegible, Press Start 2P, Doto, Pixelify Sans (no CDN; Pixelify re-cut for label sizes: C, G, S, Z, 2, 3, 5, 6 and 9 get apertures wide enough to stay open, and B a square stem, so none reads as O, 8 or S)</span></div>
   <div class="scry-colophon__row"><span class="scry-colophon__k">diagrams</span><span class="scry-colophon__v">Mermaid · pre-rendered static SVG <span class="eco">(0 JS, themes via CSS vars)</span></span></div>
@@ -43,6 +44,10 @@ Measured from the built site (`public/`), gzipped, by
 No third-party calls. Every page sits well within its per-template budget
 (article 100 KB, guide 200 KB, front page 120 KB), and the whole site is small
 enough to cache offline in full.
+
+Subscribing to the newsletter happens on Substack (scryops.substack.com), not
+on this site, and is covered by [Substack's privacy policy](https://substack.com/privacy).
+The site only links there, so no Substack code or request runs on these pages.
 
 ## Method
 

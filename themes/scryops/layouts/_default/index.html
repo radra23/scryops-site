@@ -39,14 +39,12 @@
 
 </div>
 
-{{ $hasSubscribe := .Site.Params.brevo_form_url }}
+{{ with site.Params.newsletter_url }}
 <div class="wrap" style="padding-top:8px">
-  {{ if $hasSubscribe }}
   <div style="max-width:720px;margin:0 auto 48px">
-    {{ partial "subscribe-form.html" . }}
+    {{ partial "subscribe.html" $ }}
   </div>
-  {{ end }}
-
-  </div>
+</div>
+{{ end }}
 
 {{ end }}
