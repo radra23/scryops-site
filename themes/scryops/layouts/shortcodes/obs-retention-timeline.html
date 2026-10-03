@@ -88,7 +88,7 @@
       {{- end }}
       <rect x="{{ $pl }}" y="{{ $y }}" width="{{ $wSelf }}" height="{{ $bar }}"
             fill="var(--mc-ramp-3)" stroke="var(--mc-ink)" stroke-width="1"/>
-      <text x="{{ add $pl $wTot }}" y="{{ add $y (sub $bar 3) }}" text-anchor="middle" class="obs-wf__nm on">&#10005;</text>
+      <text x="{{ add $pl $wTot }}" y="{{ add $y (sub $bar 3) }}" text-anchor="middle" class="obs-wf__nm on obs-wf__end">&#10005;</text>
       <text x="{{ add (add $pl $wTot) 10 }}" y="{{ add $y (sub $bar 4) }}" class="obs-wf__val">{{ $dur }}{{ $unit }}</text>
       {{- end }}
     </svg>
