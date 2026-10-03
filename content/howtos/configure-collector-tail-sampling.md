@@ -196,7 +196,7 @@ Three things to watch:
 When one Collector can't hold the buffer you need, put a routing tier in front. The `loadbalancingexporter` keeps each trace together. The topology looks like this:
 
 {{< mermaid >}}
-flowchart LR
+flowchart TB
     S1[Service A] --> LB
     S2[Service B] --> LB
     S3[Service C] --> LB
@@ -206,14 +206,14 @@ flowchart LR
     end
 
     subgraph Tier2["Tier 2: tail-sampling Collectors"]
-        TS0[tail-sampler-0<br/>tail_sampling processor]
-        TS1[tail-sampler-1<br/>tail_sampling processor]
-        TS2[tail-sampler-2<br/>tail_sampling processor]
+        TS0[tail-sampler-0<br/>tail_sampling<br/>processor]
+        TS1[tail-sampler-1<br/>tail_sampling<br/>processor]
+        TS2[tail-sampler-2<br/>tail_sampling<br/>processor]
     end
 
-    LB -->|all spans for trace A| TS0
-    LB -->|all spans for trace B| TS1
-    LB -->|all spans for trace C| TS2
+    LB -->|all spans<br/>of trace A| TS0
+    LB -->|all spans<br/>of trace B| TS1
+    LB -->|all spans<br/>of trace C| TS2
 
     TS0 --> Backend[(Tracing Backend)]
     TS1 --> Backend

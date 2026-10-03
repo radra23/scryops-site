@@ -20,7 +20,7 @@ Service Level Objectives (SLOs) translate reliability from a vague aspiration in
 **Burn Rate** — the rate at which the error budget is being consumed relative to the pace that would exhaust it exactly at the end of the window. For a 30-day window, a burn rate of 1× means you'll exhaust the budget in exactly 30 days. A burn rate of 14.4× means you'll exhaust it in about 2.1 days.
 
 {{< mermaid caption="Fig. — An SLI feeds an SLO target, which defines the error budget; burn rate tracks how fast that budget is spent and triggers alerts and actions." >}}
-graph LR
+graph TD
     A[SLI] -->|measured against| B[SLO target]
     B -->|defines| C[Error Budget]
     C -->|monitored via| D[Burn Rate]

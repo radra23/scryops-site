@@ -84,7 +84,7 @@ If you're still shipping logs through a separate pipeline from your traces, fix 
 The case for structured logging isn't abstract. Here's what schema-consistent logs unlock that unstructured logs never could.
 
 {{< mermaid caption="Fig. — A trace_id turns a burn rate alert into a straight line to root cause; without it, the same alert forces a manual, uncertain search across services." >}}
-flowchart LR
+flowchart TD
     A["Burn rate alert fires"] --> B["Metric spike<br/>(error rate)"]
     B --> C["Correlated trace<br/>(via trace_id)"]
     C --> D["Exact log lines<br/>from that span"]

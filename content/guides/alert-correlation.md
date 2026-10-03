@@ -12,7 +12,7 @@ In a system with any meaningful depth, a single failure propagates. A database t
 Without correlation, the on-call engineer receives that dozen pages and must manually reconstruct the causal chain under pressure. With correlation, they receive one grouped incident: "Database connectivity failure — 9 downstream services affected." That is not a minor UX improvement. The engineer starts from the likely cause instead of reconstructing it from twelve symptoms, at 3am, while the pager keeps going off.
 
 {{< mermaid >}}
-flowchart TD
+flowchart LR
     A[Alert: DB Timeout] --> C{Correlate}
     B[Alert: Service A Latency] --> C
     D[Alert: Service B Error Rate] --> C
@@ -48,9 +48,7 @@ Alerts that fire within a short time window often share a cause. Combine alerts 
 {{< mermaid >}}
 flowchart TD
     subgraph w1 ["Window 1: T+0:00 – T+0:05"]
-        A["Alert A (T+0:00)"]
-        B["Alert B (T+0:02)"]
-        C["Alert C (T+0:03)"]
+        A["Alert A (T+0:00)"] ~~~ B["Alert B (T+0:02)"] ~~~ C["Alert C (T+0:03)"]
     end
     subgraph w2 ["Window 2: T+0:10 – T+0:15"]
         D["Alert D (T+0:10)"]
@@ -66,7 +64,7 @@ Temporal correlation alone is imprecise — unrelated alerts can fire in the sam
 Group alerts that describe the same failure mode across different services. An error-rate alert on Service A and an error-rate alert on Service B, firing within the same window, are more likely to share a cause than two alerts of different types.
 
 {{< mermaid >}}
-flowchart TD
+flowchart LR
     A[Error Rate: Service A] --> C{Correlate<br/>by Type + Window}
     B[Error Rate: Service B] --> C
     D[High Latency: Service X] --> E{Correlate<br/>by Type + Window}

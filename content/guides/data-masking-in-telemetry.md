@@ -112,7 +112,7 @@ The transformation must preserve the relationships between fields: statistical d
 
 {{< mermaid caption="Fig. — A transformation has to preserve three kinds of structure at once: statistical distributions, relationships between fields, and temporal sequence, or the masked data loses its diagnostic value." >}}
 
-graph TB
+graph LR
     A[Data Value] --> B[Statistical]
     A --> C[Relational]
     A --> D[Temporal]

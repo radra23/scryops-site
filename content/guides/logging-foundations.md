@@ -122,7 +122,7 @@ A well-structured log stream is also a record of what your system did on behalf 
 Logs don't deliver value sitting in a file on one host. They need to flow through a collection layer, get enriched, cleaned and correlated, and land somewhere you can query them alongside traces and metrics.
 
 {{< mermaid caption="Fig. — A log line leaves the application through the logging library and its OpenTelemetry bridge, is parsed, enriched, redacted and sampled in the Collector, and lands in a backend where it can be queried next to the traces and metrics from the same request." >}}
-flowchart LR
+flowchart TD
     A[Application<br/>logging library] --> B[OTel bridge<br/>or file / stdout]
     B --> C[Collector<br/>parse, enrich,<br/>redact, sample]
     C --> D[Backend<br/>logs, traces, metrics]

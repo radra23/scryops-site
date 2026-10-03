@@ -30,8 +30,8 @@ The P0-P4 scale is still useful — not as a prescriptive checklist, but as a sh
 {{< mermaid >}}
 flowchart LR
     subgraph assess["Assess impact"]
-        ui["User impact<br/>and scope"]
-        br["SLO burn rate<br/>and budget left"]
+        direction TB
+        ui["User impact<br/>and scope"] ~~~ br["SLO burn rate<br/>and budget left"]
     end
     subgraph classify["Classify severity"]
         p0["P0 — immediate<br/>14× burn / ~2 days"]

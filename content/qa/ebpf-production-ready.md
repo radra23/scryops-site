@@ -22,14 +22,14 @@ Yes for profiling and networking. Clear two gates first, and know where app trac
 {{< mermaid caption="Fig. — Kernel BTF support and agent privileges are the two gates that decide whether eBPF deploys cleanly. Clear them and profiling or networking are safe starting points; app tracing still lags behind what an SDK captures." >}}
 flowchart TD
     start["Deploy eBPF for observability?"]
-    kernel{"Kernel meets the tool's floor<br/>(5.10+ is safe), BTF enabled?"}
-    caps{"Platform lets the agent run<br/>privileged with host PID?"}
+    kernel{"Kernel meets<br/>the tool's floor<br/>(5.10+ is safe),<br/>BTF enabled?"}
+    caps{"Platform lets<br/>the agent run<br/>privileged with<br/>host PID?"}
     usecase{"Use case?"}
-    upgrade["Upgrade the kernel or node image<br/>before rolling out"]
-    policy["Allow it for this DaemonSet,<br/>or use a node pool that can"]
-    profiling["CPU profiling<br/>Mature — start here"]
-    network["Network observability<br/>Mature — Cilium proven at scale"]
-    tracing["App-level auto-tracing<br/>Evolving — SDK gives more context"]
+    upgrade["Upgrade the kernel<br/>or node image<br/>before rolling out"]
+    policy["Allow it for<br/>this DaemonSet, or<br/>use a node pool<br/>that can"]
+    profiling["CPU profiling<br/>Mature —<br/>start here"]
+    network["Network<br/>observability<br/>Mature — Cilium<br/>proven at scale"]
+    tracing["App-level<br/>auto-tracing<br/>Evolving — SDK<br/>gives more context"]
     start --> kernel
     kernel -->|No| upgrade
     kernel -->|Yes| caps
