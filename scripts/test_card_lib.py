@@ -213,3 +213,20 @@ card:
     for y in (60, 315, 569):
         for x in (1, 2, 3, 1196, 1197, 1198):
             assert "#%02X%02X%02X" % rgb.getpixel((x, y)) == frame.upper(), (x, y)
+
+
+def test_card_title_overrides_the_headline_only(rc):
+    assert rc.headline({"title": "Long Page Title"}) == "Long Page Title"
+    assert rc.headline({"title": "Long Page Title", "card": {"title": "  Short  "}}) == "Short"
+    assert rc.headline({"title": "T", "card": {"panel": []}}) == "T"     # card block without a title
+    for bad in ("", "   ", 42, ["x"]):
+        with pytest.raises(SystemExit, match="card.title"):
+            rc.headline({"title": "T", "card": {"title": bad}})
+
+
+def test_card_title_changes_the_hash(site):
+    md = "content/guides/a.md"
+    write_md(md, FM)
+    base = card_lib.input_hash("guides", "a", md)
+    write_md(md, FM + '\ncard:\n  title: "Short"')
+    assert card_lib.input_hash("guides", "a", md) != base

@@ -13,9 +13,15 @@ frontmatter (4 rows max). Secondary text is sized for a phone feed, where a
 card shows at ~0.29x: eyebrow 28px, panel rows and excerpt 32px (~8-9pt).
 
     card:
+      title: "Green dashboard, broken request"   # optional, see below
       panel:
         - {key: error_rate, value: "0.3%", state: ok}
         - {key: checkout.total, value: "$0.00", state: warn, label: "200 OK, no error"}
+
+card.title (optional) replaces the page title on the card only; og:title keeps
+the real title, which most apps print under the image anyway. Use it when a long
+title would shrink the headline: in a ~250pt chat bubble a 3-line title falls
+to ~8pt, a 1-2 line one stays at ~10-12pt.
 
 state is ok | warn | error (glyph ● ▲ ■, never colour alone); label defaults to
 OK / WARN / ERROR. A dashed rule separates the first non-ok row from the ok rows.
@@ -260,7 +266,17 @@ def page_card(section, stem, md):
     for r in rows or []:
         if r.get("state") not in ("ok", "warn", "error"):
             sys.exit(f"{md}: card.panel state must be ok|warn|error, got {r.get('state')!r}")
-    return render(eyebrow, fm["title"], fm.get("excerpt"), rows)
+    return render(eyebrow, headline(fm, md), fm.get("excerpt"), rows)
+
+
+def headline(fm, md="page"):
+    """The card headline: card.title when set, else the page title."""
+    t = (fm.get("card") or {}).get("title")
+    if t is None:
+        return fm["title"]
+    if not isinstance(t, str) or not t.strip():
+        sys.exit(f"{md}: card.title must be a non-empty string")
+    return t.strip()
 
 
 def main():
