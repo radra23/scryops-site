@@ -19,9 +19,11 @@ card shows at ~0.29x: eyebrow 28px, panel rows and excerpt 32px (~8-9pt).
         - {key: checkout.total, value: "$0.00", state: warn, label: "200 OK, no error"}
 
 card.title (optional) replaces the page title on the card only; og:title keeps
-the real title, which most apps print under the image anyway. Use it when a long
-title would shrink the headline: in a ~250pt chat bubble a 3-line title falls
-to ~8pt, a 1-2 line one stays at ~10-12pt.
+the real title, which most apps print under the image anyway. The headline fits
+at 60px when the title takes 3 lines or fewer (~12.5pt in a ~250pt chat bubble)
+and only drops to 54/48/44/40px (down to ~8pt there) when it can't. So for a
+3-line title card.title is polish, a quicker read with room for the excerpt;
+for a title too long for 3 lines at 60px it keeps the headline large.
 
 state is ok | warn | error (glyph ● ▲ ■, never colour alone); label defaults to
 OK / WARN / ERROR. A dashed rule separates the first non-ok row from the ok rows.
