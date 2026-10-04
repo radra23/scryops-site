@@ -33,14 +33,13 @@
   /* party-gallery.html fixed per-character identity accents (flavor, not
      data — pref-mono already forces .party-card/.party-name/.party-ph-cls
      to neutral ink regardless of these, see the pref-mono block below) */
-  --party-monk:#4FD1C5;
-  --party-paladin:#F5C542;
   --party-sorcerer:#E55DC8;
   --party-warlock:#8B6CEF;
   --party-artificer:#D98A2B;
 
   /* obs-mascot.html fixed per-class identity accents — same pattern as
-     the party-gallery tokens above (flavor, not data) */
+     the party-gallery tokens above (flavor, not data). Monk and paladin
+     are shared with party-gallery now that both have print portraits. */
   --mascot-noob:#A99E88;
   --mascot-warrior:#D98166;
   --mascot-wizard:#8FA8C4;
@@ -50,6 +49,14 @@
   --mascot-ranger:#6FB39A;
   --mascot-oracle:#A78FE0;
   --mascot-barbarian:#D2894F;
+  --mascot-monk:#C48B9F;
+  --mascot-paladin:#93A3CC;
+  --mascot-queen:#C98AAB;
+
+  /* the print portraits are two-ink screenprints on cream paper: their ink
+     outlines vanish on a dark ground, so the paper STAYS paper in every
+     theme (same reasoning as the always-dark code well). Never override. */
+  --mascot-paper:#F6F3EC;
 
   /* inline code chip */
   --ic-bg:#1E1A14; --ic-text:#E4DDCE; --ic-bd:var(--frame);
@@ -171,8 +178,6 @@ html.light {
 
   /* darkened to clear 4.5:1 as text against the cream surface — the dark
      hues at the top of this file read fine on charcoal but fail on cream */
-  --party-monk:#22827A;
-  --party-paladin:#956F08;
   --party-sorcerer:#D222AD;
   --party-warlock:#7D5AED;
   --party-artificer:#A5671E;
@@ -187,6 +192,9 @@ html.light {
   --mascot-ranger:#44806A;
   --mascot-oracle:#8260D3;
   --mascot-barbarian:#AA642C;
+  --mascot-monk:#94586D;
+  --mascot-paladin:#5E6F99;
+  --mascot-queen:#8A4B6B;
 
   --ic-bg:#EDE7DB; --ic-text:#1E1811; --ic-bd:var(--frame);
 
@@ -228,8 +236,6 @@ html.calm {
   /* same as dark, except warlock nudged brighter — the original hue sits
      at 4.48:1 against calm's slightly-lighter card surface, just under
      the 4.5:1 text floor */
-  --party-monk:#4FD1C5;
-  --party-paladin:#F5C542;
   --party-sorcerer:#E55DC8;
   --party-warlock:#9078F2;
   --party-artificer:#D98A2B;
@@ -244,6 +250,9 @@ html.calm {
   --mascot-ranger:#6FB39A;
   --mascot-oracle:#A78FE0;
   --mascot-barbarian:#D2894F;
+  --mascot-monk:#C48B9F;
+  --mascot-paladin:#93A3CC;
+  --mascot-queen:#C98AAB;
 
   --ic-bg:#241F15; --ic-text:#EFE7D6; --ic-bd:var(--frame);
 
@@ -341,6 +350,8 @@ html.pref-mono .scry-cucco__solo img, html.pref-mono .scry-cucco__solo svg,
 /* Mascot class accents are inline (set per class in JS), so they need an
    explicit override here — the party reads by name + role + stats instead. */
 html.pref-mono .scry-cucco__wrap, html.pref-mono .scry-cucco__fg { border-top-color:var(--muted) !important; }
+/* the print portraits' accent disc goes neutral with everything else */
+html.pref-mono .scry-cucco--print, html.pref-mono .party-card { --cucco-disc:color-mix(in srgb,var(--muted) 35%,transparent); }
 html.pref-mono .scry-cucco__name, html.pref-mono .scry-cucco__plate,
 html.pref-mono .scry-cucco__fgnm { color:var(--heading) !important; }
 html.pref-mono .scry-cucco__lvl { color:var(--heading) !important; border-color:var(--border) !important; }
@@ -1213,6 +1224,24 @@ footer .scry-fp{max-width:440px;margin:0 auto;text-align:left}
 .scry-cucco__fgstat b{font-weight:600;color:var(--ac)}
 .scry-cucco__fgsep{opacity:.5;margin:0 7px}
 
+/* Print portraits (scry-cucco--print): the two-ink screenprint art. It is
+   vector line art, so it renders smooth, not pixelated, and it always sits
+   on --mascot-paper with one flat disc in the class accent behind it — the
+   disc is drawn here rather than baked into each SVG, so it follows the
+   theme's --ac and pref-mono. Pixel sprites (scry-cucco--pixel) keep the
+   rules above unchanged. */
+.scry-cucco--print img{image-rendering:auto}
+.scry-cucco--print .scry-cucco__sprite,
+.scry-cucco--print .scry-cucco__solo,
+.scry-cucco--print .scry-cucco__medallion,
+.scry-cucco--print .scry-cucco__fgframe{
+  background:radial-gradient(circle at 50% 47%,var(--cucco-disc,color-mix(in srgb,var(--ac) 42%,transparent)) 0 37%,transparent 37.5%),var(--mascot-paper);
+  border:1px solid var(--frame);border-radius:var(--radius-retro);aspect-ratio:1/1;padding:0;box-sizing:border-box}
+.scry-cucco--print .scry-cucco__sprite{width:120px}
+.scry-cucco--print .scry-cucco__medallion{border-radius:50%}
+.scry-cucco--print .scry-cucco__medallion img{width:100%}
+.scry-cucco--print .scry-cucco__fgframe{width:96px}
+
 /* ── Accessible monochrome charting tokens, Phase 5 ───────────────────
    Ported verbatim from the DS bundle (.claude/skills/scryops-design/
    tokens/charts.css), itself ported from the "Accessible monochrome
@@ -1786,6 +1815,9 @@ figure.obs-fig figcaption{font-size:12px;color:var(--muted);font-style:italic;ma
 .party-card{margin:0;background:var(--surface);border:1px solid var(--border);border-top:3px solid var(--ac);border-radius:3px;overflow:hidden;display:flex;flex-direction:column;}
 .party-art{background:var(--bg);aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;}
 .party-art img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;display:block;}
+/* print portraits: same paper ground + accent disc as .scry-cucco--print */
+.party-art--print{background:radial-gradient(circle at 50% 47%,var(--cucco-disc,color-mix(in srgb,var(--ac) 42%,transparent)) 0 37%,transparent 37.5%),var(--mascot-paper);}
+.party-art--print img{image-rendering:auto;}
 .party-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;width:88%;height:88%;border:2px dashed var(--border);border-radius:3px;color:var(--mc-ink-secondary);}
 .party-ph-cls{font-family:'Press Start 2P',monospace;font-size:.7rem;color:var(--ac);opacity:.8;}
 .party-ph-sub{font-family:var(--font-code);font-size:.7rem;letter-spacing:.06em;}

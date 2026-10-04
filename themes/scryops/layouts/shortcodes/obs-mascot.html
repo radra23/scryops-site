@@ -1,18 +1,24 @@
 {{- $variant := .Get "variant" | default "card" -}}
 {{- $class := .Get "class" | default "noob" -}}
+{{- /* art: "print" = the two-ink screenprint portraits (paper ground, accent
+     disc); "pixel" = the original pixel sprite, kept until a print exists.
+     desc: what the portrait shows, for alt text. */ -}}
 {{- $classes := dict
-  "noob"      (dict "accent" "var(--mascot-noob)"      "label" "NOOB"      "name" "Bawkward"            "role" "lvl 1 · hasn't read the runbook" "lvl" 1  "hp" 1 "xp" 8)
-  "warrior"   (dict "accent" "var(--mascot-warrior)"   "label" "WARRIOR"   "name" "Cluck Norris"         "role" "the false-alarm slayer"          "lvl" 30 "hp" 5 "xp" 72)
-  "wizard"    (dict "accent" "var(--mascot-wizard)"    "label" "WIZARD"    "name" "Cluckdalf"            "role" "seer of burn-rate runes"         "lvl" 99 "hp" 3 "xp" 99)
-  "rogue"     (dict "accent" "var(--mascot-rogue)"     "label" "ROGUE"     "name" "Featherfingers"       "role" "silencer of alerts"              "lvl" 24 "hp" 3 "xp" 55)
-  "bard"      (dict "accent" "var(--mascot-bard)"      "label" "BARD"      "name" "Bawk Dylan"           "role" "every log line is a lyric"       "lvl" 12 "hp" 2 "xp" 40)
-  "cleric"    (dict "accent" "var(--mascot-cleric)"    "label" "CLERIC"    "name" "Friar Cluck"          "role" "keeper of the postmortem"        "lvl" 40 "hp" 5 "xp" 66)
-  "ranger"    (dict "accent" "var(--mascot-ranger)"    "label" "RANGER"    "name" "Bawkeye"              "role" "tracer of the root cause"        "lvl" 27 "hp" 4 "xp" 61)
-  "oracle"    (dict "accent" "var(--mascot-oracle)"    "label" "ORACLE"    "name" "Nostradamhen"         "role" "sees the outage in the spans"    "lvl" 88 "hp" 3 "xp" 91)
-  "barbarian" (dict "accent" "var(--mascot-barbarian)" "label" "BARBARIAN" "name" "Conan the Bawkbarian" "role" "ten thousand log lines, by hand" "lvl" 18 "hp" 5 "xp" 35)
+  "noob"      (dict "accent" "var(--mascot-noob)"      "label" "NOOB"      "name" "Bawkward"            "role" "lvl 1 · hasn't read the runbook" "lvl" 1  "hp" 1 "xp" 8  "art" "print" "desc" "wide-eyed in a dented pot helmet, staring at a torch that just went out")
+  "warrior"   (dict "accent" "var(--mascot-warrior)"   "label" "WARRIOR"   "name" "Cluck Norris"         "role" "the false-alarm slayer"          "lvl" 30 "hp" 5 "xp" 72 "art" "print" "desc" "a weary armoured chicken behind a shield showing a crossed-out bell")
+  "wizard"    (dict "accent" "var(--mascot-wizard)"    "label" "WIZARD"    "name" "Cluckdalf"            "role" "seer of burn-rate runes"         "lvl" 99 "hp" 3 "xp" 99 "art" "print" "desc" "a smug chicken in a starry robe and pointed hat, holding a crystal staff")
+  "rogue"     (dict "accent" "var(--mascot-rogue)"     "label" "ROGUE"     "name" "Featherfingers"       "role" "silencer of alerts"              "lvl" 24 "hp" 3 "xp" 55 "art" "pixel" "desc" "a pixel-art rogue-class chicken")
+  "bard"      (dict "accent" "var(--mascot-bard)"      "label" "BARD"      "name" "Bawk Dylan"           "role" "every log line is a lyric"       "lvl" 12 "hp" 2 "xp" 40 "art" "print" "desc" "a chicken in a plumed hat singing with eyes squeezed shut, strumming a lute")
+  "cleric"    (dict "accent" "var(--mascot-cleric)"    "label" "CLERIC"    "name" "Friar Cluck"          "role" "keeper of the postmortem"        "lvl" 40 "hp" 5 "xp" 66 "art" "print" "desc" "a tired chicken in chainmail carrying a thick book and a lantern")
+  "ranger"    (dict "accent" "var(--mascot-ranger)"    "label" "RANGER"    "name" "Bawkeye"              "role" "tracer of the root cause"        "lvl" 27 "hp" 4 "xp" 61 "art" "print" "desc" "a hooded chicken peering through a spyglass at a trail of bird footprints")
+  "oracle"    (dict "accent" "var(--mascot-oracle)"    "label" "ORACLE"    "name" "Nostradamhen"         "role" "sees the outage in the spans"    "lvl" 88 "hp" 3 "xp" 91 "art" "print" "desc" "a hooded chicken with one glowing eye, gazing into a crystal ball that shows a trace timeline")
+  "barbarian" (dict "accent" "var(--mascot-barbarian)" "label" "BARBARIAN" "name" "Conan the Bawkbarian" "role" "ten thousand log lines, by hand" "lvl" 18 "hp" 5 "xp" 35 "art" "print" "desc" "a furious chicken in a horned helmet and fur mantle, beside a heap of log scrolls")
+  "monk"      (dict "accent" "var(--mascot-monk)"      "label" "MONK"      "name" "Master Pho"           "role" "keeper of the uptime"            "lvl" 60 "hp" 4 "xp" 80 "art" "print" "desc" "a meditating chicken floating cross-legged, one eye peeking at its prayer beads")
+  "paladin"   (dict "accent" "var(--mascot-paladin)"   "label" "PALADIN"   "name" "Sir Galahen"          "role" "guardian of the five nines"      "lvl" 50 "hp" 5 "xp" 70 "art" "print" "desc" "a proud armoured chicken with a warhammer and sun shield, a small bell on a cord at its neck, one eye twitching")
+  "queen"     (dict "accent" "var(--mascot-queen)"     "label" "QUEEN"     "name" "Queen Henrietta"      "role" "sovereign of the service level"  "lvl" 70 "hp" 4 "xp" 85 "art" "print" "desc" "an unimpressed chicken queen in a crown and plum robes, holding a sceptre")
 -}}
 {{- $meta := index $classes $class -}}
-{{- if not $meta -}}{{- $class = "noob" -}}{{- $meta = index $classes "noob" -}}{{- end -}}
+{{- if not $meta -}}{{- errorf "obs-mascot: unknown class %q (in %s)" $class .Page.File.Path -}}{{- end -}}
 {{- $accent := $meta.accent -}}
 {{- $label := $meta.label -}}
 {{- $name := .Get "name" | default $meta.name -}}
@@ -23,15 +29,16 @@
 {{- $hp := $meta.hp -}}
 {{- $xp := $meta.xp -}}
 {{- $sprite := resources.Get (printf "images/mascots/%s.svg" $class) -}}
-{{- $alt := printf "%s, a pixel-art %s-class chicken" $name $class -}}
+{{- $alt := printf "%s the %s: %s" $name $class $meta.desc -}}
+{{- $art := printf "scry-cucco scry-cucco--%s" $meta.art -}}
 {{- if $sprite -}}
 {{- $sprite = $sprite | fingerprint -}}
 {{- if eq $variant "sprite" -}}
-<figure class="scry-cucco" aria-label="{{ $alt }}">
-  <div class="scry-cucco__solo"><img src="{{ $sprite.RelPermalink }}" alt="{{ $alt }}"></div>
+<figure class="{{ $art }}" aria-label="{{ $alt }}">
+  <div class="scry-cucco__solo" style="--ac:{{ $accent | safeCSS }}"><img src="{{ $sprite.RelPermalink }}" alt="{{ $alt }}"></div>
 </figure>
 {{- else if eq $variant "badge" -}}
-<figure class="scry-cucco" aria-label="{{ $alt }} badge">
+<figure class="{{ $art }}" aria-label="{{ $alt }} badge">
   <div class="scry-cucco__badge" style="--ac:{{ $accent | safeCSS }}">
     <div class="scry-cucco__medallion" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__plate">{{ $name }}</div>
@@ -39,7 +46,7 @@
   </div>
 </figure>
 {{- else if eq $variant "quiet" -}}
-<figure class="scry-cucco" aria-label="{{ $alt }}, says: {{ $quip }}">
+<figure class="{{ $art }}" aria-label="{{ $alt }}, says: {{ $quip }}">
   <div class="scry-cucco__fg" style="--ac:{{ $accent | safeCSS }}">
     <span class="scry-cucco__fgframe" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></span>
     <div class="scry-cucco__fgbody">
@@ -52,7 +59,7 @@
   <figcaption class="scry-cucco__cap">{{ $caption }}</figcaption>
 </figure>
 {{- else -}}
-<figure class="scry-cucco" aria-label="{{ $alt }}, says: {{ $quip }}">
+<figure class="{{ $art }}" aria-label="{{ $alt }}, says: {{ $quip }}">
   <div class="scry-cucco__wrap" style="--ac:{{ $accent | safeCSS }}">
     <div class="scry-cucco__sprite" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__bubble">
