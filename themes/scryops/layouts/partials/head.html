@@ -10,6 +10,9 @@
   {{- if fileExists (printf "static/%s" $c) }}{{ $card = $c }}{{ end -}}
 {{- end -}}
 {{- $shareTitle := cond .IsHome site.Title .Title -}}
+{{- /* The card may draw a shorter card.title; alt text should match the image. */ -}}
+{{- $shareAlt := $shareTitle -}}
+{{- with .Params.card }}{{ with .title }}{{ $shareAlt = . }}{{ end }}{{ end -}}
 {{- $shareDesc := .Params.excerpt | default .Description | default site.Params.description -}}
 <meta property="og:site_name" content="scryops" />
 <meta property="og:type" content="{{ cond .IsPage "article" "website" }}" />
@@ -19,7 +22,7 @@
 <meta property="og:image" content="{{ $card | absURL }}" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
-<meta property="og:image:alt" content="{{ $shareTitle }}" />
+<meta property="og:image:alt" content="{{ $shareAlt }}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="{{ $card | absURL }}" />
 {{- with site.Home.OutputFormats.Get "rss" }}
