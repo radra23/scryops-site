@@ -33,7 +33,7 @@
      into an aria-label gets re-escaped to the literal text "&amp;middot;"
      by Hugo's autoescaper. */ -}}
 {{- $desc := slice -}}
-{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s — %s" (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s — %s" (replace (index $b "head") "&middot;" "-") (index $b "action")) }}{{ end -}}
 {{- $aria := printf "Five-rung observability maturity ladder, least to most mature: %s. Levels 4 and 5 share the diamond glyph, told apart by rail weight rather than shape or colour. Recovery time from a failed deployment ranges from over a week at level 1 to under an hour at level 5, per DORA 2025." (delimit $desc "; ") -}}
 
 <figure class="diagram">

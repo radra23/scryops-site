@@ -28,7 +28,7 @@
      into an aria-label gets re-escaped to the literal text "&amp;middot;"
      by Hugo's autoescaper. */ -}}
 {{- $desc := slice -}}
-{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s marks %s — %s" (index $shapes $i) (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "%s marks %s — %s" (index $shapes $i) (replace (index $b "head") "&middot;" "-") (index $b "action")) }}{{ end -}}
 {{- $aria := printf "Decision tree for certificate check cadence. Two questions — is there a clear owner, and is renewal automated — fan out to three outcomes least to most severe: %s. Severity is carried by shape and rail weight, not colour." (delimit $desc "; ") -}}
 
 <figure class="diagram">

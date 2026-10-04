@@ -22,7 +22,7 @@
      into an aria-label gets re-escaped to the literal text "&amp;middot;"
      by Hugo's autoescaper. */ -}}
 {{- $desc := slice -}}
-{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "rank %d, %s — %s" $i (index $b "head" | replace "&middot;" "-") (index $b "action")) }}{{ end -}}
+{{- range $i, $b := $branches }}{{ $desc = $desc | append (printf "rank %d, %s — %s" $i (replace (index $b "head") "&middot;" "-") (index $b "action")) }}{{ end -}}
 {{- $aria := printf "Ranked tiers of what breaks first in a distributed logging pipeline, least to most severe: %s. Severity is carried by shape and rail weight, not colour." (delimit $desc "; ") -}}
 
 <figure class="diagram">
