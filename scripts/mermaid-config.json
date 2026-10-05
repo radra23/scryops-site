@@ -1,7 +1,7 @@
 {
   "theme": "base",
   "htmlLabels": false,
-  "flowchart": { "htmlLabels": false, "useMaxWidth": true },
+  "flowchart": { "htmlLabels": false, "useMaxWidth": true, "curve": "step" },
   "themeCSS": ".edgeLabel rect{opacity:1;stroke:#f05a05;stroke-width:6px;stroke-linejoin:round;}",
   "themeVariables": {
     "background": "transparent",

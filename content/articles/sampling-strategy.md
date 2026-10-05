@@ -18,7 +18,7 @@ The appeal of head-based sampling is real. You make one decision per trace at th
 
 The information you need to make a good sampling decision doesn't exist yet at the moment you're forced to make it.
 
-{{< mermaid >}}
+{{< mermaid alt="Head sampling: a coin flip at the start keeps 5% and drops 95% of requests before anyone knows whether they were interesting" caption="Fig. — Head sampling decides before the request finishes, so it keeps noise and loses the interesting traces in the same proportion." >}}
 flowchart TD
     A[Request Arrives] --> B{Sample?}
     B --->|5% keep| C[Trace Recorded]
@@ -45,20 +45,20 @@ Tail-based sampling moves the moment of judgement. Instead of deciding at the st
 
 Now you can decide on facts. Did the trace contain an error? Did it blow through your latency threshold? Did it come from a high-value customer? Was it a canary request? You can keep all of the traces that matter and 1% of the ones that don't.
 
-{{< mermaid >}}
-flowchart TD
-    A[Spans Arrive] --> B[Collector Buffer]
-    B --> C{decision_wait elapsed?}
-    C -->|No| B
-    C -->|Yes| D{Evaluate every policy}
-    D -->|Error span<br/>present| E[Keep: 100%]
-    D -->|Latency<br/>over threshold| E
-    D -->|High-value<br/>customer| E
-    D -->|Health check| F[Sample: 1%]
-    D -->|Everything<br/>else| G[Sample: 5%]
-    E --> H[Export to Backend]
-    F --> H
-    G --> H
+{{< mermaid alt="Tail sampling: spans are buffered until decision_wait, then all five policies vote on the whole trace, and the trace is kept if any policy votes yes, otherwise dropped" caption="Fig. — Every policy votes on the whole trace and one yes keeps it. Order changes nothing, so the baseline has to exclude health checks itself." >}}
+flowchart LR
+    A["buffered until<br/>decision_wait"] --> P1["error-traces<br/>any ERROR span"]
+    A --> P2["slow-traces<br/>trace over 1 s"]
+    A --> P3["premium-customers<br/>premium or enterprise"]
+    A --> P4["health-checks<br/>1% of /health, /ready"]
+    A --> P5["baseline<br/>5% of everything else"]
+    P1 --> V{"any<br/>yes?"}
+    P2 --> V
+    P3 --> V
+    P4 --> V
+    P5 --> V
+    V -->|yes| K[keep + export]
+    V -->|no| X[drop]
 {{< /mermaid >}}
 
 The trade-off is real. Tail sampling buffers traces in memory until the decision, and on a busy system that buffer needs careful sizing. And the Collector doing the sampling has to receive *every* span of a trace, which means routing by trace ID instead of spreading spans at random. Both are solvable. The Collector's `tail_sampling` processor is Beta for traces and widely run in production. At scale, you put a first tier of Collectors running the `loadbalancingexporter` in front of the sampling tier, and it keeps each trace together.

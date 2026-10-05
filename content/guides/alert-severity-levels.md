@@ -27,7 +27,7 @@ The P0-P4 scale is still useful — not as a prescriptive checklist, but as a sh
 
 {{< obs-severity-tiers >}}
 
-{{< mermaid >}}
+{{< mermaid alt="Severity flow: assess user impact and SLO burn rate, classify P0 to P4 by burn rate, then route P0 and P1 to wake on-call, P2 to business hours, and P3/P4 to a ticket" caption="Fig. — The burn rate sets the level, and the level sets who gets woken." >}}
 flowchart LR
     subgraph assess["Assess impact"]
         direction TB
