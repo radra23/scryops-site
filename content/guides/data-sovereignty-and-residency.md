@@ -5,6 +5,8 @@ draft: false
 excerpt: "A system that spans continents produces telemetry that spans legal jurisdictions. Here's how to keep traces and logs where the law wants them, and still see your whole system."
 readtime: 11
 tags: ["Compliance", "Privacy", "GDPR", "Multi-Cloud", "OpenTelemetry", "Collector", "Observability"]
+card:
+  title: "Telemetry Data Sovereignty"
 ---
 
 Your users are in Frankfurt. Your trace backend is in Virginia. Every span that carries a user ID, an IP address or an email is personal data, and every one of them just crossed an ocean.

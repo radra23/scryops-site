@@ -6,6 +6,8 @@ answer: "Tracing tells you which path a request took and how long each hop took.
 excerpt: "Tracing tells you which path a request took and how long each hop took. Profiling tells you what your CPU was actually doing during those hops. They're complementary — use both."
 readtime: 2
 tags: ["Profiling", "Tracing"]
+card:
+  title: "Profiling vs. tracing: what's the difference?"
 ---
 
 {{< obs-profiling-vs-tracing >}}

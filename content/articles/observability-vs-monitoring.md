@@ -5,6 +5,8 @@ draft: false
 excerpt: "Monitoring tells you when something you predicted goes wrong. Observability lets you work out what's happening when it's something you didn't. You need both, and the gap between them is where incidents drag on."
 readtime: 6
 tags: ["Observability", "Monitoring", "Philosophy", "Cost"]
+card:
+  title: "Observability vs. Monitoring"
 ---
 
 People use the two words interchangeably. They aren't the same thing, and the difference isn't semantic. It decides which questions you can answer when something breaks at 2am.
