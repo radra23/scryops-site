@@ -195,7 +195,7 @@ Three things to watch:
 
 When one Collector can't hold the buffer you need, put a routing tier in front. The `loadbalancingexporter` keeps each trace together. The topology looks like this:
 
-{{< mermaid >}}
+{{< mermaid alt="Three services send spans to a load-balancing Collector tier, which routes all spans of each trace to the same tail-sampling Collector before export to the tracing backend" caption="Fig. — Tier 1 routes by trace ID, so each tail sampler always sees complete traces." >}}
 flowchart TB
     S1[Service A] --> LB
     S2[Service B] --> LB

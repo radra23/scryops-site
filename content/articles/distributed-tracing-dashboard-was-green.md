@@ -101,7 +101,6 @@ The trade-off is memory: the Collector holds every span for `decision_wait`, so 
 {{< /insight >}}
 
 {{< mermaid alt="A first Collector tier with the load-balancing exporter routes every span of a trace to the same tail-sampling replica" caption="Fig. 3 — Route by trace ID first, so each sampling replica sees whole traces." >}}
-%%{init: {"flowchart": {"curve": "step"}}}%%
 flowchart TD
     A[checkout] -->|"a1b2c3, d4e5f6"| LB
     B[cart] -->|"a1b2c3"| LB

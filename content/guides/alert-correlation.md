@@ -11,7 +11,7 @@ In a system with any meaningful depth, a single failure propagates. A database t
 
 Without correlation, the on-call engineer receives that dozen pages and must manually reconstruct the causal chain under pressure. With correlation, they receive one grouped incident: "Database connectivity failure — 9 downstream services affected." That is not a minor UX improvement. The engineer starts from the likely cause instead of reconstructing it from twelve symptoms, at 3am, while the pager keeps going off.
 
-{{< mermaid >}}
+{{< mermaid alt="Four alerts (DB timeout, Service A latency, Service B error rate, cache miss rate) are correlated into two incident groups: database connectivity failure and cache degradation" caption="Fig. — Four pages become two incidents, each named for its likely cause." >}}
 flowchart LR
     A[Alert: DB Timeout] --> C{Correlate}
     B[Alert: Service A Latency] --> C
@@ -29,7 +29,7 @@ Correlation systems use one or more of the following techniques, typically in co
 
 Map the dependency graph of your system. When an alert fires on a node, automatically group it with alerts from its downstream dependents. A database alert and a service-layer latency alert for a service that depends on that database are likely symptoms of the same cause.
 
-{{< mermaid >}}
+{{< mermaid alt="Dependency graph: the web server calls the application server, which uses the database directly and through the cache" caption="Fig. — Alerts on a node and its dependents belong to one incident. Start from the node they all depend on." >}}
 flowchart LR
     A[Web Server] --> B[Application Server]
     B --> C[(Database)]
@@ -45,7 +45,7 @@ This technique requires a service dependency map, which should already exist as 
 
 Alerts that fire within a short time window often share a cause. Combine alerts that arrive close together into a single incident instead of paging for each one as it lands.
 
-{{< mermaid >}}
+{{< mermaid alt="Temporal correlation: alerts A, B and C in the first five-minute window form incident group 1; alert D in a later window forms group 2" caption="Fig. — Alerts close together in time become one incident. Pair it with topology or semantic correlation." >}}
 flowchart TD
     subgraph w1 ["Window 1: T+0:00 – T+0:05"]
         A["Alert A (T+0:00)"] ~~~ B["Alert B (T+0:02)"] ~~~ C["Alert C (T+0:03)"]
@@ -63,7 +63,7 @@ Temporal correlation alone is imprecise — unrelated alerts can fire in the sam
 
 Group alerts that describe the same failure mode across different services. An error-rate alert on Service A and an error-rate alert on Service B, firing within the same window, are more likely to share a cause than two alerts of different types.
 
-{{< mermaid >}}
+{{< mermaid alt="Semantic correlation: error-rate alerts on services A and B form one incident group, latency alerts on services X and Y form another" caption="Fig. — The same failure type in the same window becomes one incident, which only works with consistent alert names." >}}
 flowchart LR
     A[Error Rate: Service A] --> C{Correlate<br/>by Type + Window}
     B[Error Rate: Service B] --> C
@@ -79,7 +79,7 @@ Semantic correlation requires consistent alert naming conventions. An alert call
 
 Once alerts are grouped, the correlation output becomes an input to triage: is this a known failure mode? If so, trigger the runbook directly.
 
-{{< mermaid >}}
+{{< mermaid alt="A correlated alert group that matches a known pattern triggers a runbook; otherwise it goes to on-call with the group as context" caption="Fig. — Known patterns go straight to a runbook. New ones reach a human with the correlation already done." >}}
 flowchart TD
     A[Correlated Alert Group] --> B{Matches<br/>Known Pattern?}
     B -->|Yes| C[Trigger Runbook<br/>Automatically or with One-Click]

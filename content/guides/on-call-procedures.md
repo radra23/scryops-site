@@ -9,7 +9,7 @@ tags: ["On-Call", "Alerting", "Reliability", "Observability", "Operations"]
 
 On-call is a machine. Like any machine, it either gets designed or it gets improvised — and improvised on-call is the kind that burns people out, misses incidents, and produces postmortems nobody reads. The sections below lay out the components: roles, rotation, triage, handoffs, and postmortems. Each is a gear. None works without the others.
 
-{{< mermaid >}}
+{{< mermaid alt="On-call as a cycle: monitor, detect, respond, resolve, postmortem, improve, then back to monitor" caption="Fig. — The postmortem feeds back into monitoring. Without that loop, on-call keeps meeting the same incidents." >}}
 flowchart TD
     A[Monitor] --> B[Detect]
     B --> C[Respond]
@@ -25,7 +25,7 @@ The cycle is intentional. The postmortem feeds back into the monitoring layer �
 
 On-call works best with two roles in rotation simultaneously: a primary who owns detection and response, and a secondary who provides backup escalation and covers gaps.
 
-{{< mermaid >}}
+{{< mermaid alt="Primary on-call detects, responds and escalates; secondary assists and takes over if the primary is unavailable" caption="Fig. — Two roles, written down in advance: the primary owns the response, the secondary backs it up." >}}
 flowchart LR
     A[Primary On-Call] --> B[Detect and Respond]
     A --> C[Escalate if Needed]
@@ -66,7 +66,7 @@ Practical notes:
 
 Not every alert warrants a page. Route based on the urgency of required action, not on the technical severity of the condition.
 
-{{< mermaid >}}
+{{< mermaid alt="Alert routing by severity: P0 and P1 page 24/7, P2 goes to the incident channel, P3 becomes a ticket, P4 notifies no one" caption="Fig. — Route by how urgently someone has to act. Only P0 and P1 wake anyone." >}}
 flowchart LR
     A[Alert fires] --> B{Severity}
     B --> C[P0 / P1: page via PagerDuty<br/>immediate response, 24/7]
@@ -81,7 +81,7 @@ The alert routing policy and severity definitions are covered in [Alert Severity
 
 When a page fires, the first step is triage — establishing severity before committing resources. The triage decision determines who gets engaged, how fast, and what communication channels open.
 
-{{< mermaid >}}
+{{< mermaid alt="Triage flow: assess severity, then P0 activates incident response, P1 starts an investigation, P2 waits for business hours; every path ends in resolve and postmortem" caption="Fig. — Severity decides who gets engaged and how fast. Every path still ends in a postmortem." >}}
 flowchart TD
     A[Incident Detected] --> B[Assess Severity]
     B --> C{Severity Level}
@@ -111,7 +111,7 @@ Once the severity is set, communication follows one rule: every update says what
 
 Incidents that span shift boundaries require explicit handoff. A handoff without documentation is a context wipe — the incoming engineer restarts diagnosis from scratch.
 
-{{< mermaid >}}
+{{< mermaid alt="Shift handoff loop: write a status update, check whether the incident is resolved, escalate if needed, keep working and check again" caption="Fig. — A handoff is a written update, then the same loop the next engineer keeps running until the incident closes." >}}
 flowchart TD
     A[Incident in Progress] --> B[Handoff at Shift Change]
     B --> C[Update: current status,<br/>actions taken, next steps,<br/>open hypotheses]
@@ -139,7 +139,7 @@ Escalation criteria should be pre-defined, not negotiated mid-incident. Common t
 
 Every significant incident produces a postmortem. The purpose is not accountability — it is systemic learning. A postmortem that identifies a person as the root cause has found the wrong root cause.
 
-{{< mermaid >}}
+{{< mermaid alt="Blameless postmortem steps, from reconstructing the timeline to action items with owners and feeding improvements back into monitoring and runbooks" caption="Fig. — A postmortem is done when its improvements reach monitoring and the runbooks, not when the meeting ends." >}}
 flowchart TD
     A[Incident Resolved] --> B[Conduct Blameless Postmortem]
     B --> C[Reconstruct Timeline]
