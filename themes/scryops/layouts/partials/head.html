@@ -1,6 +1,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ .Title }} — scryops{{ end }}</title>
+{{- /* A trailing full stop is a stylistic choice in an H1, but in a tab, a search
+       result or a share preview it reads as a typo: drop it from every title tag. */ -}}
+{{- $pageTitle := strings.TrimSuffix "." .Title -}}
+<title>{{ if .IsHome }}{{ .Site.Title }}{{ else }}{{ $pageTitle }} — scryops{{ end }}</title>
+<link rel="canonical" href="{{ .Permalink }}" />
 {{- /* Share cards: 1200x630 PNGs pre-rendered by scripts/render-cards.py into
        static/cards/<section>/<file-stem>.png; every other page (home, lists,
        taxonomies) falls back to static/cards/default.png. */ -}}
@@ -9,11 +13,15 @@
   {{- $c := printf "cards/%s/%s.png" .Section .File.ContentBaseName -}}
   {{- if fileExists (printf "static/%s" $c) }}{{ $card = $c }}{{ end -}}
 {{- end -}}
-{{- $shareTitle := cond .IsHome site.Title .Title -}}
+{{- $shareTitle := cond .IsHome site.Title $pageTitle -}}
 {{- /* The card may draw a shorter card.title; alt text should match the image. */ -}}
 {{- $shareAlt := $shareTitle -}}
 {{- with .Params.card }}{{ with .title }}{{ $shareAlt = . }}{{ end }}{{ end -}}
 {{- $shareDesc := .Params.excerpt | default .Description | default site.Params.description -}}
+{{- /* Search snippet: an explicit `description` wins, then the excerpt, so no
+       content page falls back to the site-wide boilerplate. */ -}}
+{{- $metaDesc := .Description | default .Params.excerpt | default site.Params.description | plainify -}}
+{{- $isContent := and .IsPage (in (slice "articles" "guides" "howtos" "qa") .Section) -}}
 <meta property="og:site_name" content="scryops" />
 <meta property="og:type" content="{{ cond .IsPage "article" "website" }}" />
 <meta property="og:title" content="{{ $shareTitle }}" />
@@ -25,13 +33,34 @@
 <meta property="og:image:alt" content="{{ $shareAlt }}" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:image" content="{{ $card | absURL }}" />
+{{- if $isContent }}
+<meta property="article:published_time" content="{{ .Date.Format "2006-01-02T15:04:05Z07:00" }}" />
+<meta property="article:modified_time" content="{{ .Lastmod.Format "2006-01-02T15:04:05Z07:00" }}" />
+{{- range .Params.tags }}
+<meta property="article:tag" content="{{ . }}" />
+{{- end }}
+<script type="application/ld+json">{{ dict
+  "@context" "https://schema.org"
+  "@type" "TechArticle"
+  "headline" $pageTitle
+  "description" $metaDesc
+  "url" .Permalink
+  "mainEntityOfPage" .Permalink
+  "image" ($card | absURL)
+  "datePublished" (.Date.Format "2006-01-02")
+  "dateModified" (.Lastmod.Format "2006-01-02")
+  "keywords" (delimit (.Params.tags | default slice) ", ")
+  "author" (dict "@type" "Organization" "name" "scryops" "url" site.BaseURL)
+  "publisher" (dict "@type" "Organization" "name" "scryops" "url" site.BaseURL "logo" (dict "@type" "ImageObject" "url" ("apple-touch-icon.png" | absURL)))
+  | jsonify | safeJS }}</script>
+{{- end }}
 {{- with site.Home.OutputFormats.Get "rss" }}
 <link rel="alternate" type="{{ .MediaType.Type }}" title="{{ site.Title }}" href="{{ .Permalink }}" />
 {{- end }}
 <link rel="icon" href="/favicon.ico" sizes="32x32" />
 <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ .Site.Params.description }}{{ end }}" />
+<meta name="description" content="{{ $metaDesc }}" />
 {{- /* FOUC guard: apply stored prefs (theme + reading flags) as <html> classes
        before CSS so the right theme paints on frame 1. Migrates the legacy
        scryops-mode key. Dark is the default. */ -}}
