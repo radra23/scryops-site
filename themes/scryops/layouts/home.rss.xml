@@ -14,6 +14,16 @@
     <link>{{ site.Home.Permalink }}</link>
     <description>{{ site.Params.description }}</description>
     <language>{{ site.Language.Lang }}</language>
+    {{- /* Channel image: the lens on its dark tile (static/feed-icon.png, drawn by
+           scripts/render-cards.py). RSS 2.0: GIF/JPEG/PNG, width <= 144, and its
+           title/link must match the channel's. */}}
+    <image>
+      <url>{{ "feed-icon.png" | absURL }}</url>
+      <title>{{ site.Title }}</title>
+      <link>{{ site.Home.Permalink }}</link>
+      <width>144</width>
+      <height>144</height>
+    </image>
     {{- with $pages }}
     <lastBuildDate>{{ (index . 0).Date.Format "Mon, 02 Jan 2006 15:04:05 -0700" | safeHTML }}</lastBuildDate>
     {{- end }}

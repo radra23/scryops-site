@@ -5,6 +5,8 @@
     python3 scripts/render-cards.py --all     # re-render every card
     python3 scripts/render-cards.py --prune   # also delete orphaned cards
 
+Also renders static/feed-icon.png (the RSS channel image) when missing or with --all.
+
 One card per published article/guide/how-to/Q&A, written to
 static/cards/<section>/<file-stem>.png, plus static/cards/default.png for the
 homepage and list pages. Each card: lens + wordmark, a SECTION · TAG eyebrow,
@@ -281,6 +283,21 @@ def headline(fm, md="page"):
     return t.strip()
 
 
+FEED_ICON = os.path.join("static", "feed-icon.png")
+
+
+def render_feed_icon():
+    """144x144 RSS channel <image>: the lens on a dark tile, like the favicon
+    (feed readers show it on light and dark grounds). 144 = the RSS 2.0 max
+    width and exactly 16 cells x 9px, so every cell edge lands on a pixel."""
+    t = tokens()
+    img = Image.new("RGB", (144 * S, 144 * S), t["bg"])
+    draw_lens(ImageDraw.Draw(img), 0, 0, 9, t["heading"], t["green"])
+    img = img.resize((144, 144), Image.LANCZOS)
+    os.makedirs(os.path.dirname(FEED_ICON), exist_ok=True)
+    img.quantize(colors=64, dither=Image.Dither.NONE).save(FEED_ICON, optimize=True)
+
+
 def main():
     if not os.path.isdir("content"):
         sys.exit("run me from the repo root")
@@ -292,6 +309,9 @@ def main():
                      site_desc.group(1) if site_desc else None, accent_word="understanding")
         save(img, card_lib.DEFAULT_CARD, card_lib.default_hash()); done += 1
         print(f"rendered {card_lib.DEFAULT_CARD}")
+    if force or not os.path.exists(FEED_ICON):
+        render_feed_icon(); done += 1
+        print(f"rendered {FEED_ICON}")
     for section, stem, md in card_lib.pages():
         path, h = card_lib.card_path(section, stem), card_lib.input_hash(section, stem, md)
         if not force and card_lib.read_png_hash(path) == h:
@@ -303,7 +323,7 @@ def main():
             os.remove(orphan); print(f"removed orphan {orphan}")
         else:
             print(f"orphan {orphan} (re-run with --prune to delete)")
-    print(f"{done} card(s) rendered")
+    print(f"{done} file(s) rendered")
 
 
 if __name__ == "__main__":
