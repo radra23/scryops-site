@@ -661,15 +661,17 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
    chrome — eyebrow, pixel wordmark, mode toggle
    ============================================================ */
 .scry-wordmark{font-size:13px;line-height:1;color:var(--heading)}
-.site-top .scry-wordmark{display:inline-flex;align-items:center}
+/* header lockup: the wordmark is set to the lens's 16px so mark and name read
+   as one unit, a clear step above the 12px nav (Doto's open dots read lighter
+   than solid caps, so at 13px the brand looked smaller than "ARTICLES").
+   The extra right margin separates the brand from the nav it introduces. */
+.site-top .scry-wordmark{display:inline-flex;align-items:center;font-size:16px;margin-right:var(--sp-3)}
 .scry-mark{display:block;flex-shrink:0}
 /* space after the mark only — a flex gap would also split the scry|ops spans */
 .site-top .scry-wordmark .scry-mark,.foot-logo .scry-mark{margin-right:var(--sp-2)}
 .scry-mark__ops{fill:var(--green)}
 .scry-wordmark__scry{font-family:var(--font-pixel-scry);font-weight:var(--fw-pixel-scry)}
 .scry-wordmark__ops{font-family:var(--font-pixel-ops);font-weight:var(--fw-pixel-ops);color:var(--green)}
-
-.accent-line{height:2px;background:linear-gradient(90deg,var(--green),var(--cyan))}
 
 /* skip link — off-screen until keyboard focus */
 .skip-link{position:absolute;left:-9999px;top:0}
@@ -740,7 +742,6 @@ tbody td{padding:10px 13px;color:var(--text);border-bottom:1px solid var(--tbord
 .layout .prose > *{max-width:720px;margin-inline:auto}
 .site-top{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;padding:16px 28px;background:var(--bg);border-bottom:1px solid var(--border)}
 .site-top .spacer{flex:1}
-.site-meta{font-family:var(--font-code);font-size:11px;letter-spacing:.14em;color:var(--muted)}
 /* tagline beside the wordmark: only where the bar has room (was an unexplained "obs") */
 .site-tagline{font-family:var(--font-code);font-size:11px;color:var(--muted);white-space:nowrap}
 @media (max-width:1199px){.site-tagline{display:none}}
@@ -865,9 +866,12 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
 .top-nav{display:flex;gap:18px;flex-wrap:wrap;align-items:center}
 .top-nav a{font-family:var(--font-code);font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);padding:7px 0;display:inline-block}
 .top-nav a:hover,.top-nav a[aria-current]{color:var(--cyan)}
-/* current section: brightness alone is a colour-only cue (lost in pref-mono),
-   so the underline also thickens to 2px, drawn inset so nothing shifts */
-.top-nav a[aria-current]{border-bottom-color:currentColor;box-shadow:inset 0 -1px 0 currentColor}
+/* header links are navigation, not prose: no hairline under the wordmark or
+   each nav item (the global `a` rule draws one on every link). Only the
+   current section is underlined — brightness alone is a colour-only cue
+   (lost in pref-mono), so it gets a 2px inset rule that shifts nothing. */
+.site-top .scry-wordmark,.top-nav a{border-bottom:none}
+.top-nav a[aria-current]{box-shadow:inset 0 -2px 0 currentColor}
 
 /* terminal identity strip (homepage hero line) */
 .site-identity{display:flex;align-items:center;gap:.6rem;padding:.85rem 0;border-bottom:1px solid var(--border);font-size:.88rem;flex-wrap:wrap;row-gap:.25rem;font-family:var(--font-code)}
@@ -1029,7 +1033,6 @@ figure.diagram figcaption,figure.knt-fig figcaption{font-family:var(--font-code)
    block). "obs" and the type/readtime meta go: the article repeats the meta. */
 @media (max-width:599px){
   .site-top{flex-wrap:nowrap;padding:6px 12px 6px 20px;gap:6px}
-  .site-top .site-meta{display:none}
   .site-top .scry-wordmark{order:0}
   .site-top .spacer{order:1}
   .site-top .scry-prefs__btn{order:2}
@@ -1348,7 +1351,7 @@ html.calm {
   body { color: #111; font-size: 11pt; line-height: 1.5; }
 
   /* Drop interactive + navigational chrome. */
-  .site-top, .accent-line, .toc, .site-footer, .scry-fp,
+  .site-top, .toc, .site-footer, .scry-fp,
   .ask-cta, .featured-cta { display: none !important; }
 
   /* Single-column, full-bleed article. */
