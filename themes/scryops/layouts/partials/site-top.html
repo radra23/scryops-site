@@ -3,7 +3,12 @@
      (theme dark/light/calm + reading toggles; behavior in prefs.js). */ -}}
 <header class="site-top">
   <a class="scry-wordmark" href="/">{{ partial "brand-mark.html" "top" }}<span class="scry-wordmark__scry">scry</span><span class="scry-wordmark__ops">ops</span></a>
+  {{- /* The tagline introduces the site, so it rides only on the home page. On a
+       reading page the article title is the focal point and the lockup is the
+       lens + wordmark alone, at every width (design system: header lockup). */ -}}
+  {{- if .IsHome }}
   <span class="site-tagline">observability decoded</span>
+  {{- end }}
   {{- /* Under 600px the six links wrapped to two rows plus a third for
        Reading (~190px of chrome). The nav sits in a <details> so phones get
        one row with a "menu" disclosure: rendered open (no-JS keeps the full
