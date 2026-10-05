@@ -5,6 +5,8 @@ draft: false
 excerpt: "Every team has a tagging standard. Most of them live in a wiki, enforced by nobody, remembered by almost nobody, and invisible to the CI pipeline. Open Policy Agent fixes the root cause."
 readtime: 7
 tags: ["Observability", "Compliance", "CI/CD", "Best Practices", "Operations"]
+card:
+  title: "Your Tagging Standard Is a Wiki Page."
 ---
 
 Every observability platform eventually drowns in its own tags.

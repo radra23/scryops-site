@@ -5,6 +5,8 @@ draft: false
 excerpt: "A distributed trace is only as complete as its weakest propagation link. One hop that drops the context and the trace splits in two. W3C Trace Context and Baggage, the propagator settings that matter, and the places context gets lost — between services and inside them — in .NET, Java, Go, Python and Node."
 readtime: 11
 tags: ["OpenTelemetry", "Tracing", "Observability", "Best Practices"]
+card:
+  title: "How Distributed Traces Stay Connected"
 ---
 
 A distributed trace is not stored in one place. It is assembled from spans emitted by dozens of services, each running independently. The only thing connecting them is a trace ID, passed from service to service in HTTP headers, message metadata or gRPC metadata.

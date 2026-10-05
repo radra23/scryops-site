@@ -6,6 +6,8 @@ answer: "Synthetic monitoring runs scripted user journeys on a schedule, so it c
 excerpt: "Synthetic monitoring runs scripted tests on a schedule. RUM captures what real users actually experience. They answer different questions, and you need both."
 readtime: 3
 tags: ["Observability", "RUM", "Monitoring", "Reliability"]
+card:
+  title: "Synthetic monitoring vs. RUM"
 ---
 
 **Q: I keep seeing "synthetic monitoring" alongside RUM. Are they the same thing? When do I need each one?**

@@ -5,6 +5,8 @@ draft: false
 excerpt: "Availability and latency are the obvious SLIs. But they don't fit every service type. This guide provides SLI selection frameworks for APIs, data pipelines, batch jobs, storage systems, event-driven services, and more."
 readtime: 9
 tags: ["SLOs", "Reliability", "Observability", "Metrics"]
+card:
+  title: "Choosing SLIs for Your Service"
 ---
 
 Availability and latency are the SLIs everyone reaches for first, and for a request-driven API they're the right answer. Then you try them on a nightly batch job and they stop making sense. A batch job has no requests. A Kafka consumer has no response time anyone waits on. A model server can answer every request in 40 ms while serving predictions from a model that went stale last month.

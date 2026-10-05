@@ -5,6 +5,8 @@ draft: false
 excerpt: "Observability 1.0 taught us to look backward. Observability 2.0 asks us to look forward. Most teams haven’t made that shift yet. That’s why I named this site after a medieval divination practice."
 readtime: 6
 tags: ["Observability", "OpenTelemetry", "AI", "Philosophy"]
+card:
+  title: "Observability 2.0 means prevention."
 ---
 
 ## Most teams are caught in the same old loop

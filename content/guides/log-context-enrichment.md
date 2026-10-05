@@ -5,6 +5,8 @@ draft: false
 excerpt: "Enrichment turns isolated log records into connected business events. Here is the architecture that makes it work — static resource attributes, background-refreshed caches, and per-request scopes — without taxing the request path."
 readtime: 8
 tags: ["Logs", "Observability", "OpenTelemetry", "Structured Logging", "Best Practices"]
+card:
+  title: "Log Context Enrichment"
 ---
 
 A log line that reads `"Payment failed"` tells you something went wrong. The same line with `customer.tier=enterprise`, `cloud.region=eu-west-1` and `retry.count=3` tells you who is hurting, where, and how hard the system already tried. Enrichment is the difference between knowing an event occurred and knowing what it means.

@@ -5,6 +5,8 @@ draft: false
 excerpt: "Regulated industries need observability too. A guide to building telemetry pipelines that satisfy GDPR, HIPAA, SOC 2, and PCI DSS requirements — covering data minimisation, retention mandates, audit trails, and what each framework actually requires."
 readtime: 10
 tags: ["Compliance", "Privacy", "GDPR", "Security", "Observability"]
+card:
+  title: "Observability Under Compliance"
 ---
 
 Four frameworks, four vocabularies, one pipeline. GDPR calls it a lawful basis. HIPAA calls it minimum necessary. SOC 2 calls it a Trust Services Criterion. PCI DSS calls it Requirement 10. They are asking your telemetry pipeline different questions, and the answers are mostly the same six or seven engineering decisions.

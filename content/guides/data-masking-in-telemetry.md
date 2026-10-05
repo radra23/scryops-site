@@ -5,6 +5,8 @@ draft: false
 excerpt: "Telemetry data is just as risky for PII as any database. Here's how to turn sensitive fields into safe, useful signals: hashing, tokenising, coarsening, and picking the right tool for the job."
 readtime: 8
 tags: ["Privacy", "OpenTelemetry", "Security", "Observability", "Collector"]
+card:
+  title: "Data Masking in Telemetry"
 ---
 
 This guide dives straight into the how-to of transforming your data. If you're wondering which fields are trouble or what compliance wants from you, check out [Your Traces Are Leaking User Data](/guides/pii-in-telemetry/). This is about how to actually make your data safe.

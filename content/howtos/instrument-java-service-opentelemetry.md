@@ -5,6 +5,8 @@ draft: false
 excerpt: "Instrument a Spring Boot service with the OpenTelemetry Java agent or the Spring Boot starter: traces, metrics and logs with no code, then your own spans and metrics, the Micrometer bridge and log correlation. All verified against a local Collector."
 readtime: 7
 tags: ["OpenTelemetry", "Tracing", "Observability", "How-to"]
+card:
+  title: "OpenTelemetry for a Java Spring Boot Service"
 ---
 
 Java has the most mature zero-code OpenTelemetry story of any runtime. Attach one agent jar to the JVM and a Spring Boot service exports traces, metrics and logs with no code changes at all. This guide sets that up, covers the Spring Boot starter for when an agent isn't an option, adds your own spans and metrics, and checks what arrives.
