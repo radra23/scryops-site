@@ -237,21 +237,7 @@ Quality is the signal OpenTelemetry doesn't measure for you, and grading every a
 
 Record results as telemetry linked to the call they judge. The conventions define a `gen_ai.evaluation.result` event with `gen_ai.evaluation.name`, `gen_ai.evaluation.score.value` and a low-cardinality `gen_ai.evaluation.score.label`. It should be parented to the evaluated span, or carry `gen_ai.response.id` when that isn't possible. In practice, store trace and span IDs with each sampled response so the eval job can attach its verdict hours later. "Quality dropped after the prompt change" then becomes a query, not a hunch.
 
-{{< mermaid alt="Two lanes. In the request path, a user question becomes a chat span with a trace and span ID, deterministic checks run inline, and the answer is returned. Separately, a sampled evaluation job reads stored responses with their trace and span IDs, runs an LLM-as-judge and retrieval-grounding checks, and writes a gen_ai.evaluation.result event attached to the original call's span." caption="Fig. — Grade answers off the hot path. Cheap deterministic checks run on every call; sampled judging runs later and writes its verdict back onto the span it judged." >}}
-flowchart LR
-    subgraph req["Every call"]
-        direction TB
-        Q["User question"] --> C["chat span<br/>trace + span ID"]
-        C --> D["Deterministic checks<br/>JSON, schema, citations"]
-        D --> A["Answer returned"]
-    end
-    subgraph ev["Sampled, later"]
-        direction TB
-        S["Sampled responses<br/>with trace + span IDs"] --> J["LLM-as-judge<br/>grounding checks"]
-        J --> E["gen_ai.evaluation.result<br/>on the judged span"]
-    end
-    req -.->|"trace + span IDs"| ev
-{{< /mermaid >}}
+{{< obs-llm-eval-paths >}}
 
 **Prompt injection deserves honesty.** There is no reliable detector, only heuristics with false positives and false negatives: a classifier score on inputs, a canary string in the system prompt that should never appear in output, tool calls the request shouldn't need, retrieved documents containing instruction-like text. Record them as attributes or events and watch their rates. A spike is a reason to look, never proof. The actual controls (least-privilege tools, confirmation before side effects) live in the application, not the telemetry.
 
@@ -285,15 +271,17 @@ Each shows up in tokens per request long before it shows up on the invoice.
 
 Real features chain calls: retrieve, call the model, call a tool, call the model again. When the answer is wrong, you need the whole chain for that one request, in order, with tokens and finish reason at every step. That means one trace per user request, with model calls, retrievals and tool executions as its children:
 
-{{< mermaid alt="A span tree. The POST /support/chat server span parents an invoke_agent span for support_agent. Under the agent sit four children: a chat span that picks a tool, an execute_tool span for lookup_order, a retrieval span against policy_kb, and a chat span that writes the answer. The tool span has its own child, the GET /orders/id client call." caption="Fig. — One trace for one support question: the agent span parents every model call, retrieval and tool call, and the tool's own HTTP call nests beneath it." >}}
-flowchart TD
-    A["POST /support/chat<br/>SERVER span"] --> B["invoke_agent<br/>support_agent"]
-    B --> C["chat gpt-4o-mini<br/>picks a tool"]
-    B --> D["execute_tool<br/>lookup_order"]
-    B --> E["retrieval<br/>policy_kb"]
-    B --> F["chat gpt-4o-mini<br/>writes answer"]
-    D --> G["GET /orders/id<br/>CLIENT span"]
-{{< /mermaid >}}
+{{< obs-waterfall title="One support question, one trace" total="6400" critical="6"
+      units="milliseconds, illustrative · solid = self time, hatched = waiting on children"
+      caption="Fig. — One trace for one support question: the agent span parents every model call, retrieval and tool call, and the tool's own HTTP call nests beneath it. The second model call owns the latency because it writes the long answer." >}}
+[ {"name":"POST /support/chat","start":0,"duration":6240,"self":40,"depth":0},
+  {"name":"invoke_agent","start":20,"duration":6200,"self":100,"depth":1,"kind":"manual"},
+  {"name":"chat gpt-4o-mini","start":40,"duration":1180,"depth":2},
+  {"name":"execute_tool","start":1240,"duration":360,"self":40,"depth":2,"kind":"manual"},
+  {"name":"GET /orders/{id}","start":1260,"duration":320,"depth":3},
+  {"name":"retrieval","start":1620,"duration":280,"depth":2,"kind":"manual"},
+  {"name":"chat gpt-4o-mini","start":1920,"duration":4280,"depth":2} ]
+{{< /obs-waterfall >}}
 
 Three things hold the tree together:
 

@@ -1,0 +1,39 @@
+{{- /* layouts/shortcodes/obs-llm-eval-paths.html
+     guides/llm-observability.md, "Quality and safety live outside the request
+     path": the request path every call takes, stacked over the sampled
+     evaluation job that runs later and writes its verdict back onto the span.
+     Two independent one-direction flows, so it's built on the obs-flow
+     vocabulary (template 05) the same way obs-reactive-loop is, and re-flows
+     to a column on narrow cards instead of panning.
+     One meaning per channel: the heavy entry border marks where each flow
+     starts; the dashed edge into the evaluation row is the conditional step
+     (only a sample gets judged); the inverted terminal node holds the
+     outcome. Nothing is carried by hue. Replaced a Mermaid two-lane chart. */ -}}
+<figure class="diagram">
+  <div class="diag-card" tabindex="0">
+    <div class="obs-flow-wrap">
+      <div class="obs-flow__rowlabel">EVERY CALL · IN THE REQUEST</div>
+      <div class="obs-flow" role="img" aria-label="Every call: a user question becomes a chat span carrying a trace and span ID, then deterministic checks run (JSON parses, schema matches, citations exist), then the answer is returned.">
+        <span class="obs-flow__node entry"><span class="obs-flow__text"><span class="obs-flow__nm">User question</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">chat span</span><span class="obs-flow__cap">trace + span ID</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">Deterministic checks</span><span class="obs-flow__cap">JSON, schema, citations</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node terminal"><span class="obs-flow__text"><span class="obs-flow__nm">Answer returned</span></span></span>
+      </div>
+    </div>
+    <div class="flow-divider"></div>
+    <div class="obs-flow-wrap">
+      <div class="obs-flow__rowlabel">SAMPLED · LATER, OFF THE HOT PATH</div>
+      <div class="obs-flow" role="img" aria-label="Sampled, later: a fraction of stored responses, each kept with its trace and span ID, is graded by an LLM-as-judge and retrieval-grounding checks, and the verdict is written as a gen_ai.evaluation.result event on the span that was judged.">
+        <span class="obs-flow__node entry"><span class="obs-flow__text"><span class="obs-flow__nm">Stored response</span><span class="obs-flow__cap">+ trace + span ID</span></span></span>
+        <span class="obs-flow__edge cond" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#10142;</span><span class="a-col">&#8663;</span></span><span class="obs-flow__elabel">sampled</span></span>
+        <span class="obs-flow__node"><span class="obs-flow__text"><span class="obs-flow__nm">LLM-as-judge</span><span class="obs-flow__cap">+ grounding checks</span></span></span>
+        <span class="obs-flow__edge" aria-hidden="true"><span class="obs-flow__arrow"><span class="a-row">&#8594;</span><span class="a-col">&#8595;</span></span></span>
+        <span class="obs-flow__node terminal"><span class="obs-flow__text"><span class="obs-flow__nm">gen_ai.evaluation.result</span><span class="obs-flow__cap">on the judged span</span></span></span>
+      </div>
+    </div>
+  </div>
+  <figcaption>Fig. — Grade answers off the hot path. Cheap deterministic checks run on every call; sampled judging runs later and writes its verdict back onto the span it judged.</figcaption>
+</figure>
