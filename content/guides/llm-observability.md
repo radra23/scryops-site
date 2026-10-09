@@ -23,6 +23,8 @@ Four things make an LLM call a different animal from the REST calls your dashboa
 
 **Success and correctness are separate.** HTTP reports success when the model produced *something*. Whether that something is grounded in your documents or answers the question asked is invisible to it. A hallucinated refund policy and a correct one share a status code.
 
+{{< obs-llm-truncated-call >}}
+
 **Latency follows output length.** Models generate one token at a time, so a 500-token answer takes far longer than a 20-token one. A latency spike might be an overloaded provider, or a prompt change that made answers three times longer. Without token counts next to the duration, you can't tell which.
 
 **Cost per call isn't a constant.** Providers bill per token, usually at different rates for input and output. A 200-token question with a 50-token answer and a 15,000-token RAG context with a 1,500-token answer differ by 75× on input and 30× on output, before anyone switches to a pricier model. Two orders of magnitude between calls on one endpoint is ordinary.
@@ -51,7 +53,7 @@ OpenTelemetry's GenAI semantic conventions give these signals shared names. The 
 
 Two moves this year matter before you build dashboards:
 
-- **The conventions moved repositories.** Since [semantic conventions v1.42.0](https://github.com/open-telemetry/semantic-conventions/releases/tag/v1.42.0) (June 2026), the GenAI definitions live in a dedicated [semantic-conventions-genai](https://github.com/open-telemetry/semantic-conventions-genai) repository, and the pages under [opentelemetry.io/docs/specs/semconv/gen-ai/](https://opentelemetry.io/docs/specs/semconv/gen-ai/) say so. The last core release that still defines them is v1.41.1. The new repository hasn't cut a release yet, so its `main` branch is a moving target.
+- **The conventions moved repositories.** Since [semantic conventions v1.42.0](https://github.com/open-telemetry/semantic-conventions/releases/tag/v1.42.0) (June 2026), the GenAI definitions live in a dedicated [semantic-conventions-genai](https://github.com/open-telemetry/semantic-conventions-genai) repository, and the [GenAI spec pages on opentelemetry.io](https://opentelemetry.io/docs/specs/semconv/gen-ai/) say so. The last core release that still defines them is v1.41.1. The new repository hasn't cut a release yet, so its `main` branch is a moving target.
 - **The Python instrumentation moved too.** The official OpenAI instrumentation is now `opentelemetry-instrumentation-genai-openai`, published from [opentelemetry-python-genai](https://github.com/open-telemetry/opentelemetry-python-genai). It continues `opentelemetry-instrumentation-openai-v2`, which now only gets security patches.
 
 The rule that follows: **pin your instrumentation versions, and treat attribute and metric names as a contract you re-check on every upgrade.** The old `openai-v2` package emits v1.30-era names, including the deprecated `gen_ai.system`, unless you set `OTEL_SEMCONV_STABILITY_OPT_IN=gen_ai_latest_experimental`. The new package emits the latest experimental conventions unconditionally; there is no switch.
@@ -235,6 +237,22 @@ Quality is the signal OpenTelemetry doesn't measure for you, and grading every a
 
 Record results as telemetry linked to the call they judge. The conventions define a `gen_ai.evaluation.result` event with `gen_ai.evaluation.name`, `gen_ai.evaluation.score.value` and a low-cardinality `gen_ai.evaluation.score.label`. It should be parented to the evaluated span, or carry `gen_ai.response.id` when that isn't possible. In practice, store trace and span IDs with each sampled response so the eval job can attach its verdict hours later. "Quality dropped after the prompt change" then becomes a query, not a hunch.
 
+{{< mermaid alt="Two lanes. In the request path, a user question becomes a chat span with a trace and span ID, deterministic checks run inline, and the answer is returned. Separately, a sampled evaluation job reads stored responses with their trace and span IDs, runs an LLM-as-judge and retrieval-grounding checks, and writes a gen_ai.evaluation.result event attached to the original call's span." caption="Fig. — Grade answers off the hot path. Cheap deterministic checks run on every call; sampled judging runs later and writes its verdict back onto the span it judged." >}}
+flowchart LR
+    subgraph req["Every call"]
+        direction TB
+        Q["User question"] --> C["chat span<br/>trace + span ID"]
+        C --> D["Deterministic checks<br/>JSON, schema, citations"]
+        D --> A["Answer returned"]
+    end
+    subgraph ev["Sampled, later"]
+        direction TB
+        S["Sampled responses<br/>with trace + span IDs"] --> J["LLM-as-judge<br/>grounding checks"]
+        J --> E["gen_ai.evaluation.result<br/>on the judged span"]
+    end
+    req -.->|"trace + span IDs"| ev
+{{< /mermaid >}}
+
 **Prompt injection deserves honesty.** There is no reliable detector, only heuristics with false positives and false negatives: a classifier score on inputs, a canary string in the system prompt that should never appear in output, tool calls the request shouldn't need, retrieved documents containing instruction-like text. Record them as attributes or events and watch their rates. A spike is a reason to look, never proof. The actual controls (least-privilege tools, confirmation before side effects) live in the application, not the telemetry.
 
 ## Tokens are a budget, so treat them like one
@@ -267,7 +285,7 @@ Each shows up in tokens per request long before it shows up on the invoice.
 
 Real features chain calls: retrieve, call the model, call a tool, call the model again. When the answer is wrong, you need the whole chain for that one request, in order, with tokens and finish reason at every step. That means one trace per user request, with model calls, retrievals and tool executions as its children:
 
-{{< mermaid caption="Fig. — One trace for one support question: the agent span parents every model call, retrieval and tool call, and the tool's own HTTP call nests beneath it." >}}
+{{< mermaid alt="A span tree. The POST /support/chat server span parents an invoke_agent span for support_agent. Under the agent sit four children: a chat span that picks a tool, an execute_tool span for lookup_order, a retrieval span against policy_kb, and a chat span that writes the answer. The tool span has its own child, the GET /orders/id client call." caption="Fig. — One trace for one support question: the agent span parents every model call, retrieval and tool call, and the tool's own HTTP call nests beneath it." >}}
 flowchart TD
     A["POST /support/chat<br/>SERVER span"] --> B["invoke_agent<br/>support_agent"]
     B --> C["chat gpt-4o-mini<br/>picks a tool"]
@@ -284,6 +302,8 @@ Three things hold the tree together:
 - **Put identity on the trace.** `gen_ai.agent.name`, your prompt template version and `gen_ai.conversation.id` let you group traces by what the user was talking to. Set the conversation ID only when you genuinely have one; the spec says not to invent it from a trace ID.
 
 Then "why did the bot quote the wrong refund window" stops being archaeology: the trace shows retrieval returning the 2024 policy and the model faithfully summarising it. Fix the index, not the prompt.
+
+{{< obs-mascot class="bard" tag="your chatbot, confidently" quip="Ask me the refund policy and I shall answer in flawless verse: thirty days, sixty, a lifetime guarantee, whichever scans. Status 200. Finish reason: I ran out of tokens mid-rhyme. You are welcome." caption="Bawk Dylan, who has never once answered 'I don't know'." >}}
 
 ## Where to start
 
