@@ -1,0 +1,54 @@
+name: LinkedIn token expiry
+
+# Self-serve LinkedIn tokens last 60 days with no refresh token. This opens an
+# issue two weeks before expiry and closes it once a fresh token is saved
+# (scripts/linkedin-auth.py updates LINKEDIN_TOKEN_EXPIRES_AT).
+
+on:
+  schedule:
+    - cron: "23 8 * * 1"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      EXPIRES_AT: ${{ vars.LINKEDIN_TOKEN_EXPIRES_AT }}
+      WARN_DAYS: "14"
+      TITLE: "LinkedIn token expiring: run scripts/linkedin-auth.py"
+    steps:
+      - name: Check expiry
+        run: |
+          if [ -z "$EXPIRES_AT" ]; then
+            echo "LINKEDIN_TOKEN_EXPIRES_AT is not set; nothing to check."
+            exit 0
+          fi
+          days=$(python3 -c 'import datetime as d, os
+          e = d.datetime.fromisoformat(os.environ["EXPIRES_AT"].replace("Z", "+00:00"))
+          e = e if e.tzinfo else e.replace(tzinfo=d.timezone.utc)
+          print((e - d.datetime.now(d.timezone.utc)).days)')
+          echo "Token expires $EXPIRES_AT ($days days left)."
+          open=$(gh issue list --state open --search "\"LinkedIn token expiring\" in:title" --json number --jq '.[0].number // empty')
+
+          if [ "$days" -le "$WARN_DAYS" ]; then
+            if [ -n "$open" ]; then
+              echo "Issue #$open is already open."
+              exit 0
+            fi
+            gh issue create --title "$TITLE" --body "The LinkedIn access token used by the announce workflow expires **$EXPIRES_AT** ($days days left). After that, new pages are not announced.
+
+          Renew it on your machine (LinkedIn app credentials in \`.env\`):
+
+          \`\`\`sh
+          python3 scripts/linkedin-auth.py
+          \`\`\`
+
+          This issue closes itself on the next weekly check after the new expiry is saved."
+          elif [ -n "$open" ]; then
+            gh issue close "$open" --comment "Token renewed; it now expires $EXPIRES_AT."
+          fi

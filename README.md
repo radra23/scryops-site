@@ -27,6 +27,10 @@ static/          # Static assets copied to site root
 hugo.toml        # Site configuration
 ```
 
+## LinkedIn announcements
+
+New pages are announced on LinkedIn after deploy, with an approval step. Setup and knobs: [docs/linkedin-announce.md](docs/linkedin-announce.md).
+
 ## License
 
 All content is copyright scryops. Theme and code are MIT unless otherwise noted.
