@@ -33,6 +33,11 @@
 {{- $art := printf "scry-cucco scry-cucco--%s" $meta.art -}}
 {{- if $sprite -}}
 {{- $sprite = $sprite | fingerprint -}}
+{{- /* The quote cards (card, quiet, badge) are small, and the face is the joke:
+     use the head-and-shoulders portrait when one exists, else the full body.
+     The bare "sprite" variant always shows the full body. */ -}}
+{{- $face := $sprite -}}
+{{- with resources.Get (printf "images/mascots/%s-portrait.svg" $class) }}{{ $face = . | fingerprint }}{{ end -}}
 {{- if eq $variant "sprite" -}}
 <figure class="{{ $art }}" aria-label="{{ $alt }}">
   <div class="scry-cucco__solo" style="--ac:{{ $accent | safeCSS }}"><img src="{{ $sprite.RelPermalink }}" alt="{{ $alt }}"></div>
@@ -40,7 +45,7 @@
 {{- else if eq $variant "badge" -}}
 <figure class="{{ $art }}" aria-label="{{ $alt }} badge">
   <div class="scry-cucco__badge" style="--ac:{{ $accent | safeCSS }}">
-    <div class="scry-cucco__medallion" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
+    <div class="scry-cucco__medallion" aria-hidden="true"><img src="{{ $face.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__plate">{{ $name }}</div>
     <div class="scry-cucco__sub">{{ $label }} &#183; {{ $role }}</div>
   </div>
@@ -48,7 +53,7 @@
 {{- else if eq $variant "quiet" -}}
 <figure class="{{ $art }}" aria-label="{{ $alt }}, says: {{ $quip }}">
   <div class="scry-cucco__fg" style="--ac:{{ $accent | safeCSS }}">
-    <span class="scry-cucco__fgframe" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></span>
+    <span class="scry-cucco__fgframe" aria-hidden="true"><img src="{{ $face.RelPermalink }}" alt=""></span>
     <div class="scry-cucco__fgbody">
       <div class="scry-cucco__fgnm"><span class="scry-cucco__fgdot" aria-hidden="true"></span>{{ $name }}</div>
       <div class="scry-cucco__fgrole">{{ $label }} &#183; {{ $role }}</div>
@@ -61,7 +66,7 @@
 {{- else -}}
 <figure class="{{ $art }}" aria-label="{{ $alt }}, says: {{ $quip }}">
   <div class="scry-cucco__wrap" style="--ac:{{ $accent | safeCSS }}">
-    <div class="scry-cucco__sprite" aria-hidden="true"><img src="{{ $sprite.RelPermalink }}" alt=""></div>
+    <div class="scry-cucco__sprite" aria-hidden="true"><img src="{{ $face.RelPermalink }}" alt=""></div>
     <div class="scry-cucco__bubble">
       <span class="scry-cucco__name">{{ $name }}</span>
       <span class="scry-cucco__role">{{ $label }} &#183; {{ $role }}</span>
