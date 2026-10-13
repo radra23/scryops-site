@@ -175,6 +175,8 @@ html.light {
   --warn:#7A6220;
   --danger:#A8483C;
   --violet:#5E5648;
+  /* the dark-ground greens are 2.35:1 on cream; these clear 4.5:1 on bg and surface */
+  --eco:#4F6E42; --eco-bright:#3F5E35;
 
   /* darkened to clear 4.5:1 as text against the cream surface — the dark
      hues at the top of this file read fine on charcoal but fail on cream */
