@@ -1,0 +1,240 @@
+{
+  "posts": {
+    "articles/alert-design-principles": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/alert-design-principles/"
+    },
+    "articles/alert-fatigue-is-an-observability-problem": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/alert-fatigue-is-an-observability-problem/"
+    },
+    "articles/distributed-tracing-dashboard-was-green": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/distributed-tracing-dashboard-was-green/"
+    },
+    "articles/evolution-of-system-understanding": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/evolution-of-system-understanding/"
+    },
+    "articles/observability-vs-monitoring": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/observability-vs-monitoring/"
+    },
+    "articles/opa-observability-governance": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/opa-observability-governance/"
+    },
+    "articles/sampling-strategy": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/sampling-strategy/"
+    },
+    "articles/what-is-observability-2-and-why-scryops": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/articles/what-is-observability-2-and-why-scryops/"
+    },
+    "guides/alert-correlation": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/alert-correlation/"
+    },
+    "guides/alert-severity-levels": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/alert-severity-levels/"
+    },
+    "guides/async-logging": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/async-logging/"
+    },
+    "guides/audit-trail-implementation": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/audit-trail-implementation/"
+    },
+    "guides/common-logging-pitfalls": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/common-logging-pitfalls/"
+    },
+    "guides/compliance-observability": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/compliance-observability/"
+    },
+    "guides/data-masking-in-telemetry": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/data-masking-in-telemetry/"
+    },
+    "guides/data-sovereignty-and-residency": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/data-sovereignty-and-residency/"
+    },
+    "guides/distributed-logging": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/distributed-logging/"
+    },
+    "guides/ebpf-continuous-profiling": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/ebpf-continuous-profiling/"
+    },
+    "guides/high-throughput-log-pipelines": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/high-throughput-log-pipelines/"
+    },
+    "guides/high-throughput-logging": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/high-throughput-logging/"
+    },
+    "guides/log-based-monitoring": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/log-based-monitoring/"
+    },
+    "guides/log-context-enrichment": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/log-context-enrichment/"
+    },
+    "guides/log-levels-and-severity": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/log-levels-and-severity/"
+    },
+    "guides/logging-foundations": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/logging-foundations/"
+    },
+    "guides/on-call-procedures": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/on-call-procedures/"
+    },
+    "guides/opentelemetry-overview": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/opentelemetry-overview/"
+    },
+    "guides/otel-context-propagation": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/otel-context-propagation/"
+    },
+    "guides/pii-in-telemetry": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/pii-in-telemetry/"
+    },
+    "guides/runbook-authoring": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/runbook-authoring/"
+    },
+    "guides/sli-selection-by-service-type": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/sli-selection-by-service-type/"
+    },
+    "guides/slos-and-error-budgets": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/slos-and-error-budgets/"
+    },
+    "guides/structured-logging-machine-readable": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/guides/structured-logging-machine-readable/"
+    },
+    "howtos/alert-body-template": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/alert-body-template/"
+    },
+    "howtos/benchmark-sync-vs-channel-logging": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/benchmark-sync-vs-channel-logging/"
+    },
+    "howtos/configure-collector-tail-sampling": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/configure-collector-tail-sampling/"
+    },
+    "howtos/enrich-logs-with-business-context-dotnet": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/enrich-logs-with-business-context-dotnet/"
+    },
+    "howtos/instrument-dotnet-service-opentelemetry": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/instrument-dotnet-service-opentelemetry/"
+    },
+    "howtos/instrument-java-service-opentelemetry": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/instrument-java-service-opentelemetry/"
+    },
+    "howtos/scrub-pii-from-application-logs-dotnet": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/scrub-pii-from-application-logs-dotnet/"
+    },
+    "howtos/set-up-log-based-alerting": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/set-up-log-based-alerting/"
+    },
+    "howtos/set-up-slo-burn-rate-alerts": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/set-up-slo-burn-rate-alerts/"
+    },
+    "howtos/wire-trace-ids-into-logs": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/howtos/wire-trace-ids-into-logs/"
+    },
+    "qa/ebpf-production-ready": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/qa/ebpf-production-ready/"
+    },
+    "qa/profiling-vs-tracing": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/qa/profiling-vs-tracing/"
+    },
+    "qa/structured-logging-antipatterns": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/qa/structured-logging-antipatterns/"
+    },
+    "qa/synthetic-monitoring-vs-rum": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/qa/synthetic-monitoring-vs-rum/"
+    },
+    "qa/what-is-an-sli": {
+      "at": "2026-10-13T17:17:10+00:00",
+      "status": "baseline",
+      "url": "https://scryops.dev/qa/what-is-an-sli/"
+    }
+  },
+  "version": 1
+}
