@@ -1,0 +1,125 @@
+name: Announce on LinkedIn
+
+# Posts "new on scryops" to LinkedIn after a page goes live.
+#
+#   plan  (no secrets)  finds the oldest published page not yet in the ledger
+#                       whose URL answers 200, and previews the post in the
+#                       run summary.
+#   post  (environment  waits for approval in the `linkedin` environment,
+#          `linkedin`)  uploads the page's share card, posts, records it.
+#
+# One page per run. A daily run drains any queue and catches pages that went
+# live late. The ledger lives on the `linkedin-state` branch; the first run
+# records every live page as baseline and posts nothing.
+#
+# Setup and knobs: docs/linkedin-announce.md.
+
+on:
+  workflow_run:
+    workflows: ["Deploy Hugo site to Pages"]
+    types: [completed]
+    branches: [main]
+  schedule:
+    - cron: "41 7 * * *"
+  workflow_dispatch:
+    inputs:
+      page:
+        description: "Announce this page (content path or section/stem). Empty: the next pending page."
+        required: false
+        default: ""
+      dry_run:
+        description: "Preview the payload only, post nothing"
+        type: boolean
+        default: false
+      again:
+        description: "Allow announcing a page that was already announced"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: linkedin-announce
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  plan:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    outputs:
+      key: ${{ steps.plan.outputs.key }}
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load ledger
+        run: bash scripts/linkedin-state.sh fetch "$RUNNER_TEMP/announced.json"
+
+      - name: Pick the next page
+        id: plan
+        env:
+          PAGE: ${{ inputs.page }}
+          AGAIN: ${{ inputs.again }}
+          # Right after a deploy, give the Pages CDN a couple of minutes.
+          ROUNDS: ${{ github.event_name == 'workflow_run' && '4' || '1' }}
+        run: |
+          args=(--state "$RUNNER_TEMP/announced.json" --rounds "$ROUNDS")
+          [ -n "$PAGE" ] && args+=(--ref "$PAGE")
+          [ "$AGAIN" = "true" ] && args+=(--again)
+          python3 scripts/linkedin-announce.py plan "${args[@]}"
+
+      - name: Save baseline
+        if: steps.plan.outputs.state_changed == 'true'
+        run: |
+          bash scripts/linkedin-state.sh save "$RUNNER_TEMP/announced.json" "chore(linkedin): record baseline of live pages"
+
+      - name: Dry run
+        if: inputs.dry_run && steps.plan.outputs.key != ''
+        env:
+          KEY: ${{ steps.plan.outputs.key }}
+          LINKEDIN_AUTHOR_URN: ${{ vars.LINKEDIN_AUTHOR_URN }}
+        run: python3 scripts/linkedin-announce.py post --state "$RUNNER_TEMP/announced.json" --key "$KEY" --dry-run --again
+
+  post:
+    needs: plan
+    if: needs.plan.outputs.key != '' && !inputs.dry_run
+    runs-on: ubuntu-latest
+    environment:
+      name: linkedin
+      url: ${{ steps.post.outputs.post_url }}
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Load ledger
+        run: bash scripts/linkedin-state.sh fetch "$RUNNER_TEMP/announced.json"
+
+      - name: Post to LinkedIn
+        id: post
+        env:
+          KEY: ${{ needs.plan.outputs.key }}
+          AGAIN: ${{ inputs.again }}
+          LINKEDIN_ACCESS_TOKEN: ${{ secrets.LINKEDIN_ACCESS_TOKEN }}
+          LINKEDIN_AUTHOR_URN: ${{ vars.LINKEDIN_AUTHOR_URN }}
+          LINKEDIN_API_VERSION: ${{ vars.LINKEDIN_API_VERSION }}
+          LINKEDIN_TOKEN_EXPIRES_AT: ${{ vars.LINKEDIN_TOKEN_EXPIRES_AT }}
+        run: |
+          args=(--state "$RUNNER_TEMP/announced.json" --key "$KEY")
+          [ "$AGAIN" = "true" ] && args+=(--again)
+          python3 scripts/linkedin-announce.py post "${args[@]}"
+
+      - name: Save ledger
+        if: always() && steps.post.conclusion == 'success'
+        env:
+          KEY: ${{ needs.plan.outputs.key }}
+        run: |
+          bash scripts/linkedin-state.sh save "$RUNNER_TEMP/announced.json" "chore(linkedin): announced $KEY"
