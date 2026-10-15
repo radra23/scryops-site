@@ -71,7 +71,10 @@
      (cond (ge $crit 0) (printf " %s carries a heavy outline as the span owning the latency." (index (index $spans $crit) "name")) "") -}}
 
 <figure class="diagram">
-  <div class="diag-card" tabindex="0">
+  {{- /* 0.9rem padding, not the card default 20px: the SVG holds min-width:680px
+       for the 12px label floor, and 20px padding leaves a 678px box, which
+       panned every waterfall by 2px on desktop. */}}
+  <div class="diag-card" tabindex="0" style="padding:0.9rem 0.9rem 0.6rem;">
     {{- with .Get "title" }}<div class="obs-wf__hd">{{ . }}</div>{{ end }}
     {{- with .Get "units" }}<div class="obs-wf__sub">{{ . }}</div>{{ end }}
     <svg class="obs-wf" viewBox="0 0 {{ $W }} {{ $H }}" role="img" aria-label="{{ $aria }}" style="min-width:680px">

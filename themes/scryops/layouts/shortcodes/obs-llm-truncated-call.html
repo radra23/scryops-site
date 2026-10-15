@@ -1,0 +1,79 @@
+{{- /* layouts/shortcodes/obs-llm-truncated-call.html
+     The opening point of guides/llm-observability.md, shown on one real call:
+     what the request reports (HTTP 200, span status unset, 0.69 s) beside what
+     the GenAI span records (finish reason "length", 16 of 16 output tokens, a
+     different response model, an answer cut off mid-sentence). Every value is
+     from the instrumented run printed later in the guide (fake local endpoint,
+     opentelemetry-instrumentation-genai-openai 1.2b0); change them together.
+
+     Same two-SVG pattern as obs-green-dashboard-vs-trace: a wrapping flex row
+     inside the card, so the panels stack on a phone instead of panning, and
+     each SVG carries its own min-width (318 -> 283px, 344 -> 306px) so the
+     13.5-unit labels render >= 12px and 11.5-unit pixel eyebrows >= 10px.
+     The healthy ticks are --green marks with the word on --mc-ink-secondary;
+     the truncation is told by the full token meter, the cut-off cursor and a
+     TRUNCATED tag, never by hue. Plain characters only inside the SVG. */ -}}
+{{- $tiles := slice
+      (dict "label" "HTTP status"  "value" "200 OK" "note" "success")
+      (dict "label" "span status"  "value" "UNSET"  "note" "no error")
+      (dict "label" "duration"     "value" "0.69 s" "note" "inside SLO") -}}
+{{- $maxTokens := 16 -}}{{- $outTokens := 16 -}}
+{{- $reqModel := "gpt-4o-mini" -}}{{- $respModel := "gpt-4o-mini-2024-07-18" -}}
+{{- $answer := "Refunds are accepted within 30 days" -}}
+<figure class="diagram">
+  <div class="diag-card" tabindex="0" style="padding:0.9rem 0.9rem 0.6rem;">
+    <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:14px 20px;">
+    <svg viewBox="0 0 318 300" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="ltc-title ltc-desc"
+         style="flex:1 1 318px;width:100%;max-width:318px;min-width:283px;display:block;font-family:var(--font-code);">
+      <title id="ltc-title">What the call reports: every check passes</title>
+      <desc id="ltc-desc">The model call returns HTTP 200 OK, its span status is unset rather than error, and it finishes in 0.69 seconds, inside the latency objective. By every check a REST dashboard runs, the call succeeded.</desc>
+      <rect x="0" y="0" width="318" height="300" fill="var(--fig-bg)"/>
+      <text x="24" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">WHAT THE CALL REPORTS</text>
+      <text x="24" y="48" fill="var(--mc-ink-secondary)" font-size="13.5">// the checks a REST call passes</text>
+      {{- range $i, $t := $tiles }}
+      {{- $y := add 64 (mul $i 62) }}
+      <rect x="24" y="{{ $y }}" width="270" height="52" fill="none" stroke="var(--fig-bd)" stroke-width="1"/>
+      <text x="36" y="{{ add $y 20 }}" fill="var(--mc-ink-secondary)" font-size="13.5">{{ $t.label }}</text>
+      <text x="36" y="{{ add $y 43 }}" fill="var(--heading)" font-size="20">{{ $t.value }}</text>
+      <text x="184" y="{{ add $y 43 }}" fill="var(--green)" font-size="15" text-anchor="end">✓</text>
+      <text x="282" y="{{ add $y 43 }}" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">{{ $t.note }}</text>
+      {{- end }}
+      <text x="24" y="268" fill="var(--mc-ink-secondary)" font-size="13.5">→ nothing pages. nobody looks.</text>
+    </svg>
+    <svg viewBox="0 0 344 300" xmlns="http://www.w3.org/2000/svg" role="img"
+         aria-labelledby="ltc2-title ltc2-desc"
+         style="flex:1 1 344px;width:100%;max-width:344px;min-width:306px;display:block;font-family:var(--font-code);">
+      <title id="ltc2-title">What the span records: the answer was cut off</title>
+      <desc id="ltc2-desc">The same call's GenAI span records finish reason length, and 16 output tokens against a max_tokens of 16, so the model was stopped at the cap. The request asked for {{ $reqModel }} and {{ $respModel }} answered. The user received "{{ $answer }}" and nothing more: half an answer, delivered as a success.</desc>
+      <rect x="0" y="0" width="344" height="300" fill="var(--fig-bg)"/>
+      <text x="16" y="30" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">WHAT THE SPAN RECORDS</text>
+      <text x="16" y="48" fill="var(--mc-ink-secondary)" font-size="13.5">// chat {{ $reqModel }}, same call</text>
+
+      <text x="16" y="80" fill="var(--mc-ink-secondary)" font-size="13.5">finish_reasons</text>
+      <text x="328" y="80" fill="var(--heading)" font-size="13.5" text-anchor="end">["length"]</text>
+
+      {{- /* token meter: one cell per token, the cap drawn as a heavy rule.
+             Full to the cap = stopped by the cap, not by the model. */ -}}
+      <text x="16" y="108" fill="var(--mc-ink-secondary)" font-size="13.5">output tokens</text>
+      <text x="328" y="108" fill="var(--heading)" font-size="13.5" text-anchor="end">{{ $outTokens }} of {{ $maxTokens }}</text>
+      {{- $cell := 19.0 -}}
+      {{- range $k := seq $maxTokens }}
+      {{- $cx := add 16 (mul $cell (sub $k 1)) }}
+      <rect x="{{ $cx }}" y="118" width="{{ sub $cell 3 }}" height="12" fill="{{ if le $k $outTokens }}var(--mc-ramp-1){{ else }}none{{ end }}" stroke="var(--mc-ramp-3)" stroke-width="1"/>
+      {{- end }}
+      <line x1="{{ add 16 (mul $cell $maxTokens) }}" y1="112" x2="{{ add 16 (mul $cell $maxTokens) }}" y2="136" stroke="var(--heading)" stroke-width="2.5"/>
+      <text x="328" y="152" fill="var(--mc-ink-secondary)" font-size="13.5" text-anchor="end">full to the max_tokens cap</text>
+
+      <text x="16" y="182" fill="var(--mc-ink-secondary)" font-size="13.5">response.model</text>
+      <text x="328" y="198" fill="var(--heading)" font-size="13.5" text-anchor="end">{{ $respModel }}</text>
+
+      <text x="16" y="230" fill="var(--heading)" font-family="var(--font-pixel)" font-size="11.5" letter-spacing="0.04em">TRUNCATED</text>
+      <text x="16" y="250" fill="var(--heading)" font-size="13.5">"{{ $answer }}</text>
+      <rect x="{{ add 16 (mul 8.1 (add (len $answer) 1)) }}" y="239" width="7" height="14" fill="var(--mc-ramp-1)"/>
+      <text x="16" y="282" fill="var(--heading)" font-size="13.5">→ half an answer, as a success</text>
+    </svg>
+    </div>
+  </div>
+  <figcaption>Fig.{{ with .Get "fig" }} {{ . }}{{ end }} — One real call from the run below. Everything a REST dashboard checks says success; only the span's finish reason and token count show the answer was cut off at the cap.</figcaption>
+</figure>
