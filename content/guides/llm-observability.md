@@ -1,6 +1,6 @@
 ---
 title: "LLM Observability: Monitoring What You Cannot Threshold"
-date: 2026-06-10
+date: 2026-11-15
 draft: false
 excerpt: "An LLM can return a confident, well-formatted, wrong answer with a 200 OK. What to measure, how OpenTelemetry's GenAI conventions name it, and how to trace, budget and evaluate LLM calls."
 readtime: 12
@@ -100,7 +100,8 @@ Agent frameworks get their own spans. `invoke_agent {gen_ai.agent.name}` wraps a
 Here's the official instrumentation wired to console exporters, so you can see exactly what it emits. To run without an API key or a bill, the client points at a fake OpenAI-compatible endpoint on localhost: a few dozen lines of `http.server` that wait 350 ms, then stream a canned answer that stops at the `max_tokens` limit.
 
 ```bash
-pip install "opentelemetry-instrumentation-genai-openai==1.2b0" openai opentelemetry-sdk
+pip install "opentelemetry-instrumentation-genai-openai==1.2b0" "opentelemetry-util-genai==1.2b0" \
+    "openai==3.24.0" "opentelemetry-sdk==1.45.0"
 ```
 
 ```python
