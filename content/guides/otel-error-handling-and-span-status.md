@@ -1,105 +1,140 @@
 ---
 title: "OTel Error Handling: What to Record, What to Set, and Why It Matters for Alerting"
-date: 2026-06-10
-draft: true
-excerpt: "An exception thrown does not automatically become a failed span. A failed span does not automatically become an error in your backend. The OTel error handling model requires explicit decisions — and getting them wrong means your error rate alerts are lying to you."
+date: 2026-11-16
+draft: false
+excerpt: "A thrown exception isn't always a failed span, and a caught one almost never is. Span status, exception recording, and error.type are separate decisions. Get them wrong and your error rate alerts are lying to you."
 readtime: 8
 tags: ["OpenTelemetry", "Tracing", "Observability", "Best Practices", "Alerting"]
+card:
+  title: "Span Status and Errors: What OTel Records for You"
 ---
 
-Most teams instrument errors last. They get traces working, they see spans in the UI, and they assume errors will show up automatically. They usually do not — at least not correctly.
+Most teams instrument errors last. Traces work, spans show up in the UI, and everyone assumes errors will look after themselves. Some do. The ones you catch and handle don't, and those are usually the ones your users feel.
 
-The OTel error model has three distinct steps: record the exception, set the span status, and decide what counts as an error in your SLO. Each step is explicit. Skipping any of them produces misleading data.
+There are three decisions: what the span's status is, whether the exception gets recorded, and what counts as an error for your SLO. Your SDK makes some of them for you. You need to know which.
 
-## Span Status: The Three States
+The Python behaviour below was run against `opentelemetry-sdk` **1.45.2**. The rules come from the OpenTelemetry specification **v1.62.0** and semantic conventions **v1.45.0**.
+
+## Span status: the three states
 
 Every span has a status with one of three values:
 
-- **`UNSET`** (default): the span has not been explicitly marked as success or failure. Most spans start here.
-- **`OK`**: the operation succeeded. Set this explicitly when you want to signal success.
-- **`ERROR`**: the operation failed. This is what drives error rate metrics.
+- **`UNSET`**, the default. Nobody said anything. Backends treat it as "not an error".
+- **`ERROR`**: the operation failed. This is what error-rate metrics count.
+- **`OK`**: someone explicitly declared success.
 
-The critical point: **throwing an exception does not set span status to `ERROR` automatically**. You must set it.
+Leave successful spans at `UNSET`. You don't need to set `OK` on the happy path, and the spec asks instrumentation libraries not to. `OK` is a deliberate override, and it's final. Once a span is `OK`, a later `set_status(ERROR)` is ignored. Reach for it only when you want to say "I know what this looks like, and it's fine".
+
+## What the SDK does for you, and what it doesn't
+
+This is where most write-ups get it wrong, in both directions.
+
+**An exception that escapes the span is handled for you in Python.** `start_as_current_span` records the exception and sets `ERROR` by default:
 
 ```python
-from opentelemetry.trace import StatusCode
+with tracer.start_as_current_span("process-payment") as span:
+    payment_service.charge(amount)   # raises PaymentDeclined
+```
 
+That span ends with status `ERROR`, the description `PaymentDeclined: card declined`, and one `exception` event. You wrote no error-handling code. The two parameters behind it are `record_exception=True` and `set_status_on_exception=True`, and you can turn either off.
+
+**An exception you catch is invisible.** This is the trap:
+
+```python
 with tracer.start_as_current_span("process-payment") as span:
     try:
-        result = payment_service.charge(amount)
-        span.set_status(StatusCode.OK)
-    except PaymentDeclinedException as e:
-        # Record the exception as a span event
-        span.record_exception(e)
-        # Set the span status to ERROR
-        span.set_status(StatusCode.ERROR, description=str(e))
-        raise
+        payment_service.charge(amount)
+    except PaymentDeclined:
+        return fallback_response()
 ```
 
-## record_exception vs set_status
-
-These two calls do different things:
-
-**`span.record_exception(e)`** adds a span event of type `exception` with the stack trace, exception type, and message. It is visible in the trace UI as an event on the timeline. It does **not** change the span status.
-
-**`span.set_status(StatusCode.ERROR)`** marks the span as failed. This is what metrics exporters use to compute error rate. It does **not** automatically add the exception details.
-
-You almost always want both. One without the other is incomplete:
-- `record_exception` without `set_status(ERROR)` → the stack trace is visible but the span counts as success in error rate metrics
-- `set_status(ERROR)` without `record_exception` → the span is counted as an error but there is no stack trace to debug
-
-## What Counts as an Error
-
-Not every exception should be an `ERROR` span. The rule: **set `ERROR` when the operation failed from the caller's perspective**.
-
-Examples:
-| Event | Set ERROR? | Reason |
-|-------|-----------|--------|
-| HTTP 500 from downstream | Yes | The operation failed |
-| HTTP 404 (record not found) | No | The operation succeeded — the answer is "not found" |
-| HTTP 429 (rate limited) | Depends | Error if you cannot retry; not if you have retry logic that succeeds |
-| Validation error | No | The operation succeeded — the input was invalid, you returned a clear response |
-| Database connection lost | Yes | The operation failed |
-| User authentication failed | No | The operation succeeded — the credential was wrong |
-
-The distinction matters for your SLO error budget. If you mark every 404 as an error, your error rate includes expected application behaviour and your error budget burns faster than user experience warrants.
-
-## Auto-instrumentation and Errors
-
-OTel auto-instrumentation libraries (for HTTP frameworks, database clients) set span status automatically based on the response. For HTTP:
-- 5xx responses → `ERROR`
-- 4xx responses → `UNSET` (not counted as errors in most implementations)
-
-This is usually correct. Check your instrumentation library's behaviour before assuming — some older libraries set `ERROR` for all 4xx.
-
-## Span Events for Structured Error Context
-
-Beyond `record_exception`, you can add span events with custom attributes for structured error context:
+That span ends `UNSET`, with no events. The payment failed, the user saw a fallback, and your trace says everything went fine. If the failure matters, say so:
 
 ```python
-span.add_event(
-    "payment.declined",
-    attributes={
-        "payment.decline_code": "insufficient_funds",
-        "payment.amount": 99.99,
-        "payment.currency": "USD",
-    }
-)
+with tracer.start_as_current_span("process-payment") as span:
+    try:
+        payment_service.charge(amount)
+    except PaymentDeclined as e:
+        span.set_status(StatusCode.ERROR, "card declined")
+        span.set_attribute("error.type", type(e).__qualname__)
+        return fallback_response()
 ```
 
-This is more queryable than a stack trace. Your backend can filter on `payment.decline_code = "insufficient_funds"` to understand the breakdown of payment failures.
+**Don't do both by hand and then re-raise.** A common pattern calls `span.record_exception(e)` and `span.set_status(...)` inside the `except` block and then raises again. In Python the context manager then records the same exception a second time, and you get two identical `exception` events on one span. If you re-raise, let the SDK do the recording.
 
-## Operational Standards Checklist
+**This is Python's behaviour, not a law.** The automatic handling only exists when you use the context manager. A span you create with `start_span()` and end yourself gets nothing. Other languages differ: in Java and Go you record the error and set the status yourself. Check what your SDK does before you trust your error rate.
 
-Before shipping instrumented code:
+## record_exception, set_status, and error.type
 
-- [ ] All exception paths call `record_exception` with the exception object
-- [ ] All paths that represent true failures call `set_status(StatusCode.ERROR)`
-- [ ] Expected non-success responses (404, 401, 422) are **not** marked ERROR
-- [ ] Error descriptions are non-empty and human-readable
-- [ ] Structured error context is added as span attributes or events, not just in the exception message
-- [ ] Error rate in your backend matches your expectation for the service
+Three calls, three different jobs:
 
-<!-- TODO: Add section on error propagation — when a child span errors, should the parent span also be set to ERROR? -->
+**`span.set_status(StatusCode.ERROR)`** marks the span as failed. Error-rate metrics derived from spans count this. It adds no detail about what went wrong.
+
+**`span.record_exception(e)`** attaches the exception's type, message, and stack trace. It doesn't change the status. A span with a recorded exception and no `ERROR` status still counts as a success.
+
+**`error.type`** is a span attribute, and it's the one people forget. It's a short, low-cardinality label for the class of failure: an exception type, or a status code as a string. It's a stable convention, and it's what lets you break an error rate down by cause without parsing stack traces.
+
+The status description is free text for a human. Keep sensitive data out of it. Exception messages have a habit of quoting the input that upset them.
+
+### Exceptions are moving to logs
+
+`record_exception` writes a span event. As of semantic conventions v1.45.0, recording exceptions as span events is deprecated, and the replacement is recording them as logs that carry the trace and span IDs. The API method still exists and still works. Instrumentation is meant to switch only when you opt in with `OTEL_SEMCONV_EXCEPTION_SIGNAL_OPT_IN`. Nothing breaks today, but don't build new dashboards on exception span events. [OTel Semantic Conventions](/guides/otel-semantic-conventions/) has the details.
+
+## What counts as an error
+
+Not every exception or non-200 is a failed span. For HTTP, the conventions give a rule, and it depends on which side of the call the span sits:
+
+| Response | Server span | Client span |
+|-------|-----------|--------|
+| 5xx | `ERROR` | `ERROR` |
+| 4xx (404, 401, 422, 429) | `UNSET` | `ERROR` |
+| Connection failed, timed out | n/a | `ERROR` |
+
+The logic: a server that returns 404 did its job. The caller asked for something that isn't there. From the client's side, the request it made failed. Both spans are right.
+
+That 4xx rule is the default for instrumentation that knows nothing else. You know more. If your client asks "does this record exist?" and a 404 is a normal answer, you can decide that span isn't an error.
+
+For your own business logic there's no table, so use one test: **did the operation do what its caller needed?**
+
+- A declined card: the payment span failed, even though no system broke.
+- A validation error you returned cleanly: not an error. You did your job.
+- A retry that eventually succeeded: the attempts failed, the operation didn't.
+
+This matters for your error budget. Mark every 404 as an error and your budget burns on typos and expired links. Mark nothing you catch and it never burns at all.
+
+## Auto-instrumentation
+
+Instrumentation libraries for HTTP frameworks and clients apply the table above for you. That's usually right. Two things to check:
+
+- Some libraries, older versions especially, set `ERROR` on server spans for every 4xx. Look at a real 404 in your trace backend before you assume.
+- Your error-rate query should be built on **server** spans or on the HTTP metrics. Count client spans as well and one failed call shows up twice.
+
+## Structured error context
+
+A stack trace tells you where. It doesn't tell you which decline code or which tenant. Put that in span attributes, where you can filter and group on it:
+
+```python
+span.set_attributes({
+    "error.type": "payment_declined",
+    "payment.decline_code": "insufficient_funds",
+    "payment.currency": "USD",
+})
+```
+
+Now "show me declined payments by decline code" is a query, not a grep. Keep the values bounded, and keep amounts and customer details out unless you've decided they belong in your traces.
+
+## The checklist
+
+Before you ship instrumented code:
+
+- [ ] You know whether your SDK records escaping exceptions for you
+- [ ] Every caught failure that matters sets `ERROR` and `error.type`
+- [ ] Nothing records the same exception twice
+- [ ] Successful spans are left `UNSET`, not set to `OK`
+- [ ] Expected responses (404, 401, 422) aren't `ERROR` on server spans
+- [ ] Status descriptions carry no sensitive data
+- [ ] The error rate in your backend matches what you expect for the service
+
+<!-- TODO: Add section on error propagation: when a child span errors, should the parent span also be set to ERROR? -->
 <!-- TODO: Add Go, Java, Node.js examples -->
-<!-- TODO: Add section on partial success — batch operations where some items fail -->
+<!-- TODO: Add section on partial success: batch operations where some items fail -->
