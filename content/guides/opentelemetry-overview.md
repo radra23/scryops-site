@@ -72,7 +72,7 @@ OTEL_RESOURCE_ATTRIBUTES=service.version=1.4.2,deployment.environment.name=produ
 
 Two traps. There's no `OTEL_SERVICE_VERSION` variable, so the version goes in `OTEL_RESOURCE_ATTRIBUTES` with everything else. And the environment attribute is `deployment.environment.name`: plain `deployment.environment` is deprecated in the semantic conventions, though plenty of examples still use it. Don't set `service.name` in a shared Collector, either. A `resource` processor that upserts it rewrites the identity of every service sending through that Collector.
 
-Resource attributes are defined by OTel semantic conventions — a shared vocabulary that makes the same field names mean the same thing across every service and every language SDK.
+Resource attributes are defined by OTel [semantic conventions](/guides/otel-semantic-conventions/) — a shared vocabulary that makes the same field names mean the same thing across every service and every language SDK.
 
 ## Where to Go Next
 
@@ -81,6 +81,8 @@ Resource attributes are defined by OTel semantic conventions — a shared vocabu
 
 **By concept:**
 - [Context Propagation](/guides/otel-context-propagation/) — how trace context crosses service boundaries
+- [Resource Attributes and Service Naming](/guides/otel-resource-attributes-and-service-naming/) — the identity layer for all three signals
+- [Semantic Conventions](/guides/otel-semantic-conventions/) — the standard attribute vocabulary
 
 **By language (how-tos):**
 - [Instrument a .NET Service](/howtos/instrument-dotnet-service-opentelemetry/)
@@ -88,8 +90,6 @@ Resource attributes are defined by OTel semantic conventions — a shared vocabu
 
 <!-- Re-add each link here as its page is published (all still draft on 2026-10-03):
 - [OTel Metrics Instrumentation](/guides/otel-metrics-instrumentation/) — the six instrument types and when to use each
-- [Resource Attributes and Service Naming](/guides/otel-resource-attributes-and-service-naming/) — the identity layer for all three signals
-- [Semantic Conventions](/guides/otel-semantic-conventions/) — the standard attribute vocabulary (also link "semantic conventions" in the Resource Attributes section)
 - [Exporter Configuration](/guides/otel-exporter-configuration/) — wiring the SDK and Collector to your backend
 - [SDK Direct vs Collector](/qa/otel-collector-vs-sdk-direct/) — when to use each
 - [Instrument a Python Service](/howtos/instrument-python-service-opentelemetry/)
